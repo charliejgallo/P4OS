@@ -35,10 +35,16 @@
  *                                  stack on the P4 (until it restarts)
  *   GET  /api/154/rcp/probe        asks the RCP its version in spinel, through
  *                                  the whole link
+ *   POST /api/154/zbhost           {"channel": 26}: Espressif's Zigbee stack on
+ *                                  the P4 with the C6 as its radio, a
+ *                                  coordinator forming a network of its own,
+ *                                  closed (a measuring step); its state in
+ *                                  GET /api/154 as "zbhost"
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
 #include "aos_154_proto.h"
+#include "aos_zigbee.h"
 #include "aos_hal.h"
 #include "cJSON.h"
 
@@ -83,6 +89,16 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
     if (in.heap_free) {
         cJSON_AddNumberToObject(o, "c6_heap_free", in.heap_free);
         cJSON_AddNumberToObject(o, "c6_heap_min", in.heap_min);
+    }
+    {
+        static const char *ZS[] = { "off", "starting", "formed", "failed" };
+        aos_zigbee_info_t z;
+        aos_zigbee_info(&z);
+        cJSON *h = cJSON_AddObjectToObject(o, "zbhost");
+        cJSON_AddStringToObject(h, "state", z.state < 4 ? ZS[z.state] : "?");
+        cJSON_AddNumberToObject(h, "channel", z.channel);
+        cJSON_AddNumberToObject(h, "to_c6", z.to_c6);
+        cJSON_AddNumberToObject(h, "from_c6", z.from_c6);
     }
     if (in.proto >= 3) {
         cJSON *z = cJSON_AddObjectToObject(o, "zigbee");
@@ -226,6 +242,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "stop")) ok = aos_154_stop();
     else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
     else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
+    else if (!strcmp(what, "zbhost")) ok = aos_zigbee_start((int)num(b, "channel", 26));
     else if (!strcmp(what, "c6log")) ok = aos_154_c6_log(cJSON_IsTrue(cJSON_GetObjectItem(b, "on")));
     else if (!strcmp(what, "zigbee"))
         ok = cJSON_IsTrue(cJSON_GetObjectItem(b, "on")) ? aos_154_zigbee_start((int)num(b, "channel", 26)) : aos_154_zigbee_stop();

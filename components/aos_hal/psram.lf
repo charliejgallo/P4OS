@@ -77,3 +77,33 @@ entries:
     mdns_receive (aos_extram_bss)
     mdns_pcb (aos_extram_bss)
     mdns_utils (aos_extram_bss)
+
+# The Zigbee stack on the P4 (components/aos_154/aos_zigbee_p4.c, 2026-11-24):
+# Espressif's libraries, OpenThread (only its spinel here: the radio is the
+# C6's, so no interrupt of its own) and aos_154. All of it runs in tasks.
+# With their statics internal, esp_hosted could not get its SDIO buffers at
+# boot (assert(buf_mp_g), the board hung).
+[mapping:openthread_psram]
+archive: libopenthread.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:zigbee_core_psram]
+archive: libesp-zigbee-core.zczr.release.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:zigbee_idf_psram]
+archive: libesp-zigbee-idf.remote.release.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:zigbee_psram]
+archive: libesp-zigbee.release.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_154_psram]
+archive: libaos_154.a
+entries:
+    * (aos_extram_bss)

@@ -1,0 +1,4 @@
+dependencies:
+  # Espressif's Zigbee stack (aos_zigbee_p4.c), the same version as the C6's
+  # measuring build; its radio is the C6's, over peer_data
+  espressif/esp-zigbee-lib: "==2.1.0"

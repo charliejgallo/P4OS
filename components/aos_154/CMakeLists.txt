@@ -1,7 +1,21 @@
 # The 802.15.4 radio (Zigbee, Thread), the C6's, lent to the P4 over
 # esp_hosted's peer_data channel (docs/plan/ZIGBEE.md). aos_154.c is the
 # simulator's too; the link is sim/aos_154_link_sim.c there.
-idf_component_register(SRCS "aos_154.c" "aos_154_link_p4.c"
+# aos_zigbee_p4.c: Espressif's Zigbee stack here with the C6 as its RCP.
+idf_component_register(SRCS "aos_154.c" "aos_154_link_p4.c" "aos_zigbee_p4.c" "aos_zigbee_taskq.c"
                        INCLUDE_DIRS "include"
                        REQUIRES aos_hal
-                       PRIV_REQUIRES espressif__esp_hosted)
+                       PRIV_REQUIRES espressif__esp_hosted espressif__esp-zigbee-lib openthread lwip vfs
+                       # whole: nothing of ours calls the __wrap_ functions of
+                       # aos_zigbee_taskq.c, only Espressif's libraries do
+                       WHOLE_ARCHIVE)
+
+# the stack's link to its RCP is a loopback socket to the C6's, not a UART
+target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=esp_zigbee_radio_spinel_config_uart")
+
+# esp-zigbee-lib's task queue, again, for a P4 before rev 3 (aos_zigbee_taskq.c)
+foreach(fn esp_zigbee_task_queue_init esp_zigbee_task_queue_deinit esp_zigbee_task_queue_post
+           esp_zigbee_task_queue_update esp_zigbee_task_queue_process ezb_tasklet_signal_pending
+           ezb_plat_log)
+    target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=${fn}")
+endforeach()

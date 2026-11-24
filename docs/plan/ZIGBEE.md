@@ -250,3 +250,42 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   (`esp_zigbee_radio_spinel_config_uart`, que le pasa a `esp_radio_spinel` un
   descriptor de archivo); se envuelve para darle un socket UDP local cuyo
   otro extremo va al túnel.
+
+### La pila en el P4: dónde quedó (2026-11-24, noche; rama `zigbee-p4`)
+
+En la rama `zigbee-p4`, no en `main` (todavía no forma la red, agranda la
+imagen del P4 a 8-9 % libre y hubo dos cuelgues al arrancar sin causa
+aclarada). Lo hecho y lo aprendido:
+
+- **La pila corre en el P4** (`components/aos_154/aos_zigbee_p4.c`,
+  `CONFIG_ZB_RADIO_SPINEL_UART`, `CONFIG_OPENTHREAD_SPINEL_ONLY`) con el C6
+  de radio: `esp_zigbee_radio_spinel_config_uart` envuelto le da un socket UDP
+  local (no bloqueante: su lector lee hasta que no hay más, y uno bloqueante
+  se quedaba ahí) cuyo otro extremo va al túnel. **Anda:** reinicia el RCP
+  ("Software reset co-processor successfully"), 205 bytes de ida y 292 de
+  vuelta, las señales de arranque, sin caídas.
+- **La librería de Espressif para el P4 está compilada para el P4 rev 3**:
+  `esp_zigbee_task_queue_post` lee el CSR `mintthresh` (0x347), que un P4
+  rev 1.3 no tiene (instrucción ilegal). Es la única instrucción así en las
+  tres librerías; el módulo entero (seis funciones) está reemplazado por
+  `-Wl,--wrap` en `aos_zigbee_taskq.c`, haciendo lo que hace su
+  desensamblado. **Avisarle a Espressif.**
+- **La RAM interna al arrancar:** con los estáticos de OpenThread y de la
+  pila en RAM interna, esp_hosted no consiguió sus buffers de SDIO
+  (`assert(buf_mp_g)`, la placa colgada). Van a PSRAM
+  (`components/aos_hal/psram.lf`).
+- **El almacén:** la pila guarda en el almacén grande de las preferencias
+  (`aos_hal_pref_partition()`), no en la `nvs` de la tabla, llena.
+- **Lo que no anda: la red no se forma.** El pedido de formar se acepta (0)
+  y la pila no hace nada más: nada al radio, ninguna señal, la tarea sin
+  CPU. Igual que con la pila en el C6, así que no es el túnel ni dónde
+  corre. Probado sin cambio: registrar un dispositivo (gateway) antes de
+  arrancar, pedir la formación desde el manejador o desde la cola, el
+  conjunto secundario de canales, el almacén. Las librerías de depuración
+  (`CONFIG_ZB_DEBUG_MODE`) no dicen nada más. **El próximo paso:** el ejemplo
+  de Espressif tal cual en el C6 (sin el Wi-Fi ni esp_hosted) para saber si
+  forma en esta placa; y preguntarle a Espressif.
+- **Cuelgues al arrancar:** dos veces, en el primer arranque después de
+  instalar, la placa quedó colgada y la Mac dejó de ver su USB; el usuario
+  la reinició. Sin volcado. Sin causa aclarada (no siempre pasa, ni se ató a
+  que el RCP estuviera andando).

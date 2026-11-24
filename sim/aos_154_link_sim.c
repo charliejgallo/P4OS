@@ -231,3 +231,8 @@ bool aos_154_link_spinel(const uint8_t *data, size_t len)
     (void)len;
     return !off();
 }
+
+/* no Zigbee stack in the simulator (aos_zigbee_p4.c is the board's) */
+#include "aos_zigbee.h"
+bool aos_zigbee_start(int channel) { (void)channel; return false; }
+void aos_zigbee_info(aos_zigbee_info_t *out) { memset(out, 0, sizeof *out); }

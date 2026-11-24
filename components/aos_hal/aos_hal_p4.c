@@ -325,6 +325,18 @@ static void prefs_trim(void)
     ESP_LOGW("pref", "the first store trimmed: %d keys erased, %d kept for an older firmware", n, kept);
 }
 
+static bool nvs_ok(void);
+
+/* P4OS: the NVS partition the preferences are on ("prefs", or the one carved
+ * out of "storage" on a board with the old table), for another user of NVS
+ * that needs room: the Zigbee stack keeps its network there
+ * (components/aos_154/aos_zigbee_p4.c); the table's "nvs" is full. The
+ * preferences are opened at start, so this touches no flash. */
+const char *aos_hal_pref_partition(void)
+{
+    return s_nvs ? s_part : NULL;
+}
+
 static bool nvs_ok(void)
 {
     if (s_nvs) return true;
