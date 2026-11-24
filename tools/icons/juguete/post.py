@@ -91,9 +91,10 @@ def gradient(w, h):
 def sheet(group):
     """Two columns of apps; each app a row of its variants."""
     redo = []
-    if group == "rehacer":      # the apps the user sent back, with their new variants (d, e, f)
+    if group.startswith("rehacer"):     # the apps sent back: rehacer (d-f), rehacer2 (g-i)...
+        first = chr(ord("d") + 3 * (int(group[7:] or 1) - 1))
         redo = json.load(open(os.path.join(ICONS, "elegidos.json"))).get("rehacer", [])
-        lst = [dict(a, juguete={k: t for k, t in a["juguete"].items() if k > "c"})
+        lst = [dict(a, juguete={k: t for k, t in a["juguete"].items() if first <= k < chr(ord(first) + 3)})
                for a in apps()["apps"] if a["id"] in redo]
     else:
         lst = [a for a in apps()["apps"] if a["group"] == group]
@@ -156,7 +157,7 @@ if __name__ == "__main__":
         do_shrink()
     elif a[0] == "sheets":
         do_shrink()
-        for g in (a[1:] or apps()["groups"] + ["rehacer"]):
+        for g in (a[1:] or apps()["groups"]):
             sheet(g)
     elif a[0] == "pack":
         pack()

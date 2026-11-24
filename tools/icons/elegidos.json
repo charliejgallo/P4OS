@@ -28,6 +28,7 @@
   "aos.estudio": "a",
   "aos.files": "a",
   "aos.flasher": "b",
+  "aos.ha": "d",
   "aos.impresoras": "a",
   "aos.infrarrojo": "a",
   "aos.leds": "b",
@@ -37,6 +38,7 @@
   "aos.luces": "b",
   "aos.macropad": "b",
   "aos.mines": "a",
+  "aos.modbus": "e",
   "aos.modules": "a",
   "aos.mqtt": "a",
   "aos.music": "c",
@@ -68,9 +70,12 @@
   "demo.arkanos": "a",
   "demo.asteroides": "a",
   "demo.atasco": "b",
+  "demo.bastion": "d",
   "demo.blackjack": "a",
+  "demo.burbujas": "e",
   "demo.canos": "b",
   "demo.chatarra": "a",
+  "demo.cjump": "e",
   "demo.emulador": "a",
   "demo.flappy": "b",
   "demo.gemas": "b",
@@ -80,6 +85,8 @@
   "demo.mapas": "a",
   "demo.mesa": "a",
   "demo.metegol": "a",
+  "demo.mila": "e",
+  "demo.monsterhop": "e",
   "demo.neon": "a",
   "demo.pinball": "a",
   "demo.solitario": "b",
@@ -94,16 +101,9 @@
   "dev.blittest": "a"
  },
  "rehacer": [
-  "aos.ha",
-  "aos.modbus",
-  "demo.bastion",
-  "demo.burbujas",
   "demo.claudito",
-  "demo.cjump",
   "demo.duke3d",
   "demo.doom",
-  "demo.topos",
-  "demo.mila",
-  "demo.monsterhop"
+  "demo.topos"
  ]
 }

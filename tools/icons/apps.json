@@ -1073,7 +1073,10 @@
     "b": "mascota con su plato",
     "d": "un juguete de bolsillo con pantalla y botones",
     "e": "la mascota dormida en su camita",
-    "f": "la mascota abrazando un corazón"
+    "f": "la mascota abrazando un corazón",
+    "g": "una estrella naranja redondeada con carita, sobre crema",
+    "h": "la estrella en crema, sobre naranja",
+    "i": "la estrellita con patitas"
    }
   },
   {
@@ -1089,7 +1092,9 @@
     "b": "puerta con una llave roja",
     "d": "un pasillo oscuro con un resplandor rojo",
     "e": "tres cartuchos rojos",
-    "f": "un botiquín blanco con cruz roja"
+    "f": "un botiquín blanco con cruz roja",
+    "g": "el monstruo del ícono de la app, en juguete",
+    "h": "el mismo monstruo, enojado"
    }
   },
   {
@@ -1105,7 +1110,8 @@
     "b": "3D en bloques",
     "d": "una mira",
     "e": "tres tarjetas llave de colores",
-    "f": "un pasillo con una luz al fondo"
+    "f": "un pasillo con una luz al fondo",
+    "g": "el símbolo nuclear, amarillo y negro, sobre naranja"
    }
   },
   {
@@ -1322,7 +1328,10 @@
     "b": "martillo y topo",
     "d": "tres pozos y un topo asomado",
     "e": "el topo con casco (el que aguanta dos golpes)",
-    "f": "un topo mareado con estrellitas"
+    "f": "un topo mareado con estrellitas",
+    "g": "la cara del topo de cerca, asomando de la tierra",
+    "h": "el tablero: pozos y dos topos",
+    "i": "una maza grande y una estrella del golpe"
    }
   },
   {
