@@ -250,3 +250,15 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   (`esp_zigbee_radio_spinel_config_uart`, que le pasa a `esp_radio_spinel` un
   descriptor de archivo); se envuelve para darle un socket UDP local cuyo
   otro extremo va al túnel.
+
+### La pila en el P4: rama `zigbee-p4` (2026-11-24, noche)
+
+La integración de la pila de Espressif en el P4 sobre el túnel está en la
+rama `zigbee-p4`, no en `main`: corre y habla con el RCP del C6, pero
+todavía no forma una red (lo mismo que en el C6), agranda la imagen del P4
+(8-9 % libre) y hubo dos cuelgues al arrancar sin causa aclarada. Lo
+aprendido (la librería del P4 compilada para el rev 3, sus estáticos a
+PSRAM, el almacén) está en el ZIGBEE.md de esa rama. **La placa del usuario
+corre ese firmware desde esa noche**, y `build/rev1_3/sdkconfig` tiene sus
+opciones (`CONFIG_ZB_*`, `CONFIG_OPENTHREAD_SPINEL_ONLY`): para volver a
+`main`, sacarlas de ahí o borrar ese sdkconfig.
