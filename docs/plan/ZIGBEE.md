@@ -253,9 +253,9 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
 
 ### La pila en el P4: dónde quedó (2026-11-24, noche; rama `zigbee-p4`)
 
-En la rama `zigbee-p4`, no en `main` (todavía no forma la red, agranda la
-imagen del P4 a 8-9 % libre y hubo dos cuelgues al arrancar sin causa
-aclarada). Lo hecho y lo aprendido:
+En la rama `zigbee-p4`, no en `main` (agranda la imagen del P4 a 8-9 %
+libre, todavía lleva contadores de medición y hubo cuelgues al arrancar sin
+causa aclarada). Lo hecho y lo aprendido:
 
 - **La pila corre en el P4** (`components/aos_154/aos_zigbee_p4.c`,
   `CONFIG_ZB_RADIO_SPINEL_UART`, `CONFIG_OPENTHREAD_SPINEL_ONLY`) con el C6
@@ -276,15 +276,38 @@ aclarada). Lo hecho y lo aprendido:
   (`components/aos_hal/psram.lf`).
 - **El almacén:** la pila guarda en el almacén grande de las preferencias
   (`aos_hal_pref_partition()`), no en la `nvs` de la tabla, llena.
-- **Lo que no anda: la red no se forma.** El pedido de formar se acepta (0)
-  y la pila no hace nada más: nada al radio, ninguna señal, la tarea sin
-  CPU. Igual que con la pila en el C6, así que no es el túnel ni dónde
-  corre. Probado sin cambio: registrar un dispositivo (gateway) antes de
-  arrancar, pedir la formación desde el manejador o desde la cola, el
-  conjunto secundario de canales, el almacén. Las librerías de depuración
-  (`CONFIG_ZB_DEBUG_MODE`) no dicen nada más. **El próximo paso:** el ejemplo
-  de Espressif tal cual en el C6 (sin el Wi-Fi ni esp_hosted) para saber si
-  forma en esta placa; y preguntarle a Espressif.
+- **La red se forma** (2026-11-24, noche, C6 3.0.9-154.12): coordinador en
+  el canal 26, `BDB Formation status 0`, y en los arranques siguientes vuelve
+  sola a su red (`Device Reboot` OK; pedirle formar otra vez contesta
+  `ON_A_NETWORK`, 12, así que no se pide). Manda sus tramas sin errores
+  (`frames: N sent, N done` en el log del C6). Las tres cosas que la
+  trababan estaban **en el RCP del C6** (`c6/main/rcp.c`), no en la pila:
+  1. **El lazo de OpenThread no se despertaba.** Los bytes del P4 entran
+     desde una tarea propia (`feeder`), no desde adentro del lazo como los
+     de una UART; un pedido que sólo arma un timer (una trama a mandar: su
+     espera CSMA es un timer del RCP) quedaba esperando a que otra cosa
+     despertara el `select()`, y la pila del P4 se cansaba, reiniciaba el
+     RCP (`80 01 02`) y daba `MAC_CHANNEL_ACCESS_FAILURE` (481). Ahora el
+     `feeder` llama a `otTaskletsSignalPending()` después de cada pedazo.
+  2. **La medida de energía larga no terminaba.** El escaneo que abre la
+     formación pide 138 ms (8625 símbolos) de una vez; con el Wi-Fi del C6
+     andando el driver quedaba en la medida para siempre, sin su "done" ni su
+     "failed" (contado en el C6). El RCP ahora la hace en medidas de 1 ms
+     (64 símbolos) hasta cumplir el tiempo, cada una con 20 ms de espera, y
+     se queda con la más fuerte, como el escáner de `radio154.c`; además
+     define `esp_ieee802154_ed_failed()`, débil y vacía en la IDF (nadie
+     avisaba a OpenThread de una medida rechazada). En la primera prueba, 9
+     medidas, 7 sin respuesta: el escaneo termina igual.
+  3. **La coexistencia Wi-Fi / 802.15.4** no estaba prendida en el RCP
+     (`esp_coex_wifi_i154_enable()`, como `zigbee_test.c`), y su prioridad
+     para 802.15.4 quedaba en la más baja del driver (OpenThread la sube por
+     el rol sólo cuando arma la red él): MEDIO para mandar y escuchar, ALTO
+     para lo que va con hora.
+  Lo mismo explicaría por qué tampoco formaba con la pila en el C6 (la
+  medida larga). **Falta:** probar con el BLE de la placa conectado y sin
+  conectar (la prueba fue con una Mac conectada por BLE), medir el Wi-Fi
+  mientras tanto, que se una un equipo (abrir la red), y sacar los
+  contadores de medición (`aos_zigbee_trace.c`, los de `rcp.c`).
 - **Cuelgues al arrancar:** dos veces, en el primer arranque después de
   instalar, la placa quedó colgada y la Mac dejó de ver su USB; el usuario
   la reinició. Sin volcado. Sin causa aclarada (no siempre pasa, ni se ató a

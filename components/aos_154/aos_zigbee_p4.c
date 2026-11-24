@@ -18,9 +18,11 @@
 #include "aos_154.h"
 #include "aos_154_proto.h"
 #include "aos_hal.h"
+#include "aos_zigbee_trace.h"
 
 #include <string.h>
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "esp_zigbee.h"
 #include "ezbee/zha.h"
 #include "esp_radio_spinel.h"
@@ -58,6 +60,7 @@ static void from_c6(const uint8_t *d, size_t n)
     if (s_c6_fd >= 0) {
         send(s_c6_fd, d, n, MSG_DONTWAIT);
         s_from_c6 += n;
+        aos_zb_tail_add(&g_zb_tail_from, d, n);
     }
 }
 
@@ -70,6 +73,7 @@ static void bridge(void *arg)
         int n = recv(s_c6_fd, buf, sizeof buf, 0);
         if (n <= 0) { aos_hal_sleep_ms(10); continue; }
         if (aos_154_spinel_send(buf, (size_t)n)) s_to_c6 += (uint32_t)n;
+        aos_zb_tail_add(&g_zb_tail_to, buf, (size_t)n);
     }
 }
 
@@ -117,8 +121,17 @@ static bool on_signal(const ezb_app_signal_t *sig)
     case EZB_ZDO_SIGNAL_SKIP_STARTUP:
         commission((void *)(uintptr_t)EZB_BDB_MODE_INITIALIZATION);
         return true;
-    case EZB_BDB_SIGNAL_DEVICE_FIRST_START:
     case EZB_BDB_SIGNAL_DEVICE_REBOOT:
+        /* the network it formed before, back from its NVS: nothing to form
+         * (asked again, the formation answers "on a network", 12) */
+        if (p && p->status == 0) {
+            s_state = AOS_ZB_FORMED;
+            aos_hal_log(TAG, "back on its network, channel %u", s_channel);
+            return true;
+        }
+        commission((void *)(uintptr_t)EZB_BDB_MODE_NETWORK_FORMATION);
+        return true;
+    case EZB_BDB_SIGNAL_DEVICE_FIRST_START:
         commission((void *)(uintptr_t)EZB_BDB_MODE_NETWORK_FORMATION);
         return true;
     case EZB_BDB_SIGNAL_FORMATION:
@@ -132,6 +145,37 @@ static bool on_signal(const ezb_app_signal_t *sig)
 }
 
 const char *aos_hal_pref_partition(void);     /* aos_hal_p4.c */
+
+/* A probe while measuring: every 3 s, through the stack's own task queue,
+ * what its commissioning says. If it never runs, the stack's loop is stuck. */
+static void probe(void *ctx)
+{
+    (void)ctx;
+    static int n;
+    aos_hal_log(TAG, "probe %d: mode 0x%x, status %u, joined %d, factory new %d, channels 0x%08x/0x%08x", ++n,
+                (unsigned)ezb_bdb_get_commissioning_mode(), (unsigned)ezb_bdb_get_commissioning_status(),
+                ezb_bdb_dev_joined(), ezb_bdb_is_factory_new(), (unsigned)ezb_bdb_get_primary_channel_set(),
+                (unsigned)ezb_bdb_get_secondary_channel_set());
+    const aos_zb_trace_t *z = &g_zb_trace;
+    aos_hal_log(TAG, "  alarms ms %u/%u (last %u ms), us %u/%u; radio enable %u (%d), rx %u ch %u (%d), tx %u (%d) done %u (%d), "
+                "ed %u ch %u for %u (%d) done %u rssi %d, rx done %u; to C6 %u, from C6 %u",
+                (unsigned)z->ms_start, (unsigned)z->ms_fired, (unsigned)z->ms_last_dt, (unsigned)z->us_start,
+                (unsigned)z->us_fired, (unsigned)z->enable, z->enable_err, (unsigned)z->receive, z->receive_ch,
+                z->receive_err, (unsigned)z->transmit, z->transmit_err, (unsigned)z->tx_done, z->tx_done_err,
+                (unsigned)z->ed, z->ed_ch, (unsigned)z->ed_dur, z->ed_err, (unsigned)z->ed_done, z->ed_rssi, (unsigned)z->rx_done,
+                (unsigned)s_to_c6, (unsigned)s_from_c6);
+    if (n == 1 || n == 5) {
+        aos_zb_tail_log("to C6", &g_zb_tail_to);
+        aos_zb_tail_log("from C6", &g_zb_tail_from);
+    }
+}
+
+static void probe_timer(void *arg)
+{
+    (void)arg;
+    static int n;
+    if (++n <= 20 && esp_zigbee_task_queue_post(probe, NULL) != ESP_OK) aos_hal_log(TAG, "probe: the queue did not take it");
+}
 
 static void stack_task(void *arg)
 {
@@ -181,6 +225,9 @@ static void stack_task(void *arg)
     ezb_bdb_set_primary_channel_set(1u << s_channel);
     ezb_bdb_set_secondary_channel_set(0x07FFF800u);   /* as Espressif's example: all */
     ezb_app_signal_add_handler(on_signal);
+    static esp_timer_handle_t t;
+    const esp_timer_create_args_t ta = { .callback = probe_timer, .name = "zb_probe" };
+    if (!t && esp_timer_create(&ta, &t) == ESP_OK) esp_timer_start_periodic(t, 3000000);
     if (esp_zigbee_start(false) != ESP_OK) s_state = AOS_ZB_FAILED;
     else esp_zigbee_launch_mainloop();
     vTaskDelete(NULL);
@@ -194,7 +241,9 @@ bool aos_zigbee_start(int channel)
     /* the C6 becomes the RCP, and the link must answer before the stack speaks */
     aos_154_rcp_start();
     char v[128];
-    if (!aos_154_rcp_probe(v, sizeof v, 3000)) {
+    /* the RCP's first answer after the C6 starts it can take more than 3 s
+     * (with the coexistence on, 2026-11-24): a second try */
+    if (!aos_154_rcp_probe(v, sizeof v, 3000) && !aos_154_rcp_probe(v, sizeof v, 5000)) {
         aos_hal_log(TAG, "the C6's RCP does not answer: its firmware is 3.0.9-154.5 or newer?");
         return false;
     }

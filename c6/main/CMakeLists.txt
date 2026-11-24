@@ -7,9 +7,13 @@ idf_component_register(
 )
 
 # rcp.c: the OpenThread RCP's spinel goes to the P4 over peer_data instead of
-# a UART, by taking its otPlatUartSend
+# a UART, by taking its otPlatUartSend; and its energy scan is made of short
+# measures, with the driver's "done" passing through rcp.c first
 if(CONFIG_OPENTHREAD_RADIO)
-    target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=otPlatUartSend")
+    foreach(fn otPlatUartSend otPlatRadioEnergyScan esp_ieee802154_event_callback_list_register
+               esp_ieee802154_transmit)
+        target_link_libraries(${COMPONENT_LIB} INTERFACE "-Wl,--wrap=${fn}")
+    endforeach()
 endif()
 
 # The repository's partition table (../partitions_eh_cp_ota_4m.csv) as the

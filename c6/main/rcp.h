@@ -10,3 +10,5 @@ bool     rcp_running(void);
 void     rcp_from_host(const uint8_t *data, size_t len);
 uint32_t rcp_tx_bytes(void);
 uint32_t rcp_rx_bytes(void);
+/* energy measures the radio could not make (Wi-Fi refused them), since the start */
+uint32_t rcp_ed_failures(void);

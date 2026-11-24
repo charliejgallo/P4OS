@@ -29,6 +29,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "openthread/error.h"
+#include "openthread/tasklet.h"
 #include "eh_cp_feat_peer_data.h"
 
 /* OpenThread's UART platform functions (examples/platforms/utils/uart.h in
@@ -86,8 +87,163 @@ static void feeder(void *arg)
         if (xQueueReceive(s_in, &c, portMAX_DELAY) != pdTRUE) continue;
         esp_openthread_lock_acquire(portMAX_DELAY);
         otPlatUartReceived(c.b, c.n);
+        /* A UART's bytes come in from inside OpenThread's loop, which then
+         * looks at its timers again before it sleeps; these come from this
+         * task, while the loop sleeps in its select() with the timeout it had.
+         * A request that only sets a timer (a frame to send: its CSMA backoff
+         * is the RCP's own timer) was left waiting until something else woke
+         * the loop, and the host gave up on the RCP and reset it (on the
+         * board, 2026-11-24). So the loop is woken after every chunk. */
+        otTaskletsSignalPending(esp_openthread_get_instance());
         esp_openthread_lock_release();
         s_rx += c.n;
+    }
+}
+
+/* The energy scan, in short measures. OpenThread's port asks the 802.15.4
+ * driver for one measure as long as the host's scan (a Zigbee coordinator's
+ * formation asks for 138 ms, 8625 symbols), and on this C6, with its Wi-Fi up,
+ * such a measure never ended: the driver stayed in it, with neither its
+ * "done" nor its "failed" (on the board, 2026-11-24, counted below), so the
+ * host waited forever. radio154's scan, 1 ms measures with a timeout each,
+ * always got its answers. So the scan is done the same way here: measures of
+ * 64 symbols one after another until the scan's time is up, the strongest
+ * kept, each one asked for again if it does not answer in 20 ms or the
+ * driver says it failed (esp_ieee802154_ed_failed, a weak function nobody
+ * else defines: coexistence refused it). The result goes to OpenThread's own
+ * callback, as the one long measure's would have. */
+#include "esp_ieee802154.h"
+#include "esp_coexist.h"
+#include "esp_timer.h"
+#include "openthread/platform/radio.h"
+#include "esp_openthread.h"
+
+esp_err_t __real_esp_ieee802154_event_callback_list_register(esp_ieee802154_event_cb_list_t cb);
+
+#define ED_CHUNK    64                  /* symbols: 1 ms */
+#define ED_WAIT_MS  20
+
+static TaskHandle_t s_ed_task;
+static void (*s_ot_ed_done)(int8_t power);       /* OpenThread's port's */
+static volatile bool s_ed_on;
+static volatile int8_t s_ed_max;
+static volatile uint32_t s_ed_samples, s_ed_failed, s_ed_timeouts, s_ed_scans;
+static int64_t s_ed_until;
+
+uint32_t rcp_ed_failures(void) { return s_ed_failed; }
+
+static void IRAM_ATTR ed_wake(void)
+{
+    BaseType_t woke = pdFALSE;
+    if (s_ed_task) vTaskNotifyGiveFromISR(s_ed_task, &woke);
+    portYIELD_FROM_ISR(woke);
+}
+
+static void IRAM_ATTR ed_done(int8_t power)
+{
+    if (!s_ed_on) {                     /* not one of the scan's: OpenThread's as it was */
+        if (s_ot_ed_done) s_ot_ed_done(power);
+        return;
+    }
+    if (!s_ed_samples || power > s_ed_max) s_ed_max = power;
+    s_ed_samples++;
+    ed_wake();
+}
+
+void IRAM_ATTR esp_ieee802154_ed_failed(uint16_t error)
+{
+    (void)error;
+    s_ed_failed++;
+    if (s_ed_on) ed_wake();
+}
+
+/* While measuring (2026-11-24): each frame sent, and how it ended */
+static esp_ieee802154_transmit_done_cb_t s_ot_tx_done;
+static esp_ieee802154_transmit_failed_cb_t s_ot_tx_failed;
+static volatile uint32_t s_tx_start, s_tx_ok, s_tx_fail[8];
+
+static void IRAM_ATTR tx_done(const uint8_t *frame, const uint8_t *ack, esp_ieee802154_frame_info_t *info)
+{
+    s_tx_ok++;
+    if (s_ot_tx_done) s_ot_tx_done(frame, ack, info);
+}
+
+static void IRAM_ATTR tx_failed(const uint8_t *frame, esp_ieee802154_tx_error_t error)
+{
+    s_tx_fail[(unsigned)error & 7]++;
+    if (s_ot_tx_failed) s_ot_tx_failed(frame, error);
+}
+
+esp_err_t __real_esp_ieee802154_transmit(const uint8_t *frame, bool cca);
+esp_err_t __wrap_esp_ieee802154_transmit(const uint8_t *frame, bool cca)
+{
+    s_tx_start++;
+    return __real_esp_ieee802154_transmit(frame, cca);
+}
+
+/* OpenThread's port's callbacks, with the measure's own put in between */
+esp_err_t __wrap_esp_ieee802154_event_callback_list_register(esp_ieee802154_event_cb_list_t cb)
+{
+    if (s_running) {                    /* only while the RCP starts: radio154's list is its own */
+        s_ot_ed_done = cb.ed_done_cb;
+        cb.ed_done_cb = ed_done;
+        s_ot_tx_done = cb.tx_done_cb;
+        cb.tx_done_cb = tx_done;
+        s_ot_tx_failed = cb.tx_failed_cb;
+        cb.tx_failed_cb = tx_failed;
+    }
+    return __real_esp_ieee802154_event_callback_list_register(cb);
+}
+
+/* called by OpenThread with its lock held */
+otError __wrap_otPlatRadioEnergyScan(otInstance *ins, uint8_t ch, uint16_t ms)
+{
+    (void)ins;
+    esp_ieee802154_set_channel(ch);
+    s_ed_samples = 0;
+    s_ed_max = -128;
+    s_ed_until = esp_timer_get_time() + (int64_t)ms * 1000;
+    s_ed_scans++;
+    s_ed_on = true;
+    esp_ieee802154_energy_detect(ED_CHUNK);
+    if (s_ed_task) xTaskNotifyGive(s_ed_task);
+    return OT_ERROR_NONE;
+}
+
+static void ed_task(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        bool answered = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(s_ed_on ? ED_WAIT_MS : 1000)) != 0;
+        if (!s_ed_on) {
+            static uint32_t seen, ticks;
+            uint32_t now = s_tx_start + s_tx_ok;
+            for (int i = 0; i < 8; i++) now += s_tx_fail[i];
+            ticks++;
+            if (now != seen && ticks >= 5) {        /* at most one line in 5 s */
+                seen = now;
+                ticks = 0;
+                ESP_LOGI(TAG, "frames: %u sent, %u done; failed: cca %u, abort %u, no ack %u, bad ack %u, coex %u, sec %u",
+                         (unsigned)s_tx_start, (unsigned)s_tx_ok, (unsigned)s_tx_fail[1], (unsigned)s_tx_fail[2],
+                         (unsigned)s_tx_fail[3], (unsigned)s_tx_fail[4], (unsigned)s_tx_fail[5], (unsigned)s_tx_fail[6]);
+            }
+            continue;
+        }
+        esp_openthread_lock_acquire(portMAX_DELAY);
+        if (s_ed_on) {
+            if (!answered) s_ed_timeouts++;
+            if (esp_timer_get_time() < s_ed_until) esp_ieee802154_energy_detect(ED_CHUNK);
+            else {
+                s_ed_on = false;
+                int8_t r = s_ed_samples ? s_ed_max : OT_RADIO_RSSI_INVALID;
+                if (s_ed_scans <= 3 || !s_ed_samples)
+                    ESP_LOGI(TAG, "energy scan %u: %u measures, strongest %d dBm (%u refused, %u unanswered)",
+                             (unsigned)s_ed_scans, (unsigned)s_ed_samples, r, (unsigned)s_ed_failed,
+                             (unsigned)s_ed_timeouts);
+                if (s_ot_ed_done) s_ot_ed_done(r);
+            }
+        }
+        esp_openthread_lock_release();
     }
 }
 
@@ -117,13 +273,24 @@ bool rcp_start(void)
             .port_config = { .storage_partition_name = "nvs", .netif_queue_size = 10, .task_queue_size = 10 },
         },
     };
+    /* Wi-Fi and 802.15.4 taking turns on the one radio: without it, with the
+     * C6's Wi-Fi up, the RCP's measures and frames were left hanging (on the
+     * board, 2026-11-24). zigbee_test.c does the same. */
+    ESP_LOGI(TAG, "Wi-Fi and 802.15.4 coexistence: %s", esp_err_to_name(esp_coex_wifi_i154_enable()));
     s_running = true;                   /* before: the P4 may speak as soon as it starts */
     if (esp_openthread_start(&cfg) != ESP_OK) {
         s_running = false;
         ESP_LOGE(TAG, "OpenThread's RCP did not start");
         return false;
     }
+    /* 802.15.4's turn against Wi-Fi's and BLE's: OpenThread raises it by the
+     * device's role only when it runs the network itself, not as an RCP, so
+     * the driver's default stays, the lowest. A coordinator sends and
+     * listens: in the middle, and high for what is timed. */
+    esp_ieee802154_coex_config_t cc = { .idle = IEEE802154_IDLE, .txrx = IEEE802154_MIDDLE, .txrx_at = IEEE802154_HIGH };
+    esp_ieee802154_set_coex_config(cc);
     xTaskCreate(feeder, "rcp_in", 3072, NULL, 5, NULL);
+    xTaskCreate(ed_task, "rcp_ed", 3072, NULL, 6, &s_ed_task);
     ESP_LOGI(TAG, "the RCP is up, spinel over peer_data");
     return true;
 }
@@ -135,5 +302,6 @@ bool rcp_running(void) { return false; }
 void rcp_from_host(const uint8_t *data, size_t len) { (void)data; (void)len; }
 uint32_t rcp_tx_bytes(void) { return 0; }
 uint32_t rcp_rx_bytes(void) { return 0; }
+uint32_t rcp_ed_failures(void) { return 0; }
 
 #endif
