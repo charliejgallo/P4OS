@@ -128,6 +128,7 @@ static void api_devices(aos_httpd_req_t *r)
             snprintf(t, sizeof t, "%02X%02X%02X%02X%02X%02X%02X%02X", e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7]);
             cJSON_AddStringToObject(x, "ext", t);
         }
+        if (d[i].vendor[0]) cJSON_AddStringToObject(x, "vendor", d[i].vendor);
         cJSON_AddNumberToObject(x, "ch", d[i].channel);
         cJSON_AddNumberToObject(x, "frames", d[i].frames);
         cJSON_AddNumberToObject(x, "rssi", d[i].rssi_last);

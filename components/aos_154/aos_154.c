@@ -333,6 +333,40 @@ static void dev_note(const aos_154_frame_t *fr)
     }
 }
 
+/* The maker of a long address, from <card>/zigbee/oui.bin: "AOUI", u32
+ * count, then records of 32 bytes sorted by prefix (u8 prefix[3], u8 len,
+ * char name[28]). A binary search with fseek; nothing kept in memory. */
+static bool vendor_of(const uint8_t ext[8], char *out, size_t n)
+{
+    const char *root = aos_hal_path_sd_root();
+    if (!root) return false;
+    char path[96];
+    snprintf(path, sizeof path, "%s/zigbee/oui.bin", root);
+    FILE *f = fopen(path, "rb");
+    if (!f) return false;
+    uint8_t h[8], r[32];
+    bool ok = false;
+    if (fread(h, 1, 8, f) == 8 && !memcmp(h, "AOUI", 4)) {
+        uint32_t lo = 0, hi = (uint32_t)h[4] | (uint32_t)h[5] << 8 | (uint32_t)h[6] << 16 | (uint32_t)h[7] << 24;
+        while (lo < hi && !ok) {
+            uint32_t mid = (lo + hi) / 2;
+            if (fseek(f, 8 + (long)mid * 32, SEEK_SET) || fread(r, 1, 32, f) != 32) break;
+            int c = memcmp(r, ext, 3);
+            if (c < 0) lo = mid + 1;
+            else if (c > 0) hi = mid;
+            else {
+                size_t len = r[3] > 28 ? 28 : r[3];
+                if (len >= n) len = n - 1;
+                memcpy(out, r + 4, len);
+                out[len] = '\0';
+                ok = true;
+            }
+        }
+    }
+    fclose(f);
+    return ok;
+}
+
 int aos_154_devices(aos_154_device_t *out, int max)
 {
     if (!s_lock) return 0;
@@ -341,6 +375,20 @@ int aos_154_devices(aos_154_device_t *out, int max)
     if (s_dev)
         for (int i = 0; i < s_ndev && n < max; i++) out[n++] = s_dev[i];
     unlock();
+    /* the makers of the long addresses learnt since the last look, once each,
+     * out of the lock (it reads the card) */
+    for (int i = 0; i < n; i++) {
+        if (!out[i].has_ext || out[i].vendor_done) continue;
+        if (!vendor_of(out[i].ext, out[i].vendor, sizeof out[i].vendor)) out[i].vendor[0] = '\0';
+        out[i].vendor_done = true;
+        lock();
+        for (int k = 0; k < s_ndev; k++)
+            if (s_dev[k].has_ext && !memcmp(s_dev[k].ext, out[i].ext, 8)) {
+                memcpy(s_dev[k].vendor, out[i].vendor, sizeof out[i].vendor);
+                s_dev[k].vendor_done = true;
+            }
+        unlock();
+    }
     /* the most recently heard first */
     for (int i = 1; i < n; i++)
         for (int j = i; j > 0 && (int32_t)(out[j].last_ms - out[j - 1].last_ms) > 0; j--) {

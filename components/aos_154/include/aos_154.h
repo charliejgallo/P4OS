@@ -72,6 +72,10 @@ typedef struct {
     uint32_t frames;
     int8_t   rssi_last, rssi_avg;
     uint32_t first_ms, last_ms; /* aos_hal_uptime_ms() */
+    char     vendor[29];        /* the radio's maker by the long address's first three
+                                 * bytes (<card>/zigbee/oui.bin, tools/zigbee/gen_oui.py);
+                                 * "" when unknown */
+    bool     vendor_done;       /* looked up already */
 } aos_154_device_t;
 
 /* The devices heard since the board started (or since aos_154_devices_clear),

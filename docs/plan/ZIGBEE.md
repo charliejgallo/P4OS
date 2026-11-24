@@ -159,3 +159,9 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   (etapa 2). **La tabla:** el sitio del IEEE (`standards-oui.ieee.org`)
   rechaza las descargas automáticas; hay que bajar `oui.csv` a mano desde el
   navegador y que un script arme el índice (no se esquiva el bloqueo).
+  **Preparado (2026-11-24):** `tools/zigbee/gen_oui.py <oui.csv>` arma
+  `oui.bin` (registros de 32 bytes ordenados por prefijo, ~1 MB) para
+  `<tarjeta>/zigbee/`; el P4 busca ahí el fabricante la primera vez que
+  conoce la dirección larga de un equipo (`aos_154_devices()`), y la app y el
+  portal lo muestran. Probado en el simulador con una tabla de prueba. Falta
+  el `oui.csv` de verdad y llevar `oui.bin` como parte del sistema.

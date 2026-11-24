@@ -3599,7 +3599,8 @@ async function pageZigbee() {
     try {
       const d = await api('154/devices');
       put(devs, h('h2', {}, tr('Equipos')), d.devices.length ? d.devices.map(x => row(
-        h('span', {}, (x.short || x.ext) + (x.short === '0x0000' ? ' · ' + tr('coordinador') : ''), x.short && x.ext ? h('div', { class: 'small muted mono' }, x.ext) : null),
+        h('span', {}, (x.short || x.ext) + (x.short === '0x0000' ? ' · ' + tr('coordinador') : '') + (x.vendor ? ' · ' + x.vendor : ''),
+          x.short && x.ext ? h('div', { class: 'small muted mono' }, x.ext) : null),
         tr('%s paquetes · %s dBm · hace %s s', x.frames, x.rssi_avg, Math.round(x.ago_ms / 1000)) + (x.pan ? ' · PAN ' + x.pan : ''))) :
         h('p', { class: 'note' }, tr('Todavía nadie: escuchá un canal con tráfico.')),
         h('div', { class: 'btns', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => post('154/devices/clear').then(loadDevs) }, tr('Olvidarlos'))));

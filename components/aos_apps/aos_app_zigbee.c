@@ -396,7 +396,7 @@ static void fill_devices(int32_t w)
                                      : _("Todavía nadie: escuchá un canal con tráfico."));
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = 0; i < n; i++) {
-        char a[64], b[120], ext[24] = "";
+        char a[96], b[120], ext[24] = "";
         if (d[i].has_ext)
             snprintf(ext, sizeof ext, "%02X%02X:%02X%02X:%02X%02X:%02X%02X", d[i].ext[0], d[i].ext[1], d[i].ext[2], d[i].ext[3],
                      d[i].ext[4], d[i].ext[5], d[i].ext[6], d[i].ext[7]);
@@ -404,6 +404,10 @@ static void fill_devices(int32_t w)
             snprintf(a, sizeof a, "0x%04X%s%s", d[i].short_addr, d[i].short_addr == 0 ? "  " : "",
                      d[i].short_addr == 0 ? _("coordinador") : "");
         else snprintf(a, sizeof a, "%s", ext);
+        if (d[i].vendor[0]) {
+            size_t l = strlen(a);
+            snprintf(a + l, sizeof a - l, "  %s", d[i].vendor);
+        }
         uint32_t ago = (now - d[i].last_ms) / 1000;
         int k = snprintf(b, sizeof b, _("%u paquetes · %d dBm, promedio %d · hace %u s"), (unsigned)d[i].frames,
                          d[i].rssi_last, d[i].rssi_avg, (unsigned)ago);
