@@ -565,6 +565,21 @@ static void sd_mount(void)
      * restart from the portal, 2026-09-29) the board came up with no card
      * until it was unplugged. So a failed mount is tried twice more, after
      * a pause, before the board goes on without the card. */
+    /* The card and the C6 share the P4's one SDMMC controller (the card on
+     * slot 0, the C6's SDIO on slot 1), and esp_hosted brings the C6 up on
+     * its own from before app_main: it resets the C6 and sets up its slot,
+     * clock and card while this would be reading the card's registers. When
+     * the two met, the card's reads timed out three times and the C6's link
+     * went down with them ("bring-up timed out"): the board came up with no
+     * card and no Wi-Fi, which looked like a hang (caught on the serial
+     * port, 2026-11-24, after an OTA; the "no card" of 2026-09-29 below was
+     * likely the same). So the card waits for the C6's link to be up, at
+     * most 4 s (a C6 that never answers must not keep the card away). */
+    extern int eh_host_mcu_transport_state_is_rx_ready(void);
+    int64_t t0 = esp_timer_get_time();
+    while (!eh_host_mcu_transport_state_is_rx_ready() && esp_timer_get_time() - t0 < 4000000) vTaskDelay(pdMS_TO_TICKS(20));
+    ESP_LOGI(TAG, "microSD after the C6's link: %s, %lld ms", eh_host_mcu_transport_state_is_rx_ready() ? "up" : "not up",
+             (long long)((esp_timer_get_time() - t0) / 1000));
     esp_err_t e = ESP_FAIL;
     for (int attempt = 1; attempt <= 3; attempt++) {
         e = esp_vfs_fat_sdmmc_mount(SD_ROOT, &host, &slot, &mc, &s_card);
