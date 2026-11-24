@@ -40,6 +40,8 @@ Reglas del pack, además de la receta del estilo B (abajo):
   inclinarlo (gira alrededor de z = 0): levantarlo con `loc=(…, …, 0.08-0.1)`
   en `group()`. Y para un juguete chico, armarlo a tamaño normal y achicar
   el grupo (`scale`), no las medidas: los redondeos no achican bien.
+- `rounded_poly` sobre un arco fino (`arc_band`) se rompe: los anillos y
+  sectores van sin redondear, con un bisel chico (0,015).
 - Las letras de Blender no tienen − ni ÷: los signos se arman con piezas
   (`_sign` en `models_sistema1.py`).
 
