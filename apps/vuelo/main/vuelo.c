@@ -250,28 +250,30 @@ static void step(app_t *a, float dt)
     pl->in_y = a->in_y;
     pl->in_thr = a->in_thr;
     pl->in_rud = a->in_rud;
-#ifdef AOS_SIM_BUILTIN
-    /* development: VU_AUTO=1 flies the missions by itself */
-    static int s_auto = -1;
-    if (s_auto < 0) s_auto = getenv("VU_AUTO") ? 1 : 0;
-    if (s_auto && g->state == VG_ST_FLY && g->next < g->npt) {
-        float tgt[3];
-        memcpy(tgt, g->pt[g->next].p, sizeof tgt);
-        if (g->kind == VG_DELIVER) tgt[2] += 20.0f;
-        else {
-            /* from afar, a point on the ring's axis before it; near, the ring */
-            float dx = g->pt[g->next].p[0] - pl->p[0], dy = g->pt[g->next].p[1] - pl->p[1];
-            if (dx > VW_SIZE / 2) dx -= VW_SIZE;
-            if (dx < -VW_SIZE / 2) dx += VW_SIZE;
-            if (dy > VW_SIZE / 2) dy -= VW_SIZE;
-            if (dy < -VW_SIZE / 2) dy += VW_SIZE;
-            float along = -(dx * g->pt[g->next].n[0] + dy * g->pt[g->next].n[1]);
-            if (dx * dx + dy * dy > 150.0f * 150.0f || along < 30.0f)
-                for (int k = 0; k < 2; k++) tgt[k] -= g->pt[g->next].n[k] * 100.0f;
+    /* development (planeo_dev.txt with "auto", or VU_AUTO=1 in the
+     * simulator): the plane flies by itself, to measure without hands */
+    if (a->dev_auto && g->state == VG_ST_FLY) {
+        if (g->kind == VG_FREE || g->next >= g->npt) {
+            vf_autopilot(pl, &a->world, a->t);
+        } else {
+            float tgt[3];
+            memcpy(tgt, g->pt[g->next].p, sizeof tgt);
+            if (g->kind == VG_DELIVER) {
+                tgt[2] += 20.0f;
+            } else {
+                /* from afar, a point on the ring's axis before it; near, the ring */
+                float dx = g->pt[g->next].p[0] - pl->p[0], dy = g->pt[g->next].p[1] - pl->p[1];
+                if (dx > VW_SIZE / 2) dx -= VW_SIZE;
+                if (dx < -VW_SIZE / 2) dx += VW_SIZE;
+                if (dy > VW_SIZE / 2) dy -= VW_SIZE;
+                if (dy < -VW_SIZE / 2) dy += VW_SIZE;
+                float along = -(dx * g->pt[g->next].n[0] + dy * g->pt[g->next].n[1]);
+                if (dx * dx + dy * dy > 150.0f * 150.0f || along < 30.0f)
+                    for (int k = 0; k < 2; k++) tgt[k] -= g->pt[g->next].n[k] * 100.0f;
+            }
+            vf_autopilot_to(pl, &a->world, tgt);
         }
-        vf_autopilot_to(pl, &a->world, tgt);
     }
-#endif
     int vn = a->in_view_n;
     if (vn != a->view_seen) {
         a->view_seen = vn;
@@ -568,8 +570,28 @@ static void ask_world(app_t *a, int biome, int hour)
  * The flights, for the screens
  * -------------------------------------------------------------------------- */
 
+/* planeo_dev.txt in the data folder: "auto" flies by itself */
+static void dev_read(app_t *a)
+{
+    char path[160];
+    snprintf(path, sizeof path, "%s/planeo_dev.txt", aos_hal_path_data());
+    FILE *f = fopen(path, "r");
+    char b[64] = "";
+    if (f) {
+        size_t n = fread(b, 1, sizeof b - 1, f);
+        b[n] = 0;
+        fclose(f);
+    }
+    a->dev_auto = strstr(b, "auto") != NULL;
+#ifdef AOS_SIM_BUILTIN
+    if (getenv("VU_AUTO")) a->dev_auto = true;
+#endif
+    if (a->dev_auto) aos_hal_log("vuelo", "development: the plane flies by itself");
+}
+
 static void flight_begin(app_t *a)
 {
+    dev_read(a);
     vn_close(a);
     a->state = VA_FLY;
     a->paused = false;

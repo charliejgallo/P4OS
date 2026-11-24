@@ -125,6 +125,7 @@ typedef struct app_s {
     bool        result_record;
     float       result_time;
     bool        was_stall;
+    bool        dev_auto;           /* planeo_dev.txt: the plane flies by itself */
     /* the menus' state */
     int         menu_world;
     int         free_world, free_hour;

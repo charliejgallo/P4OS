@@ -85,9 +85,12 @@ vuelo: 30.6 fps 426x240 (drawn 153, upright 144 kpx), frame 32.7 ms (ground+sky 
 - In the simulator (`sim/build-vuelo`):
   - `VU_MISSION=0..14` goes straight into a mission;
   - `VU_FREE=<world*10+hour>` goes into a free flight;
-  - `VU_AUTO=1` flies the missions by itself (deliveries complete; rings
-    sometimes need a second lap);
+  - `VU_AUTO=1` flies by itself (deliveries complete; rings sometimes
+    need a second lap);
   - `VU_STARS=n` gives the first n missions three stars, not kept.
+- On the board, a file `planeo_dev.txt` with the word `auto` in the app's
+  data folder (`PUT /api/fs/put` from the portal) does the same, to measure
+  without hands: free flight wanders, missions fly to the next target.
 - `tools/bench.c`, compiled as its header says, makes every world on the
   Mac, flies it with the autopilot, saves pictures and times frames next to
   Visor 3D's rasteriser. Its times on the board are known, so the Mac's
