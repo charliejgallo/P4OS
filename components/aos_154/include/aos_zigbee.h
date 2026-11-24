@@ -26,19 +26,51 @@ bool aos_zigbee_start(int channel);
 void aos_zigbee_info(aos_zigbee_info_t *out);
 
 /* Devices joining: the network open for some seconds (0 closes it, at most
- * 254), and what is known of those that joined since the start. */
+ * 254), and what is known of those that joined since the start, with what
+ * they said (aos_zigbee_devices.c). */
 #define AOS_ZB_DEVICES_MAX 32
+#define AOS_ZB_CLUSTERS    16           /* the clusters a device serves, kept */
+#define AOS_ZB_ATTRS       16           /* the last attributes it said, kept raw */
 enum { AOS_ZB_DEV_EPS = 0, AOS_ZB_DEV_BASIC, AOS_ZB_DEV_DONE, AOS_ZB_DEV_FAILED, AOS_ZB_DEV_LEFT };
+/* the clusters the board reads into values (aos_zigbee_dev_t.clusters) */
+enum { AOS_ZB_CL_POWER = 1 << 0, AOS_ZB_CL_ONOFF = 1 << 1, AOS_ZB_CL_TEMP = 1 << 2, AOS_ZB_CL_HUM = 1 << 3,
+       AOS_ZB_CL_OCC = 1 << 4, AOS_ZB_CL_IAS = 1 << 5 };
+typedef struct {
+    uint16_t cluster, attr;
+    uint8_t  ep, type, len;     /* ZCL type; len of v (a string: its first bytes) */
+    uint8_t  v[12];
+    uint32_t ms;                /* aos_hal_uptime_ms() when said */
+} aos_zigbee_attr_t;
 typedef struct {
     uint8_t  ieee[8];           /* little-endian, as on the air */
     uint16_t nwk;
     uint8_t  cap;               /* the announce's capability: bit 1 router, bit 3 on when idle */
     uint8_t  step;              /* AOS_ZB_DEV_*: how far its interview went */
+    uint8_t  setup;             /* setup requests still to go, 0 when done */
     uint8_t  ep, eps;           /* the first endpoint, how many */
+    uint8_t  neps, eps_list[4]; /* the endpoints (the first four) */
     uint8_t  power;             /* Basic's power source (0x01 mains, 0x03 battery...) */
     int8_t   rssi;
     uint32_t seen_ms;           /* aos_hal_uptime_ms() of its last announce */
+    uint32_t heard_ms;          /* and of the last frame from it */
     char     manuf[33], model[33];
+    /* the clusters its endpoints serve: ep << 16 | cluster */
+    uint8_t  ncl;
+    uint32_t cl[AOS_ZB_CLUSTERS];
+    /* what the board reads into values; unknown: INT16_MIN, 0xFFFF, 0xFF */
+    uint16_t clusters;          /* AOS_ZB_CL_* */
+    int16_t  temp;              /* 0.01 degC */
+    uint16_t hum;               /* 0.01 % */
+    uint8_t  battery;           /* 0.5 % */
+    uint8_t  voltage;           /* 0.1 V */
+    uint8_t  onoff, onoff_known;        /* a bit per endpoint, eps_list's order */
+    uint8_t  occupancy;
+    uint16_t zone_type;         /* IAS: 0x0015 contact, 0x000d motion, 0x002a water, ... */
+    uint16_t zone_status;       /* IAS: bit 0 alarm (open, motion, water), bit 3 battery low */
+    uint8_t  zone_known;
+    /* and every attribute it said, raw, the last of each (any device) */
+    uint8_t  nattr;
+    aos_zigbee_attr_t attr[AOS_ZB_ATTRS];
 } aos_zigbee_dev_t;
 
 bool aos_zigbee_permit(int seconds);

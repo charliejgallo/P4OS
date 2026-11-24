@@ -11555,3 +11555,47 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: è entrato un 
 Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x ha lasciato la rete
 Zigbee: se pueden sumar equipos por %u s	Zigbee: i dispositivi possono entrare per %u s
 Zigbee: ya no se pueden sumar equipos	Zigbee: non possono più entrare dispositivi
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Impossibile creare la rete: il C6 ha il firmware 154.15?
+La red no tomó el pedido	La rete non ha accettato la richiesta
+contacto	contatto
+movimiento	movimento
+agua	acqua
+humo	fumo
+gas	gas
+alarma	allarme
+cerrado	chiuso
+sin movimiento	nessun movimento
+¡agua!	acqua!
+seco	asciutto
+normal	normale
+batería	batteria
+encendido	acceso/spento
+nivel	livello
+color	colore
+temperatura	temperatura
+presión	pressione
+humedad	umidità
+presencia	presenza
+luz	luce
+medidor	contatore
+eléctrico	elettrico
+Armando la red...	Creo la rete...
+Armar la red	Crea la rete
+Abierta: %d s	Aperta: %d s
+Sumar equipos	Aggiungi dispositivi
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La scheda crea la propria rete Zigbee, con il C6 come radio, e i dispositivi vi entrano: così si può provarne qualunque. Un dispositivo sta in una sola rete: per aggiungerlo qui va resettato (di solito, tenendo premuto il pulsante finché lampeggia).
+Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Resetta ora il dispositivo: lo schermo avvisa quando entra e cos'è. Se è a batteria, premi ogni tanto il suo pulsante mentre si configura.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Rete sul canale %u. %d dispositivi. I valori arrivano quando il dispositivo li invia.
+router	router
+a red eléctrica	a rete elettrica
+a pila	a batteria
+se fue	uscito
+no contestó	non ha risposto
+configurándolo	lo configuro
+hay alguien	c'è qualcuno
+nadie	nessuno
+salida %d: %s	uscita %d: %s
+prendida	accesa
+antes	prima
+Mi red	La mia rete
+Zigbee: %s, salida %u %s	Zigbee: %s, uscita %u %s

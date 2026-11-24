@@ -117,6 +117,7 @@ static void commission(void *ctx)
 
 /* aos_zigbee_devices.c */
 void aos_zigbee_devices_init(void);
+void aos_zigbee_devices_endpoint(ezb_af_ep_desc_t ep);
 bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig);
 
 static bool on_signal(const ezb_app_signal_t *sig)
@@ -230,6 +231,7 @@ static void stack_task(void *arg)
     ezb_zcl_cluster_desc_t basic = ezb_af_endpoint_get_cluster_desc(ep, EZB_ZCL_CLUSTER_ID_BASIC, EZB_ZCL_CLUSTER_SERVER);
     ezb_zcl_basic_cluster_desc_add_attr(basic, EZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, (void *)"\x04P4OS");
     ezb_zcl_basic_cluster_desc_add_attr(basic, EZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (void *)"\x03hub");
+    aos_zigbee_devices_endpoint(ep);
     ezb_af_device_add_endpoint_desc(dev, ep);
     ezb_af_device_desc_register(dev);
     /* devices from before Zigbee 3.0 (Xiaomi and Aqara's, among many) never ask

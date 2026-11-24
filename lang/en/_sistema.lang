@@ -10980,3 +10980,47 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: a device joine
 Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x left the network
 Zigbee: se pueden sumar equipos por %u s	Zigbee: devices can join for %u s
 Zigbee: ya no se pueden sumar equipos	Zigbee: no more devices can join
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Could not start the network: does the C6 run its 154.15 firmware?
+La red no tomó el pedido	The network did not take the request
+contacto	contact
+movimiento	motion
+agua	water
+humo	smoke
+gas	gas
+alarma	alarm
+cerrado	closed
+sin movimiento	no motion
+¡agua!	water!
+seco	dry
+normal	normal
+batería	battery
+encendido	on/off
+nivel	level
+color	color
+temperatura	temperature
+presión	pressure
+humedad	humidity
+presencia	occupancy
+luz	light
+medidor	meter
+eléctrico	electrical
+Armando la red...	Starting the network...
+Armar la red	Start the network
+Abierta: %d s	Open: %d s
+Sumar equipos	Add devices
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	The board starts its own Zigbee network, with the C6 as its radio, and devices join it: that is how any of them can be tried. A device is on one network only: to add it here, reset it (usually, hold its button until it blinks).
+Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Reset the device now: the screen tells when it joins and what it is. If it runs on battery, press its button now and then while it is set up.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Network on channel %u. %d devices. Values arrive when the device sends them.
+router	router
+a red eléctrica	mains powered
+a pila	on battery
+se fue	left
+no contestó	did not answer
+configurándolo	setting it up
+hay alguien	someone there
+nadie	nobody
+salida %d: %s	output %d: %s
+prendida	on
+antes	earlier
+Mi red	My network
+Zigbee: %s, salida %u %s	Zigbee: %s, output %u %s

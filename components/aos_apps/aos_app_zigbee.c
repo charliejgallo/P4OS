@@ -11,14 +11,21 @@
  *              capture to the card for Wireshark
  *   Equipos    every device heard while listening: its addresses, how much
  *              it talks and how well it is heard
+ *   Mi red     the board's own Zigbee network (the stack on the P4, the C6
+ *              its radio: aos_zigbee.h): start it, let devices join, and
+ *              each one with what it is and what it says, named where the
+ *              board knows the cluster and raw where it does not, so any
+ *              device can be tried
  *
- * Nothing is sent on the air: the radio only listens. Leaving the app stops
- * it. A C6 with an older firmware does not answer, and the app says how to
+ * In the first three nothing is sent on the air: the radio only listens, and
+ * leaving the app stops it. The network of the fourth stays up when the app
+ * closes (until the board restarts). A C6 with an older firmware does not answer, and the app says how to
  * update it.
  */
 #include "aos_apps.h"
 #include "aos_154.h"
 #include "aos_154_proto.h"
+#include "aos_zigbee.h"
 #include "aos_i18n.h"
 #include "aos_theme.h"
 #include "aos_hal.h"
@@ -35,7 +42,8 @@
 #define DB_MIN      (-100)
 #define DB_MAX      (-35)
 
-enum { P_CHANNELS = 0, P_SNIFF, P_DEVICES, P_COUNT };
+enum { P_CHANNELS = 0, P_SNIFF, P_DEVICES, P_NET, P_COUNT };
+#define ZB_CHANNEL  26                  /* the board's network: away from Wi-Fi's 1, 6 and 11 */
 
 static struct {
     lv_obj_t *root, *col, *sub, *warn, *page, *tabs[P_COUNT], *devs, *devs_note;
@@ -52,6 +60,8 @@ static struct {
     int rows;
     bool deep;                          /* a scan of 2 s a channel, not 250 ms */
     uint32_t devs_tick;
+    lv_obj_t *net, *net_note, *net_btn, *net_lbl, *close_btn;
+    volatile bool starting;             /* the network being started, off LVGL's task */
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -429,12 +439,236 @@ static void fill_devices(int32_t w)
 }
 
 /* -------------------------------------------------------------------------- */
+/* Mi red: the board's own network                                             */
+/* -------------------------------------------------------------------------- */
+
+/* starting it waits for the C6 (seconds): not in LVGL's task */
+static void start_task(void *arg)
+{
+    (void)arg;
+    if (!aos_zigbee_start(ZB_CHANNEL)) aos_ui_request_toast(_("No se pudo armar la red: ¿el C6 tiene su firmware 154.15?"));
+    U.starting = false;
+}
+
+static void net_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state == AOS_ZB_FORMED) {
+        if (!aos_zigbee_permit(254)) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+    } else if (!U.starting && z.state != AOS_ZB_STARTING) {
+        aos_154_info_t in;
+        aos_154_info(&in);
+        if (in.state == AOS_154_SCANNING || in.state == AOS_154_SNIFFING) aos_154_stop();
+        U.starting = true;
+        if (!aos_hal_thread_start("zb_start", start_task, NULL, 4096, 4)) U.starting = false;
+    }
+}
+
+static void close_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_zigbee_permit(0);
+}
+
+static void build_net(lv_obj_t *page, int32_t w)
+{
+    lv_obj_t *row = box(page, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(row, 20, 0);
+    U.net_btn = pill(row, "", true, net_cb, NULL, &U.net_lbl);
+    U.close_btn = pill(row, _("Cerrar"), false, close_cb, NULL, NULL);
+    U.net_note = wrap(page, "", aos_font_caption, AOS_C_DIM, w);
+    U.net = box(page, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(U.net, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(U.net, 10, 0);
+    U.devs_tick = 0;
+}
+
+static const char *zone_name(uint16_t t)
+{
+    switch (t) {
+    case 0x0015: return _("contacto");
+    case 0x000d: return _("movimiento");
+    case 0x002a: return _("agua");
+    case 0x0028: return _("humo");
+    case 0x002b: return _("gas");
+    default:     return _("alarma");
+    }
+}
+
+static const char *zone_state(uint16_t t, bool alarm)
+{
+    switch (t) {
+    case 0x0015: return alarm ? _("abierto") : _("cerrado");
+    case 0x000d: return alarm ? _("movimiento") : _("sin movimiento");
+    case 0x002a: return alarm ? _("¡agua!") : _("seco");
+    default:     return alarm ? _("alarma") : _("normal");
+    }
+}
+
+/* the names of the clusters most devices have, for the raw lines */
+static const char *cluster_name(uint16_t c)
+{
+    switch (c) {
+    case 0x0001: return _("batería");
+    case 0x0006: return _("encendido");
+    case 0x0008: return _("nivel");
+    case 0x0300: return _("color");
+    case 0x0402: return _("temperatura");
+    case 0x0403: return _("presión");
+    case 0x0405: return _("humedad");
+    case 0x0406: return _("presencia");
+    case 0x0400: return _("luz");
+    case 0x0500: return "IAS";
+    case 0x0702: return _("medidor");
+    case 0x0b04: return _("eléctrico");
+    case 0xef00: return "Tuya";
+    default:     return NULL;
+    }
+}
+
+static void add_value(lv_obj_t *row, const char *text, lv_color_t c)
+{
+    lv_obj_t *v = box(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(v, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_color(v, AOS_C_CARD2, 0);
+    lv_obj_set_style_radius(v, 16, 0);
+    lv_obj_set_style_pad_hor(v, 14, 0);
+    lv_obj_set_style_pad_ver(v, 6, 0);
+    aos_label(v, text, aos_font_small, c);
+}
+
+static void fill_net(int32_t w)
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    int open = aos_zigbee_permit_left();
+    if (U.starting || z.state == AOS_ZB_STARTING) lv_label_set_text(U.net_lbl, _("Armando la red..."));
+    else if (z.state != AOS_ZB_FORMED) lv_label_set_text(U.net_lbl, _("Armar la red"));
+    else if (open) lv_label_set_text_fmt(U.net_lbl, _("Abierta: %d s"), open);
+    else lv_label_set_text(U.net_lbl, _("Sumar equipos"));
+    if (open) lv_obj_remove_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
+
+    static aos_zigbee_dev_t d[AOS_ZB_DEVICES_MAX];
+    int n = aos_zigbee_devices(d, AOS_ZB_DEVICES_MAX);
+    if (z.state != AOS_ZB_FORMED)
+        lv_label_set_text(U.net_note, _("La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a "
+                                        "ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá "
+                                        "hay que resetearlo (en general, el botón apretado hasta que parpadea)."));
+    else if (open)
+        lv_label_set_text(U.net_note, _("Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, "
+                                        "tocale el botón cada tanto mientras se configura."));
+    else
+        lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda."),
+                              z.channel, n);
+    lv_obj_clean(U.net);
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    for (int i = n - 1; i >= 0; i--) {
+        const aos_zigbee_dev_t *e = &d[i];
+        lv_obj_t *r = card(U.net, w, LV_SIZE_CONTENT);
+        lv_obj_set_style_pad_hor(r, 18, 0);
+        lv_obj_set_style_pad_ver(r, 12, 0);
+        lv_obj_set_flex_flow(r, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_pad_row(r, 6, 0);
+        char a[96], b[160];
+        if (e->manuf[0] || e->model[0]) snprintf(a, sizeof a, "%s %s", e->manuf, e->model);
+        else snprintf(a, sizeof a, "%02X%02X:%02X%02X:%02X%02X:%02X%02X", e->ieee[7], e->ieee[6], e->ieee[5], e->ieee[4],
+                      e->ieee[3], e->ieee[2], e->ieee[1], e->ieee[0]);
+        lv_obj_t *t = aos_label(r, a, aos_font_small, e->step == AOS_ZB_DEV_LEFT ? AOS_C_DIM : AOS_C_TEXT);
+        lv_obj_set_width(t, w - 36);
+        lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);
+        const char *kind = (e->cap & 0x02) ? _("router") : (e->power == 1 ? _("a red eléctrica") : _("a pila"));
+        int k = snprintf(b, sizeof b, "0x%04X · %s", e->nwk, kind);
+        if (e->rssi) k += snprintf(b + k, sizeof b - (size_t)k, " · %d dBm", e->rssi);
+        k += snprintf(b + k, sizeof b - (size_t)k, " · ");
+        k += snprintf(b + k, sizeof b - (size_t)k, _("hace %u s"), (unsigned)((now - e->heard_ms) / 1000));
+        if (e->step == AOS_ZB_DEV_LEFT) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("se fue"));
+        else if (e->step == AOS_ZB_DEV_FAILED) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("no contestó"));
+        else if (e->setup) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("configurándolo"));
+        lv_obj_t *s2 = aos_label(r, b, aos_font_tiny, AOS_C_DIM);
+        lv_obj_set_width(s2, w - 36);
+        lv_label_set_long_mode(s2, LV_LABEL_LONG_MODE_DOTS);
+
+        /* what the board names */
+        lv_obj_t *vals = box(r, w - 36, LV_SIZE_CONTENT);
+        lv_obj_set_flex_flow(vals, LV_FLEX_FLOW_ROW_WRAP);
+        lv_obj_set_style_pad_column(vals, 8, 0);
+        lv_obj_set_style_pad_row(vals, 8, 0);
+        char v[48];
+        if (e->temp != INT16_MIN) {
+            snprintf(v, sizeof v, "%d.%d °C", e->temp / 100, abs(e->temp % 100) / 10);
+            add_value(vals, v, AOS_C_ORANGE);
+        }
+        if (e->hum != 0xFFFF) {
+            snprintf(v, sizeof v, "%u.%u %%", e->hum / 100, (e->hum % 100) / 10);
+            add_value(vals, v, AOS_C_TEAL);
+        }
+        if (e->zone_known) {
+            bool al = e->zone_status & 1;
+            snprintf(v, sizeof v, "%s: %s", zone_name(e->zone_type), zone_state(e->zone_type, al));
+            add_value(vals, v, al ? AOS_C_RED : AOS_C_GREEN);
+        }
+        if (e->occupancy != 0xFF) add_value(vals, e->occupancy & 1 ? _("hay alguien") : _("nadie"), AOS_C_TEXT);
+        for (int q = 0; q < e->neps; q++)
+            if ((e->onoff_known >> q) & 1) {
+                bool on = (e->onoff >> q) & 1;
+                snprintf(v, sizeof v, _("salida %d: %s"), q + 1, on ? _("prendida") : _("apagada"));
+                add_value(vals, v, on ? AOS_C_YELLOW : AOS_C_DIM);
+            }
+        if (e->battery != 0xFF) {
+            snprintf(v, sizeof v, "%s %u %%", _("batería"), e->battery / 2);
+            add_value(vals, v, e->battery < 40 ? AOS_C_RED : AOS_C_DIM);
+        } else if (e->voltage) {
+            snprintf(v, sizeof v, "%s %u.%u V", _("batería"), e->voltage / 10, e->voltage % 10);
+            add_value(vals, v, AOS_C_DIM);
+        }
+        if (!lv_obj_get_child_count(vals)) lv_obj_add_flag(vals, LV_OBJ_FLAG_HIDDEN);
+
+        /* and what it said raw, the newest first: any device's */
+        int order[AOS_ZB_ATTRS];
+        for (int q = 0; q < e->nattr; q++) {
+            int m = q;
+            while (m > 0 && e->attr[order[m - 1]].ms < e->attr[q].ms) {
+                order[m] = order[m - 1];
+                m--;
+            }
+            order[m] = q;
+        }
+        for (int q = 0; q < e->nattr; q++) {
+            int best = order[q];
+            const aos_zigbee_attr_t *at = &e->attr[best];
+            char hex[2 * sizeof at->v + 1];
+            for (int m = 0; m < at->len; m++) snprintf(hex + 2 * m, 3, "%02x", at->v[m]);
+            hex[2 * at->len] = '\0';
+            const char *cn = cluster_name(at->cluster);
+            char cl[32];
+            if (cn) snprintf(cl, sizeof cl, "%s 0x%04x", cn, at->cluster);
+            else snprintf(cl, sizeof cl, "0x%04x", at->cluster);
+            if (at->type == 0xFF)
+                snprintf(b, sizeof b, "ep%u %s %s 0x%02x: %s · %s", at->ep, cl, _("comando"), at->attr, hex,
+                         (now - at->ms) < 60000 ? _("recién") : _("antes"));
+            else
+                snprintf(b, sizeof b, "ep%u %s/0x%04x = %s · %s", at->ep, cl, at->attr, hex,
+                         (now - at->ms) < 60000 ? _("recién") : _("antes"));
+            lv_obj_t *l = aos_label(r, b, aos_font_tiny, AOS_C_DIM);
+            lv_obj_set_width(l, w - 36);
+            lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Refresh                                                                     */
 /* -------------------------------------------------------------------------- */
 
 static void refresh(void)
 {
     if (U.page_no == P_DEVICES && U.devs && U.devs_tick++ % 4 == 0) fill_devices(U.W - 2 * AOS_UI_PAD);
+    if (U.page_no == P_NET && U.net && U.devs_tick++ % 4 == 0) fill_net(U.W - 2 * AOS_UI_PAD);
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;
@@ -510,6 +744,7 @@ static void build(void)
     memset(U.bars, 0, sizeof U.bars);
     U.list = NULL;
     U.devs = NULL;
+    U.net = NULL;
     int32_t w = U.W - 2 * AOS_UI_PAD;
     for (int i = 0; i < P_COUNT; i++)
         lv_obj_set_style_bg_color(U.tabs[i], i == U.page_no ? AOS_C_ACCENT : AOS_C_CARD, 0);
@@ -518,7 +753,8 @@ static void build(void)
     lv_obj_set_style_pad_row(U.page, 16, 0);
     if (U.page_no == P_CHANNELS) build_channels(U.page, w);
     else if (U.page_no == P_SNIFF) build_sniff(U.page, w);
-    else build_devices(U.page, w);
+    else if (U.page_no == P_DEVICES) build_devices(U.page, w);
+    else build_net(U.page, w);
     refresh();
 }
 
@@ -553,7 +789,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     lv_obj_t *tabs = box(U.col, w, 60);
     lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_column(tabs, 10, 0);
-    static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos") };
+    static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos"), N_("Mi red") };
     for (int i = 0; i < P_COUNT; i++) {
         lv_obj_t *c = box(tabs, LV_SIZE_CONTENT, 60);
         lv_obj_set_style_radius(c, 30, 0);
@@ -577,7 +813,8 @@ static void destroy(aos_app_t *self, void *inst)
     if (U.timer) lv_timer_delete(U.timer);
     aos_154_info_t in;
     aos_154_info(&in);
-    if (in.state != AOS_154_IDLE) aos_154_stop();
+    /* the scan and the sniffer stop; the board's network (the RCP) stays */
+    if (in.state == AOS_154_SCANNING || in.state == AOS_154_SNIFFING) aos_154_stop();
     memset(&U, 0, sizeof U);
 }
 

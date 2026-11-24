@@ -124,7 +124,59 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
             cJSON_AddStringToObject(e, "model", d->model);
             cJSON_AddNumberToObject(e, "power", d->power);
             if (d->rssi) cJSON_AddNumberToObject(e, "rssi", d->rssi);
-            cJSON_AddNumberToObject(e, "ago_s", (double)(((uint32_t)aos_hal_uptime_ms() - d->seen_ms) / 1000));
+            uint32_t now = (uint32_t)aos_hal_uptime_ms();
+            cJSON_AddNumberToObject(e, "ago_s", (double)((now - d->seen_ms) / 1000));
+            cJSON_AddNumberToObject(e, "heard_s", (double)((now - d->heard_ms) / 1000));
+            cJSON_AddNumberToObject(e, "setup", d->setup);
+            cJSON *eps = cJSON_AddArrayToObject(e, "endpoints");
+            for (int k = 0; k < d->neps; k++) cJSON_AddItemToArray(eps, cJSON_CreateNumber(d->eps_list[k]));
+            /* the clusters it serves, "ep:cluster" in hex */
+            cJSON *cl = cJSON_AddArrayToObject(e, "clusters");
+            for (int k = 0; k < d->ncl; k++) {
+                char t[12];
+                snprintf(t, sizeof t, "%u:%04x", (unsigned)(d->cl[k] >> 16), (unsigned)(d->cl[k] & 0xFFFF));
+                cJSON_AddItemToArray(cl, cJSON_CreateString(t));
+            }
+            /* what the board names */
+            cJSON *v = cJSON_AddObjectToObject(e, "values");
+            if (d->temp != INT16_MIN) cJSON_AddNumberToObject(v, "temperature", d->temp / 100.0);
+            if (d->hum != 0xFFFF) cJSON_AddNumberToObject(v, "humidity", d->hum / 100.0);
+            if (d->battery != 0xFF) cJSON_AddNumberToObject(v, "battery", d->battery / 2.0);
+            if (d->voltage) cJSON_AddNumberToObject(v, "voltage", d->voltage / 10.0);
+            if (d->occupancy != 0xFF) cJSON_AddBoolToObject(v, "occupancy", d->occupancy & 1);
+            if (d->onoff_known) {
+                cJSON *o = cJSON_AddArrayToObject(v, "on");
+                for (int k = 0; k < d->neps; k++)
+                    cJSON_AddItemToArray(o, (d->onoff_known >> k) & 1 ? cJSON_CreateBool((d->onoff >> k) & 1) : cJSON_CreateNull());
+            }
+            if (d->zone_known || d->zone_type != 0xFFFF) {
+                cJSON *z = cJSON_AddObjectToObject(v, "zone");
+                if (d->zone_type != 0xFFFF) cJSON_AddNumberToObject(z, "type", d->zone_type);
+                if (d->zone_known) {
+                    cJSON_AddBoolToObject(z, "alarm", d->zone_status & 1);
+                    cJSON_AddBoolToObject(z, "battery_low", (d->zone_status >> 3) & 1);
+                    cJSON_AddNumberToObject(z, "status", d->zone_status);
+                }
+            }
+            /* and everything it said, raw */
+            cJSON *at = cJSON_AddArrayToObject(e, "attributes");
+            for (int k = 0; k < d->nattr; k++) {
+                const aos_zigbee_attr_t *r = &d->attr[k];
+                char hex[2 * sizeof r->v + 1];
+                for (int m = 0; m < r->len; m++) snprintf(hex + 2 * m, 3, "%02x", r->v[m]);
+                hex[2 * r->len] = '\0';
+                cJSON *x = cJSON_CreateObject();
+                cJSON_AddNumberToObject(x, "ep", r->ep);
+                cJSON_AddNumberToObject(x, "cluster", r->cluster);
+                if (r->type == 0xFF) cJSON_AddNumberToObject(x, "command", r->attr);
+                else {
+                    cJSON_AddNumberToObject(x, "attr", r->attr);
+                    cJSON_AddNumberToObject(x, "type", r->type);
+                }
+                cJSON_AddStringToObject(x, "hex", hex);
+                cJSON_AddNumberToObject(x, "ago_s", (double)((now - r->ms) / 1000));
+                cJSON_AddItemToArray(at, x);
+            }
             cJSON_AddItemToArray(a, e);
         }
     }

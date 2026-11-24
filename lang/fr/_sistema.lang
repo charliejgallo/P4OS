@@ -11555,3 +11555,47 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee : un appareil a
 Zigbee: 0x%04x salió de la red	Zigbee : 0x%04x a quitté le réseau
 Zigbee: se pueden sumar equipos por %u s	Zigbee : des appareils peuvent rejoindre pendant %u s
 Zigbee: ya no se pueden sumar equipos	Zigbee : plus aucun appareil ne peut rejoindre
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Impossible de créer le réseau : le C6 a-t-il son firmware 154.15 ?
+La red no tomó el pedido	Le réseau n'a pas accepté la demande
+contacto	contact
+movimiento	mouvement
+agua	eau
+humo	fumée
+gas	gaz
+alarma	alarme
+cerrado	fermé
+sin movimiento	aucun mouvement
+¡agua!	eau !
+seco	sec
+normal	normal
+batería	batterie
+encendido	marche/arrêt
+nivel	niveau
+color	couleur
+temperatura	température
+presión	pression
+humedad	humidité
+presencia	présence
+luz	lumière
+medidor	compteur
+eléctrico	électrique
+Armando la red...	Création du réseau...
+Armar la red	Créer le réseau
+Abierta: %d s	Ouvert : %d s
+Sumar equipos	Ajouter des appareils
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
+Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Réinitialisez l'appareil maintenant : l'écran indique quand il rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie.
+router	routeur
+a red eléctrica	sur secteur
+a pila	sur pile
+se fue	parti
+no contestó	pas de réponse
+configurándolo	configuration
+hay alguien	quelqu'un
+nadie	personne
+salida %d: %s	sortie %d : %s
+prendida	allumée
+antes	avant
+Mi red	Mon réseau
+Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s

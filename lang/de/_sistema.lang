@@ -10980,3 +10980,47 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: ein Gerät ist
 Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x hat das Netz verlassen
 Zigbee: se pueden sumar equipos por %u s	Zigbee: Geräte können %u s lang beitreten
 Zigbee: ya no se pueden sumar equipos	Zigbee: keine weiteren Geräte können beitreten
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Netz konnte nicht gestartet werden: hat der C6 die Firmware 154.15?
+La red no tomó el pedido	Das Netz hat die Anfrage nicht angenommen
+contacto	Kontakt
+movimiento	Bewegung
+agua	Wasser
+humo	Rauch
+gas	Gas
+alarma	Alarm
+cerrado	geschlossen
+sin movimiento	keine Bewegung
+¡agua!	Wasser!
+seco	trocken
+normal	normal
+batería	Batterie
+encendido	Ein/Aus
+nivel	Pegel
+color	Farbe
+temperatura	Temperatur
+presión	Druck
+humedad	Feuchte
+presencia	Anwesenheit
+luz	Licht
+medidor	Zähler
+eléctrico	elektrisch
+Armando la red...	Netz wird gestartet...
+Armar la red	Netz starten
+Abierta: %d s	Offen: %d s
+Sumar equipos	Geräte hinzufügen
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	Die Platine startet ihr eigenes Zigbee-Netz, mit dem C6 als Funk, und Geräte treten ihm bei: so lässt sich jedes testen. Ein Gerät ist nur in einem Netz: um es hier hinzuzufügen, setze es zurück (meist die Taste halten, bis es blinkt).
+Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Setze das Gerät jetzt zurück: der Bildschirm zeigt, wann es beitritt und was es ist. Bei Batteriegeräten ab und zu die Taste drücken, während es eingerichtet wird.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Netz auf Kanal %u. %d Geräte. Werte kommen, wenn das Gerät sie sendet.
+router	Router
+a red eléctrica	Netzbetrieb
+a pila	Batterie
+se fue	gegangen
+no contestó	keine Antwort
+configurándolo	wird eingerichtet
+hay alguien	jemand da
+nadie	niemand
+salida %d: %s	Ausgang %d: %s
+prendida	an
+antes	früher
+Mi red	Mein Netz
+Zigbee: %s, salida %u %s	Zigbee: %s, Ausgang %u %s
