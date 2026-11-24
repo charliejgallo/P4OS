@@ -3578,6 +3578,12 @@ static const char blob_en__sistema_lang[] =
     "Vitral\tVitral\n"
     "DJ\tDJ\n"
     "Planeo\tGlide\n"
+    "3D de juguete\t3D toy\n"
+    "Línea\tLine\n"
+    "ÍCONOS\tICONS\n"
+    "Los de siempre\tThe usual ones\n"
+    "Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.\tThe drawn icons of a pack; apps that are not in it look as usual.\n"
+    "Los packs de íconos se bajan de la Tienda, en Sistema.\tIcon packs are downloaded from the Store, under System.\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7148,6 +7154,12 @@ static const char blob_de__sistema_lang[] =
     "Vitral\tVitral\n"
     "DJ\tDJ\n"
     "Planeo\tGleitflug\n"
+    "3D de juguete\t3D-Spielzeug\n"
+    "Línea\tLinie\n"
+    "ÍCONOS\tSYMBOLE\n"
+    "Los de siempre\tDie üblichen\n"
+    "Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.\tDie gezeichneten Symbole eines Pakets; Apps, die nicht darin sind, sehen aus wie immer.\n"
+    "Los packs de íconos se bajan de la Tienda, en Sistema.\tSymbolpakete gibt es im Store unter System.\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7155,7 +7167,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3563, 0, files_en, 1 },
-    { "de", "Deutsch", 3563, 0, files_de, 1 },
+    { "en", "English", 3569, 0, files_en, 1 },
+    { "de", "Deutsch", 3569, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

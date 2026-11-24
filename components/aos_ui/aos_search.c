@@ -208,7 +208,7 @@ static const spage_t PAGES[] = {
     { "ethernet",  "Ethernet",                "ethernet cable red lan w5500 rj45 network" },
     { "display",   N_("Pantalla"),            "pantalla brillo display brightness orientacion rotation girar apagar" },
     { "sound",     N_("Sonido"),              "sonido volumen sound volume parlante speaker teclado click" },
-    { "wallpaper", N_("Fondo"),               "fondo wallpaper foto photo color acento accent" },
+    { "wallpaper", N_("Fondo"),               "fondo wallpaper foto photo color acento accent iconos icons" },
     { "lock",      N_("Pantalla de bloqueo"), "bloqueo lock codigo code pin reloj clock" },
     { "bluetooth", "Bluetooth",               "bluetooth iphone telefono phone teclado keyboard mouse" },
     { "usb",       "USB",                     "usb teclado keyboard mouse disco disk red network host pendrive" },

@@ -53,6 +53,7 @@
 #include "aos_i18n.h"
 #include "aos_menu.h"
 #include "aos_icon_ops.h"
+#include "aos_icon_pack.h"
 #include "aos_io.h"
 
 #include <stdio.h>
@@ -1414,7 +1415,7 @@ void aos_ui_restyle(void)
 static void requests_tick(void)
 {
     if (s_req_menu) { s_req_menu = false; aos_menu_load(); aos_home_rebuild(); }
-    if (s_req_icons) { s_req_icons = false; aos_icon_scan_files(); aos_home_rebuild(); }
+    if (s_req_icons) { s_req_icons = false; aos_icon_scan_files(); aos_icon_pack_reload(); aos_home_rebuild(); }
     if (s_req_open_pending) { s_req_open_pending = false; aos_ui_open(s_req_open); }
     if (s_req_nav_pending) {
         s_req_nav_pending = false;

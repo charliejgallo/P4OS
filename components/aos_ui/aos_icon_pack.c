@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include <sys/stat.h>
 
 #define MAGIC       "AICP"
@@ -18,7 +19,7 @@
 #define MAX_ENTRIES 2048
 #define MAX_SIDE    256                 /* a picture bigger than this is refused */
 #define LOOK_MS     2000                /* how often the file's date is looked at */
-#define PREF_ON     "icon_hd"
+#define PREF_PACK   "icon_pack"         /* "" the first pack there is, "off" none, or a name */
 
 typedef struct {
     char     id[AOS_ICON_PACK_ID_MAX + 1];
@@ -32,7 +33,9 @@ static long     s_fsize;                /* the file the index was read from */
 static long     s_mtime;
 static uint32_t s_looked_ms;
 static bool     s_looked;
-static int8_t   s_on = -1;              /* -1: not read from the preferences yet */
+static char     s_choice[AOS_ICON_PACK_NAME_MAX + 1];  /* the preference */
+static bool     s_choice_read;
+static char     s_cur[AOS_ICON_PACK_NAME_MAX + 1];     /* the pack in use, "" none */
 static FILE    *s_file;                 /* open while a batch of icons is made */
 
 /* What a screenful of icons cost, for the log: the pictures made since the
@@ -50,25 +53,90 @@ static void close_file(void)
     s_file = NULL;
 }
 
-static void pack_path(char *out, size_t n)
+static void pack_path(char *out, size_t n, const char *name)
 {
-    snprintf(out, n, "%s/hd.pak", aos_hal_path_icons());
+    snprintf(out, n, "%s/%s.pak", aos_hal_path_icons(), name);
 }
 
-bool aos_icon_pack_enabled(void)
+static bool name_ok(const char *s, size_t len)
 {
-    if (s_on < 0) {
-        int32_t v = 1;
-        aos_hal_pref_get_i32(PREF_ON, &v);
-        s_on = v ? 1 : 0;
+    if (!len || len > AOS_ICON_PACK_NAME_MAX) return false;
+    for (size_t i = 0; i < len; i++)
+        if (!((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= '0' && s[i] <= '9') || s[i] == '_')) return false;
+    return true;
+}
+
+const char *aos_icon_pack_choice(void)
+{
+    if (!s_choice_read) {
+        s_choice_read = true;
+        if (!aos_hal_pref_get_str(PREF_PACK, s_choice, sizeof s_choice)) s_choice[0] = '\0';
     }
-    return s_on;
+    return s_choice;
 }
 
-void aos_icon_pack_set_enabled(bool on)
+void aos_icon_pack_choose(const char *name)
 {
-    s_on = on ? 1 : 0;
-    aos_hal_pref_set_i32(PREF_ON, on ? 1 : 0);
+    snprintf(s_choice, sizeof s_choice, "%s", name ? name : "");
+    s_choice_read = true;
+    aos_hal_pref_set_str(PREF_PACK, s_choice);
+    s_looked = false;                   /* the next icon looks again */
+}
+
+void aos_icon_pack_reload(void)
+{
+    s_looked = false;
+}
+
+const char *aos_icon_pack_current(void)
+{
+    aos_icon_pack_refresh();
+    return s_cur[0] ? s_cur : NULL;
+}
+
+static int cmp_name(const void *a, const void *b)
+{
+    return strcmp((const char *)a, (const char *)b);
+}
+
+int aos_icon_pack_list(char (*names)[AOS_ICON_PACK_NAME_MAX + 1], int max)
+{
+    DIR *d = opendir(aos_hal_path_icons());
+    if (!d) return 0;
+    int n = 0;
+    struct dirent *e;
+    while ((e = readdir(d)) && n < max) {
+        size_t len = strlen(e->d_name);
+        if (len <= 4 || strcmp(e->d_name + len - 4, ".pak") || !name_ok(e->d_name, len - 4)) continue;
+        memcpy(names[n], e->d_name, len - 4);
+        names[n][len - 4] = '\0';
+        n++;
+    }
+    closedir(d);
+    qsort(names, (size_t)n, sizeof names[0], cmp_name);
+    return n;
+}
+
+/* The pack to use: the one chosen if it is on the card, otherwise the first
+ * there is by name (a pack the Store just put there shows with no choosing),
+ * none when "off" is chosen. */
+static void resolve(char *out)
+{
+    const char *c = aos_icon_pack_choice();
+    out[0] = '\0';
+    if (!strcmp(c, "off")) return;
+    struct stat st;
+    char path[192];
+    if (c[0] && name_ok(c, strlen(c))) {
+        pack_path(path, sizeof path, c);
+        if (stat(path, &st) == 0) {
+            strcpy(out, c);
+            return;
+        }
+    }
+    char all[16][AOS_ICON_PACK_NAME_MAX + 1];
+    int n = aos_icon_pack_list(all, 16);
+    if (n) strcpy(out, all[0]);
 }
 
 static uint16_t rd16(const uint8_t *p) { return (uint16_t)(p[0] | p[1] << 8); }
@@ -128,28 +196,28 @@ static void read_index(const char *path, long fsize)
     lv_free(raw);
     s_idx = idx;
     s_count = count;
-    aos_hal_log("icon", "HD icon pack: %d pictures%s", count - bad, bad ? " (some refused)" : "");
+    aos_hal_log("icon", "%s: %d pictures%s", path, count - bad, bad ? " (some refused)" : "");
 }
 
 bool aos_icon_pack_refresh(void)
 {
-    if (!aos_icon_pack_enabled()) {
-        if (s_idx) drop_index();
-        return false;
-    }
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     if (s_looked && now - s_looked_ms < LOOK_MS) return s_idx != NULL;
     s_looked = true;
     s_looked_ms = now;
-    char path[192];
-    pack_path(path, sizeof path);
+    char name[AOS_ICON_PACK_NAME_MAX + 1];
+    resolve(name);
     struct stat st;
-    if (stat(path, &st) != 0 || st.st_size <= HEAD) {
+    char path[192];
+    if (name[0]) pack_path(path, sizeof path, name);
+    if (!name[0] || stat(path, &st) != 0 || st.st_size <= HEAD) {
         if (s_idx) drop_index();
+        s_cur[0] = '\0';
         s_fsize = s_mtime = 0;
         return false;
     }
-    if (st.st_size != s_fsize || (long)st.st_mtime != s_mtime || !s_idx) {
+    if (strcmp(name, s_cur) || st.st_size != s_fsize || (long)st.st_mtime != s_mtime || !s_idx) {
+        strcpy(s_cur, name);
         s_fsize = st.st_size;
         s_mtime = (long)st.st_mtime;
         read_index(path, s_fsize);
@@ -214,7 +282,7 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
     }
     int side = e->size;
     char path[192];
-    pack_path(path, sizeof path);
+    pack_path(path, sizeof path, s_cur);
     uint8_t *q = lv_malloc(e->len);
     size_t px_bytes = (size_t)side * side * 4;
     lv_image_dsc_t *dsc = lv_malloc(sizeof *dsc + px_bytes);

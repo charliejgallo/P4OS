@@ -35,6 +35,7 @@
 #include "aos_text_safe.h"
 #include "aos_io.h"
 #include "aos_sys_glyphs.h"
+#include "aos_icon_pack.h"
 #include "aos_lock.h"
 #include "aos_access.h"
 #include "aos_eth.h"
@@ -1232,6 +1233,43 @@ static void accent_cb(lv_event_t *e)
     show(PG_WALL);
 }
 
+/* The icon packs on the card (aos_icon_pack.h), as the wallpaper page
+ * lists them; a row's user data is its index here, -1 the icons of always. */
+static char s_packs[8][AOS_ICON_PACK_NAME_MAX + 1];
+
+static void icons_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    aos_icon_pack_choose(i < 0 ? "off" : s_packs[i]);
+    aos_ui_restyle();
+    show(PG_WALL);
+}
+
+/* A pack's name as Settings shows it: the styles P4OS publishes have one,
+ * any other pack shows its file's name. */
+static const char *pack_title(const char *name)
+{
+    static const struct { const char *file, *title; } T[] = {
+        { "juguete", N_("3D de juguete") }, { "linea", N_("Línea") },
+    };
+    for (size_t i = 0; i < sizeof T / sizeof T[0]; i++)
+        if (!strcmp(name, T[i].file)) return _(T[i].title);
+    return name;
+}
+
+static void build_icons(lv_obj_t *p)
+{
+    int n = aos_icon_pack_list(s_packs, 8);
+    lv_obj_t *g = group(p, _("ÍCONOS"));
+    const char *cur = aos_icon_pack_current();
+    row(g, AOS_SYM_APPS, 0x8E8E93, _("Los de siempre"), cur ? NULL : AOS_SYM_CHECK, false, icons_cb, (void *)(intptr_t)-1);
+    for (int i = 0; i < n; i++)
+        row(g, AOS_SYM_APPS, 0x5E5CE6, pack_title(s_packs[i]), cur && !strcmp(cur, s_packs[i]) ? AOS_SYM_CHECK : NULL,
+            false, icons_cb, (void *)(intptr_t)i);
+    note(p, n ? _("Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.")
+              : _("Los packs de íconos se bajan de la Tienda, en Sistema."));
+}
+
 static void build_wall(lv_obj_t *p)
 {
     lv_obj_t *grid = lv_obj_create(p);
@@ -1311,6 +1349,8 @@ static void build_wall(lv_obj_t *p)
         lv_obj_set_ext_click_area(d, 8);
         lv_obj_add_event_cb(d, accent_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
     }
+
+    build_icons(p);
 }
 
 /* ---- Expansion ---- */

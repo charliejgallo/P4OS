@@ -3,7 +3,11 @@
 Plan para la versión después de la 0.33.0. **Es una de las dos estrellas de
 esa versión, junto con el hub Zigbee/Thread** (`docs/internal/PEDIDOS-APPS-2026-11.md`,
 G25). Pensado con el usuario el 2026-11-23; **la parte del firmware se hizo el
-2026-11-24** (abajo, "Lo hecho"); falta el estilo y los dibujos.
+2026-11-24** (abajo, "Lo hecho"). **Estilo elegido (2026-11-24): el B, 3D de
+juguete hecho en Blender** (`tools/icons/`, la muestra en la rama
+`claude/iconos-estilo-365bbb`), y **packs alternativos**: el C (línea
+duotono sobre fondo oscuro) le gustó mucho al usuario y va a ser el segundo
+pack. Falta la producción.
 
 ## Por qué
 
@@ -72,7 +76,8 @@ Lo que más pesa es el diseño coherente, no el firmware.
 
 ## Lo hecho (firmware, 2026-11-24)
 
-- **El pack:** `<tarjeta>/icons/hd.pak`. Un índice (id de la app, tamaño,
+- **El pack:** `<tarjeta>/icons/<nombre>.pak`, uno por estilo
+  (`juguete.pak` el B, `linea.pak` el C; `hd.pak` fue el de prueba). Un índice (id de la app, tamaño,
   dónde está) y las imágenes en QOI; el formato está en
   `components/aos_ui/include/aos_icon_pack.h`. El índice se lee a PSRAM y
   se vuelve a leer si el archivo cambia (se mira cada 2 s como mucho), así
@@ -86,8 +91,14 @@ Lo que más pesa es el diseño coherente, no el firmware.
   su id) y la pantalla de "pronto".
 - **Tamaños:** se usa el del pack igual o más grande más cercano y se
   achica; lo justo es tener 120, 108 y 26.
-- **La preferencia** `icon_hd` (1 por defecto) lo apaga; todavía no hay
-  botón en Ajustes.
+- **Varios packs:** la preferencia `icon_pack` elige cuál: vacía, el primero
+  por nombre que haya en la tarjeta (así un pack recién bajado se ve sin
+  elegir nada); `off`, ninguno; si no, el nombre. Si el elegido no está, el
+  primero que haya. **Ajustes → Fondo de pantalla → Íconos** los lista ("Los
+  de siempre" y cada pack, con su nombre traducido si es uno de los
+  publicados: `pack_title()` en `aos_app_settings.c`) y el inicio cambia en
+  el momento. Cuando la Tienda instala algo en `icons/`, el inicio se arma
+  de nuevo (`aos_ui_request_icons()`).
 - **La Tienda** acepta `icons/<nombre>.pak` como parte del sistema
   (`sys_allowed()` en `aos_store.c`, `SYS_PATH` en `tools/gen_store.py`).
 - **La herramienta:** `tools/icons/mkpack.py <carpeta> [salida]` arma el
@@ -132,13 +143,13 @@ anotado; el pack se arma con las elegidas.
 - **El estilo y los dibujos** (las etapas de arriba).
 - **El portal** sigue dibujando el AIC; mostraría el PNG si la placa sirve
   los íconos del pack (por ejemplo `/api/icon/<id>.png`).
-- **Ajustes:** el interruptor de `icon_hd` y, más adelante, los temas
-  (`icons/<tema>.pak` y una preferencia con el nombre).
-- **La release:** en `store/system.json`, una parte nueva así (los
-  textos, el glifo y los colores a gusto):
+- **Un pack nuevo publicado** suma su nombre a `pack_title()` (con sus
+  traducciones) y su parte del sistema.
+- **La release:** en `store/system.json`, una parte por pack (los textos,
+  el glifo y los colores a gusto):
 
   ```json
-  {"file": "sys-icons", "files": [{"path": "icons/hd.pak", "asset": "icons_hd.pak"}], ...}
+  {"file": "sys-icons-juguete", "files": [{"path": "icons/juguete.pak", "asset": "icons_juguete.pak"}], ...}
   ```
 
   y el pack subido a la release publicada antes del tag, como los demás.
