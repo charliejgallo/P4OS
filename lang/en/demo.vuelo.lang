@@ -1,0 +1,160 @@
+# amoledos-lang 1   es -> en
+# demo.vuelo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+Islas	Islands
+
+Cañones	Canyons
+
+Nieve	Snow
+
+Volcán	Volcano
+
+Ciudad	City
+
+Mañana	Morning
+
+Mediodía	Midday
+
+Atardecer	Sunset
+
+Noche	Night
+
+Anillos	Rings
+
+Carrera	Race
+
+Entregas	Deliveries
+
+Pasá por los anillos en orden, lo más rápido que puedas.	Fly through the rings in order, as fast as you can.
+
+Una carrera por los anillos contra otro avión.	A race through the rings against another plane.
+
+Pasá bajo por la luz verde a buscar cada paquete y llevalo a la naranja.	Fly low through the green light to pick up each package and take it to the orange one.
+
+Rápida	Fast
+
+Normal	Normal
+
+Fina	Fine
+
+Volá sobre mundos que el P4 dibuja en vivo	Fly over worlds the P4 draws live
+
+Misiones	Missions
+
+Vuelo libre	Free flight
+
+Ajustes	Settings
+
+Se abre con %d estrellas (tenés %d).	Opens with %d stars (you have %d).
+
+Récord: %s	Record: %s
+
+Sin récord	No record yet
+
+Sin reloj ni anillos: elegí un mundo y una hora, y volá.	No clock and no rings: pick a world and a time of day, and fly.
+
+Mundo	World
+
+Hora	Time of day
+
+Volar	Fly
+
+Apagado	Off
+
+Prendido	On
+
+Arriba sube	Up climbs
+
+Arriba baja	Up dives
+
+Detrás	Behind
+
+Cabina	Cockpit
+
+Sonido	Sound
+
+Palanca	Stick
+
+Calidad	Quality
+
+Cámara	Camera
+
+Cuadros por segundo	Frames per second
+
+\"Arriba baja\" es como en un avión: tirar hacia vos levanta la nariz. La calidad fina dibuja más puntos y va más lenta.	\"Up dives\" is like a real plane: pulling towards you raises the nose. Fine quality draws more points and runs slower.
+
+Pausa	Pause
+
+Seguir	Continue
+
+Empezar de nuevo	Start over
+
+Salir al menú	Back to the menu
+
+¡Ganaste la carrera!	You won the race!
+
+Te ganó por poco	Beaten by a whisker
+
+¡Misión cumplida!	Mission accomplished!
+
+¡Récord nuevo!	New record!
+
+Ganale para la segunda estrella.	Beat it for the second star.
+
+Tercera estrella: ganale por seis segundos (%s).	Third star: beat it by six seconds (%s).
+
+Próxima estrella: %s	Next star: %s
+
+Otra vez	Again
+
+Siguiente	Next
+
+Menú	Menu
+
+ANILLOS	RINGS
+
+CARRERA	RACE
+
+ENTREGAS	DELIVERIES
+
+VUELO LIBRE	FREE FLIGHT
+
+¡YA!	GO!
+
+¡LLEGASTE!	YOU MADE IT!
+
+¡GANASTE!	YOU WIN!
+
+TE GANÓ	BEATEN
+
+¡PAQUETE!	PACKAGE!
+
+¡ENTREGADO!	DELIVERED!
+
+¡PÉRDIDA!	STALL!
+
+¡CHOQUE!	CRASH!
+
+¡RÉCORD!	RECORD!
+
+km/h	km/h
+
+m	m
+
+1.º	1st
+
+2.º	2nd
+
+¡MUY BAJO!	TOO LOW!
+
+Buscá el paquete	Pick up the package
+
+Llevalo a destino	Take it where it goes
+
+ÚLTIMO	LAST
+
+Armando el mundo: %s	Making the world: %s

@@ -1,0 +1,160 @@
+# amoledos-lang 1   es -> de
+# demo.vuelo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+Islas	Inseln
+
+Cañones	Schluchten
+
+Nieve	Schnee
+
+Volcán	Vulkan
+
+Ciudad	Stadt
+
+Mañana	Morgen
+
+Mediodía	Mittag
+
+Atardecer	Abend
+
+Noche	Nacht
+
+Anillos	Ringe
+
+Carrera	Rennen
+
+Entregas	Lieferungen
+
+Pasá por los anillos en orden, lo más rápido que puedas.	Flieg der Reihe nach durch die Ringe, so schnell du kannst.
+
+Una carrera por los anillos contra otro avión.	Ein Rennen durch die Ringe gegen ein anderes Flugzeug.
+
+Pasá bajo por la luz verde a buscar cada paquete y llevalo a la naranja.	Flieg tief durch das grüne Licht, um jedes Paket abzuholen, und bring es zum orangen.
+
+Rápida	Schnell
+
+Normal	Normal
+
+Fina	Fein
+
+Volá sobre mundos que el P4 dibuja en vivo	Flieg über Welten, die der P4 live zeichnet
+
+Misiones	Missionen
+
+Vuelo libre	Freier Flug
+
+Ajustes	Einstellungen
+
+Se abre con %d estrellas (tenés %d).	Öffnet sich mit %d Sternen (du hast %d).
+
+Récord: %s	Rekord: %s
+
+Sin récord	Noch kein Rekord
+
+Sin reloj ni anillos: elegí un mundo y una hora, y volá.	Ohne Uhr und ohne Ringe: Wähl eine Welt und eine Tageszeit und flieg los.
+
+Mundo	Welt
+
+Hora	Tageszeit
+
+Volar	Fliegen
+
+Apagado	Aus
+
+Prendido	An
+
+Arriba sube	Hoch steigt
+
+Arriba baja	Hoch sinkt
+
+Detrás	Hinten
+
+Cabina	Cockpit
+
+Sonido	Ton
+
+Palanca	Steuerknüppel
+
+Calidad	Qualität
+
+Cámara	Kamera
+
+Cuadros por segundo	Bilder pro Sekunde
+
+\"Arriba baja\" es como en un avión: tirar hacia vos levanta la nariz. La calidad fina dibuja más puntos y va más lenta.	\"Hoch sinkt\" ist wie im echten Flugzeug: Ziehen hebt die Nase. Feine Qualität zeichnet mehr Punkte und läuft langsamer.
+
+Pausa	Pause
+
+Seguir	Weiter
+
+Empezar de nuevo	Neu starten
+
+Salir al menú	Zurück zum Menü
+
+¡Ganaste la carrera!	Rennen gewonnen!
+
+Te ganó por poco	Knapp verloren
+
+¡Misión cumplida!	Mission erfüllt!
+
+¡Récord nuevo!	Neuer Rekord!
+
+Ganale para la segunda estrella.	Besieg es für den zweiten Stern.
+
+Tercera estrella: ganale por seis segundos (%s).	Dritter Stern: mit sechs Sekunden Vorsprung gewinnen (%s).
+
+Próxima estrella: %s	Nächster Stern: %s
+
+Otra vez	Nochmal
+
+Siguiente	Nächste
+
+Menú	Menü
+
+ANILLOS	RINGE
+
+CARRERA	RENNEN
+
+ENTREGAS	LIEFERUNGEN
+
+VUELO LIBRE	FREIER FLUG
+
+¡YA!	LOS!
+
+¡LLEGASTE!	GESCHAFFT!
+
+¡GANASTE!	GEWONNEN!
+
+TE GANÓ	VERLOREN
+
+¡PAQUETE!	PAKET!
+
+¡ENTREGADO!	GELIEFERT!
+
+¡PÉRDIDA!	STRÖMUNGSABRISS!
+
+¡CHOQUE!	ABSTURZ!
+
+¡RÉCORD!	REKORD!
+
+km/h	km/h
+
+m	m
+
+1.º	1.
+
+2.º	2.
+
+¡MUY BAJO!	ZU TIEF!
+
+Buscá el paquete	Hol das Paket
+
+Llevalo a destino	Bring es ans Ziel
+
+ÚLTIMO	LETZTER
+
+Armando el mundo: %s	Die Welt entsteht: %s
