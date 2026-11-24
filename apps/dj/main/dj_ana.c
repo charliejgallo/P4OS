@@ -157,7 +157,7 @@ float dj_ana_tempo(const float *onset, const float *kick, int n, float fr, float
 typedef struct {
     float lp1, lp2, hp1, hp2;   /* the band filters' state */
     float a_lo, a_hi;           /* their coefficients */
-    float peak, s_lo, s_mid, s_hi;
+    float peak, s_lo, s_mid, s_hi, s_all;
     int   cnt;
     float prev_lo, prev_mid, prev_k;
 } bands_t;
@@ -196,6 +196,7 @@ static bool push(pass_t *p, const int16_t *s, int count)
         b->hp1 += (x - b->hp1) * b->a_hi;
         b->hp2 += (b->hp1 - b->hp2) * b->a_hi;
         float lo = b->lp2, hi = x - b->hp2, mid = b->hp2 - lo;
+        b->s_all += x * x;
         b->s_lo += lo * lo;
         b->s_mid += mid * mid;
         b->s_hi += hi * hi;
@@ -205,9 +206,11 @@ static bool push(pass_t *p, const int16_t *s, int count)
             float rl = sqrtf(b->s_lo * k), rm = sqrtf(b->s_mid * k), rh = sqrtf(b->s_hi * k);
             dj_wave_t *w = &t->wave[p->n];
             w->peak = (uint8_t)(dj_clampf(b->peak, 0.0f, 1.0f) * 255.0f);
-            w->lo = (uint8_t)(dj_clampf(rl * 2.2f, 0.0f, 1.0f) * 255.0f);
-            w->mid = (uint8_t)(dj_clampf(rm * 3.0f, 0.0f, 1.0f) * 255.0f);
-            w->hi = (uint8_t)(dj_clampf(rh * 5.0f, 0.0f, 1.0f) * 255.0f);
+            /* with headroom: a loud master must not fill them all (the
+             * whole track is scaled to the screen at the end) */
+            w->lo = (uint8_t)(dj_clampf(rl * 1.2f, 0.0f, 1.0f) * 255.0f);
+            w->mid = (uint8_t)(dj_clampf(rm * 1.8f, 0.0f, 1.0f) * 255.0f);
+            w->hi = (uint8_t)(dj_clampf(rh * 3.0f, 0.0f, 1.0f) * 255.0f);
             /* the rise of each band, in log: the kick's counts most */
             float el = logf(1e-4f + rl * rl), em = logf(1e-4f + rm * rm);
             float fl = el - b->prev_lo, fm = em - b->prev_mid;
@@ -219,10 +222,10 @@ static bool push(pass_t *p, const int16_t *s, int count)
             float kl = ek - b->prev_k;
             b->prev_k = ek;
             if (p->kick) p->kick[p->n] = kl > 0.0f ? kl : 0.0f;
-            float ms = (rl * rl + rm * rm + rh * rh);
+            float ms = b->s_all * k;       /* the signal's, not the bands' (they overlap) */
             if (ms > 1e-4f) { p->sq_sum += ms; p->sq_n++; }
             if (b->peak > p->peak) p->peak = b->peak;
-            b->peak = b->s_lo = b->s_mid = b->s_hi = 0.0f;
+            b->peak = b->s_lo = b->s_mid = b->s_hi = b->s_all = 0.0f;
             b->cnt = 0;
             p->n++;
             if ((p->n & 63) == 0) t->wave_n = p->n;
@@ -340,6 +343,47 @@ static bool pass_flac(pass_t *p, int16_t *pcm)
     return ok;
 }
 
+/* The whole track to the screen's height, band by band, stretched between
+ * the level the band rarely goes under (its 20th percentile, kept at a
+ * fifth of the height) and the one its loud parts reach (the 98th, at 240).
+ * A dense, loud master, whose bands hardly move, shows its kicks and
+ * breaks again; a quiet track grows. */
+static uint8_t band(const dj_wave_t *w, int k) { return k == 0 ? w->lo : k == 1 ? w->mid : w->hi; }
+
+static void wave_fit(dj_track_t *t, uint32_t n)
+{
+    if (!n || !t->wave) return;
+    float lo[3], sc[3];
+    for (int k = 0; k < 3; k++) {
+        uint32_t hist[256] = { 0 };
+        for (uint32_t i = 0; i < n; i++) hist[band(&t->wave[i], k)]++;
+        uint32_t want20 = n / 100 * 20, want98 = n / 100 * 98, acc = 0;
+        int v20 = 0, v98 = 255;
+        bool got20 = false;
+        for (int i = 0; i < 256; i++) {
+            acc += hist[i];
+            if (!got20 && acc >= want20) { v20 = i; got20 = true; }
+            if (acc >= want98) { v98 = i; break; }
+        }
+        /* the floor at 70 % of the 20th percentile, mapped to 48 */
+        float f0 = 0.7f * (float)v20, span = (float)v98 - f0;
+        if (span < 4.0f) span = 4.0f;
+        lo[k] = f0;
+        sc[k] = (240.0f - 48.0f) / span;
+    }
+    for (uint32_t i = 0; i < n; i++) {
+        dj_wave_t *w = &t->wave[i];
+        for (int k = 0; k < 3; k++) {
+            float v = (float)band(w, k);
+            float o = v <= lo[k] ? v * 48.0f / (lo[k] > 1.0f ? lo[k] : 1.0f) : 48.0f + (v - lo[k]) * sc[k];
+            uint8_t u = (uint8_t)(o > 255.0f ? 255.0f : o < 0.0f ? 0.0f : o);
+            if (k == 0) w->lo = u;
+            else if (k == 1) w->mid = u;
+            else w->hi = u;
+        }
+    }
+}
+
 /* one track, start to end, in the calling thread (the thread below; a
  * test on the desktop) */
 void dj_ana_track(dj_track_t *t)
@@ -377,6 +421,7 @@ void dj_ana_track(dj_track_t *t)
     dj_free(p.onset);
     dj_free(p.kick);
     if (stale(&p)) return;
+    wave_fit(t, p.n);
     t->gain = gain;
     t->peak = p.peak;
     if (bpm > 0.0f) {

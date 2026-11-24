@@ -105,13 +105,14 @@ static void bands(uint16_t *buf, int32_t W, int32_t x, int32_t cy, int32_t half,
         C[1][0] = c565(0x14336E); C[1][1] = c565(0x7A4F1A); C[1][2] = c565(0x7C7C7C);
     }
     const uint16_t *c = C[played ? 1 : 0];
-    float k = (float)half / 255.0f * gain;
-    int32_t hl = (int32_t)((float)(w->peak > w->lo ? (w->peak + w->lo) / 2 : w->lo) * k);
-    int32_t hm = (int32_t)((float)w->mid * k * 0.6f);
-    int32_t hh = (int32_t)((float)w->hi * k * 0.6f);
-    if (hl > half) hl = half;
-    if (hm > half) hm = half;
-    if (hh > half) hh = half;
+    (void)gain;                 /* the analysis scales each band of the track to the height */
+    /* the bands' levels, expanded (^1.5): the body of a loud track sits
+     * lower and the hits stand out of it */
+    static uint8_t EXP[256];
+    if (!EXP[255]) for (int i = 0; i < 256; i++) { float v = (float)i / 255.0f; EXP[i] = (uint8_t)(v * sqrtf(v) * 255.0f); }
+    int32_t hl = EXP[w->lo] * half / 255;
+    int32_t hm = EXP[w->mid] * half * 3 / (255 * 4);
+    int32_t hh = EXP[w->hi] * half / (255 * 2);
     if (hl < 1) hl = 1;
     vline(buf, W, x, cy - hl, cy + hl, c[0]);
     if (hm > 0) vline(buf, W, x, cy - hm, cy + hm, c[1]);
@@ -180,7 +181,7 @@ static void strip(int d, int32_t y0, int32_t h)
         if (e1 > nw) e1 = nw;
         if (e1 <= e0) e1 = e0 + 1;
         const dj_wave_t *best = &t->wave[e0];
-        for (uint32_t e = e0 + 1; e < e1; e++) if (t->wave[e].peak > best->peak) best = &t->wave[e];
+        for (uint32_t e = e0 + 1; e < e1; e++) if (t->wave[e].lo + t->wave[e].mid > best->lo + best->mid) best = &t->wave[e];
         bands(buf, W, x, cy, half, best, gain, x < cx);
     }
     /* the cue and the hot cues */
@@ -255,7 +256,7 @@ void dj_ov_render(int d, bool force)
             const dj_wave_t *best = &t->wave[e0];
             /* a stride: a long track has thousands of entries per pixel */
             uint32_t step = (e1 - e0) / 48 + 1;
-            for (uint32_t e = e0 + 1; e < e1; e += step) if (t->wave[e].peak > best->peak) best = &t->wave[e];
+            for (uint32_t e = e0 + 1; e < e1; e += step) if (t->wave[e].lo + t->wave[e].mid > best->lo + best->mid) best = &t->wave[e];
             bands(buf, W, x, cy, H / 2 - 1, best, gain, x < px);
         }
         if (p->loop_on) {

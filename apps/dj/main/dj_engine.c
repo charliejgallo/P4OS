@@ -329,6 +329,8 @@ static void command(dj_engine_t *e, const dj_cmd_t *c)
     }
     if (c->type == DC_UNLOAD) {
         k->loaded = false;
+        for (int h = 0; h < DJ_HOT; h++) k->hot[h] = -1.0f;
+        k->cue = 0.0f;
         k->playing = false;
         k->vel = 0.0f;
         k->loop_on = false;
@@ -901,9 +903,8 @@ dj_engine_t *dj_engine_new(void)
     for (int d = 0; d < DJ_NDECK; d++) {
         ok = ok && dj_track_alloc_cache(&e->trk[d]);
         strip_init(&e->dk[d].st);
-        e->dk[d].st.echo = dj_alloc((size_t)ECHO_N * 2 * sizeof(float));
-        ok = ok && e->dk[d].st.echo;
         e->dk[d].lbeats = 4.0f;
+        for (int h = 0; h < DJ_HOT; h++) e->dk[d].hot[h] = -1.0f;
         e->dk[d].rate = 1.0f;
         e->dk[d].pull = 1.0f;
         e->mix.s[d].vol = 0.8f;
@@ -911,8 +912,6 @@ dj_engine_t *dj_engine_new(void)
         e->mix.s[d].fx_beats = 3;
         for (int h = 0; h < DJ_HOT; h++) e->pub[d].hot[h] = -1.0f;
     }
-    e->rec_ring = dj_alloc((size_t)REC_N * 4);
-    ok = ok && e->rec_ring;
     e->mix.master = 0.85f;
     e->mix.range = 0.08f;
     e->mix.quant = true;
@@ -977,6 +976,33 @@ void dj_engine_stop(dj_engine_t *e)
     e->rec = false;
 }
 
+/* 1 MB per deck for the echo's line and 512 KB for the recording ring are
+ * only taken when they are first used: a set with no echo and no recording
+ * leaves 2.5 MB of PSRAM to the rest of the board. The audio thread looks
+ * at the pointers before it touches them; they are set before the switch
+ * that makes it look. */
+bool dj_engine_echo_mem(dj_engine_t *e, int d)
+{
+    if (!e || d < 0 || d >= DJ_NDECK) return false;
+    if (e->dk[d].st.echo) return true;
+    float *b = dj_alloc((size_t)ECHO_N * 2 * sizeof(float));
+    if (!b) return false;
+    DJ_FENCE();
+    e->dk[d].st.echo = b;
+    return true;
+}
+
+bool dj_engine_rec_mem(dj_engine_t *e)
+{
+    if (!e) return false;
+    if (e->rec_ring) return true;
+    int16_t *b = dj_alloc((size_t)REC_N * 4);
+    if (!b) return false;
+    DJ_FENCE();
+    e->rec_ring = b;
+    return true;
+}
+
 bool dj_engine_running(const dj_engine_t *e) { return e && e->running && !e->done; }
 dj_mix_t *dj_mix(dj_engine_t *e) { return &e->mix; }
 const dj_pub_t *dj_pub(const dj_engine_t *e, int deck) { return &e->pub[deck]; }
@@ -994,6 +1020,7 @@ void dj_stats(dj_engine_t *e, dj_stats_t *out)
 
 int dj_rec_take(dj_engine_t *e, int16_t *out, int max_frames)
 {
+    if (!e->rec_ring) return 0;
     uint32_t r = e->rec_r, w = e->rec_w;
     DJ_FENCE();
     int n = (int)(w - r);

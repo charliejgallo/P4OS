@@ -43,7 +43,7 @@
 
 #define DJ_CH_SHIFT  15
 #define DJ_CH        (1 << DJ_CH_SHIFT)     /* source samples per cache chunk (0.74 s at 44.1 kHz) */
-#define DJ_NSLOT     32                     /* chunks kept per deck: 4 MB, ~24 s of a 44.1 kHz track */
+#define DJ_NSLOT     24                     /* chunks kept per deck: 3 MB, ~18 s of a 44.1 kHz track */
 #define DJ_WHOP      256                    /* source samples per waveform entry */
 #define DJ_HOT       4                      /* hot cues per deck */
 #define DJ_MAXLEN    (2u * 3600u * 48000u)  /* two hours at 48 kHz */
@@ -216,6 +216,9 @@ dj_track_t  *dj_deck_track(dj_engine_t *e, int deck);
 void         dj_stats(dj_engine_t *e, dj_stats_t *out);
 float        dj_master_vu(const dj_engine_t *e);
 uint32_t     dj_engine_blocks(const dj_engine_t *e);
+/* the memory the echo and the recording need, taken when first used (UI thread) */
+bool         dj_engine_echo_mem(dj_engine_t *e, int deck);
+bool         dj_engine_rec_mem(dj_engine_t *e);
 /* the recording */
 bool         dj_rec_on(const dj_engine_t *e);
 uint32_t     dj_rec_ms(const dj_engine_t *e);
@@ -238,6 +241,7 @@ void dj_track_close(dj_track_t *t);
 bool dj_track_alloc_cache(dj_track_t *t);
 void dj_track_free_cache(dj_track_t *t);
 float dj_track_secs(const dj_track_t *t);
+void  dj_nfc(char *s);                     /* decomposed accents put back together */
 
 /* ---- analysis (dj_ana.c) ---- */
 

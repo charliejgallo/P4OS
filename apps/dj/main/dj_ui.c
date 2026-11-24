@@ -366,7 +366,7 @@ static void btn_state(const ctl_t *c, char *lbl, size_t n, uint32_t *bg, uint32_
         int h = c->id - C_HOT1;
         snprintf(lbl, n, "%d", h + 1);
         *font = aos_font_small;
-        if (P(d)->hot[h] >= 0.0f) { *bg = mixc(HOTC[h], 0x000000, 150); *fg = 0xFFFFFF; *lit = true; }
+        if (loaded(d) && P(d)->hot[h] >= 0.0f) { *bg = mixc(HOTC[h], 0x000000, 150); *fg = 0xFFFFFF; *lit = true; }
         else *fg = DJ_COL_DIM;
         break;
     }
@@ -436,7 +436,7 @@ static void draw_btn(lv_layer_t *l, const ctl_t *c, const lv_area_t *r)
     if (c->id >= C_HOT1 && c->id <= C_HOT4) {
         int h = c->id - C_HOT1;
         lv_area_t b = { r->x1 + 6, r->y2 - 7, r->x2 - 6, r->y2 - 4 };
-        rect(l, &b, HOTC[h], P(c->deck)->hot[h] >= 0.0f ? LV_OPA_COVER : LV_OPA_30, 2);
+        rect(l, &b, HOTC[h], loaded(c->deck) && P(c->deck)->hot[h] >= 0.0f ? LV_OPA_COVER : LV_OPA_30, 2);
     }
     text_mid(l, r, lbl, font, fg, true);
 }
@@ -768,8 +768,17 @@ void dj_act_press(int i)
     case C_JUMP_BACK:  dj_cmd(e, DC_BEATJUMP, d, 0, -P(d)->loop_beats); break;
     case C_JUMP_FWD:   dj_cmd(e, DC_BEATJUMP, d, 0, P(d)->loop_beats); break;
     case C_LOAD:       dj_lib_open(d); break;
-    case C_FX_TYPE:    U->m->s[d].fx_type = (U->m->s[d].fx_type + 1) % FX_COUNT; break;
-    case C_FX_ON:      U->m->s[d].fx_on = !U->m->s[d].fx_on; break;
+    case C_FX_TYPE:
+        U->m->s[d].fx_type = (U->m->s[d].fx_type + 1) % FX_COUNT;
+        if (U->m->s[d].fx_on && U->m->s[d].fx_type == FX_ECHO && !dj_engine_echo_mem(e, d)) U->m->s[d].fx_on = false;
+        break;
+    case C_FX_ON:
+        if (!U->m->s[d].fx_on && U->m->s[d].fx_type == FX_ECHO && !dj_engine_echo_mem(e, d)) {
+            aos_ui_toast(_("Sin memoria"), 1500);
+            break;
+        }
+        U->m->s[d].fx_on = !U->m->s[d].fx_on;
+        break;
     case C_FX_BEATS:   U->m->s[d].fx_beats = (U->m->s[d].fx_beats + 1) % DJ_FX_NBEATS; break;
     case C_INFO:       if (loaded(d)) dj_grid_open(d); break;
     case C_LIB:        dj_lib_open(-1); break;
@@ -777,6 +786,7 @@ void dj_act_press(int i)
     case C_REC: {
         bool start = !dj_rec_on(e);
         if (start && !U->audio_ok) break;
+        if (start && !dj_engine_rec_mem(e)) { aos_ui_toast(_("Sin memoria"), 1500); break; }
         dj_cmd(e, DC_REC, 0, start ? 1 : 0, 0.0f);
         if (start) aos_ui_toast(_("Grabando la mezcla en Grabaciones"), 2500);
         break;
@@ -1126,10 +1136,10 @@ void dj_ui_tick(void)
     dj_stats_t s;
     dj_stats(U->e, &s);
     float secs = (float)(now - U->log_ms) / 1000.0f;
-    aos_hal_log(DJ_TAG, "audio: %.0f us avg, %.0f us max per %d-sample block (%.1f%% of %d us), queue %d, dry %u, "
-                "misses %u; ui: %.1f fps, draw %.2f ms x %u, %u touches",
+    aos_hal_log(DJ_TAG, "audio: %.0f us avg, %.0f us max per %d-sample block (%.1f%% of %d us), queue %d + out %d ms, "
+                "dry %u, misses %u; ui: %.1f fps, draw %.2f ms x %u, %u touches",
                 (double)s.blk_us_avg, (double)s.blk_us_max, DJ_BLK, (double)s.load_pct, DJ_BLK * 1000000 / DJ_SR,
-                s.queued, (unsigned)s.underruns, (unsigned)s.misses, (double)((float)U->frames / secs),
+                s.queued, aos_hal_spk_latency_ms(), (unsigned)s.underruns, (unsigned)s.misses, (double)((float)U->frames / secs),
                 (double)(U->draw_n ? (float)U->draw_us / (float)U->draw_n / 1000.0f : 0.0f), (unsigned)U->draw_n,
                 (unsigned)U->touch_n);
     U->frames = U->draw_us = U->draw_n = U->touch_n = 0;

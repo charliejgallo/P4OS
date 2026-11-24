@@ -189,6 +189,7 @@ static bool scan_cb(const aos_dir_entry_t *de, void *ctx)
     snprintf(e->name, sizeof e->name, "%.99s", de->name);
     char *dot = strrchr(e->name, '.');
     if (dot) *dot = 0;
+    dj_nfc(e->name);
     e->size = de->size;
     e->rec = s->rec;
     e->bpm = 0.0f;

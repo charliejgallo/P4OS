@@ -38,12 +38,14 @@ recordings folder as `mezcla-<date>.wav` (stereo, 16-bit, 48 kHz).
 ## How it works
 
 **Memory.** A five-minute track decoded whole is 50 MB of stereo samples:
-the decks keep only chunks of 32768 samples, 32 per deck (4 MB, about 24 s
+the decks keep only chunks of 32768 samples, 24 per deck (3 MB, about 18 s
 of a 44.1 kHz track), the ones around the playhead and the ones under the
 cue, the hot cues and the loop, so a jump there plays at once. The I/O
 thread decodes the most urgent missing chunk first; a chunk that is not
-there plays as silence and counts as a miss in the log. With the echoes'
-lines and the recording ring the engine takes about 10.5 MB of PSRAM.
+there plays as silence and counts as a miss in the log. The engine takes
+about 6 MB of PSRAM, plus 1 MB per deck once its echo is used and 512 KB
+once a mix is recorded, and the waveform of each track (4 bytes every 256
+samples: 330 KB for eight minutes).
 
 **MP3 seeking.** Opening an MP3 reads every frame's offset once (the whole
 file, headers only). A chunk is decoded from its first frame minus three

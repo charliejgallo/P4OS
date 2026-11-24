@@ -1,9 +1,9 @@
 /*
  * DJ - two decks and a mixer (docs/internal/PEDIDOS-APPS-2026-11.md, G22).
  *
- * The app's life: create() makes the engine (the caches and the effects'
- * memory, ~10 MB of PSRAM), starts the audio, I/O and analysis threads and
- * loads the tracks that were on the decks last time. Leaving it (hide)
+ * The app's life: create() makes the engine (the caches, ~6 MB of
+ * PSRAM), starts the audio, I/O and analysis threads and loads the
+ * tracks that were on the decks last time. Leaving it (hide)
  * stops the audio and lets go of the speaker, so the music and the other
  * apps can sound; the decks stay where they were. destroy() waits for the
  * three threads to return - the loader unloads the .so right after - and

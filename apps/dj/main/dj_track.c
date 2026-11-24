@@ -164,6 +164,39 @@ static uint32_t id3v2(FILE *f, dj_track_t *t)
     return total;
 }
 
+/* A name copied from a Mac comes decomposed: "o" and then the accent as a
+ * combining mark (U+0301), which the fonts do not have (a box shows). The
+ * Latin letters with an accent, tilde, diaeresis or cedilla are put back
+ * together, in place (three bytes become two). */
+void dj_nfc(char *s)
+{
+    /* base letters for U+00C0..U+00FF, and the mark each one takes */
+    static const char BASE[] = "AAAAAA_CEEEEIIII_NOOOOO_OUUUUY__aaaaaa_ceeeeiiii_nooooo_ouuuuy_y";
+    static const uint8_t MARK[] = {
+        0x80, 0x81, 0x82, 0x83, 0x88, 0, 0, 0xA7, 0x80, 0x81, 0x82, 0x88, 0x80, 0x81, 0x82, 0x88,
+        0, 0x83, 0x80, 0x81, 0x82, 0x83, 0x88, 0, 0, 0x80, 0x81, 0x82, 0x88, 0x81, 0, 0,
+        0x80, 0x81, 0x82, 0x83, 0x88, 0, 0, 0xA7, 0x80, 0x81, 0x82, 0x88, 0x80, 0x81, 0x82, 0x88,
+        0, 0x83, 0x80, 0x81, 0x82, 0x83, 0x88, 0, 0, 0x80, 0x81, 0x82, 0x88, 0x81, 0, 0x88,
+    };
+    char *o = s;
+    for (const char *p = s; *p;) {
+        if ((unsigned char)p[1] == 0xCC && p[2]) {
+            int found = -1;
+            for (int i = 0; i < 64; i++)
+                if (BASE[i] == p[0] && MARK[i] == (uint8_t)p[2]) { found = i; break; }
+            if (found >= 0) {
+                unsigned cp = 0xC0u + (unsigned)found;
+                *o++ = (char)(0xC0 | (cp >> 6));
+                *o++ = (char)(0x80 | (cp & 63));
+                p += 3;
+                continue;
+            }
+        }
+        *o++ = *p++;
+    }
+    *o = 0;
+}
+
 static void names_from_file(dj_track_t *t)
 {
     const char *base = strrchr(t->path, '/');
@@ -178,6 +211,8 @@ static void names_from_file(dj_track_t *t)
         *sep = 0;
         dj_copy(t->artist, sizeof t->artist, name);
     }
+    dj_nfc(t->title);
+    dj_nfc(t->artist);
 }
 
 /* ---- opening ---- */
