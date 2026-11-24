@@ -1,0 +1,17 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Piezas de vidrio de colores caen en una ventana de plomo. Completá filas para romperlas; una fila de un solo color es un vitral y vale el triple.",
+  "en": "Pieces of coloured glass fall into a window of lead. Fill rows to break them; a row of a single colour is a vitral and scores triple."
+ },
+ "desc": {
+  "es": "Las piezas son de tres y de cinco cuadros, en un pozo de doce de ancho. Una fila completa se rompe en esquirlas; varias juntas suman más. Una fila completa de un solo color es un vitral: vale el triple, se lleva también la fila de abajo y llena la ventana de luz. El vidrio transparente va con cualquier color, y lo que viene se ve con su color para ir armando.\n\nHay cuatro modos. Maratón, con niveles que aceleran y piezas más difíciles a medida que subís. Contrarreloj, tres minutos para el mejor puntaje. Rompecabezas, treinta ventanas para llenar justo con las piezas que te tocan, con deshacer, una pista y estrellas por tiempo. Y De a dos, cada uno con su pozo en la misma pantalla: las filas que rompés le suben escombro al otro.\n\nSe juega con el dedo (deslizar para mover y bajar, un golpe hacia abajo para tirarla, uno hacia arriba para guardarla, un toque para girar) o con teclas en pantalla, de pie o acostada. También con joystick USB y con teclado. Guarda los récords.",
+  "en": "The pieces are of three and of five squares, in a well twelve wide. A full row breaks into shards; several at once score more. A full row of a single colour is a vitral: it scores triple, takes the row below with it and fills the window with light. Clear glass goes with any colour, and the coming pieces show their colour so you can plan.\n\nThere are four modes. Marathon, with levels that speed up and harder pieces as you climb. Time attack, three minutes for the best score. Puzzle, thirty windows to fill exactly with the pieces you are given, with undo, a hint and stars for time. And Two players, each with a well on the same screen: the rows you break send rubble up to the other.\n\nIt plays with a finger (slide to move and lower, a flick down to drop, one up to hold, a tap to turn) or with on-screen keys, upright or lying down. Also with a USB gamepad and a keyboard. It keeps the records."
+ },
+ "shots": [
+  "app-vitral.jpg",
+  "app-vitral-title.jpg",
+  "app-vitral-puzzle.jpg",
+  "land-vitral.jpg"
+ ]
+}
