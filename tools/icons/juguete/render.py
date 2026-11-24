@@ -71,7 +71,11 @@ def main():
         if ARGS.chosen and chosen.get(app_id) != v:
             continue
         for mini, res in ((False, BIG), (True, MINI)):
-            path = os.path.join(RAW, f"{app_id}_{v}_{'mini' if mini else 'big'}.png")
+            # a sprite model renders only the tile, into raw/tile/; sprites.py
+            # lays the game's art on it and writes raw/<id>_<v>_*.png
+            base = os.path.join(RAW, "tile") if getattr(fn, "SPRITE", False) else RAW
+            os.makedirs(base, exist_ok=True)
+            path = os.path.join(base, f"{app_id}_{v}_{'mini' if mini else 'big'}.png")
             if (not ARGS.force and os.path.exists(path)
                     and os.path.getmtime(path) > max(os.path.getmtime(src),
                                                      os.path.getmtime(os.path.join(HERE, "lib.py")))):

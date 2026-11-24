@@ -55,6 +55,8 @@ def sized(app_id, v, size):
 
 
 def do_shrink():
+    import sprites
+    sprites.compose_all()
     n = 0
     for f in sorted(os.listdir(RAW)):
         if not f.endswith(".png"):
@@ -88,7 +90,13 @@ def gradient(w, h):
 
 def sheet(group):
     """Two columns of apps; each app a row of its variants."""
-    lst = [a for a in apps()["apps"] if a["group"] == group]
+    redo = []
+    if group == "rehacer":      # the apps the user sent back, with their new variants (d, e, f)
+        redo = json.load(open(os.path.join(ICONS, "elegidos.json"))).get("rehacer", [])
+        lst = [dict(a, juguete={k: t for k, t in a["juguete"].items() if k > "c"})
+               for a in apps()["apps"] if a["id"] in redo]
+    else:
+        lst = [a for a in apps()["apps"] if a["group"] == group]
     cell_w, cell_h, var_w = 3 * 176 + 24, 214, 176
     cols = 2
     rows = (len(lst) + cols - 1) // cols
@@ -148,7 +156,7 @@ if __name__ == "__main__":
         do_shrink()
     elif a[0] == "sheets":
         do_shrink()
-        for g in (a[1:] or apps()["groups"]):
+        for g in (a[1:] or apps()["groups"] + ["rehacer"]):
             sheet(g)
     elif a[0] == "pack":
         pack()

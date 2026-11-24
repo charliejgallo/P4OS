@@ -209,7 +209,10 @@
    ],
    "juguete": {
     "a": "casita celeste con techo a dos aguas",
-    "b": "casa con tres nodos conectados al frente"
+    "b": "casa con tres nodos conectados al frente",
+    "d": "una casa blanca con una redecita azul adentro",
+    "e": "la casa como contorno, con una red que brilla adentro",
+    "f": "una casa azul sobre una red de nodos"
    }
   },
   {
@@ -431,7 +434,10 @@
    ],
    "juguete": {
     "a": "módulo verde en un riel DIN",
-    "b": "dos fichas enlazadas"
+    "b": "dos fichas enlazadas",
+    "d": "una fábrica con techo de sierra y chimenea",
+    "e": "una bornera verde con tres cables",
+    "f": "un PLC con display (01) y luces"
    }
   },
   {
@@ -977,7 +983,10 @@
    ],
    "juguete": {
     "a": "fuerte espacial con torres",
-    "b": "torreta con cañón"
+    "b": "torreta con cañón",
+    "d": "un escudo con una estrella",
+    "e": "una torre almenada con un plato volador",
+    "f": "un planeta con anillo y una base con cúpula"
    }
   },
   {
@@ -1003,7 +1012,10 @@
    ],
    "juguete": {
     "a": "burbujas de colores",
-    "b": "lanzador con una burbuja"
+    "b": "lanzador con una burbuja",
+    "d": "una burbuja de jabón grande y dos chicas",
+    "e": "el tablero: filas de burbujas y la flecha que apunta",
+    "f": "un aro de hacer burbujas y las burbujas"
    }
   },
   {
@@ -1042,7 +1054,10 @@
    ],
    "juguete": {
     "a": "personajito saltando entre plataformas",
-    "b": "resorte con plataforma"
+    "b": "resorte con plataforma",
+    "d": "plataformas en zigzag y una estrella arriba",
+    "e": "el saltarín en el aire, con los brazos arriba",
+    "f": "una flecha hacia arriba hecha de plataformas"
    }
   },
   {
@@ -1055,7 +1070,10 @@
    ],
    "juguete": {
     "a": "mascota naranja con ojitos",
-    "b": "mascota con su plato"
+    "b": "mascota con su plato",
+    "d": "un juguete de bolsillo con pantalla y botones",
+    "e": "la mascota dormida en su camita",
+    "f": "la mascota abrazando un corazón"
    }
   },
   {
@@ -1068,7 +1086,10 @@
    ],
    "juguete": {
     "a": "casco verde con visor",
-    "b": "puerta con una llave roja"
+    "b": "puerta con una llave roja",
+    "d": "un pasillo oscuro con un resplandor rojo",
+    "e": "tres cartuchos rojos",
+    "f": "un botiquín blanco con cruz roja"
    }
   },
   {
@@ -1081,7 +1102,10 @@
    ],
    "juguete": {
     "a": "anteojos de sol sobre amarillo",
-    "b": "3D en bloques"
+    "b": "3D en bloques",
+    "d": "una mira",
+    "e": "tres tarjetas llave de colores",
+    "f": "un pasillo con una luz al fondo"
    }
   },
   {
@@ -1185,7 +1209,10 @@
    ],
    "juguete": {
     "a": "gatita negra",
-    "b": "gatita empujando una caja"
+    "b": "gatita empujando una caja",
+    "d": "Mila sentada (del juego)",
+    "e": "Mila maullando (del juego)",
+    "f": "Mila ronroneando (del juego)"
    }
   },
   {
@@ -1198,7 +1225,10 @@
    ],
    "juguete": {
     "a": "monstruito violeta saltando",
-    "b": "llave dorada"
+    "b": "llave dorada",
+    "d": "Tommy con su gorra roja (del juego)",
+    "e": "el vampiro (del juego)",
+    "f": "el murciélago (del juego)"
    }
   },
   {
@@ -1289,7 +1319,10 @@
    ],
    "juguete": {
     "a": "topo saliendo de un agujero",
-    "b": "martillo y topo"
+    "b": "martillo y topo",
+    "d": "tres pozos y un topo asomado",
+    "e": "el topo con casco (el que aguanta dos golpes)",
+    "f": "un topo mareado con estrellitas"
    }
   },
   {
