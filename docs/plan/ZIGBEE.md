@@ -125,3 +125,27 @@ Para ser coordinador, router o dispositivo hace falta una pila Zigbee
 El primer paso es probar el primer camino con el ejemplo de un sensor de
 Espressif en el C6. La emulación de equipos (un sensor de temperatura, un
 módulo de relés de 1 a 4 canales) sale de ahí casi sola.
+
+### Qué equipo es: la base de Zigbee2MQTT (pedido del usuario, 2026-11-24)
+
+Cuando la placa sea coordinador, al unirse un equipo se le leen del cluster
+Basic el `manufacturerName` (0x0004) y el `modelIdentifier` (0x0005). Con eso
+la app puede decir **qué es** ("Aqara WSDCGQ11LM, sensor de temperatura y
+humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
+
+- **La base:** `zigbee-herdsman-converters` (Koenkk, en GitHub y en npm), la
+  lista de equipos de Zigbee2MQTT, licencia MIT (confirmarla y el tamaño al
+  armarlo). Cada equipo: su huella (`zigbeeModel`, el fabricante), marca,
+  modelo, descripción y lo que expone. Son ~4000-5000. Otras públicas para
+  lo mismo: los quirks de ZHA (`zha-device-handlers`, Apache-2.0) y la lista
+  de compatibilidad de Blakadder.
+- **Cómo llega a la placa:** un script en la Mac (como `gen_emoji.py`) la
+  baja y arma un índice compacto, huella → marca, modelo, descripción,
+  soportado y lo que expone, que va como **parte del sistema en la Tienda**
+  (`zigbee/devices.pak` o parecido; unos cientos de KB, a medir) y se
+  regenera en cada release. **Sin las fotos de los equipos**: son de los
+  fabricantes.
+- **Antes, con el sniffer:** la dirección larga de un equipo empieza con el
+  prefijo de su fabricante (OUI, la tabla pública del IEEE): "chip Telink",
+  "Silicon Labs", "Espressif" sin unirse a nada. Es menos, pero sale ya
+  (etapa 2).
