@@ -1274,6 +1274,15 @@ proyecto).
 
 **Dónde quedó (2026-11-21):**
 
+- **Para la próxima release (2026-11-24): una parte del sistema nueva,
+  `sys-zigbee-oui`** (los fabricantes de radios para la app Zigbee,
+  `zigbee/oui.bin`). No la arma el CI: el sitio del IEEE no deja bajar
+  `oui.csv` con un script. Se baja a mano desde el navegador
+  (`open https://standards-oui.ieee.org/oui/oui.csv`), se arma con
+  `python3 tools/zigbee/gen_oui.py ~/Downloads/oui.csv build/zigbee/zigbee_oui.bin`,
+  se sube a la release publicada antes del tag como los packs y queda en
+  `CARRIED_PACKS` (ya está). Hasta entonces el catálogo la deja afuera
+  (`--missing-packs skip`).
 - **Fases 0 a 4, el merge y la release:** hechos. La 0.30.0 está
   publicada y la placa del usuario la corre, instalada por ella misma.
 - **De la fase 6**, adelantado: el firmware del P4 desde GitHub y las

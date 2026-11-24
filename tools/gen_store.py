@@ -204,7 +204,7 @@ def load_packs():
     return packs
 
 
-SYS_PATH = re.compile(r"lang/[a-z]{2}/_[a-z0-9_]+\.lang|fonts/[a-z0-9_]+\.pak|icons/[a-z0-9_]+\.pak|firmware/[a-z0-9_]+\.bin")
+SYS_PATH = re.compile(r"lang/[a-z]{2}/_[a-z0-9_]+\.lang|fonts/[a-z0-9_]+\.pak|icons/[a-z0-9_]+\.pak|zigbee/[a-z0-9_]+\.bin|firmware/[a-z0-9_]+\.bin")
 SYS_FW_MIN = "0.30.0"           # the first firmware that knows what a part of the system is
 
 

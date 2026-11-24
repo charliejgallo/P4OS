@@ -201,5 +201,32 @@
     "asset": "c6.bin"
    }
   ]
+ },
+ {
+  "file": "sys-zigbee-oui",
+  "name": {
+   "es": "Fabricantes de radios Zigbee",
+   "en": "Zigbee radio makers"
+  },
+  "about": {
+   "es": "Para que la app Zigbee diga de qué fabricante es la radio de cada equipo que oye.",
+   "en": "So the Zigbee app can tell who made the radio of each device it hears."
+  },
+  "desc": {
+   "es": "El registro público del IEEE de los prefijos de las direcciones de hardware: unos 40 000 fabricantes, 1,2 MB. La app Zigbee lo usa en Equipos para decir de quién es el chip de radio de un equipo (Silicon Labs, Telink, Espressif...) por su dirección larga. Es el fabricante del chip, no la marca del equipo.\n\nSin este paquete la app anda igual, sin el fabricante.",
+   "en": "The IEEE's public registry of the prefixes of hardware addresses: some 40,000 makers, 1.2 MB. The Zigbee app uses it in Devices to tell who made a device's radio chip (Silicon Labs, Telink, Espressif...) from its long address. It is the chip's maker, not the device's brand.\n\nWithout this pack the app works the same, with no maker."
+  },
+  "glyph": "AOS_SYM_ACCESS_POINT",
+  "colors": [
+   "EB0443",
+   "9E0230"
+  ],
+  "license": "IEEE MA-L registry (public)",
+  "files": [
+   {
+    "path": "zigbee/oui.bin",
+    "asset": "zigbee_oui.bin"
+   }
+  ]
  }
 ]

@@ -167,4 +167,7 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   el 2026-11-24: 40 554 fabricantes, 1,2 MB): de 13 equipos con dirección
   larga, 7 Silicon Labs, 4 Telink, 1 Espressif y 1 "IEEE Registration
   Authority" (un bloque repartido en partes: haría falta también la tabla
-  MA-M/MA-S). Falta llevar `oui.bin` como parte del sistema en la Tienda.
+  MA-M/MA-S). **Como parte del sistema:** `sys-zigbee-oui` en
+  `store/system.json`, asset `zigbee_oui.bin` (la Tienda acepta
+  `zigbee/*.bin`); se sube a mano antes de la release (`docs/plan/TIENDA.md`,
+  "Dónde quedó").
