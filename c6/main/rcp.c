@@ -172,7 +172,10 @@ static volatile uint32_t s_tx_start, s_tx_ok, s_tx_fail[8];
  * listening. The driver's own variable, written directly: its setter is not
  * in IRAM and these run in its interrupt. */
 extern esp_ieee802154_coex_config_t s_coex_config;      /* esp_ieee802154_util.c */
-#define TX_TURN     IEEE802154_MIDDLE
+/* high to send: at the middle level, while a door sensor looked for the
+ * network, four of the five beacons answering it were refused and it heard
+ * none (on the board, 2026-11-24); frames sent are few and short */
+#define TX_TURN     IEEE802154_HIGH
 #define LISTEN_TURN IEEE802154_LOW
 
 static void IRAM_ATTR tx_done(const uint8_t *frame, const uint8_t *ack, esp_ieee802154_frame_info_t *info)

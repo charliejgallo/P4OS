@@ -58,7 +58,12 @@ static int udp_bound(uint16_t port, uint16_t peer)
 static void from_c6(const uint8_t *d, size_t n)
 {
     if (s_c6_fd >= 0) {
-        send(s_c6_fd, d, n, MSG_DONTWAIT);
+        /* in datagrams no longer than the stack's read: it reads as from a
+         * UART, a FIFO's worth at a time (UART_HW_FIFO_LEN, 128 bytes here,
+         * esp_radio_spinel_uart_interface.cpp), and of a longer datagram the
+         * rest is lost. A long frame came in broken ("dropping radio frame:
+         * Parse", on the board, 2026-11-24: an Aqara sensor's Basic answer) */
+        for (size_t at = 0; at < n; at += 64) send(s_c6_fd, d + at, n - at > 64 ? 64 : n - at, MSG_DONTWAIT);
         s_from_c6 += n;
         aos_zb_tail_add(&g_zb_tail_from, d, n);
     }
@@ -227,6 +232,11 @@ static void stack_task(void *arg)
     ezb_zcl_basic_cluster_desc_add_attr(basic, EZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (void *)"\x03hub");
     ezb_af_device_add_endpoint_desc(dev, ep);
     ezb_af_device_desc_register(dev);
+    /* devices from before Zigbee 3.0 (Xiaomi and Aqara's, among many) never ask
+     * for their own link key: with the exchange required, the stack put such a
+     * device out 14 s after it joined ("authorization timeout", on the board,
+     * 2026-11-24, an Aqara door sensor). Zigbee2MQTT does not require it either. */
+    ezb_secur_set_tclk_exchange_required(false);
     ezb_bdb_set_primary_channel_set(1u << s_channel);
     ezb_bdb_set_secondary_channel_set(0x07FFF800u);   /* as Espressif's example: all */
     ezb_app_signal_add_handler(on_signal);
