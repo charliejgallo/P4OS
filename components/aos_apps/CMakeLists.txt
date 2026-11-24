@@ -11,5 +11,5 @@ endif()
 idf_component_register(
     SRCS ${APP_SRCS}
     INCLUDE_DIRS "include"
-    REQUIRES aos_hal aos_ui aos_io aos_fonts lvgl json aos_flasher lwip mbedtls aos_store aos_backup
+    REQUIRES aos_hal aos_ui aos_io aos_fonts lvgl json aos_flasher lwip mbedtls aos_store aos_backup aos_154
 )

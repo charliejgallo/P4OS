@@ -82,9 +82,21 @@ El protocolo está en `components/aos_154/include/aos_154_proto.h`.
   1,3 MB/s) y el ping iba de 5 a 80 ms: la diferencia está dentro del ruido.
   **Falta medirlo mejor**, alternando varias veces.
 
-## Etapa 2: la pantalla (lo que sigue)
+## Etapa 2: la pantalla (empezada el 2026-11-24)
 
-Una app del sistema, "Zigbee" (o "Radio 802.15.4"), con:
+**Hecho:** la app del sistema **Zigbee** (`aos.zigbee`,
+`components/aos_apps/aos_app_zigbee.c`), probada en el simulador; en la
+placa instalada pero sin mirar (la pantalla estaba bloqueada). Dos páginas:
+Canales (las barras, los Wi-Fi 1, 6 y 11 encima, escaneo rápido o a fondo,
+y el canal con tráfico queda elegido para escuchar) y Escuchar (el canal, la
+captura para Wireshark, la lista de lo que se oye decodificado: tipo,
+direcciones y PAN, y encima Zigbee NWK o 6LoWPAN). Al salir de la app la
+radio se apaga. Textos en los cinco idiomas.
+
+**Falta:** el resumen por equipo y los filtros, la página del portal, mirar
+la app en la placa, y el ícono (hoy el glifo de "access point").
+
+Lo pensado:
 
 - **Canales:** las 16 barras de energía y de tráfico, con los canales de
   Wi-Fi 1, 6 y 11 dibujados encima (para elegir el canal de una red nueva).

@@ -10929,3 +10929,43 @@ Los packs de íconos se bajan de la Tienda, en Sistema.	Icon packs are downloade
 %d actualizaciones, hasta %s	%d updates, up to %s
 %d necesitan un P4OS más nuevo: actualizá el sistema primero.	%d need a newer P4OS: update the system first.
 Actualizar todas	Update all
+pedido de asociación	association request
+respuesta de asociación	association response
+aviso de desasociación	disassociation notice
+pedido de datos	data request
+pedido de beacon	beacon request
+realineación	realignment
+comando	command
+trama corta (%d bytes)	short frame (%d bytes)
+acepta equipos nuevos	accepts new devices
+cerrada	closed
+Acuse	Ack
+Comando	Command
+cifrada en la capa MAC	encrypted at the MAC layer
+comando de red	network command
+datos	data
+radio	radius
+cifrada	encrypted
+6LoWPAN (Thread)	6LoWPAN (Thread)
+6LoWPAN, malla	6LoWPAN, mesh
+trama de tipo %d	frame of type %d
+trama de %d bytes, cortada	frame of %d bytes, cut short
+El C6 no tomó el pedido	The C6 did not take the request
+A fondo (2 s por canal)	Thorough (2 s per channel)
+La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	The bar is the energy on the channel; the number, the packets heard while listening. A Zigbee or Thread network shows as a channel with packets. For a new network, pick one with no packets and away from the Wi-Fi: Zigbee usually uses 11, 15, 20 or 25.
+Escuchar	Listen
+Guardar para Wireshark	Save for Wireshark
+El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6. Se baja de la Tienda, en Sistema.	The C6 does not answer. It needs its firmware 3.0.9-154.1 or newer: Settings, Update, Install on the C6. It is downloaded from the Store, under System.
+El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	The C6 fell over with the radio on and kept it off so as not to lose the Wi-Fi. Tap Scan or Listen to try again.
+Escaneando, canal %u	Scanning, channel %u
+Escuchando el canal %u	Listening on channel %u
+La radio, apagada	The radio, off
+Escaneando...	Scanning...
+Hay tráfico en el canal %d: en Escuchar se ve qué es.	There is traffic on channel %d: Listen shows what it is.
+No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	No packet was heard. Try a thorough scan: quiet networks send little.
+%u paquetes	%u packets
+%u perdidos en el C6	%u lost in the C6
+guardando %u en %s	saving %u to %s
+Zigbee y Thread	Zigbee and Thread
+Canales	Channels
+Zigbee	Zigbee

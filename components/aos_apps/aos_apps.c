@@ -28,6 +28,7 @@ void aos_apps_register_builtin(void)
         aos_app_net_get,
         aos_app_sysmon_get,
         aos_app_claude_get,
+        aos_app_zigbee_get,
         aos_app_modules_get,
         aos_app_leds_get,
         aos_app_macropad_get,

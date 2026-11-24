@@ -11504,3 +11504,43 @@ Los packs de íconos se bajan de la Tienda, en Sistema.	I pacchetti di icone si 
 %d actualizaciones, hasta %s	%d aggiornamenti, fino a %s
 %d necesitan un P4OS más nuevo: actualizá el sistema primero.	%d richiedono un P4OS più recente: aggiorna prima il sistema.
 Actualizar todas	Aggiorna tutte
+pedido de asociación	richiesta di associazione
+respuesta de asociación	risposta di associazione
+aviso de desasociación	avviso di disassociazione
+pedido de datos	richiesta di dati
+pedido de beacon	richiesta di beacon
+realineación	riallineamento
+comando	comando
+trama corta (%d bytes)	frame corto (%d byte)
+acepta equipos nuevos	accetta nuovi dispositivi
+cerrada	chiusa
+Acuse	Conferma
+Comando	Comando
+cifrada en la capa MAC	cifrato a livello MAC
+comando de red	comando di rete
+datos	dati
+radio	raggio
+cifrada	cifrato
+6LoWPAN (Thread)	6LoWPAN (Thread)
+6LoWPAN, malla	6LoWPAN, mesh
+trama de tipo %d	frame di tipo %d
+trama de %d bytes, cortada	frame di %d byte, troncato
+El C6 no tomó el pedido	Il C6 non ha accettato la richiesta
+A fondo (2 s por canal)	A fondo (2 s per canale)
+La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	La barra è l'energia sul canale; il numero, i pacchetti sentiti durante l'ascolto. Una rete Zigbee o Thread appare come un canale con pacchetti. Per una rete nuova conviene uno senza pacchetti e lontano dal Wi-Fi: Zigbee di solito usa 11, 15, 20 o 25.
+Escuchar	Ascolta
+Guardar para Wireshark	Salva per Wireshark
+El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6. Se baja de la Tienda, en Sistema.	Il C6 non risponde. Serve il suo firmware 3.0.9-154.1 o più recente: Impostazioni, Aggiornamento, Installa sul C6. Si scarica dallo Store, in Sistema.
+El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Il C6 è andato in crash con la radio accesa e l'ha lasciata spenta per non perdere il Wi-Fi. Tocca Scansiona o Ascolta per riprovare.
+Escaneando, canal %u	Scansione, canale %u
+Escuchando el canal %u	In ascolto sul canale %u
+La radio, apagada	La radio, spenta
+Escaneando...	Scansione...
+Hay tráfico en el canal %d: en Escuchar se ve qué es.	C'è traffico sul canale %d: in Ascolta si vede cos'è.
+No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Nessun pacchetto sentito. Prova a fondo: le reti tranquille trasmettono poco.
+%u paquetes	%u pacchetti
+%u perdidos en el C6	%u persi nel C6
+guardando %u en %s	salvataggio di %u in %s
+Zigbee y Thread	Zigbee e Thread
+Canales	Canali
+Zigbee	Zigbee

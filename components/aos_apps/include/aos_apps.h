@@ -27,6 +27,7 @@ void aos_app_mqtt_get(aos_app_t *app);
 void aos_app_net_get(aos_app_t *app);
 void aos_app_sysmon_get(aos_app_t *app);       /* also registers "widget sysmon" */
 void aos_app_claude_get(aos_app_t *app);
+void aos_app_zigbee_get(aos_app_t *app);
 void aos_claude_widget_register(void);
 void aos_app_modules_get(aos_app_t *app);      /* the header, modules.txt, the sensors; also "widget sensors" */
 void aos_app_leds_get(aos_app_t *app);         /* Tiras LED: addressable strips, WLED's way */
