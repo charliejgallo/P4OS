@@ -1,5 +1,5 @@
 /*
- * VUELO - the instruments (see vu_hud.h)
+ * PLANEO - the instruments (see vu_hud.h)
  */
 #include "vu_hud.h"
 #include "vu_render.h"

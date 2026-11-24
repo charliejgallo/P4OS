@@ -1,5 +1,5 @@
 /*
- * VUELO - a flight over worlds drawn live in 3D.
+ * PLANEO - a flight over worlds drawn live in 3D.
  *
  * The prototype of the engine: a world made from a seed, the plane, the
  * flight, and the numbers of what it costs. Lying down only.
@@ -787,7 +787,7 @@ static const uint8_t VU_ICON[] = {
 static bool vuelo_init(aos_app_t *app)
 {
     app->desc.id       = "demo.vuelo";
-    app->desc.name     = "Vuelo";
+    app->desc.name     = "Planeo";
     app->desc.icon     = LV_SYMBOL_PLAY;
     app->desc.icon_vec = AOS_ICON_NONE;
     aos_icon_set_ops(app, VU_ICON, sizeof VU_ICON);

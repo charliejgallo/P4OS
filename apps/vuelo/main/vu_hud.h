@@ -1,5 +1,5 @@
 /*
- * VUELO - what is drawn over the flight, inside the frame: the speed and
+ * PLANEO - what is drawn over the flight, inside the frame: the speed and
  * the height, the stick under the thumb, the throttle, the buttons, and the
  * numbers of the measurement. A 5 x 7 pixel font with a dark edge so it
  * reads over any ground. Sizes are in units of the frame's height / 240.

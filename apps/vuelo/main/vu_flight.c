@@ -1,5 +1,5 @@
 /*
- * VUELO - the flight (see vu_flight.h)
+ * PLANEO - the flight (see vu_flight.h)
  */
 #include "vu_flight.h"
 

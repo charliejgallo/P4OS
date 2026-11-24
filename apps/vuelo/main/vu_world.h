@@ -1,5 +1,5 @@
 /*
- * VUELO - a world: a height map that tiles, with its colours already lit.
+ * PLANEO - a world: a height map that tiles, with its colours already lit.
  *
  * 1024 x 1024 texels of VW_TEXM metres (2 km a side; the world repeats, so
  * the flight never meets an edge), and five smaller levels for what is far

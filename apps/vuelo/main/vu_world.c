@@ -1,5 +1,5 @@
 /*
- * VUELO - the worlds (see vu_world.h)
+ * PLANEO - the worlds (see vu_world.h)
  *
  * Made in stages, each over rows and split between the two cores where it
  * can be: the heights and what each texel is (a beach, a road, lava...);

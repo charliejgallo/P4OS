@@ -1,5 +1,5 @@
 /*
- * VUELO - the engine on the Mac: every world made, flown for a while by the
+ * PLANEO - the engine on the Mac: every world made, flown for a while by the
  * autopilot, pictures saved and frames timed; and Visor 3D's rasteriser
  * timed beside it, whose times on the board are known, so the Mac's numbers
  * can be turned into the board's (the same calibration as Tanques').

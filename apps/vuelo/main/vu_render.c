@@ -1,5 +1,5 @@
 /*
- * VUELO - the 3D (see vu_render.h)
+ * PLANEO - the 3D (see vu_render.h)
  */
 #include "vu_render.h"
 #include "vu_mem.h"

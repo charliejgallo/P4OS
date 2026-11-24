@@ -1,5 +1,5 @@
 /*
- * VUELO - the 3D: the world drawn in columns, the sky, the clouds.
+ * PLANEO - the 3D: the world drawn in columns, the sky, the clouds.
  *
  * The camera sees the world upright first: a column of the picture is a
  * slice of the ground marched from near to far (lines of equal depth, all

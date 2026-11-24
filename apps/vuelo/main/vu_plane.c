@@ -1,5 +1,5 @@
 /*
- * VUELO - the plane (see vu_plane.h)
+ * PLANEO - the plane (see vu_plane.h)
  *
  * The model, in metres, x forward, y right, z up: a round fuselage of
  * eight-sided rings with a spinner, a bubble canopy, low wings with a

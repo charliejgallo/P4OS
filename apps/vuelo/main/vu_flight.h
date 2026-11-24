@@ -1,5 +1,5 @@
 /*
- * VUELO - the flight: an arcade plane and the camera that follows it.
+ * PLANEO - the flight: an arcade plane and the camera that follows it.
  *
  * The plane flies where its nose points. The stick rolls and pitches it,
  * a bank turns it (the more banked, the tighter, the slower the tighter),

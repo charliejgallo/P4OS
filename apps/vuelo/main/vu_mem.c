@@ -1,5 +1,5 @@
 /*
- * VUELO - memory (see vu_mem.h)
+ * PLANEO - memory (see vu_mem.h)
  */
 #include "vu_mem.h"
 

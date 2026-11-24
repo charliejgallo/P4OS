@@ -1,5 +1,5 @@
 /*
- * VUELO - memory: everything big goes to PSRAM, and is counted so the log
+ * PLANEO - memory: everything big goes to PSRAM, and is counted so the log
  * can say what the game holds.
  */
 #pragma once

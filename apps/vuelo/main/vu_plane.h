@@ -1,5 +1,5 @@
 /*
- * VUELO - the plane: a small stunt plane made of triangles by code, drawn
+ * PLANEO - the plane: a small stunt plane made of triangles by code, drawn
  * in real time over the world (seen from behind it banks and climbs as it
  * really does), with its shadow on the ground and the propeller's blur.
  */
