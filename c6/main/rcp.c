@@ -162,14 +162,29 @@ static esp_ieee802154_transmit_done_cb_t s_ot_tx_done;
 static esp_ieee802154_transmit_failed_cb_t s_ot_tx_failed;
 static volatile uint32_t s_tx_start, s_tx_ok, s_tx_fail[8];
 
+/* The driver's turn against Wi-Fi's: one setting, "txrx", for sending and
+ * for listening alike. A coordinator listens all the time: at the middle
+ * level that took half of the Wi-Fi's speed (1.5 MB from the card: ~500 KB/s
+ * without Zigbee, ~250 with it), and at the low one Wi-Fi was back but most
+ * frames were refused (16 of 22; on the board, 2026-11-24). So it is low
+ * while listening and middle while a frame goes out: raised before the
+ * send, lowered in its "done" or "failed", before the driver goes back to
+ * listening. The driver's own variable, written directly: its setter is not
+ * in IRAM and these run in its interrupt. */
+extern esp_ieee802154_coex_config_t s_coex_config;      /* esp_ieee802154_util.c */
+#define TX_TURN     IEEE802154_MIDDLE
+#define LISTEN_TURN IEEE802154_LOW
+
 static void IRAM_ATTR tx_done(const uint8_t *frame, const uint8_t *ack, esp_ieee802154_frame_info_t *info)
 {
+    s_coex_config.txrx = LISTEN_TURN;
     s_tx_ok++;
     if (s_ot_tx_done) s_ot_tx_done(frame, ack, info);
 }
 
 static void IRAM_ATTR tx_failed(const uint8_t *frame, esp_ieee802154_tx_error_t error)
 {
+    s_coex_config.txrx = LISTEN_TURN;
     s_tx_fail[(unsigned)error & 7]++;
     if (s_ot_tx_failed) s_ot_tx_failed(frame, error);
 }
@@ -178,6 +193,7 @@ esp_err_t __real_esp_ieee802154_transmit(const uint8_t *frame, bool cca);
 esp_err_t __wrap_esp_ieee802154_transmit(const uint8_t *frame, bool cca)
 {
     s_tx_start++;
+    s_coex_config.txrx = TX_TURN;
     return __real_esp_ieee802154_transmit(frame, cca);
 }
 
@@ -283,11 +299,11 @@ bool rcp_start(void)
         ESP_LOGE(TAG, "OpenThread's RCP did not start");
         return false;
     }
-    /* 802.15.4's turn against Wi-Fi's and BLE's: OpenThread raises it by the
-     * device's role only when it runs the network itself, not as an RCP, so
-     * the driver's default stays, the lowest. A coordinator sends and
-     * listens: in the middle, and high for what is timed. */
-    esp_ieee802154_coex_config_t cc = { .idle = IEEE802154_IDLE, .txrx = IEEE802154_MIDDLE, .txrx_at = IEEE802154_HIGH };
+    /* 802.15.4's turn against Wi-Fi's and BLE's: OpenThread sets it by the
+     * device's role only when it runs the network itself, not as an RCP.
+     * Low while listening, raised for each frame sent (tx_done, above), high
+     * for what is timed. */
+    esp_ieee802154_coex_config_t cc = { .idle = IEEE802154_IDLE, .txrx = LISTEN_TURN, .txrx_at = IEEE802154_HIGH };
     esp_ieee802154_set_coex_config(cc);
     xTaskCreate(feeder, "rcp_in", 3072, NULL, 5, NULL);
     xTaskCreate(ed_task, "rcp_ed", 3072, NULL, 6, &s_ed_task);

@@ -12,6 +12,6 @@ cmake_minimum_required(VERSION 3.5)
 # stack on request, AOS_154_PROTO 3; 154.4: grows its own app slots on
 # request, AOS_154_PROTO 4; 154.5: an RCP for a stack on the P4, spinel over
 # peer_data, AOS_154_PROTO 5)
-set(PROJECT_VER "3.0.9-154.12")
+set(PROJECT_VER "3.0.9-154.14")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(p4os_c6)

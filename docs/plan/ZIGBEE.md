@@ -299,15 +299,34 @@ causa aclarada). Lo hecho y lo aprendido:
      avisaba a OpenThread de una medida rechazada). En la primera prueba, 9
      medidas, 7 sin respuesta: el escaneo termina igual.
   3. **La coexistencia Wi-Fi / 802.15.4** no estaba prendida en el RCP
-     (`esp_coex_wifi_i154_enable()`, como `zigbee_test.c`), y su prioridad
-     para 802.15.4 quedaba en la más baja del driver (OpenThread la sube por
-     el rol sólo cuando arma la red él): MEDIO para mandar y escuchar, ALTO
-     para lo que va con hora.
+     (`esp_coex_wifi_i154_enable()`, como `zigbee_test.c`), y nadie fijaba
+     el turno de 802.15.4 frente al Wi-Fi (OpenThread lo fija por el rol
+     sólo cuando arma la red él). El driver tiene uno solo para mandar y
+     para escuchar, y un coordinador escucha todo el tiempo: ahora es BAJO
+     mientras escucha y MEDIO mientras sale una trama (se sube antes de
+     mandar y se baja en su "done"/"failed"; medido abajo).
   Lo mismo explicaría por qué tampoco formaba con la pila en el C6 (la
-  medida larga). **Falta:** probar con el BLE de la placa conectado y sin
-  conectar (la prueba fue con una Mac conectada por BLE), medir el Wi-Fi
-  mientras tanto, que se una un equipo (abrir la red), y sacar los
+  medida larga). **Falta:** que se una un equipo (abrir la red) y sacar los
   contadores de medición (`aos_zigbee_trace.c`, los de `rcp.c`).
+- **Wi-Fi, BLE y Zigbee juntos** (2026-11-24, noche; la placa a -20 dBm del
+  router, una Mac conectada por BLE como teclado). Cada prueba: 100 pings
+  cada 0,2 s y tres bajadas de `/firmware/c6.bin` (1,5 MB) desde el portal;
+  del lado del C6, las tramas mandadas y cómo terminaron:
+
+  | Prueba | Ping prom. | Bajada | Tramas Zigbee |
+  |---|---|---|---|
+  | Sin Zigbee, BLE conectado (3 veces) | 46-59 ms | 340-675 KB/s | - |
+  | Zigbee, 802.15.4 en MEDIO, BLE conectado | 68-75 ms | 190-260 KB/s | 1 de 9 rechazada por coex |
+  | Igual, con el BLE apagado | 80-83 ms | 180-270 KB/s | 9 de 25 rechazadas |
+  | Zigbee, 802.15.4 en BAJO | 37-42 ms | 220-570 KB/s | 16 de 22 rechazadas, una llegó como falla a la pila |
+  | **Zigbee, BAJO al escuchar y MEDIO al mandar** (154.14) | 45-58 ms | 270-570 KB/s | 4 de 13 rechazadas al primer intento, ninguna falla |
+
+  - **El BLE no es el problema:** apagarlo no mejoró nada. Lo que le quita
+    aire al Wi-Fi es que el coordinador escucha todo el tiempo; con el turno
+    repartido así, el Wi-Fi queda como sin Zigbee y las tramas salen (las
+    rechazadas se reintentan solas: OpenThread las manda de nuevo).
+  - Con poco tráfico Zigbee (sólo los "link status" cada 15 s, sin equipos
+    unidos): con equipos reales hay que medir de nuevo.
 - **Cuelgues al arrancar:** dos veces, en el primer arranque después de
   instalar, la placa quedó colgada y la Mac dejó de ver su USB; el usuario
   la reinició. Sin volcado. Sin causa aclarada (no siempre pasa, ni se ató a
