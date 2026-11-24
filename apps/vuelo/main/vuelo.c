@@ -111,6 +111,9 @@ typedef struct {
     uint64_t perf_frame_us, perf_ground_us, perf_turn_us, perf_hud_us, perf_present_us, perf_samples, perf_lines;
     uint64_t perf_upx;
     volatile int fps10;
+    /* what LVGL redraws while the frames are flipped: it paints over them */
+    lv_area_t inv[6];
+    int       ninv, inv_count;
 } app_t;
 
 uint32_t vr_now_us(void)
@@ -349,6 +352,19 @@ static void present(app_t *a)
     a->perf_presents++;
 }
 
+/* LVGL marked an area to draw again: over a flipped frame that shows as a
+ * patch of the root's colour until the next flip. Gathered for the log. */
+static void inval_cb(lv_event_t *e)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(e);
+    const lv_area_t *ar = (const lv_area_t *)lv_event_get_param(e);
+    if (!a || !ar || a->closing) return;
+    a->inv_count++;
+    for (int i = 0; i < a->ninv; i++)
+        if (a->inv[i].x1 == ar->x1 && a->inv[i].y1 == ar->y1 && a->inv[i].x2 == ar->x2 && a->inv[i].y2 == ar->y2) return;
+    if (a->ninv < 6) a->inv[a->ninv++] = *ar;
+}
+
 static void perf_log(app_t *a)
 {
     uint32_t now = aos_hal_uptime_ms();
@@ -376,6 +392,15 @@ static void perf_log(app_t *a)
                 (unsigned)(a->perf_present_us / np / 1000), (unsigned)(a->perf_present_us / np / 100 % 10),
                 (unsigned)(a->perf_samples / n / 1000), (unsigned)(a->perf_lines / n), WORLD_HUD[a->biome % VW_BIOMES],
                 a->pl.view == VF_COCKPIT ? "cockpit" : "chase", a->in_auto ? ", autopilot" : "");
+    if (a->inv_count) {
+        char b[200];
+        int o = 0;
+        for (int i = 0; i < a->ninv && o < (int)sizeof b - 32; i++)
+            o += snprintf(b + o, sizeof b - (size_t)o, " %d,%d-%d,%d", (int)a->inv[i].x1, (int)a->inv[i].y1,
+                          (int)a->inv[i].x2, (int)a->inv[i].y2);
+        aos_hal_log("vuelo", "LVGL redrew %d areas over the flight:%s", a->inv_count, b);
+        a->inv_count = a->ninv = 0;
+    }
     a->perf_t0 = now;
     a->perf_frames = a->perf_presents = 0;
     a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
@@ -738,7 +763,9 @@ static void *vuelo_create(aos_app_t *self, lv_obj_t *root)
     }
     ask_world(a, biome, hour >= 0 ? hour : WORLD_HOUR[biome]);
     a->timer = lv_timer_create(frame_cb, TICK_MS, a);
-    aos_hal_display_refresh_request(60);
+    lv_display_add_event_cb(lv_display_get_default(), inval_cb, LV_EVENT_INVALIDATE_AREA, a);
+    int hz = aos_hal_display_refresh_request(60);
+    aos_hal_log("vuelo", "panel at %d Hz", hz);
     aos_hal_log("vuelo", "ready %dx%d | psram free before %u KB, held %u KB", a->SW, a->SH, (unsigned)(hp / 1024),
                 (unsigned)(vu_mem_used() / 1024));
     return a;
@@ -750,6 +777,7 @@ static void vuelo_destroy(aos_app_t *self, void *inst)
     app_t *a = (app_t *)inst;
     if (!a) return;
     a->closing = true;
+    lv_display_remove_event_cb_with_user_data(lv_display_get_default(), inval_cb, a);
     if (a->worker_ok) aos_hal_worker_stop();
     if (a->timer) lv_timer_delete(a->timer);
     aos_hal_display_refresh_request(0);
