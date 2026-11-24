@@ -78,11 +78,104 @@ def main():
                 continue
             sc = lib.reset(res, ARGS.samples, ARGS.cpu)
             fn(mini)
+            moved = fit(MARGIN_MINI if mini else MARGIN)
+            if moved:
+                FITS.append((app_id, v, "mini" if mini else "big", moved))
             sc.render.filepath = path
             bpy.ops.render.render(write_still=True)
             done += 1
             print("rendered", os.path.basename(path), flush=True)
     print("renders:", done)
+    if FITS:
+        log = os.path.join(os.path.dirname(RAW), "fit.log")
+        with open(log, "a") as f:
+            for app_id, v, kind, (dx, dy, k, dz) in FITS:
+                line = f"{app_id} {v} {kind}: moved {dx:+.3f} {dy:+.3f}, scaled {k:.2f}, lifted {dz:.3f}"
+                print("fit", line)
+                f.write(line + "\n")
+
+
+# --------------------------------------------------------------------------
+# Every toy inside the tile, whole, with a margin.
+#
+# The camera looks straight down, orthographic, so what the picture shows of
+# a toy is its vertices' x and y. Those must lie inside the tile's rounded
+# square shrunk by MARGIN (the same corner, smaller), or the tile's edge cuts
+# the toy. When a toy does not fit, it is centred and then shrunk until it
+# does. And no part of it may sink below the tile's face (z = 0) - a big flat
+# toy, tilted, dips into the tile on one side and the tile swallows it - so
+# it is lifted until it clears. A model is never trusted to have done the
+# sums itself.
+
+MARGIN = 0.06           # of the side: ~7 px at 120
+MARGIN_MINI = 0.05      # ~1.3 px at 26
+FITS = []
+FLAT = 0.008            # paper-thin things (a pitch's lines) belong to the tile
+LIFT = 0.004            # nothing of a toy below this: under z = 0 the tile hides it
+
+
+def _inside(x, y, h, r):
+    ax, ay = abs(x), abs(y)
+    if ax > h or ay > h:
+        return False
+    if ax > h - r and ay > h - r:
+        return (ax - (h - r)) ** 2 + (ay - (h - r)) ** 2 <= r * r
+    return True
+
+
+def _toy_points():
+    """Every vertex of every visible thing but the tile, in world x, y."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    pts = []
+    for ob in bpy.context.scene.objects:
+        if ob.name.startswith("tile") or ob.type not in ("MESH", "CURVE", "FONT", "META", "SURFACE"):
+            continue
+        ev = ob.evaluated_get(dg)
+        try:
+            me = ev.to_mesh()
+        except RuntimeError:
+            me = None
+        if me is None:
+            continue
+        mw = ev.matrix_world
+        vs = [mw @ v.co for v in me.vertices]
+        ev.to_mesh_clear()
+        if vs and max(v.z for v in vs) - min(v.z for v in vs) <= FLAT:
+            continue
+        pts += [(v.x, v.y, v.z) for v in vs]
+    return pts
+
+
+def fit(margin):
+    bpy.context.view_layer.update()
+    pts = _toy_points()
+    h, r = 0.5 - margin, lib.RADIUS - margin * 0.5
+    if not pts:
+        return None
+    zmin = min(p[2] for p in pts)
+    outside = not all(_inside(x, y, h, r) for x, y, _z in pts)
+    if not outside and zmin >= LIFT:
+        return None
+    cx = cy = 0.0
+    k = 1.0
+    if outside:
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        while k > 0.3 and not all(_inside((x - cx) * k, (y - cy) * k, h, r) for x, y, _z in pts):
+            k *= 0.98
+    dz = max(0.0, LIFT - zmin * k)
+    # move and shrink every top-level thing but the tile and the lights
+    from mathutils import Matrix, Vector
+    m = (Matrix.Translation(Vector((0, 0, dz))) @ Matrix.Scale(k, 4) @ Matrix.Translation(Vector((-cx, -cy, 0))))
+    for ob in bpy.context.scene.objects:
+        if ob.parent is None and not ob.name.startswith("tile") and ob.type not in ("CAMERA", "LIGHT"):
+            if ob.type != "EMPTY" and ob.type in ("MESH", "CURVE", "FONT", "META"):
+                zs = [(ob.matrix_world @ Vector(c)).z for c in ob.bound_box]
+                if max(zs) - min(zs) <= FLAT:
+                    continue
+            ob.matrix_world = m @ ob.matrix_world
+    bpy.context.view_layer.update()
+    return (-cx, -cy, k, dz)
 
 
 main()

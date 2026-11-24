@@ -31,15 +31,19 @@ por grupo, así dos sesiones pueden trabajar a la vez sin pisarse;
 Reglas del pack, además de la receta del estilo B (abajo):
 
 - Cada app con dos o tres **ideas distintas**, no la misma con otro ángulo.
-- El juguete entra en la ficha con margen (nada fuera de ±0,42), inclinado
-  10-25° para que se vea el volumen.
+- El juguete entra **entero** en la ficha, con margen: `render.py` mide la
+  silueta que ve la cámara y, si se sale de la forma achicada un 6 % (5 % en
+  la miniatura), la centra y la achica; si algo queda debajo de la cara de
+  la ficha, levanta el juguete. Lo que hizo queda en `out/juguete/fit.log`.
+  Igual conviene modelarlo para que entre: el ajuste es la red de abajo.
 - Nada de logos ni marcas: Python es una víbora, Lua una luna, Claude un
   robot, Home Assistant una casa.
 - La miniatura (`mini`): el juguete ×1,1-1,25 y sin las piezas chicas.
-- **Un juguete grande y plano se hunde en la ficha** de un lado al
-  inclinarlo (gira alrededor de z = 0): levantarlo con `loc=(…, …, 0.08-0.1)`
-  en `group()`. Y para un juguete chico, armarlo a tamaño normal y achicar
-  el grupo (`scale`), no las medidas: los redondeos no achican bien.
+- Un juguete grande y plano se hunde en la ficha de un lado al inclinarlo
+  (gira alrededor de z = 0) y la ficha lo tapa: el ajuste lo levanta, pero
+  queda mejor levantarlo en el modelo (`loc=(…, …, 0.08-0.1)` en `group()`).
+- Para un juguete chico, armarlo a tamaño normal y achicar el grupo
+  (`scale`), no las medidas: los redondeos no achican bien.
 - `rounded_poly` sobre un arco fino (`arc_band`) se rompe: los anillos y
   sectores van sin redondear, con un bisel chico (0,015).
 - Las letras de Blender no tienen − ni ÷: los signos se arman con piezas
