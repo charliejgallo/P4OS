@@ -3,6 +3,22 @@
 **Producción: el pack `juguete` (estilo B)**, elegido el 2026-11-24. Más
 abajo, la etapa Estilo que lo eligió (las muestras de A, B y C).
 
+## El pack línea (estilo C)
+
+El segundo pack, para las mismas apps que el juguete (las de `elegidos.json`):
+`tools/icons/linea/` (`lib.py`, la ficha oscura, la línea en dos colores con su
+brillo y los ayudantes de dibujo; `build.py`, tamaños, láminas y pack; un
+`models_<grupo>.py` por grupo con `ART = {id: art(m)}` y los colores en
+`PAIRS`). Un ícono es un SVG de 120 × 120 escrito por código; la miniatura es
+el mismo dibujo con línea de 2,4 px y sin brillo (`m.mini` saca detalles).
+Cuando se puede, cada ícono repite la idea de la variante elegida del juguete.
+
+```bash
+python3 tools/icons/linea/build.py              # out/linea/<id>_120|108|26.png
+python3 tools/icons/linea/build.py sheet todos  # laminas/linea_todos.jpg
+python3 tools/icons/linea/build.py pack         # out/linea/linea.pak
+```
+
 ## El pack juguete
 
 | Archivo | Qué es |
