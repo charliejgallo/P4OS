@@ -94,6 +94,11 @@ CONFIG_ESP_HOSTED_SDIO_HOST_INTERFACE=y
 # wide TCP window); the P4's SDMMC reaches PSRAM. 3.x has both as options.
 CONFIG_EH_HOST_PORT_DMA_PREFER_SPIRAM=y
 CONFIG_ESP_HOSTED_DFLT_TASK_FROM_SPIRAM=y
+# The C6's link is brought up by the HAL after the microSD, not by esp_hosted
+# on its own before app_main: they share the SDMMC controller and met while
+# both set themselves up, and the board came up with neither (2026-11-24;
+# components/aos_hal/aos_hal_p4.c, c6_link_start).
+CONFIG_ESP_HOSTED_AUTO_CALL_INIT_BEFORE_APP_MAIN=n
 
 # Bluetooth (components/aos_ble): NimBLE's host on the P4, the C6's
 # controller through esp_hosted's HCI. No controller here; one connection

@@ -312,6 +312,11 @@ static void net_task(void *arg)
     esp_event_loop_create_default();
     s_sta = esp_netif_create_default_wifi_sta();
     esp_netif_set_hostname(s_sta, aos_hal_device_name());
+    /* the C6's link comes up after the card (aos_hal_p4.c, c6_link_start);
+     * the netif and the event loop above may not wait for it: the portal
+     * starts on them (lwip's "Invalid mbox" otherwise, on the board) */
+    extern bool aos_hal_c6_link_wait(uint32_t ms);
+    if (!aos_hal_c6_link_wait(8000)) ESP_LOGW(TAG, "the C6's link is not up");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     int64_t t = esp_timer_get_time();
     esp_err_t e = esp_wifi_init(&cfg);

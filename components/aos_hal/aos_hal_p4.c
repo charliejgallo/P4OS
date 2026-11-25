@@ -566,6 +566,51 @@ static bool sd_host_config(sdmmc_host_t *out_host, sdmmc_slot_config_t *out_slot
     return true;
 }
 
+/* The C6's link, brought up here, after the card, and not by esp_hosted on
+ * its own from before app_main (CONFIG_ESP_HOSTED_AUTO_CALL_INIT_BEFORE_APP_MAIN
+ * off, sdkconfig.defaults). The card and the C6 share the P4's one SDMMC
+ * controller (the card on slot 0, the C6's SDIO on slot 1), and esp_hosted
+ * resets the C6 and sets up its slot, its clock and its data path while the
+ * card would be setting up its own. When the two met, the card's commands
+ * timed out three times and the C6's link went down with them ("bring-up
+ * timed out"): the board came up with no card and no Wi-Fi, which looked
+ * like a hang (four times on 2026-11-24, after an OTA, caught on the serial
+ * port; the "no card" of 2026-09-29 below was likely the same). Waiting for
+ * the link before the card was not enough: its data path opens after the
+ * point that says "up", and they met there too. So the card first, alone on
+ * the controller as in every boot that went well, and then the C6, in a task
+ * of its own while the panel comes up; the network waits for it
+ * (aos_hal_c6_link_wait, aos_net_p4.c). Once both are up they share the
+ * controller fine, transfer by transfer. */
+static volatile int s_c6_link;          /* 0 coming up, 1 up, -1 failed */
+
+static void c6_link_task(void *arg)
+{
+    (void)arg;
+    extern int eh_host_init(const void *cfg);
+    extern int eh_host_connect_to_slave(void);
+    int64_t t0 = esp_timer_get_time();
+    int a = eh_host_init(NULL), b = a == 0 ? eh_host_connect_to_slave() : a;
+    s_c6_link = (a == 0 && b == 0) ? 1 : -1;
+    ESP_LOGI(TAG, "the C6's link, after the card: %s (%d/%d), %lld ms", s_c6_link > 0 ? "up" : "FAILED", a, b,
+             (long long)((esp_timer_get_time() - t0) / 1000));
+    vTaskDelete(NULL);
+}
+
+static void c6_link_start(void)
+{
+    /* internal RAM for its stack, and only while it runs: esp_hosted's own
+     * start ran in one like it (4 KB, priority 23) */
+    if (xTaskCreate(c6_link_task, "c6_link", 4096, NULL, 23, NULL) != pdPASS) s_c6_link = -1;
+}
+
+bool aos_hal_c6_link_wait(uint32_t ms)
+{
+    int64_t until = esp_timer_get_time() + (int64_t)ms * 1000;
+    while (!s_c6_link && esp_timer_get_time() < until) vTaskDelay(pdMS_TO_TICKS(20));
+    return s_c6_link > 0;
+}
+
 static void sd_mount(void)
 {
     sdmmc_host_t host;
@@ -577,21 +622,6 @@ static void sd_mount(void)
      * restart from the portal, 2026-09-29) the board came up with no card
      * until it was unplugged. So a failed mount is tried twice more, after
      * a pause, before the board goes on without the card. */
-    /* The card and the C6 share the P4's one SDMMC controller (the card on
-     * slot 0, the C6's SDIO on slot 1), and esp_hosted brings the C6 up on
-     * its own from before app_main: it resets the C6 and sets up its slot,
-     * clock and card while this would be reading the card's registers. When
-     * the two met, the card's reads timed out three times and the C6's link
-     * went down with them ("bring-up timed out"): the board came up with no
-     * card and no Wi-Fi, which looked like a hang (caught on the serial
-     * port, 2026-11-24, after an OTA; the "no card" of 2026-09-29 below was
-     * likely the same). So the card waits for the C6's link to be up, at
-     * most 4 s (a C6 that never answers must not keep the card away). */
-    extern int eh_host_mcu_transport_state_is_rx_ready(void);
-    int64_t t0 = esp_timer_get_time();
-    while (!eh_host_mcu_transport_state_is_rx_ready() && esp_timer_get_time() - t0 < 4000000) vTaskDelay(pdMS_TO_TICKS(20));
-    ESP_LOGI(TAG, "microSD after the C6's link: %s, %lld ms", eh_host_mcu_transport_state_is_rx_ready() ? "up" : "not up",
-             (long long)((esp_timer_get_time() - t0) / 1000));
     esp_err_t e = ESP_FAIL;
     for (int attempt = 1; attempt <= 3; attempt++) {
         e = esp_vfs_fat_sdmmc_mount(SD_ROOT, &host, &slot, &mc, &s_card);
@@ -2018,6 +2048,7 @@ bool aos_hal_init(void)
 
     aos_hal_boot_stage("card");
     sd_mount();
+    c6_link_start();                /* after the card: they share the SDMMC (c6_link_start) */
     aos_hal_boot_stage("panel");
     panel_init_on_core1();
 
