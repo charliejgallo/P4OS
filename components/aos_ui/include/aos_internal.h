@@ -47,6 +47,7 @@ bool aos_wall_photo_next(void);                           /* locking: the album'
 /* ---- home screen (aos_home.c) ---- */
 void aos_home_create(lv_obj_t *parent);
 void aos_home_rebuild(void);             /* the model or the orientation changed */
+void aos_home_suspend(bool on);         /* a game: the home screen holds nothing while it runs (aos_home.c) */
 bool aos_home_back(void);                /* closes a folder / leaves edit mode   */
 void aos_home_edit(bool on);
 bool aos_home_editing(void);

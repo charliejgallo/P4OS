@@ -238,7 +238,11 @@ static void closed_check_tick(void)
 {
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = 0; i < AOS_MAX_APPS; i++) {
-        if (!s_closed_ms[i] || now - s_closed_ms[i] < 1500) continue;
+        /* 5 s: at 1.5 s the wallpaper was still reading its photo back and
+         * the home screen making its icons again after a game, and Planeo
+         * looked 2 MB short that a moment later were there (on the board,
+         * 2026-11-25) */
+        if (!s_closed_ms[i] || now - s_closed_ms[i] < 5000) continue;
         if (s_cur || s_closed_creates[i] != s_creates) {      /* something else took memory since */
             s_closed_ms[i] = 0;
             continue;
@@ -594,6 +598,21 @@ static void trim_for_memory(void)
     }
 }
 
+/* A game is opening: the apps waiting in the background go, all that are
+ * not busy (playing, recording, serving the portal: busy_why), whatever the
+ * free PSRAM. Planeo's world needs ~11 MB at its peak and left the board
+ * with 517 KB free even with nothing else open (on the board, 2026-11-25). */
+static void trim_for_game(const aos_app_t *game)
+{
+    aos_app_t *alive[AOS_MAX_APPS];
+    int n = aos_ui_alive(alive, AOS_MAX_APPS);
+    for (int i = n - 1; i >= 0; i--) {
+        if (alive[i] == s_cur || alive[i] == game || busy_why(alive[i], false)) continue;
+        aos_hal_log("ui", "closing %s for a game (%s)", alive[i]->desc.id, game->desc.id);
+        destroy_app(alive[i]);
+    }
+}
+
 /* ---- apps that start with the board (aos_ui.h) ----
  * A comma-separated list of ids in the preference "boot_apps". */
 #define BOOT_KEY "boot_apps"
@@ -728,7 +747,10 @@ static void leave_current(bool destroy_now)
     if (app->hide && app->running) app->hide(app, app->inst);
     if (destroy_now || !keepable(app) || !keep_on_leaving(app)) destroy_app(app);
     else if (app->root) lv_obj_add_flag(app->root, LV_OBJ_FLAG_HIDDEN);
-    if (is_game(app) && !app->running) aos_wall_photo_for_game(false);
+    if (is_game(app) && !app->running) {
+        aos_wall_photo_for_game(false);
+        aos_home_suspend(false);
+    }
     aos_hal_app_context_set(NULL);
     aos_hal_audio_foreground(NULL);
     aos_hal_display_refresh_request(0);     /* a rate it asked for was its own */
@@ -751,6 +773,19 @@ bool aos_ui_open(const char *id)
 
     aos_app_t *prev = s_cur;
     if (prev) leave_current(false);
+
+    /* a game: before it turns the screen (which would make the home screen
+     * again, in the other orientation, behind it) the home screen and the
+     * icon pack's pictures let go of their PSRAM (aos_home_suspend) */
+    bool game_starts = is_game(app) && !app->running;
+    uint32_t home_kb = psram_free_kb();
+    if (game_starts) {
+        aos_home_suspend(true);
+        aos_icon_pack_let_go();
+        trim_for_game(app);
+        aos_hal_log("ui", "home screen let go for %s: %u KB of PSRAM free (%u before)", app->desc.id,
+                    (unsigned)psram_free_kb(), (unsigned)home_kb);
+    }
 
     apply_rotation(app);
     aos_hal_app_context_set(app->desc.id);      /* what it claims now is its (aos_io) */
@@ -784,7 +819,7 @@ bool aos_ui_open(const char *id)
          * "kept" the 1.9 MB of the photos (Air Hockey, Vuelos and Juegos de
          * mesa on the board, 2026-11-22), and a real leak of that size
          * would have looked the same. */
-        uint32_t before_kb = psram_free_kb();
+        uint32_t before_kb = game_starts ? home_kb : psram_free_kb();
         if (is_game(app)) aos_wall_photo_for_game(true);
         uint32_t after_kb = psram_free_kb();
         s_lent_kb[slot_of_app(app)] = after_kb > before_kb ? after_kb - before_kb : 0;

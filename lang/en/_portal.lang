@@ -2463,7 +2463,6 @@ escaneando, canal %s	scanning, channel %s
 escuchando el canal %s	listening on channel %s
 apagada	off
 Firmware del C6	C6 firmware
-El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	The C6 needs its firmware 3.0.9-154.1 or newer: Settings, Update, Install on the C6, on the board.
 El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	The C6 fell over with the radio on and kept it off; scanning or listening tries it again.
 Escuchar	Listen
 %s paquetes	%s packets
@@ -2506,7 +2505,6 @@ luz	light
 medidor	meter
 eléctrico	electrical
 La red no tomó el pedido	The network did not take the request
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Could not start the network: does the C6 run its 154.15 firmware?
 Nombre del equipo	Device name
 ¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Remove %s from the network? To add it again, it has to be reset.
 router	router
@@ -2580,3 +2578,5 @@ emulando un equipo: buscando una red	emulating a device: looking for a network
 la red Zigbee de la placa, canal %s	the board's Zigbee network, channel %s
 armando la red Zigbee	starting the Zigbee network
 sin usar	idle
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Could not start the network: does the C6 have its new firmware? Store, System, The radio's firmware (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	The radio does not answer: the C6 needs its new firmware (3.0.9-154.15). On the board: 1) Store, System, The radio's firmware (C6): get it. 2) Settings, Update, Install on the C6. About 15 s without Wi-Fi, and the board restarts by itself.

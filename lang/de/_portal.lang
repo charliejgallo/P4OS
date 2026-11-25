@@ -2463,7 +2463,6 @@ escaneando, canal %s	scanne, Kanal %s
 escuchando el canal %s	höre auf Kanal %s
 apagada	aus
 Firmware del C6	C6-Firmware
-El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	Der C6 braucht seine Firmware 3.0.9-154.1 oder neuer: Einstellungen, Aktualisierung, Auf dem C6 installieren, auf der Platine.
 El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Der C6 ist mit eingeschaltetem Funk abgestürzt und lässt ihn aus; Scannen oder Zuhören versucht es erneut.
 Escuchar	Zuhören
 %s paquetes	%s Pakete
@@ -2506,7 +2505,6 @@ luz	Licht
 medidor	Zähler
 eléctrico	elektrisch
 La red no tomó el pedido	Das Netz hat die Anfrage nicht angenommen
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Netz konnte nicht gestartet werden: hat der C6 die Firmware 154.15?
 Nombre del equipo	Gerätename
 ¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	%s aus dem Netz entfernen? Um es wieder hinzuzufügen, muss es zurückgesetzt werden.
 router	Router
@@ -2580,3 +2578,5 @@ emulando un equipo: buscando una red	emuliert ein Gerät: sucht ein Netz
 la red Zigbee de la placa, canal %s	das Zigbee-Netz der Platine, Kanal %s
 armando la red Zigbee	baut das Zigbee-Netz auf
 sin usar	frei
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Netz nicht aufgebaut: Hat der C6 seine neue Firmware? Store, System, Firmware des Funkmoduls (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	Das Funkmodul antwortet nicht: Der C6 braucht seine neue Firmware (3.0.9-154.15). Auf der Platine: 1) Store, System, Firmware des Funkmoduls (C6): laden. 2) Einstellungen, Aktualisierung, Auf dem C6 installieren. Etwa 15 s ohne WLAN, dann startet die Platine von selbst neu.

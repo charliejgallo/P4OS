@@ -2808,7 +2808,6 @@ escaneando, canal %s	scansione, canale %s
 escuchando el canal %s	in ascolto sul canale %s
 apagada	spenta
 Firmware del C6	Firmware del C6
-El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	Il C6 ha bisogno del firmware 3.0.9-154.1 o più recente: Impostazioni, Aggiornamento, Installa sul C6, sulla scheda.
 El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Il C6 è andato in crash con la radio accesa e l'ha lasciata spenta; scansionare o ascoltare la riprova.
 Escuchar	Ascolta
 %s paquetes	%s pacchetti
@@ -2851,7 +2850,6 @@ luz	luce
 medidor	contatore
 eléctrico	elettrico
 La red no tomó el pedido	La rete non ha accettato la richiesta
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Impossibile creare la rete: il C6 ha il firmware 154.15?
 Nombre del equipo	Nome del dispositivo
 ¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Rimuovere %s dalla rete? Per aggiungerlo di nuovo va resettato.
 router	router
@@ -2925,3 +2923,5 @@ emulando un equipo: buscando una red	emula un dispositivo: cerca una rete
 la red Zigbee de la placa, canal %s	la rete Zigbee della scheda, canale %s
 armando la red Zigbee	avvio della rete Zigbee
 sin usar	inutilizzata
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossibile creare la rete: il C6 ha il nuovo firmware? Store, Sistema, Firmware della radio (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio non risponde: il C6 ha bisogno del nuovo firmware (3.0.9-154.15). Sulla scheda: 1) Store, Sistema, Firmware della radio (C6): scaricalo. 2) Impostazioni, Aggiornamento, Installa sul C6. Circa 15 s senza Wi-Fi, poi la scheda si riavvia da sola.

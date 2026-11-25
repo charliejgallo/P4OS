@@ -3608,7 +3608,7 @@ function zbNet() {
     try {
       if (st && (st.state === 'scanning' || st.state === 'sniffing')) await post('154/stop');
       s = await post('154/zbhost', { channel: 26 });     /* the board app's: away from Wi-Fi's 1, 6 and 11 */
-    } catch { toast(tr('No se pudo armar la red: ¿el C6 tiene su firmware 154.15?'), true); }
+    } catch { toast(tr('No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)'), true); }
     starting = false;
     draw(s, true);
   };
@@ -3769,7 +3769,7 @@ function zbNet() {
         formed && !open ? h('button', { class: 'btn', onclick: () => act('zbpermit', { seconds: 254, board: true, strict: true, static: true }) }, tr('Sumar Zigbee 3.0')) : null,
         formed && open ? h('span', { class: 'zbchip zb-acc' }, tr('Abierta: %d s', open)) : null,
         formed && open ? h('button', { class: 'btn', onclick: () => act('zbpermit', { seconds: 0 }) }, tr('Cerrar')) : null),
-      z.state === 'failed' ? h('p', { class: 'note warn' }, tr('No se pudo armar la red: ¿el C6 tiene su firmware 154.15?')) : null,
+      z.state === 'failed' ? h('p', { class: 'note warn' }, tr('No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)')) : null,
       h('p', { class: 'note' }, !formed ? tr('La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).')
         : open ? tr('Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.')
         : tr('Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.', z.channel, devs.length)));
@@ -3895,7 +3895,7 @@ async function pageZigbee() {
     const busy = zb.emulating || zb.state === 'formed' || zb.state === 'starting';
     put(status, row(tr('Radio'), radio, (busy || st.reachable ? '' : 'warn') + ' wrap'),
       row(tr('Firmware del C6'), st.c6 || '?'),
-      !st.reachable && !busy ? h('p', { class: 'note' }, tr('El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.')) : null,
+      !st.reachable && !busy ? h('p', { class: 'note' }, tr('La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.')) : null,
       st.guarded ? h('p', { class: 'note warn' }, tr('El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.')) : null);
     bars();
     goBtn.textContent = st.state === 'sniffing' ? tr('Parar') : tr('Escuchar');
