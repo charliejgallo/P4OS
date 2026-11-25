@@ -471,7 +471,7 @@ static void fill_devices(int32_t w)
 static void start_task(void *arg)
 {
     (void)arg;
-    if (!aos_zigbee_start(ZB_CHANNEL)) aos_ui_request_toast(_("No se pudo armar la red: ¿el C6 tiene su firmware 154.15?"));
+    if (!aos_zigbee_start(ZB_CHANNEL)) aos_ui_request_toast(_("No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)"));
     U.starting = false;
 }
 
@@ -1404,8 +1404,9 @@ static void refresh(void)
     aos_zigbee_info_t zw;
     aos_zigbee_info(&zw);
     bool old = !in.reachable && !zw.emu && zw.state == AOS_ZB_OFF && aos_hal_uptime_ms() - U.t_open > 2000;
-    lv_label_set_text(U.warn, old ? _("El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, "
-                                      "Instalar en el C6. Se baja de la Tienda, en Sistema.")
+    lv_label_set_text(U.warn, old ? _("La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, "
+                                      "Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son "
+                                      "unos 15 s sin Wi-Fi y la placa se reinicia sola.")
                                   : in.guarded ? _("El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. "
                                                    "Tocá Escanear o Escuchar para probar otra vez.") : "");
     /* what the radio is doing: the board's network (or a device it

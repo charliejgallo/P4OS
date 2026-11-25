@@ -10955,7 +10955,6 @@ A fondo (2 s por canal)	Thorough (2 s per channel)
 La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	The bar is the energy on the channel; the number, the packets heard while listening. A Zigbee or Thread network shows as a channel with packets. For a new network, pick one with no packets and away from the Wi-Fi: Zigbee usually uses 11, 15, 20 or 25.
 Escuchar	Listen
 Guardar para Wireshark	Save for Wireshark
-El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6. Se baja de la Tienda, en Sistema.	The C6 does not answer. It needs its firmware 3.0.9-154.1 or newer: Settings, Update, Install on the C6. It is downloaded from the Store, under System.
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	The C6 fell over with the radio on and kept it off so as not to lose the Wi-Fi. Tap Scan or Listen to try again.
 Escaneando, canal %u	Scanning, channel %u
 Escuchando el canal %u	Listening on channel %u
@@ -10979,7 +10978,6 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: a device joine
 Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x left the network
 Zigbee: se pueden sumar equipos por %u s	Zigbee: devices can join for %u s
 Zigbee: ya no se pueden sumar equipos	Zigbee: no more devices can join
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Could not start the network: does the C6 run its 154.15 firmware?
 La red no tomó el pedido	The network did not take the request
 contacto	contact
 movimiento	motion
@@ -11185,3 +11183,5 @@ La radio: emulando un equipo	The radio: emulating a device
 La radio: la red Zigbee, canal %u	The radio: the Zigbee network, channel %u
 La radio: armando la red Zigbee	The radio: starting the Zigbee network
 La radio, sin usar	The radio, idle
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Could not start the network: does the C6 have its new firmware? Store, System, The radio's firmware (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	The radio does not answer: the C6 needs its new firmware (3.0.9-154.15). 1) Store, System, The radio's firmware (C6): get it. 2) Settings, Update, Install on the C6. About 15 s without Wi-Fi, and the board restarts by itself.

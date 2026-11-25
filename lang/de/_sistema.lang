@@ -10955,7 +10955,6 @@ A fondo (2 s por canal)	Gründlich (2 s pro Kanal)
 La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	Der Balken ist die Energie auf dem Kanal, die Zahl die Pakete, die beim Zuhören empfangen wurden. Ein Zigbee- oder Thread-Netz zeigt sich als Kanal mit Paketen. Für ein neues Netz einen ohne Pakete und weit weg vom WLAN wählen: Zigbee nutzt meist 11, 15, 20 oder 25.
 Escuchar	Zuhören
 Guardar para Wireshark	Für Wireshark speichern
-El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6. Se baja de la Tienda, en Sistema.	Der C6 antwortet nicht. Er braucht seine Firmware 3.0.9-154.1 oder neuer: Einstellungen, Aktualisierung, Auf dem C6 installieren. Sie kommt aus dem Store, unter System.
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Der C6 ist mit eingeschaltetem Funk abgestürzt und lässt ihn aus, um das WLAN nicht zu verlieren. Auf Scannen oder Zuhören tippen, um es erneut zu versuchen.
 Escaneando, canal %u	Scanne, Kanal %u
 Escuchando el canal %u	Höre auf Kanal %u
@@ -10979,7 +10978,6 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: ein Gerät ist
 Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x hat das Netz verlassen
 Zigbee: se pueden sumar equipos por %u s	Zigbee: Geräte können %u s lang beitreten
 Zigbee: ya no se pueden sumar equipos	Zigbee: keine weiteren Geräte können beitreten
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Netz konnte nicht gestartet werden: hat der C6 die Firmware 154.15?
 La red no tomó el pedido	Das Netz hat die Anfrage nicht angenommen
 contacto	Kontakt
 movimiento	Bewegung
@@ -11185,3 +11183,5 @@ La radio: emulando un equipo	Das Funkmodul: emuliert ein Gerät
 La radio: la red Zigbee, canal %u	Das Funkmodul: das Zigbee-Netz, Kanal %u
 La radio: armando la red Zigbee	Das Funkmodul: baut das Zigbee-Netz auf
 La radio, sin usar	Das Funkmodul, frei
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Netz nicht aufgebaut: Hat der C6 seine neue Firmware? Store, System, Firmware des Funkmoduls (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	Das Funkmodul antwortet nicht: Der C6 braucht seine neue Firmware (3.0.9-154.15). 1) Store, System, Firmware des Funkmoduls (C6): laden. 2) Einstellungen, Aktualisierung, Auf dem C6 installieren. Etwa 15 s ohne WLAN, dann startet die Platine von selbst neu.

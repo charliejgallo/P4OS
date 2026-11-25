@@ -11530,7 +11530,6 @@ A fondo (2 s por canal)	En profondeur (2 s par canal)
 La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	La barre est l'énergie sur le canal ; le nombre, les paquets entendus pendant l'écoute. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets. Pour un nouveau réseau, choisissez-en un sans paquets et loin du Wi-Fi : Zigbee utilise souvent 11, 15, 20 ou 25.
 Escuchar	Écouter
 Guardar para Wireshark	Enregistrer pour Wireshark
-El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6. Se baja de la Tienda, en Sistema.	Le C6 ne répond pas. Il lui faut le firmware 3.0.9-154.1 ou plus récent : Réglages, Mise à jour, Installer sur le C6. Il se télécharge depuis la Boutique, dans Système.
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Le C6 a planté avec la radio allumée et l'a laissée éteinte pour ne pas perdre le Wi-Fi. Touchez Scanner ou Écouter pour réessayer.
 Escaneando, canal %u	Analyse, canal %u
 Escuchando el canal %u	Écoute du canal %u
@@ -11554,7 +11553,6 @@ Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee : un appareil a
 Zigbee: 0x%04x salió de la red	Zigbee : 0x%04x a quitté le réseau
 Zigbee: se pueden sumar equipos por %u s	Zigbee : des appareils peuvent rejoindre pendant %u s
 Zigbee: ya no se pueden sumar equipos	Zigbee : plus aucun appareil ne peut rejoindre
-No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Impossible de créer le réseau : le C6 a-t-il son firmware 154.15 ?
 La red no tomó el pedido	Le réseau n'a pas accepté la demande
 contacto	contact
 movimiento	mouvement
@@ -11760,3 +11758,5 @@ La radio: emulando un equipo	La radio : émule un appareil
 La radio: la red Zigbee, canal %u	La radio : le réseau Zigbee, canal %u
 La radio: armando la red Zigbee	La radio : création du réseau Zigbee
 La radio, sin usar	La radio, inutilisée
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossible de créer le réseau : le C6 a-t-il son nouveau firmware ? Boutique, Système, Firmware de la radio (C6)
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio ne répond pas : le C6 a besoin de son nouveau firmware (3.0.9-154.15). 1) Boutique, Système, Firmware de la radio (C6) : le télécharger. 2) Réglages, Mise à jour, Installer sur le C6. Environ 15 s sans Wi-Fi, puis la carte redémarre seule.
