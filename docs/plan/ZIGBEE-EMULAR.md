@@ -17,6 +17,32 @@ primera que encuentra), "Pausar" (Volver a Mi red guarda la otra red) y
 mostrar la configuración de reportes al lado de cada valor (está en el
 registro). Más abajo, el diseño como se escribió.
 
+**Etapa 1 en la placa (2026-11-25, con el usuario), contra su Zigbee2MQTT
+con un Sonoff ZBDongle-E (adaptador `ember`):**
+
+- "Reiniciar y emular": la pila arrancó como router a los 10 s del
+  arranque y buscó cada ~10 s (cada búsqueda en los 16 canales tarda ~5
+  s; antes de abrir la red, "Comm failed in Join"). Abierta la red en
+  Zigbee2MQTT, **entró al quinto intento** (canal 11).
+- **La entrevista entera**, en el registro, en 3 s: descriptor del nodo,
+  endpoints 1, 2 y 242 (Green Power), Basic de a un atributo (0005 0004,
+  0007, 0000-0003, 0006, 4000), y en orden: ató On/Off y configuró su
+  reporte (0 s a 65000 s), Power Configuration (batería, 3600 a 65000 s),
+  temperatura y humedad (10 s a 3600 s), leyendo cada uno después.
+- **Sin el intercambio de clave Zigbee 3.0** (`TCLK_READY` no llegó) y
+  igual quedó en la red: ember no lo exige, como Zigbee2MQTT con los
+  equipos viejos.
+- **Zigbee2MQTT lo expone** sin definición propia: Identify, State
+  (On/Off), Power-on behavior, Battery, Temperature y Humidity del
+  endpoint 2, Linkquality 255 (`docs/img/zigbee-emular.jpg`, con las
+  direcciones borroneadas).
+- **Anda todo lo de la luz y los valores:** Prender desde Zigbee2MQTT
+  llega a la placa ("mandó Prender a la luz", "la luz quedó prendida") y
+  la placa lo muestra; los deslizadores (29 °C, 17 %, 35 %) y "Reportar
+  ahora" aparecen en Zigbee2MQTT.
+- Zigbee2MQTT pregunta la dirección larga cada tanto (su chequeo de que
+  el equipo sigue vivo).
+
 Diseño, escrito antes del código (2026-11-25). Sigue a `ZIGBEE.md` (la pila de
 Espressif en el P4 con el C6 de radio, la red propia de la placa como
 coordinador) y es el punto 3 de "La idea" de ese documento.
