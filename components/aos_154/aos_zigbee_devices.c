@@ -1186,6 +1186,8 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
         break;
     case 0x02: {                        /* sending: it asks for a chunk */
         if (s_ir.state != AOS_ZB_IR_SENDING || n < 6 || !s_ir.msg) return;
+        /* a late answer to a sending given up is not this one's (seq u16 first) */
+        if ((uint16_t)(p[0] | p[1] << 8) != s_ir.seq) return;
         s_ir.got02 = true;
         uint32_t pos = get32(p + 2);
         if (pos > s_ir.msg_len) return;
@@ -1202,7 +1204,8 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
         break;
     }
     case 0x04:                          /* sending: all of it went */
-        if (s_ir.state != AOS_ZB_IR_SENDING || !s_ir.got02) return;
+        if (s_ir.state != AOS_ZB_IR_SENDING || !s_ir.got02 || n < 3) return;
+        if ((uint16_t)(p[1] | p[2] << 8) != s_ir.seq) return;     /* 00, then seq u16 */
         put16(b, s_ir.seq);
         put16(b + 2, 0);
         send_now(nwk, ep, CL_IR_TX, 0x05, b, 4, true);
@@ -1214,17 +1217,20 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
     }
 }
 
-/* every second: the sending's first frame again until the blaster answers,
- * and given up after 15 s (right after learning, a TS1201 took its third or
- * fourth first frame, 7 s; then half a second; on the board, 2026-11-24) */
+/* every second: the sending's first frame twice more, at 5 and 10 s, until
+ * the blaster answers, and given up after 30 s. A TS1201 takes its requests
+ * one after the other: busy (after a few learnings turned on and off), it
+ * answered a sending 17 s late, and the first frame sent again every 3 s had
+ * only lengthened its queue, each answered in turn (on the board,
+ * 2026-11-25). Usually it answers in a tenth of a second. */
 static void ir_tick(void)
 {
     if (s_ir.state != AOS_ZB_IR_SENDING) return;
     int64_t now = (int64_t)aos_hal_uptime_ms();
-    if (now - s_ir.t0_ms > 15000) {
+    if (now - s_ir.t0_ms > 30000) {
         s_ir.state = AOS_ZB_IR_FAILED;
         aos_hal_log(TAG, "IR: the blaster did not take the code");
-    } else if (!s_ir.got02 && now - s_ir.last00_ms > 2000) ir_send00();
+    } else if (!s_ir.got02 && now - s_ir.t0_ms < 11000 && now - s_ir.last00_ms >= 5000) ir_send00();
 }
 
 /* every ZCL frame that comes in, before the stack goes on with it */

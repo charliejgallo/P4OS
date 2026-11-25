@@ -45,7 +45,8 @@
 #define LIST_MS   2000
 #define POST_MS   3000          /* the firmware's task takes a request well within this */
 #define FREE_MS   6000          /* waiting for someone else's transfer to end */
-#define SEND_MS   20000         /* the firmware gives up at 15 s */
+#define SEND_MS   35000         /* the firmware gives up at 30 s */
+#define LINGER_MS 10000         /* learning kept on this long after nobody listens */
 #define REARM_MS  30000         /* learning asked for again, in case the blaster let it go */
 #define PAUSE_MS  700
 #define CODE_MAX  3072          /* a learned code in base64 (the firmware keeps 2 KB of it) */
@@ -80,6 +81,7 @@ static struct {
     uint32_t     sent, fails;
     /* learning */
     char         want[3][IR_VIA_LEN];   /* by IR_WHO_*: the blaster each one listens through */
+    uint32_t     unwant_ms;             /* when nobody listened any more, learning still on (0: someone does) */
     int          l;             /* L_* */
     uint8_t      l_ieee[8];
     uint32_t     l_ms;
@@ -419,7 +421,13 @@ static void learn_step(int st, const uint8_t ie[8], uint32_t t)
         }
         break;
     case L_ON:
+        /* nobody listening: learning stays on a while, so going from tab to
+         * tab does not turn it off and on; a TS1201 told so a few times in a
+         * row answered the next sending 17 s late (on the board, 2026-11-25) */
+        if (!want && w[0] == '\0' && t - (O.unwant_ms ? O.unwant_ms : (O.unwant_ms = t)) < LINGER_MS) break;
+        if (want) O.unwant_ms = 0;
         if (!want || memcmp(wie, O.l_ieee, 8)) {
+            O.unwant_ms = 0;
             if (st == AOS_ZB_IR_LEARNING) learn_off(t);
             O.l = L_PAUSE;
             O.l_ms = t;
