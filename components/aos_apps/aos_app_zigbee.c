@@ -64,6 +64,9 @@ static struct {
     volatile bool starting;             /* the network being started, off LVGL's task */
     bool keep_open;                     /* "Sumar equipos": open again each time it closes, until Cerrar */
     uint32_t asked_ms;
+    uint8_t rm_ieee[AOS_ZB_DEVICES_MAX][8];     /* each card's device, for its Sacar */
+    uint8_t armed[8];                   /* the one whose Sacar was tapped once */
+    uint32_t armed_ms;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -495,6 +498,21 @@ static void build_net(lv_obj_t *page, int32_t w)
     U.devs_tick = 0;
 }
 
+/* Sacar: a first tap asks, a second one within 4 s does it */
+static void rm_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    if (!memcmp(U.armed, U.rm_ieee[k], 8) && now - U.armed_ms < 4000) {
+        if (!aos_zigbee_remove(U.rm_ieee[k])) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+        memset(U.armed, 0, sizeof U.armed);
+    } else {
+        memcpy(U.armed, U.rm_ieee[k], 8);
+        U.armed_ms = now;
+    }
+    U.devs_tick = 0;                    /* redrawn at once */
+}
+
 static const char *zone_name(uint16_t t)
 {
     switch (t) {
@@ -578,7 +596,8 @@ static void fill_net(int32_t w)
                                         "uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el "
                                         "botón cada tanto mientras se configura."));
     else
-        lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda."),
+        lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: "
+                                            "uno a pila puede tardar en dar noticias (tocale el botón para despertarlo)."),
                               z.channel, n);
     lv_obj_clean(U.net);
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
@@ -593,14 +612,26 @@ static void fill_net(int32_t w)
         if (e->manuf[0] || e->model[0]) snprintf(a, sizeof a, "%s %s", e->manuf, e->model);
         else snprintf(a, sizeof a, "%02X%02X:%02X%02X:%02X%02X:%02X%02X", e->ieee[7], e->ieee[6], e->ieee[5], e->ieee[4],
                       e->ieee[3], e->ieee[2], e->ieee[1], e->ieee[0]);
-        lv_obj_t *t = aos_label(r, a, aos_font_small, e->step == AOS_ZB_DEV_LEFT ? AOS_C_DIM : AOS_C_TEXT);
-        lv_obj_set_width(t, w - 36);
+        bool news = e->heard_ms != 0;
+        lv_obj_t *top = box(r, w - 36, LV_SIZE_CONTENT);
+        lv_obj_t *t = aos_label(top, a, aos_font_small, e->step == AOS_ZB_DEV_LEFT || !news ? AOS_C_DIM : AOS_C_TEXT);
+        lv_obj_set_width(t, w - 36 - 170);
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);
+        memcpy(U.rm_ieee[i], e->ieee, 8);
+        bool armed = !memcmp(U.armed, e->ieee, 8) && now - U.armed_ms < 4000;
+        lv_obj_t *rm = pill(top, armed ? _("¿Seguro?") : _("Sacar"), armed, rm_cb, (void *)(intptr_t)i, NULL);
+        lv_obj_set_height(rm, 48);
+        lv_obj_align(rm, LV_ALIGN_TOP_RIGHT, 0, 0);
         const char *kind = (e->cap & 0x02) ? _("router") : (e->power == 1 ? _("a red eléctrica") : _("a pila"));
         int k = snprintf(b, sizeof b, "0x%04X · %s", e->nwk, kind);
         if (e->rssi) k += snprintf(b + k, sizeof b - (size_t)k, " · %d dBm", e->rssi);
         k += snprintf(b + k, sizeof b - (size_t)k, " · ");
-        k += snprintf(b + k, sizeof b - (size_t)k, _("hace %u s"), (unsigned)((now - e->heard_ms) / 1000));
+        if (!news) k += snprintf(b + k, sizeof b - (size_t)k, "%s", _("sin noticias desde que arrancó la placa"));
+        else {
+            uint32_t ago = (now - e->heard_ms) / 1000;
+            if (ago < 120) k += snprintf(b + k, sizeof b - (size_t)k, _("hace %u s"), (unsigned)ago);
+            else k += snprintf(b + k, sizeof b - (size_t)k, _("hace %u min"), (unsigned)(ago / 60));
+        }
         if (e->step == AOS_ZB_DEV_LEFT) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("se fue"));
         else if (e->step == AOS_ZB_DEV_FAILED) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("no contestó"));
         else if (e->setup) snprintf(b + k, sizeof b - (size_t)k, " · %s", _("configurándolo"));

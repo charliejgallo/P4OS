@@ -11010,7 +11010,6 @@ Abierta: %d s	Offen: %d s
 Sumar equipos	Geräte hinzufügen
 La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	Die Platine startet ihr eigenes Zigbee-Netz, mit dem C6 als Funk, und Geräte treten ihm bei: so lässt sich jedes testen. Ein Gerät ist nur in einem Netz: um es hier hinzuzufügen, setze es zurück (meist die Taste halten, bis es blinkt).
 Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Setze das Gerät jetzt zurück: der Bildschirm zeigt, wann es beitritt und was es ist. Bei Batteriegeräten ab und zu die Taste drücken, während es eingerichtet wird.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Netz auf Kanal %u. %d Geräte. Werte kommen, wenn das Gerät sie sendet.
 router	Router
 a red eléctrica	Netzbetrieb
 a pila	Batterie
@@ -11026,3 +11025,8 @@ Mi red	Mein Netz
 Zigbee: %s, salida %u %s	Zigbee: %s, Ausgang %u %s
 Abierta para sumar	Offen zum Hinzufügen
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Das Netz bleibt offen, solange du hier bist, bis Schließen. Setze die Geräte einzeln zurück: der Bildschirm zeigt, wann jedes beitritt und was es ist. Bei Batteriegeräten ab und zu die Taste drücken, während es eingerichtet wird.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo).	Netz auf Kanal %u. %d Geräte. Werte kommen, wenn das Gerät sie sendet: ein Batteriegerät kann eine Weile brauchen (Taste drücken, um es zu wecken).
+¿Seguro?	Sicher?
+Sacar	Entfernen
+sin noticias desde que arrancó la placa	keine Nachricht seit dem Start der Platine
+Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, aus dem Netz entfernt

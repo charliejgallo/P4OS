@@ -118,6 +118,7 @@ static void commission(void *ctx)
 /* aos_zigbee_devices.c */
 void aos_zigbee_devices_init(void);
 void aos_zigbee_devices_endpoint(ezb_af_ep_desc_t ep);
+void aos_zigbee_devices_network_up(void);
 bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig);
 
 static bool on_signal(const ezb_app_signal_t *sig)
@@ -138,6 +139,7 @@ static bool on_signal(const ezb_app_signal_t *sig)
         if (p && p->status == 0) {
             s_state = AOS_ZB_FORMED;
             aos_hal_log(TAG, "back on its network, channel %u", s_channel);
+            aos_zigbee_devices_network_up();
             return true;
         }
         commission((void *)(uintptr_t)EZB_BDB_MODE_NETWORK_FORMATION);
@@ -147,6 +149,7 @@ static bool on_signal(const ezb_app_signal_t *sig)
         return true;
     case EZB_BDB_SIGNAL_FORMATION:
         s_state = (p && p->status == 0) ? AOS_ZB_FORMED : AOS_ZB_FAILED;
+        if (s_state == AOS_ZB_FORMED) aos_zigbee_devices_network_up();
         aos_hal_log(TAG, s_state == AOS_ZB_FORMED ? "the network is formed, on channel %u" : "the formation failed (channel %u)",
                     s_channel);
         return true;

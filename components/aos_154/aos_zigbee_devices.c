@@ -29,6 +29,14 @@
  * restart: the stack keeps its network, this list starts empty) starts its
  * setup again.
  *
+ * The list is kept in the preferences ("zbd00".."zbd31": who each one is,
+ * not what it said) and comes back at the start: a device that joined is in
+ * it until it is removed, "with no news" until it speaks again (a sensor on
+ * battery may say nothing for an hour), so a restart never looks like the
+ * devices went away. Those on mains are asked at the start whether they are
+ * there; the stack's neighbor table adds any it has that the list lost.
+ * Removing one asks it to leave the network (Mgmt_Leave) and forgets it.
+ *
  * Everything that calls the stack runs in its task: the signals and the
  * callbacks are there already, the portal's requests and the jobs' timer are
  * posted to its task queue. The table is read by the portal's task, under a
@@ -94,14 +102,14 @@ static void unlock(void) { xSemaphoreGive(s_lock); }
 static int find_nwk(uint16_t nwk)
 {
     for (int i = 0; i < s_n; i++)
-        if (s_dev[i].nwk == nwk && s_dev[i].step != AOS_ZB_DEV_LEFT) return i;
+        if (s_dev[i].nwk == nwk && s_dev[i].step != AOS_ZB_DEV_LEFT && s_dev[i].step != AOS_ZB_DEV_REMOVED) return i;
     return -1;
 }
 
 static int find_ieee(const uint8_t *ieee)
 {
     for (int i = 0; i < s_n; i++)
-        if (!memcmp(s_dev[i].ieee, ieee, 8)) return i;
+        if (!memcmp(s_dev[i].ieee, ieee, 8) && s_dev[i].step != AOS_ZB_DEV_REMOVED) return i;
     return -1;
 }
 
@@ -119,6 +127,84 @@ static int add(const uint8_t *ieee, uint16_t nwk)
     d->occupancy = 0xFF;
     d->zone_type = 0xFFFF;
     return s_n++;
+}
+
+/* ---- the list in the preferences ----------------------------------------- */
+
+#define SAVE_KEY "zbd%02d"
+static int s_saved;                     /* how many keys the last save wrote */
+
+/* "ieee nwk cap power step neps ep,ep,ep,ep zone_type clusters|manuf|model" */
+static void save_all(void)
+{
+    char key[16], v[160];
+    lock();
+    int n = 0;
+    for (int i = 0; i < s_n; i++) {
+        const aos_zigbee_dev_t *d = &s_dev[i];
+        if (d->step == AOS_ZB_DEV_REMOVED) continue;
+        snprintf(key, sizeof key, SAVE_KEY, n++);
+        snprintf(v, sizeof v, "%02x%02x%02x%02x%02x%02x%02x%02x %u %u %u %u %u %u,%u,%u,%u %u %u|%s|%s", d->ieee[7], d->ieee[6],
+                 d->ieee[5], d->ieee[4], d->ieee[3], d->ieee[2], d->ieee[1], d->ieee[0], d->nwk, d->cap, d->power,
+                 d->step == AOS_ZB_DEV_DONE ? AOS_ZB_DEV_DONE : AOS_ZB_DEV_EPS, d->neps, d->eps_list[0], d->eps_list[1],
+                 d->eps_list[2], d->eps_list[3], d->zone_type, d->clusters, d->manuf, d->model);
+        unlock();
+        aos_hal_pref_set_str(key, v);
+        lock();
+    }
+    unlock();
+    for (int i = n; i < s_saved; i++) {
+        snprintf(key, sizeof key, SAVE_KEY, i);
+        aos_hal_pref_erase(key);
+    }
+    s_saved = n;
+}
+
+static void load_all(void)
+{
+    char key[16], v[160];
+    lock();
+    for (int i = 0; i < AOS_ZB_DEVICES_MAX; i++) {
+        snprintf(key, sizeof key, SAVE_KEY, i);
+        if (!aos_hal_pref_get_str(key, v, sizeof v)) break;
+        uint8_t ieee[8];
+        unsigned nwk, cap, power, step, neps, e0, e1, e2, e3, zt, cls;
+        int at = 0;
+        bool ok = true;
+        for (int k = 0; k < 8 && ok; k++) {
+            unsigned b;
+            ok = sscanf(v + 2 * k, "%2x", &b) == 1;
+            ieee[7 - k] = (uint8_t)b;
+        }
+        if (!ok || sscanf(v + 16, " %u %u %u %u %u %u,%u,%u,%u %u %u%n", &nwk, &cap, &power, &step, &neps, &e0, &e1, &e2, &e3,
+                          &zt, &cls, &at) != 11)
+            continue;
+        int j = add(ieee, (uint16_t)nwk);
+        if (j < 0) break;
+        aos_zigbee_dev_t *d = &s_dev[j];
+        d->cap = (uint8_t)cap;
+        d->power = (uint8_t)power;
+        d->step = (uint8_t)step;
+        d->neps = (uint8_t)(neps > 4 ? 4 : neps);
+        d->eps_list[0] = (uint8_t)e0, d->eps_list[1] = (uint8_t)e1, d->eps_list[2] = (uint8_t)e2, d->eps_list[3] = (uint8_t)e3;
+        d->ep = d->eps_list[0];
+        d->eps = d->neps;
+        d->zone_type = (uint16_t)zt;
+        d->clusters = (uint16_t)cls;
+        const char *m = strchr(v + 16 + at, '|');
+        if (m) {
+            const char *m2 = strchr(m + 1, '|');
+            size_t l = m2 ? (size_t)(m2 - m - 1) : strlen(m + 1);
+            if (l >= sizeof d->manuf) l = sizeof d->manuf - 1;
+            memcpy(d->manuf, m + 1, l);
+            d->manuf[l] = '\0';
+            if (m2) snprintf(d->model, sizeof d->model, "%s", m2 + 1);
+        }
+        /* heard_ms 0: no news since the board started */
+    }
+    s_saved = s_n;
+    unlock();
+    aos_hal_log(TAG, "%d devices in the saved list", s_saved);
 }
 
 static int ep_index(const aos_zigbee_dev_t *d, uint8_t ep)
@@ -349,19 +435,31 @@ static void start_job(int i)
 static void run(int i)
 {
     lock();
+    bool finished = s_dev[i].setup && !s_jobs[i].n;
     s_dev[i].setup = s_jobs[i].n;
     unlock();
+    if (finished) save_all();           /* who it is, now known */
     if (s_jobs[i].busy || !s_jobs[i].n) return;
     s_jobs[i].busy = true;
     s_jobs[i].since_ms = (int64_t)aos_hal_uptime_ms();
     start_job(i);
 }
 
+static int64_t s_net_up_ms;              /* when the network came up, for the neighbor table's second looks */
+void aos_zigbee_devices_network_up(void);
+
 /* every second, in the stack's task: a job with no answer is let go */
 static void tick(void *ctx)
 {
     (void)ctx;
     int64_t now = (int64_t)aos_hal_uptime_ms();
+    /* routers show in the neighbor table after their link status (every
+     * 15 s): it is looked at again 30 s and 2 min after the start */
+    static int looks;
+    if (s_net_up_ms && ((looks == 0 && now - s_net_up_ms > 30000) || (looks == 1 && now - s_net_up_ms > 120000))) {
+        looks++;
+        aos_zigbee_devices_network_up();
+    }
     for (int i = 0; i < s_n; i++)
         if (s_jobs[i].busy && now - s_jobs[i].since_ms > JOB_WAIT_MS) {
             const job_t *j = &s_jobs[i].q[s_jobs[i].head];
@@ -412,7 +510,10 @@ static void joined(const uint8_t *ieee, uint16_t nwk)
     }
     bool go = i >= 0 && s_dev[i].step != AOS_ZB_DEV_DONE && !setting_up(i);
     unlock();
-    if (fresh && i >= 0) notice(_("Zigbee: entró un equipo (0x%04x), preguntándole qué es"), nwk);
+    if (fresh && i >= 0) {
+        notice(_("Zigbee: entró un equipo (0x%04x), preguntándole qué es"), nwk);
+        save_all();
+    }
     if (go) setup(i);
 }
 
@@ -647,6 +748,7 @@ void aos_zigbee_devices_endpoint(ezb_af_ep_desc_t ep)
 
 void aos_zigbee_devices_init(void)
 {
+    if (!s_n) load_all();
     ezb_zcl_raw_command_handler_register(on_raw);
     static esp_timer_handle_t t;
     const esp_timer_create_args_t ta = { .callback = tick_timer, .name = "zb_jobs" };
@@ -699,6 +801,7 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
         unlock();
         if (i >= 0) s_jobs[i].n = 0, s_jobs[i].busy = false;
         aos_hal_log(TAG, "0x%04x left the network (rejoin %u)", l->short_addr, l->leave_type);
+        if (i >= 0) save_all();
         notice(_("Zigbee: 0x%04x salió de la red"), l->short_addr);
         return true;
     }
@@ -714,6 +817,90 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
     default:
         return false;
     }
+}
+
+/* The network is up (formed, or back after a restart): any device of the
+ * stack's neighbor table the list does not have goes in, and those that
+ * listen all the time (routers, mains) are asked their Basic, to know at
+ * once whether they are there. Those asleep say so when they speak. */
+void aos_zigbee_devices_network_up(void)
+{
+    if (!s_net_up_ms) s_net_up_ms = (int64_t)aos_hal_uptime_ms();
+    ezb_nwk_info_iterator_t it = EZB_NWK_INFO_ITERATOR_INIT;
+    ezb_nwk_neighbor_info_t nb;
+    int added = 0;
+    while (ezb_nwk_get_next_neighbor(&it, &nb) == EZB_ERR_NONE) {
+        lock();
+        int i = find_ieee(nb.ieee_addr.u8);
+        if (i < 0 && (i = add(nb.ieee_addr.u8, nb.short_addr)) >= 0) added++;
+        if (i >= 0) {
+            s_dev[i].nwk = nb.short_addr;
+            if (nb.rx_on_when_idle) s_dev[i].cap |= 0x08;
+            if (nb.device_type == 1) s_dev[i].cap |= 0x02;          /* a router */
+            if (nb.rssi) s_dev[i].rssi = nb.rssi;
+        }
+        unlock();
+        if (it == EZB_NWK_INFO_ITERATOR_EOT) break;
+    }
+    aos_hal_log(TAG, "network up: %d devices in the list, %d more from the neighbor table", s_n, added);
+    if (added) save_all();
+    for (int i = 0; i < s_n; i++) {
+        if (s_dev[i].step == AOS_ZB_DEV_LEFT || s_dev[i].step == AOS_ZB_DEV_REMOVED) continue;
+        if (s_dev[i].step != AOS_ZB_DEV_DONE) {
+            if ((s_dev[i].cap & 0x08) && !setting_up(i)) setup(i);  /* awake: set it up now */
+        } else if ((s_dev[i].cap & 0x08) && !s_dev[i].heard_ms && !s_jobs[i].n) {
+            lock();
+            s_dev[i].ncl = 0;
+            unlock();
+            push(i, J_BASIC, s_dev[i].ep ? s_dev[i].ep : 1, CL_BASIC);  /* are you there? */
+            for (int k = 0; k < s_dev[i].neps; k++) push(i, J_SIMPLE, s_dev[i].eps_list[k], 0);
+            run(i);
+        }
+    }
+}
+
+/* ---- removing one ---------------------------------------------------------- */
+
+static uint8_t s_rm_ieee[8];
+
+static void on_leave(const ezb_zdo_nwk_mgmt_leave_req_result_t *res, void *ctx)
+{
+    (void)ctx;
+    aos_hal_log(TAG, "the leave request: %d/%d", res ? res->error : -1, res && res->rsp ? res->rsp->status : -1);
+}
+
+static void remove_task(void *ctx)
+{
+    (void)ctx;
+    lock();
+    int i = find_ieee(s_rm_ieee);
+    uint16_t nwk = i >= 0 ? s_dev[i].nwk : 0xFFFF;
+    unlock();
+    if (i < 0) return;
+    /* asked to leave, for good (a sleepy one gets it from its parent when
+     * it wakes); out of the list either way */
+    ezb_zdo_nwk_mgmt_leave_req_t r = { .dst_nwk_addr = nwk, .cb = on_leave };
+    memcpy(r.field.device_addr.u8, s_rm_ieee, 8);
+    r.field.remove_children = false;
+    r.field.rejoin = false;
+    aos_hal_log(TAG, "0x%04x: asked to leave: %d", nwk, ezb_zdo_nwk_mgmt_leave_req(&r));
+    /* marked, not moved: answers still on their way carry the slot's index */
+    lock();
+    i = find_ieee(s_rm_ieee);
+    if (i >= 0) s_dev[i].step = AOS_ZB_DEV_REMOVED;
+    unlock();
+    if (i >= 0) s_jobs[i].n = 0, s_jobs[i].busy = false;
+    save_all();
+    notice(_("Zigbee: 0x%04x, sacado de la red"), nwk);
+}
+
+bool aos_zigbee_remove(const uint8_t ieee[8])
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_FORMED) return false;
+    memcpy(s_rm_ieee, ieee, 8);
+    return esp_zigbee_task_queue_post(remove_task, NULL) == ESP_OK;
 }
 
 /* ---- the portal's side -------------------------------------------------- */
@@ -744,8 +931,9 @@ int aos_zigbee_permit_left(void)
 int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
 {
     lock();
-    int n = s_n < max ? s_n : max;
-    memcpy(out, s_dev, (size_t)n * sizeof *out);
+    int n = 0;
+    for (int i = 0; i < s_n && n < max; i++)
+        if (s_dev[i].step != AOS_ZB_DEV_REMOVED) out[n++] = s_dev[i];
     unlock();
     return n;
 }

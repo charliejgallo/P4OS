@@ -31,7 +31,8 @@ void aos_zigbee_info(aos_zigbee_info_t *out);
 #define AOS_ZB_DEVICES_MAX 32
 #define AOS_ZB_CLUSTERS    16           /* the clusters a device serves, kept */
 #define AOS_ZB_ATTRS       16           /* the last attributes it said, kept raw */
-enum { AOS_ZB_DEV_EPS = 0, AOS_ZB_DEV_BASIC, AOS_ZB_DEV_DONE, AOS_ZB_DEV_FAILED, AOS_ZB_DEV_LEFT };
+enum { AOS_ZB_DEV_EPS = 0, AOS_ZB_DEV_BASIC, AOS_ZB_DEV_DONE, AOS_ZB_DEV_FAILED, AOS_ZB_DEV_LEFT,
+       AOS_ZB_DEV_REMOVED };       /* removed: not listed, its slot kept until the next start */
 /* the clusters the board reads into values (aos_zigbee_dev_t.clusters) */
 enum { AOS_ZB_CL_POWER = 1 << 0, AOS_ZB_CL_ONOFF = 1 << 1, AOS_ZB_CL_TEMP = 1 << 2, AOS_ZB_CL_HUM = 1 << 3,
        AOS_ZB_CL_OCC = 1 << 4, AOS_ZB_CL_IAS = 1 << 5 };
@@ -52,7 +53,7 @@ typedef struct {
     uint8_t  power;             /* Basic's power source (0x01 mains, 0x03 battery...) */
     int8_t   rssi;
     uint32_t seen_ms;           /* aos_hal_uptime_ms() of its last announce */
-    uint32_t heard_ms;          /* and of the last frame from it */
+    uint32_t heard_ms;          /* and of the last frame from it; 0: no news since the start */
     char     manuf[33], model[33];
     /* the clusters its endpoints serve: ep << 16 | cluster */
     uint8_t  ncl;
@@ -74,6 +75,8 @@ typedef struct {
 } aos_zigbee_dev_t;
 
 bool aos_zigbee_permit(int seconds);
+/* asks a device to leave the network, and forgets it */
+bool aos_zigbee_remove(const uint8_t ieee[8]);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
 

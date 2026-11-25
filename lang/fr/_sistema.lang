@@ -11585,7 +11585,6 @@ Abierta: %d s	Ouvert : %d s
 Sumar equipos	Ajouter des appareils
 La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
 Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Réinitialisez l'appareil maintenant : l'écran indique quand il rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie.
 router	routeur
 a red eléctrica	sur secteur
 a pila	sur pile
@@ -11601,3 +11600,8 @@ Mi red	Mon réseau
 Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s
 Abierta para sumar	Ouvert pour ajouter
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Le réseau reste ouvert tant que vous êtes ici, jusqu'à Fermer. Réinitialisez les appareils un par un : l'écran indique quand chacun rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo).	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut mettre du temps à donner des nouvelles (appuyez sur son bouton pour le réveiller).
+¿Seguro?	Sûr ?
+Sacar	Retirer
+sin noticias desde que arrancó la placa	aucune nouvelle depuis le démarrage de la carte
+Zigbee: 0x%04x, sacado de la red	Zigbee : 0x%04x, retiré du réseau

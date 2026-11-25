@@ -11585,7 +11585,6 @@ Abierta: %d s	Aberta: %d s
 Sumar equipos	Adicionar dispositivos
 La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	A placa cria sua própria rede Zigbee, com o C6 como rádio, e os dispositivos entram nela: assim dá para testar qualquer um. Um dispositivo fica em uma rede só: para adicioná-lo aqui, resete-o (em geral, segurando o botão até piscar).
 Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Resete o dispositivo agora: a tela avisa quando ele entra e o que é. Se for a pilha, aperte o botão de vez em quando enquanto ele é configurado.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda.	Rede no canal %u. %d dispositivos. Os valores chegam quando o dispositivo os envia.
 router	roteador
 a red eléctrica	na tomada
 a pila	a pilha
@@ -11601,3 +11600,8 @@ Mi red	Minha rede
 Zigbee: %s, salida %u %s	Zigbee: %s, saída %u %s
 Abierta para sumar	Aberta para adicionar
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	A rede fica aberta enquanto você estiver aqui, até Fechar. Resete os dispositivos um de cada vez: a tela avisa quando cada um entra e o que é. Se for a pilha, aperte o botão de vez em quando enquanto ele é configurado.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo).	Rede no canal %u. %d dispositivos. Os valores chegam quando o dispositivo os envia: um a pilha pode demorar para dar notícias (aperte o botão para acordá-lo).
+¿Seguro?	Certeza?
+Sacar	Remover
+sin noticias desde que arrancó la placa	sem notícias desde que a placa ligou
+Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, removido da rede
