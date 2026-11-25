@@ -10,7 +10,8 @@
   "juegos-1",
   "juegos-2",
   "juegos-3",
-  "pruebas"
+  "pruebas",
+  "nuevas"
  ],
  "apps": [
   {
@@ -1383,6 +1384,22 @@
    ],
    "juguete": {
     "a": "barras de colores de prueba"
+   }
+  },
+  {
+   "id": "aos.zigbee",
+   "name": "Zigbee",
+   "group": "nuevas",
+   "colors": [
+    "#EB0443",
+    "#9E0230"
+   ],
+   "juguete": {
+    "a": "una malla de nodos con el coordinador en el medio",
+    "b": "el módulo de radio con su antena en zigzag",
+    "c": "un hub con una lamparita, un sensor y un enchufe",
+    "d": "una Z trazada por una malla de nodos, con ondas",
+    "e": "el ícono de hoy, ((•)), en 3D"
    }
   }
  ]
