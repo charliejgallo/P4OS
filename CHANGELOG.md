@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.34.0 — 2026-11-25
+
+The board becomes a Zigbee hub, a test bench and a fake device, and the home
+screen gets drawn icons. **Zigbee needs a new firmware in the ESP32-C6**
+(3.0.9-154.15): Store, System, The radio's firmware (C6); then Settings,
+Update, Install on the C6 (about 15 s without Wi-Fi, the board restarts by
+itself). The release notes have the steps in detail.
+
+- **Zigbee, the board's own network** (the Zigbee app's tab My network).
+  Espressif's Zigbee stack runs on the P4 with the C6 as its radio
+  (OpenThread's RCP, its spinel over esp_hosted's peer_data), and forms a
+  network on channel 26. Devices join with "Add devices", or with "Add
+  Zigbee 3.0" for one that blinks and never finishes (the link key exchange
+  required, the board alone open). Each one shows what it is (Basic, and
+  for 1,400 Tuya devices a table from Zigbee2MQTT's definitions, a System
+  part), what it measures, its datapoints by name, its events and every
+  attribute it said; outputs switch with a tap, dimmers, covers and colour
+  temperature have sliders, thermostats, locks and fans their controls. A
+  device can have a name of your own; the list is kept, and one that is
+  off shows as "no news". Tried on the board with door, water, motion and
+  temperature sensors, a two-relay Tuya module, a dimmer and an IR blaster.
+- **Tuya IR blasters** (TS1201, "Zosung"): learn a code from any remote,
+  keep it with a name (on the card), send it with a tap, from the screen or
+  the portal. The Infrarrojo app can send and learn through a blaster
+  instead of the board's LED, so its remotes, air conditioners and SmartIR's
+  library go out through it.
+- **Emulate** (a new tab): the board joins someone else's Zigbee network
+  (Home Assistant's, ZHA or Zigbee2MQTT) as a router posing as a light and a
+  temperature, humidity and battery sensor, and logs in words every request
+  of the coordinator. Its network is kept apart from the board's own (the
+  stack's NVS namespace "zbemu"); a restart goes back to it by itself, and
+  "Back to My network" brings the board's own back. Tried against
+  Zigbee2MQTT with a Sonoff ZBDongle-E.
+- **The portal's Zigbee page** has My network and Emulate, to drive the
+  devices from a phone; `/api/154` and its `zb*` and `zbemu` requests.
+- **The C6's firmware 3.0.9-154.15** (`c6.bin`, a System part): the
+  802.15.4 radio able to carry a Zigbee network (the energy scan in short
+  measures, Wi-Fi coexistence, the loop woken on each request). It fits the
+  factory's slots.
+- **Drawn icons**: two packs as System parts, 3D toy and Line, 103 apps
+  each, for the home screen, the dock, the folders, the Store and the
+  portal; Settings, Wallpaper, Icons, where "The usual ones" go back. While
+  a full-screen game runs the home screen lets go of its icons and the apps
+  waiting in the background close: Planeo opens with 15.8 MB of PSRAM free
+  with the toy pack, against 16.1 MB without.
+- **The boot hang after an OTA** ("no card, no Wi-Fi"): the microSD and the
+  C6 share the P4's one SDMMC controller, and a restart in the middle of a
+  card write left the card stuck. The card is unmounted before any restart
+  and runs at 20 MHz, and it is mounted before the C6's link starts.
+- **Store:** "Update all" under Updates, on the board and in the portal; a
+  part of the system may write `zigbee/*.txt`.
+- A row of the portal with a long value wraps on a phone instead of
+  overlapping its label.
+
 ## 0.33.0 — 2026-11-24
 
 Nine new apps, three new languages, and a Terminal that reads multimeters.
