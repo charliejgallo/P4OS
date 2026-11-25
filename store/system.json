@@ -183,12 +183,12 @@
    "en": "The radio's firmware (C6)"
   },
   "about": {
-   "es": "Un firmware más nuevo para el ESP32-C6, que hace el Wi-Fi y el Bluetooth. Se instala después desde Ajustes.",
-   "en": "A newer firmware for the ESP32-C6, which does the Wi-Fi and the Bluetooth. It is installed afterwards from Settings."
+   "es": "El firmware del ESP32-C6, que hace el Wi-Fi, el Bluetooth y, desde la 0.34, la radio Zigbee. Se instala después desde Ajustes.",
+   "en": "The ESP32-C6's firmware, which does the Wi-Fi, the Bluetooth and, since 0.34, the Zigbee radio. It is installed afterwards from Settings."
   },
   "desc": {
-   "es": "La placa sale de fábrica con un firmware más viejo en el C6, que anda. Este es el de la misma versión que usa el lado del P4 (esp_hosted 3.0.9). Bajarlo lo deja en la tarjeta y nada más.\n\nPara instalarlo: Ajustes, Actualización, Instalar en el C6. Mientras se manda no hay Wi-Fi, unos segundos, y al terminar la placa se reinicia.",
-   "en": "The board leaves the factory with an older firmware in the C6, which works. This one is the same version the P4's side runs (esp_hosted 3.0.9). Getting it leaves it on the card and nothing else.\n\nTo install it: Settings, Update, Install on the C6. While it is sent there is no Wi-Fi, for some seconds, and at the end the board restarts."
+   "es": "La versión 3.0.9-154.15: el Wi-Fi y el Bluetooth de siempre, y además la radio 802.15.4 que usa la app Zigbee (escanear, escuchar, la red propia de la placa y emular un equipo). Sin ella la app Zigbee no anda; lo demás sí.\n\nBajarlo lo deja en la tarjeta y nada más. Para instalarlo: Ajustes, Actualización, Instalar en el C6. Mientras se manda (unos 15 s) no hay Wi-Fi; al terminar la placa se reinicia sola y vuelve en unos 30 s. No hace falta cable ni tocar nada más.",
+   "en": "Version 3.0.9-154.15: the usual Wi-Fi and Bluetooth, plus the 802.15.4 radio the Zigbee app uses (scanning, listening, the board's own network and emulating a device). Without it the Zigbee app does not work; everything else does.\n\nGetting it leaves it on the card and nothing else. To install it: Settings, Update, Install on the C6. While it is sent (some 15 s) there is no Wi-Fi; at the end the board restarts by itself and is back in about 30 s. No cable, nothing else to touch."
   },
   "glyph": "AOS_SYM_ROUTER_WIRELESS",
   "colors": [
@@ -253,6 +253,58 @@
    {
     "path": "zigbee/tuya.txt",
     "asset": "zigbee_tuya.txt"
+   }
+  ]
+ },
+ {
+  "file": "sys-icons-juguete",
+  "name": {
+   "es": "Íconos 3D de juguete",
+   "en": "3D toy icons"
+  },
+  "about": {
+   "es": "Un ícono dibujado en 3D para cada app, como de juguete, en lugar del círculo con un símbolo.",
+   "en": "A 3D icon for every app, like a toy, instead of the circle with a symbol."
+  },
+  "desc": {
+   "es": "103 íconos hechos en Blender para las apps del sistema y las de la Tienda, en el inicio, el dock, las carpetas, la Tienda y el portal. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes. Si hay un pack en la tarjeta y no se eligió ninguno, se usa ese.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
+   "en": "103 icons made in Blender for the system's apps and the Store's, on the home screen, the dock, the folders, the Store and the portal. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones. If a pack is on the card and none was chosen, that one is used.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
+  },
+  "glyph": "AOS_SYM_APPS",
+  "colors": [
+   "FF9F0A",
+   "C24E00"
+  ],
+  "files": [
+   {
+    "path": "icons/juguete.pak",
+    "asset": "juguete.pak"
+   }
+  ]
+ },
+ {
+  "file": "sys-icons-linea",
+  "name": {
+   "es": "Íconos de línea",
+   "en": "Line icons"
+  },
+  "about": {
+   "es": "Un ícono de línea en dos colores sobre fondo oscuro para cada app.",
+   "en": "A two-colour line icon on a dark tile for every app."
+  },
+  "desc": {
+   "es": "Los mismos 103 íconos, en otro estilo: una línea en dos colores con un brillo suave, sobre una ficha casi negra. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
+   "en": "The same 103 icons in another style: a two-colour line with a soft glow on an almost black tile. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
+  },
+  "glyph": "AOS_SYM_APPS",
+  "colors": [
+   "5E5CE6",
+   "1C1C3A"
+  ],
+  "files": [
+   {
+    "path": "icons/linea.pak",
+    "asset": "linea.pak"
    }
   ]
  }

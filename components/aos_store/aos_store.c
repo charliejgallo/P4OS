@@ -407,8 +407,9 @@ static bool allowed(const char *path, const char *file)
 /* Where a part of the system may put a file - the official source's own
  * (see "System parts" below): lang/<code>/_<name>.lang, the system's and
  * the portal's translations; fonts/<name>.pak, the colour emoji;
- * icons/<name>.pak, the HD icons (aos_icon_pack.h); zigbee/<name>.bin, the
- * Zigbee app's tables (the makers of radios, aos_154.c); and
+ * icons/<name>.pak, the HD icons (aos_icon_pack.h); zigbee/<name>.bin or
+ * .txt, the Zigbee app's tables (the makers of radios, aos_154.c; what each
+ * Tuya device is, aos_zigbee_tuya.c); and
  * firmware/<name>.bin, the radio's firmware, which Settings installs. */
 static bool sys_allowed(const char *path)
 {
@@ -420,7 +421,8 @@ static bool sys_allowed(const char *path)
         return b && b - a - 1 == 2 && islower((unsigned char)a[1]) && islower((unsigned char)a[2]) && !strchr(b + 1, '/') &&
                b[1] == '_' && ends(b + 1, ".lang") && name_ok(b + 1, strlen(b + 1), "_.");
     if (!strncmp(path, "fonts/", 6)) return !b && ends(a + 1, ".pak") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
-    if (!strncmp(path, "zigbee/", 7)) return !b && ends(a + 1, ".bin") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
+    if (!strncmp(path, "zigbee/", 7))
+        return !b && (ends(a + 1, ".bin") || ends(a + 1, ".txt")) && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
     if (!strncmp(path, "icons/", 6)) return !b && ends(a + 1, ".pak") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
     if (!strncmp(path, "firmware/", 9)) return !b && ends(a + 1, ".bin") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
     return false;
