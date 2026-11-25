@@ -377,7 +377,15 @@ velocidad que sin Zigbee. Lo de cada paso:
   por equipo con sus valores y lo crudo. Probado: el módulo de relés
   (configurado entero, las dos salidas) y el de temperatura (25,9 °C,
   62,1 %, batería 78 %, llegados solos aunque dormido no terminó de
-  configurarse). **Falta:** el contacto de puerta, el PIR y el de agua con
+  configurarse). Pulido después de la primera prueba del usuario ("me
+  cuesta agregar los equipos"): cinco equipos entraron por el router (el
+  módulo de relés) y su anuncio nunca llegó a la placa, que los esperaba
+  para listarlos; ahora entra a la lista y se configura apenas la red lo
+  autoriza. Ya no se atan los clusters propios de cada marca (0xFC00 y
+  más: 5 s perdidos cada uno mientras el equipo a pila se dormía), un
+  equipo a medio configurar se configura de nuevo cuando habla, y "Sumar
+  equipos" deja la red abierta mientras se está en la pestaña, hasta
+  Cerrar. **Falta:** el contacto de puerta, el PIR y el de agua con
   esta versión, mandar órdenes (prender una salida), guardar la lista,
   buscar el modelo en la base de Zigbee2MQTT.
 - **Para qué** (el usuario, 2026-11-24): un banco de pruebas de campo. Si
@@ -418,7 +426,7 @@ quien siga no repita las vueltas:
 | 11 | El primer sensor entró y a los 14 s lo echaron ("authorization timeout") | la pila exigía el intercambio de clave de Zigbee 3.0, que los equipos anteriores no hacen | no se exige, como en Zigbee2MQTT |
 | 12 | El sensor no encontraba la red | el Wi-Fi rechazaba 4 de 5 beacons que le contestaban (prioridad MEDIO) | prioridad ALTA al mandar: 0 rechazos |
 | 13 | El fabricante y el modelo llegaban rotos ("dropping radio frame: Parse") | la pila lee su "UART" de a 128 bytes y, de un datagrama más largo, el resto se pierde | el túnel le entrega datagramas de 64 bytes |
-| 14 | La placa "colgada" en el primer arranque después de un OTA (cuatro veces en el día) | la microSD y el C6 comparten el único controlador SDMMC del P4, y esp_hosted levanta el C6 por su cuenta mientras se lee la tarjeta: cuando se cruzaron, la tarjeta falló tres veces y el enlace del C6 se cayó (sin tarjeta y sin Wi-Fi) | la tarjeta espera a que el enlace del C6 esté arriba (`aos_hal_p4.c`, `sd_mount`, a lo sumo 4 s; ~1,6 s más de arranque); seis reinicios seguidos, limpios. **No es de Zigbee: `main` lo necesita también** |
+| 14 | La placa "colgada" en el primer arranque después de un OTA (cuatro veces en el día) | la microSD y el C6 comparten el único controlador SDMMC del P4, y esp_hosted levanta el C6 por su cuenta mientras se lee la tarjeta: cuando se cruzaron, la tarjeta falló tres veces y el enlace del C6 se cayó (sin tarjeta y sin Wi-Fi) | primero se probó que la tarjeta esperara al enlace del C6, y en el OTA siguiente se cruzaron igual (el enlace abre su camino de datos después de decir "arriba"); quedó así: esp_hosted ya no levanta el C6 solo antes de `app_main` (`CONFIG_ESP_HOSTED_AUTO_CALL_INIT_BEFORE_APP_MAIN` apagado), la HAL monta la tarjeta sola y después levanta el enlace en una tarea propia mientras arranca la pantalla (`aos_hal_p4.c`, `c6_link_start`); siete arranques limpios y la pantalla 1,6 s antes. **No era de Zigbee: está en `main` también** (`b3e9ace0`) |
 
 Y lo que lo hizo visible: contadores en cada llamada entre la pila y su
 plataforma (`aos_zigbee_trace.c`), el volcado de los bytes de spinel en cada

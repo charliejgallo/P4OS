@@ -11599,3 +11599,5 @@ prendida	allumée
 antes	avant
 Mi red	Mon réseau
 Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s
+Abierta para sumar	Ouvert pour ajouter
+La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Le réseau reste ouvert tant que vous êtes ici, jusqu'à Fermer. Réinitialisez les appareils un par un : l'écran indique quand chacun rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.

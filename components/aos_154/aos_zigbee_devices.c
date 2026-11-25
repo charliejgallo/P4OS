@@ -143,6 +143,7 @@ static struct {
     uint8_t head, n;
     bool    busy;
     int64_t since_ms;
+    int64_t setup_ms;                   /* when its setup last started */
 } s_jobs[AOS_ZB_DEVICES_MAX];
 
 static void run(int i);
@@ -220,7 +221,12 @@ static void on_simple(const ezb_zdo_simple_desc_req_result_t *res, void *ctx)
              * says comes here (and is kept raw if the board cannot name it);
              * not those that only take commands or are the device's own */
             bool quiet = c == CL_BASIC || c == 0x0003 || c == 0x0004 || c == 0x0005 || c == 0x000a || c == 0x0019 ||
-                         c == 0x0020 || c == 0x1000;
+                         c == 0x0020 || c == 0x1000 ||
+                         /* a maker's own (0xFC00 and up): what they say comes
+                          * unbound, and a bind they do not take costs a
+                          * sleepy device's few awake seconds (an SNZB-02D's
+                          * 0xFC57 and 0xFC11, an ORVIBO's 0xFFFF: 5 s each) */
+                         c >= 0xFC00;
             if (!quiet) push(i, J_BIND, ep, c);
             if (c == CL_IAS) {
                 push(i, J_CIE, ep, c);
@@ -374,8 +380,40 @@ static void setup(int i)
 {
     s_jobs[i].head = s_jobs[i].n = 0;
     s_jobs[i].busy = false;
+    s_jobs[i].setup_ms = (int64_t)aos_hal_uptime_ms();
+    lock();
+    s_dev[i].ncl = 0;
+    s_dev[i].clusters = 0;
+    unlock();
     push(i, J_ACTIVE, 0, 0);
     run(i);
+}
+
+/* a setup under way, or one that started a short while ago */
+static bool setting_up(int i)
+{
+    return s_jobs[i].n || (int64_t)aos_hal_uptime_ms() - s_jobs[i].setup_ms < 60000;
+}
+
+/* a device the network let in: into the list and set up, if it is not
+ * already. The announce that should follow its join (a broadcast) did not
+ * reach the board for five devices that came in through a router (on the
+ * board, 2026-11-24): the network's own word that it is in is enough. */
+static void joined(const uint8_t *ieee, uint16_t nwk)
+{
+    lock();
+    int i = find_ieee(ieee);
+    bool fresh = i < 0;
+    if (fresh) i = add(ieee, nwk);
+    if (i >= 0) {
+        s_dev[i].nwk = nwk;
+        s_dev[i].seen_ms = s_dev[i].heard_ms = (uint32_t)aos_hal_uptime_ms();
+        if (s_dev[i].step == AOS_ZB_DEV_LEFT || s_dev[i].step == AOS_ZB_DEV_FAILED) s_dev[i].step = AOS_ZB_DEV_EPS;
+    }
+    bool go = i >= 0 && s_dev[i].step != AOS_ZB_DEV_DONE && !setting_up(i);
+    unlock();
+    if (fresh && i >= 0) notice(_("Zigbee: entró un equipo (0x%04x), preguntándole qué es"), nwk);
+    if (go) setup(i);
 }
 
 /* ---- what the devices say ----------------------------------------------- */
@@ -423,6 +461,7 @@ static const char *zone_word(uint16_t type, bool alarm)
 
 static void zone_status(aos_zigbee_dev_t *d, uint16_t st)
 {
+    aos_hal_log(TAG, "0x%04x: zone status 0x%04x", d->nwk, st);
     bool was = d->zone_known && (d->zone_status & 1), now = st & 1;
     bool first = !d->zone_known;
     d->zone_status = st;
@@ -559,6 +598,7 @@ static bool on_raw(const ezb_zcl_raw_frame_t *f)
     bool enroll = specific && cl == CL_IAS && h->cmd_id == 0x01;
     char manuf[33], model[33];
     bool named = is_read && cl == CL_BASIC;
+    bool unfinished = d->step != AOS_ZB_DEV_DONE;
     if (named) {
         d->step = AOS_ZB_DEV_DONE;
         memcpy(manuf, d->manuf, sizeof manuf);
@@ -569,7 +609,13 @@ static bool on_raw(const ezb_zcl_raw_frame_t *f)
     if (fresh) {
         aos_hal_log(TAG, "0x%04x spoke and is not in the list: setting it up", nwk);
         setup(i);
+    } else if (!named && unfinished && !setting_up(i)) {
+        /* half set up (asleep before it was done): it is awake now */
+        aos_hal_log(TAG, "0x%04x spoke, its setup was not finished: again", nwk);
+        setup(i);
     }
+    if (specific && cl == CL_IAS)
+        aos_hal_log(TAG, "0x%04x: IAS command 0x%02x, %u bytes", nwk, h->cmd_id, (unsigned)f->payload_length);
     if (named) {
         aos_hal_log(TAG, "0x%04x: \"%s\" \"%s\"", nwk, manuf, model);
         notice("Zigbee: %s %s", manuf[0] ? manuf : "?", model);
@@ -615,31 +661,28 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
     case EZB_ZDO_SIGNAL_DEVICE_ANNCE: {
         const ezb_zdo_signal_device_annce_params_t *a = p;
         if (!a) return true;
-        lock();
-        int i = find_ieee(a->device_addr.u8);
-        if (i < 0) i = add(a->device_addr.u8, a->short_addr);
-        bool again = false;
-        if (i >= 0) {
-            aos_zigbee_dev_t *d = &s_dev[i];
-            d->nwk = a->short_addr;
-            d->cap = a->capability;
-            d->seen_ms = d->heard_ms = (uint32_t)aos_hal_uptime_ms();
-            again = d->step != AOS_ZB_DEV_DONE;
-            if (again) d->step = AOS_ZB_DEV_EPS;
-        }
-        unlock();
         const uint8_t *e = a->device_addr.u8;
         aos_hal_log(TAG, "a device announced itself: 0x%04x, %02x%02x%02x%02x%02x%02x%02x%02x, capability 0x%02x",
                     a->short_addr, e[7], e[6], e[5], e[4], e[3], e[2], e[1], e[0], a->capability);
-        if (i >= 0 && again) {
-            notice(_("Zigbee: entró un equipo (0x%04x), preguntándole qué es"), a->short_addr);
-            setup(i);
+        /* a device that joins again (reset) is asked everything again */
+        lock();
+        int i = find_ieee(a->device_addr.u8);
+        if (i >= 0) {
+            s_dev[i].cap = a->capability;
+            if (s_dev[i].nwk != a->short_addr) s_dev[i].step = AOS_ZB_DEV_EPS;
         }
+        unlock();
+        joined(a->device_addr.u8, a->short_addr);
+        lock();
+        if ((i = find_ieee(a->device_addr.u8)) >= 0) s_dev[i].cap = a->capability;
+        unlock();
         return true;
     }
     case EZB_ZDO_SIGNAL_DEVICE_AUTHORIZED: {
         const ezb_zdo_signal_device_authorized_params_t *a = p;
-        if (a) aos_hal_log(TAG, "0x%04x authorized: type %u, status %u", a->short_addr, a->type, a->status);
+        if (!a) return true;
+        aos_hal_log(TAG, "0x%04x authorized: type %u, status %u", a->short_addr, a->type, a->status);
+        if (a->status == 0) joined(a->device_addr.u8, a->short_addr);
         return true;
     }
     case EZB_ZDO_SIGNAL_DEVICE_UPDATE: {

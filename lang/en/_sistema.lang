@@ -11024,3 +11024,5 @@ prendida	on
 antes	earlier
 Mi red	My network
 Zigbee: %s, salida %u %s	Zigbee: %s, output %u %s
+Abierta para sumar	Open to add
+La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	The network stays open while you are here, until Close. Reset the devices one at a time: the screen tells when each one joins and what it is. If it runs on battery, press its button now and then while it is set up.

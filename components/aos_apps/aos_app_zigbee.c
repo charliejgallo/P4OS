@@ -62,6 +62,8 @@ static struct {
     uint32_t devs_tick;
     lv_obj_t *net, *net_note, *net_btn, *net_lbl, *close_btn;
     volatile bool starting;             /* the network being started, off LVGL's task */
+    bool keep_open;                     /* "Sumar equipos": open again each time it closes, until Cerrar */
+    uint32_t asked_ms;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -456,6 +458,11 @@ static void net_cb(lv_event_t *e)
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
     if (z.state == AOS_ZB_FORMED) {
+        /* open until Cerrar or until the app closes: a device's reset is
+         * not always on the first try, and 254 s (the most one opening
+         * lasts) ran out in the middle of pairing several */
+        U.keep_open = true;
+        U.asked_ms = (uint32_t)aos_hal_uptime_ms();
         if (!aos_zigbee_permit(254)) aos_ui_toast(_("La red no tomó el pedido"), 2000);
     } else if (!U.starting && z.state != AOS_ZB_STARTING) {
         aos_154_info_t in;
@@ -469,6 +476,7 @@ static void net_cb(lv_event_t *e)
 static void close_cb(lv_event_t *e)
 {
     (void)e;
+    U.keep_open = false;
     aos_zigbee_permit(0);
 }
 
@@ -546,11 +554,17 @@ static void fill_net(int32_t w)
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
     int open = aos_zigbee_permit_left();
+    uint32_t t = (uint32_t)aos_hal_uptime_ms();
+    if (U.keep_open && z.state == AOS_ZB_FORMED && open < 5 && t - U.asked_ms > 5000) {
+        U.asked_ms = t;
+        aos_zigbee_permit(254);
+    }
     if (U.starting || z.state == AOS_ZB_STARTING) lv_label_set_text(U.net_lbl, _("Armando la red..."));
     else if (z.state != AOS_ZB_FORMED) lv_label_set_text(U.net_lbl, _("Armar la red"));
+    else if (U.keep_open) lv_label_set_text(U.net_lbl, _("Abierta para sumar"));
     else if (open) lv_label_set_text_fmt(U.net_lbl, _("Abierta: %d s"), open);
     else lv_label_set_text(U.net_lbl, _("Sumar equipos"));
-    if (open) lv_obj_remove_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
+    if (open || U.keep_open) lv_obj_remove_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
     else lv_obj_add_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
 
     static aos_zigbee_dev_t d[AOS_ZB_DEVICES_MAX];
@@ -559,9 +573,10 @@ static void fill_net(int32_t w)
         lv_label_set_text(U.net_note, _("La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a "
                                         "ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá "
                                         "hay que resetearlo (en general, el botón apretado hasta que parpadea)."));
-    else if (open)
-        lv_label_set_text(U.net_note, _("Reseteá el equipo ahora: la pantalla avisa cuando entra y qué es. Si es a pila, "
-                                        "tocale el botón cada tanto mientras se configura."));
+    else if (open || U.keep_open)
+        lv_label_set_text(U.net_note, _("La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a "
+                                        "uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el "
+                                        "botón cada tanto mientras se configura."));
     else
         lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda."),
                               z.channel, n);
