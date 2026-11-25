@@ -23,8 +23,10 @@
 #if !defined(AOS_SIM)
 #include "esp_heap_caps.h"
 #define tz_malloc(n) heap_caps_malloc((n), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT)
+#define tz_calloc(n) heap_caps_calloc(1, (n), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT)
 #else
 #define tz_malloc(n) malloc(n)
+#define tz_calloc(n) calloc(1, (n))
 #endif
 
 #define CACHE 40
@@ -137,7 +139,10 @@ static entry_t *lookup(const aos_zigbee_dev_t *d)
     snprintf(path, sizeof path, "%s/zigbee/tuya.txt", root);
     FILE *f = fopen(path, "r");
     if (!f) return NULL;
-    if (!s_cache) s_cache = tz_malloc(sizeof(entry_t) * CACHE);
+    /* zeroed: an entry used for the first time has no key and no set to free
+     * (not zeroed, the first lookup freed garbage: the portal aborted, on
+     * the board, 2026-11-25) */
+    if (!s_cache) s_cache = tz_calloc(sizeof(entry_t) * CACHE);
     char *line = tz_malloc(LINE);
     if (!s_cache || !line) {
         free(line);
