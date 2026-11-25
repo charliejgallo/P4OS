@@ -28,7 +28,11 @@ de lo más rápido a lo que lleva más tiempo (detalle en
       Aprender por el hub. El primer envío puede tardar: mirar el log
       ("IR: from the blaster").
 - [ ] **El portal:** la página Zigbee con Mi red, desde el celular.
-- [ ] **Emular** (lo que más tiempo lleva, necesita el Home Assistant del
+- [x] **Emular**, hecho el 2026-11-25 contra Zigbee2MQTT (ember): entró,
+      la entrevista, la luz en los dos sentidos, los valores, un reinicio
+      vuelve solo, Volver a Mi red trae los 7 equipos
+      (`ZIGBEE-EMULAR.md`, "Etapa 1 en la placa"). Lo que decía:
+      (lo que más tiempo lleva, necesita el Home Assistant del
       usuario): antes, preguntarle qué coordinador tiene (ZHA o
       Zigbee2MQTT, y el dongle). Pestaña Emular, "Reiniciar y emular"; en
       Home Assistant abrir la red; la placa entra como "P4OS-EMU-LT".

@@ -1,8 +1,9 @@
 # P4OS — La placa emula un equipo Zigbee
 
-**Dónde quedó (2026-11-25, de noche):** la etapa 0 está hecha y probada en
-el simulador; falta la etapa 1 en la placa, con el usuario
-(`PRUEBAS-PLACA.md`, arriba). Lo que hay: `aos_zigbee_emu.c` (el equipo
+**Dónde quedó (2026-11-25):** las etapas 0 y 1 están hechas: la placa se
+unió al Zigbee2MQTT del usuario como equipo, la luz y los valores van y
+vienen, un reinicio vuelve solo y Volver a Mi red trae la red propia
+intacta (abajo, "Etapa 1 en la placa"). Lo que hay: `aos_zigbee_emu.c` (el equipo
 "luz y sensor", la búsqueda de red cada 5 s, el registro en palabras de lo
 que pide el coordinador, salir y volver), `aos_zigbee_nvs.c` (el desvío de
 `"zigbee"` a `"zbemu"`, confirmado en el mapa del enlazador: la librería lo
@@ -42,6 +43,23 @@ con un Sonoff ZBDongle-E (adaptador `ember`):**
   ahora" aparecen en Zigbee2MQTT.
 - Zigbee2MQTT pregunta la dirección larga cada tanto (su chequeo de que
   el equipo sigue vivo).
+- **La luz en los dos sentidos, confirmado por el usuario:** tocarla en la
+  placa cambia el State en Zigbee2MQTT, y el State de Zigbee2MQTT la
+  cambia en la placa.
+- **Un reinicio vuelve solo:** con la red guardada en `"zbemu"`, "Unirse"
+  volvió a la red sin que la abrieran (`DEVICE_REBOOT` 0, la misma
+  dirección corta), y un reinicio (`/api/restart`) también. Para eso
+  hizo falta `zbe_mode` (queda puesto mientras se emula): `zbe_boot` sola
+  se borra al usarse y la pila no arrancaba.
+- **Volver a Mi red, lo más importante: anda.** Se reinició, arrancó
+  como coordinador en el canal 26 y la pila encontró su red en
+  `"zigbee"` ("back on its network", `DEVICE_REBOOT` 0, no una red
+  nueva): los 7 equipos en la lista, y en un minuto contestaron el
+  TS0002, el dimmer, el emisor IR y el PIR. Las dos redes quedaron cada
+  una en su namespace, sin pisarse.
+
+Quedan para la etapa 2: los otros tipos (puerta, relé, dimmer, botón),
+probar contra ZHA, y elegir la red cuando hay más de una abierta.
 
 Diseño, escrito antes del código (2026-11-25). Sigue a `ZIGBEE.md` (la pila de
 Espressif en el P4 con el C6 de radio, la red propia de la placa como
