@@ -5,6 +5,40 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
+## Zigbee, para probar el 2026-11-25 (rama `zigbee-p4`, con el usuario)
+
+Todo esto anda en el simulador; nada se instaló en la placa. En orden,
+de lo más rápido a lo que lleva más tiempo (detalle en
+`docs/plan/ZIGBEE.md` y `ZIGBEE-EMULAR.md`):
+
+1. **Instalar** el firmware (`NOBUILD=1 tools/ota.sh`, ya compilado), la
+   app Infrarrojo (`tools/install_apps.sh p4os.local infrarrojo`) y el
+   pack de idioma (`tools/install_lang.sh p4os.local en`). Después, para
+   la tabla Tuya: subir `build/zigbee/zigbee_tuya.txt` a
+   `/sdcard/zigbee/tuya.txt` (lo arma `tools/zigbee/gen_tuya.py`).
+- [ ] La red propia vuelve sola con sus 7 equipos (Mi red, Armar la red).
+- [ ] **Nombre propio:** tocar el título de una tarjeta, ponerle nombre;
+      reiniciar y que siga.
+- [ ] **Tabla Tuya:** el TS0002 dice "Tuya TS0002_basic, 2 gang switch
+      module". (Ningún TS0601 para probar los datapoints.)
+- [ ] **Códigos IR guardados:** aprender uno, "Guardarlo...", reiniciar,
+      tocarlo: la tele responde. Mantener dos veces: se borra.
+- [ ] **Infrarrojo por el hub:** en Cableado, Salida = el TS1201; un
+      control de la biblioteca SmartIR (la tele del usuario) por el hub;
+      Aprender por el hub. El primer envío puede tardar: mirar el log
+      ("IR: from the blaster").
+- [ ] **El portal:** la página Zigbee con Mi red, desde el celular.
+- [ ] **Emular** (lo que más tiempo lleva, necesita el Home Assistant del
+      usuario): antes, preguntarle qué coordinador tiene (ZHA o
+      Zigbee2MQTT, y el dongle). Pestaña Emular, "Reiniciar y emular"; en
+      Home Assistant abrir la red; la placa entra como "P4OS-EMU-LT".
+      Mirar: la entrevista en el registro, la luz desde Home Assistant y
+      desde la placa, la temperatura y la batería en Home Assistant,
+      "Reportar ahora", un reinicio (vuelve sola), "Salir de la red" y
+      **"Volver a Mi red": que la red propia vuelva con sus equipos** (es
+      lo más importante: el desvío del NVS a "zbemu"). Los nueve pasos
+      están en `ZIGBEE-EMULAR.md`, etapa 1.
+
 ## Pendientes al 2026-11-22, después de la 0.32.0
 
 La placa corre `v0.32.0`, la imagen del CI, con las 73 apps del catálogo

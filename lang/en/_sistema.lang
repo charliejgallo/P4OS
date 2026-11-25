@@ -11115,3 +11115,70 @@ factor de potencia	power factor
 frecuencia	frequency
 energía entregada	energy produced
 salida %d	output %d
+La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	The board is emulating a device on another network (Emulate tab). Its own network and devices are kept: they come back with Back to My network, which restarts the board.
+Reiniciando para emular...	Restarting to emulate...
+Volviendo a la red propia: la placa se reinicia	Back to its own network: the board restarts
+Luz y sensor de temperatura	Light and temperature sensor
+Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1: a light that turns on and off (0x0100). Endpoint 2: temperature, humidity and battery (0x0302). Manufacturer P4OS, model P4OS-EMU-LT.
+La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	The board joins another Zigbee network, Home Assistant's for example, posing as this device, to see whether the coordinator reads and drives it, and what it asks. It joins as a router, mains powered: a battery device cannot be emulated. First, in Home Assistant: Add device (ZHA) or Permit join (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	A network from last time is kept: the board goes back to it without it being opened.
+Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	To emulate, the board leaves its network for a while: it restarts as a device. Your devices are kept and come back with Back to My network.
+Reiniciar y emular	Restart and emulate
+Buscando una red abierta... (intento %u de 36)	Looking for an open network... (try %u of 36)
+Fuera de la red	Out of the network
+No encontró una red abierta en 3 minutos	No open network found in 3 minutes
+Abrí la red en Home Assistant (Agregar dispositivo, o Permitir unirse) y la placa entra sola. Busca en los 16 canales cada 5 s.	Open the network in Home Assistant (Add device, or Permit join) and the board joins by itself. It looks on all 16 channels every 5 s.
+Buscar otra vez	Look again
+Volver a Mi red	Back to My network
+En la red 0x%04X, canal %u, como 0x%04X	In network 0x%04X, channel %u, as 0x%04X
+Con su propia clave de enlace (Zigbee 3.0).	With its own link key (Zigbee 3.0).
+Sin clave propia todavía (sólo la de la red).	No key of its own yet (only the network's).
+Home Assistant pide que se identifique: %u s	Home Assistant asks it to identify itself: %u s
+Luz: prendida	Light: on
+Luz: apagada	Light: off
+La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	Home Assistant turns the light on and off; a tap here does too, and Home Assistant should find out.
+Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	A new value goes out as the coordinator configured reporting (below, in what it asked): a small change may wait. Report now sends them at once.
+Reportar ahora	Report now
+Salir de la red	Leave the network
+Lo que pidió el coordinador	What the coordinator asked
+Emular	Emulate
+la luz, tocada en la placa: %s	the light, tapped on the board: %s
+mandó todos los valores al coordinador	sent every value to the coordinator
+leyó %s (ep %u):%s	read %s (ep %u):%s
+escribió en %s (ep %u)	wrote to %s (ep %u)
+configuró reportes de %s 0x%04x: cada %u s a %u s	configured reporting of %s 0x%04x: every %u s to %u s
+leyó la configuración de reportes de %s	read the reporting configuration of %s
+preguntó qué atributos tiene %s	asked which attributes %s has
+preguntó qué comandos tiene %s	asked which commands %s has
+comando general 0x%02x en %s	general command 0x%02x on %s
+Prender	On
+Cambiar	Toggle
+mandó %s a la luz	sent %s to the light
+pidió que se identifique %u s	asked it to identify itself for %u s
+comando 0x%02x de %s	command 0x%02x of %s
+pidió la dirección corta	asked for the short address
+pidió la dirección larga	asked for the long address
+pidió el descriptor del nodo	asked for the node descriptor
+pidió el descriptor de energía	asked for the power descriptor
+pidió el descriptor del endpoint %u	asked for endpoint %u's descriptor
+pidió la lista de endpoints	asked for the list of endpoints
+ató %s (ep %u) a sí mismo	bound %s (ep %u) to itself
+desató %s (ep %u)	unbound %s (ep %u)
+pidió la tabla de vecinos	asked for the neighbour table
+pidió la tabla de rutas	asked for the routing table
+le pidió a la placa que se vaya de la red	asked the board to leave the network
+abrió la red para sumar por %u s	opened the network for joining for %u s
+pedido ZDO 0x%04x	ZDO request 0x%04x
+la luz quedó %s	the light is now %s
+no encontró una red abierta en 3 minutos	no open network found in 3 minutes
+adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	in: channel %u, PAN 0x%04x, the board is 0x%04x
+buscando una red abierta para sumarse	looking for an open network to join
+de vuelta en la red de antes	back in the network from before
+la red de antes no está: buscando una abierta	the network from before is not there: looking for an open one
+el coordinador le dio su propia clave de enlace (Zigbee 3.0)	the coordinator gave it its own link key (Zigbee 3.0)
+salió de la red	left the network
+el coordinador la sacó de la red	the coordinator took it out of the network
+arrancando la pila como router	starting the stack as a router
+la pila no arrancó (¿el C6 tiene su firmware 154?)	the stack did not start (does the C6 have its 154 firmware?)
+pidió irse de la red y olvidarla	asked to leave the network and forget it
+vuelve a la red propia (se reinicia)	back to its own network (restarting)

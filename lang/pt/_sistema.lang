@@ -11690,3 +11690,70 @@ factor de potencia	fator de potência
 frecuencia	frequência
 energía entregada	energia produzida
 salida %d	saída %d
+La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	A placa está emulando um dispositivo em outra rede (aba Emular). A rede própria e seus dispositivos ficam guardados: voltam com Voltar a Minha rede, que reinicia a placa.
+Reiniciando para emular...	Reiniciando para emular...
+Volviendo a la red propia: la placa se reinicia	Voltando à rede própria: a placa reinicia
+Luz y sensor de temperatura	Luz e sensor de temperatura
+Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1: uma luz que acende e apaga (0x0100). Endpoint 2: temperatura, umidade e bateria (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.
+La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	A placa entra em outra rede Zigbee, a do Home Assistant por exemplo, fingindo ser este dispositivo, para ver se o coordenador o lê e o controla, e o que pede. Entra como roteador, na tomada: um dispositivo a pilha não pode ser emulado. Antes, no Home Assistant: Adicionar dispositivo (ZHA) ou Permitir entrar (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Há uma rede guardada da vez anterior: a placa volta a ela sem que a abram.
+Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	Para emular, a placa deixa sua rede um tempo: reinicia como dispositivo. Seus dispositivos ficam guardados e voltam com Voltar a Minha rede.
+Reiniciar y emular	Reiniciar e emular
+Buscando una red abierta... (intento %u de 36)	Procurando uma rede aberta... (tentativa %u de 36)
+Fuera de la red	Fora da rede
+No encontró una red abierta en 3 minutos	Não encontrou uma rede aberta em 3 minutos
+Abrí la red en Home Assistant (Agregar dispositivo, o Permitir unirse) y la placa entra sola. Busca en los 16 canales cada 5 s.	Abra a rede no Home Assistant (Adicionar dispositivo, ou Permitir entrar) e a placa entra sozinha. Procura nos 16 canais a cada 5 s.
+Buscar otra vez	Procurar de novo
+Volver a Mi red	Voltar a Minha rede
+En la red 0x%04X, canal %u, como 0x%04X	Na rede 0x%04X, canal %u, como 0x%04X
+Con su propia clave de enlace (Zigbee 3.0).	Com sua própria chave de enlace (Zigbee 3.0).
+Sin clave propia todavía (sólo la de la red).	Ainda sem chave própria (só a da rede).
+Home Assistant pide que se identifique: %u s	O Home Assistant pede que se identifique: %u s
+Luz: prendida	Luz: acesa
+Luz: apagada	Luz: apagada
+La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	O Home Assistant acende e apaga a luz; tocar aqui também, e o Home Assistant deveria perceber.
+Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	Um valor novo sai conforme os relatórios que o coordenador configurou (abaixo, no que pediu): uma mudança pequena pode esperar. Reportar agora os manda já.
+Reportar ahora	Reportar agora
+Salir de la red	Sair da rede
+Lo que pidió el coordinador	O que o coordenador pediu
+Emular	Emular
+la luz, tocada en la placa: %s	a luz, tocada na placa: %s
+mandó todos los valores al coordinador	mandou todos os valores ao coordenador
+leyó %s (ep %u):%s	leu %s (ep %u):%s
+escribió en %s (ep %u)	escreveu em %s (ep %u)
+configuró reportes de %s 0x%04x: cada %u s a %u s	configurou relatórios de %s 0x%04x: a cada %u s a %u s
+leyó la configuración de reportes de %s	leu a configuração de relatórios de %s
+preguntó qué atributos tiene %s	perguntou que atributos %s tem
+preguntó qué comandos tiene %s	perguntou que comandos %s tem
+comando general 0x%02x en %s	comando geral 0x%02x em %s
+Prender	Acender
+Cambiar	Alternar
+mandó %s a la luz	mandou %s à luz
+pidió que se identifique %u s	pediu que se identifique por %u s
+comando 0x%02x de %s	comando 0x%02x de %s
+pidió la dirección corta	pediu o endereço curto
+pidió la dirección larga	pediu o endereço longo
+pidió el descriptor del nodo	pediu o descritor do nó
+pidió el descriptor de energía	pediu o descritor de energia
+pidió el descriptor del endpoint %u	pediu o descritor do endpoint %u
+pidió la lista de endpoints	pediu a lista de endpoints
+ató %s (ep %u) a sí mismo	vinculou %s (ep %u) a si mesmo
+desató %s (ep %u)	desvinculou %s (ep %u)
+pidió la tabla de vecinos	pediu a tabela de vizinhos
+pidió la tabla de rutas	pediu a tabela de rotas
+le pidió a la placa que se vaya de la red	pediu à placa que saia da rede
+abrió la red para sumar por %u s	abriu a rede para entrar por %u s
+pedido ZDO 0x%04x	pedido ZDO 0x%04x
+la luz quedó %s	a luz ficou %s
+no encontró una red abierta en 3 minutos	não encontrou uma rede aberta em 3 minutos
+adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	dentro: canal %u, PAN 0x%04x, a placa é 0x%04x
+buscando una red abierta para sumarse	procurando uma rede aberta para entrar
+de vuelta en la red de antes	de volta à rede de antes
+la red de antes no está: buscando una abierta	a rede de antes não está: procurando uma aberta
+el coordinador le dio su propia clave de enlace (Zigbee 3.0)	o coordenador lhe deu sua própria chave de enlace (Zigbee 3.0)
+salió de la red	saiu da rede
+el coordinador la sacó de la red	o coordenador a tirou da rede
+arrancando la pila como router	iniciando a pilha como roteador
+la pila no arrancó (¿el C6 tiene su firmware 154?)	a pilha não iniciou (o C6 tem seu firmware 154?)
+pidió irse de la red y olvidarla	pediu para sair da rede e esquecê-la
+vuelve a la red propia (se reinicia)	volta à rede própria (reinicia)

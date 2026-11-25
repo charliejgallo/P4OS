@@ -3779,9 +3779,76 @@ function zbNet() {
   return { el, draw };
 }
 
+/* ---- Emular: the board as a device on someone else's network (Home
+ * Assistant's), docs/plan/ZIGBEE-EMULAR.md; POST /api/154/zbemu ---- */
+function zbEmu() {
+  const el = h('div', { class: 'card pad' });
+  let sig = '', held = false, armed = 0;
+  el.addEventListener('pointerdown', () => {
+    held = true;
+    const up = () => { document.removeEventListener('pointerup', up); setTimeout(() => { held = false; }, 400); };
+    document.addEventListener('pointerup', up);
+  });
+  const act = async (body, done) => {
+    try { const s = await post('154/zbemu', body); if (done) toast(done); sig = ''; draw(s); }
+    catch (e) { toast(e.status === 400 ? tr('No se pudo') : e.message, true); }
+  };
+  const slider = (label, unit, min, max, step, now, key) => {
+    const out = h('span', {}, label + ' ' + now + ' ' + unit);
+    const r = h('input', { type: 'range', min, max, step, value: now, style: 'width:100%',
+      oninput: e => { out.textContent = label + ' ' + e.target.value + ' ' + unit; },
+      onchange: e => act({ set: { [key]: +e.target.value } }) });
+    return h('div', { style: 'margin:10px 0' }, out, r);
+  };
+  function draw(st) {
+    if (!st || held) return;
+    const m = st.zbemu || { state: 'off', log: [] };
+    const ns = JSON.stringify([m.state, m.saved, m.tries, m.on, m.temp, m.hum, m.battery, m.tclk, m.identify_s,
+      (m.log || []).length, ((m.log || []).slice(-1)[0] || {}).text, st.zbhost && st.zbhost.state, Date.now() - armed < 4000]);
+    if (ns === sig) return;
+    sig = ns;
+    const kids = [h('h2', {}, tr('Emular un equipo'))];
+    if (m.state === 'off') {
+      kids.push(h('p', {}, tr('La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).')));
+      if (m.saved) kids.push(h('p', { class: 'note' }, tr('Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.')));
+      const own = st.zbhost && st.zbhost.state !== 'off';
+      kids.push(h('div', { class: 'btns' }, own
+        ? h('button', { class: 'btn pri', onclick: () => { if (confirm(tr('La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?'))) act({ join: true, restart: true }, tr('Reiniciando para emular...')); } }, tr('Reiniciar y emular'))
+        : h('button', { class: 'btn pri', onclick: () => act({ join: true }) }, tr('Unirse'))));
+    } else if (m.state !== 'joined') {
+      kids.push(h('p', {}, m.state === 'searching' ? tr('Buscando una red abierta... (intento %s de 36)', m.tries)
+        : m.state === 'left' ? tr('Fuera de la red') : tr('No encontró una red abierta en 3 minutos')));
+      kids.push(h('div', { class: 'btns' },
+        m.state !== 'searching' ? h('button', { class: 'btn pri', onclick: () => act({ join: true }) }, tr('Buscar otra vez')) : null,
+        h('button', { class: 'btn', onclick: () => act({ home: true }, tr('Volviendo a la red propia: la placa se reinicia')) }, tr('Volver a Mi red'))));
+    } else {
+      kids.push(h('p', {}, tr('En la red 0x%s, canal %s, como 0x%s', m.pan.toString(16).toUpperCase().padStart(4, '0'), m.channel,
+        m.nwk.toString(16).toUpperCase().padStart(4, '0')) + ' · ' + (m.tclk ? tr('con su propia clave de enlace') : tr('sin clave propia todavía'))));
+      if (m.identify_s) kids.push(h('p', { class: 'warn' }, tr('Home Assistant pide que se identifique: %s s', m.identify_s)));
+      kids.push(h('div', { class: 'btns' },
+        h('button', { class: m.on ? 'btn pri' : 'btn', onclick: () => act({ set: { on: !m.on } }) }, m.on ? tr('Luz: prendida') : tr('Luz: apagada'))));
+      kids.push(slider(tr('temperatura'), '°C', -20, 50, 0.1, m.temp, 'temp'), slider(tr('humedad'), '%', 0, 100, 1, m.hum, 'hum'),
+        slider(tr('batería'), '%', 0, 100, 1, m.battery, 'battery'));
+      const leaving = Date.now() - armed < 4000;
+      kids.push(h('div', { class: 'btns' },
+        h('button', { class: 'btn pri', onclick: () => act({ report: true }) }, tr('Reportar ahora')),
+        h('button', { class: 'btn', onclick: () => act({ home: true }, tr('Volviendo a la red propia: la placa se reinicia')) }, tr('Volver a Mi red')),
+        h('button', { class: 'btn', onclick: () => { if (leaving) { armed = 0; act({ leave: true }); } else { armed = Date.now(); sig = ''; draw(st); } } },
+          leaving ? tr('¿Seguro? Tocá otra vez') : tr('Salir de la red'))));
+    }
+    if ((m.log || []).length) {
+      const ago = s => s < 120 ? s + ' s' : Math.floor(s / 60) + ' min';
+      kids.push(h('h2', {}, tr('Lo que pidió el coordinador')), h('div', { class: 'zbemu-log' },
+        m.log.slice().reverse().map(x => h('div', { class: x.board ? 'zbemu-board' : '' }, h('span', { class: 'note' }, ago(x.ago_s) + '  '), x.text))));
+    }
+    put(el, ...kids);
+  }
+  return { el, draw };
+}
+
 async function pageZigbee() {
   const status = h('div', { class: 'card pad' }), chans = h('div', { class: 'card pad' }), sniff = h('div', { class: 'card pad' });
-  const devs = h('div', { class: 'card pad' }), caps = h('div', { class: 'card pad' }), net = zbNet();
+  const devs = h('div', { class: 'card pad' }), caps = h('div', { class: 'card pad' }), net = zbNet(), emu = zbEmu();
   const canvas = h('canvas', { width: 1200, height: 400, style: 'width:100%;height:auto;display:block' });
   let st = null, from = 1, rows = [], chan = 15, pcap = true;
   const act = (what, body) => post('154/' + what, body).then(s => { st = s; draw(); }).catch(e => toast(e.message, true));
@@ -3857,7 +3924,10 @@ async function pageZigbee() {
     const best = (st.channels || []).filter(c => c.frames).sort((a, b) => b.frames - a.frames)[0];
     if (best && st.state !== 'sniffing') chan = best.ch;
     draw();
+    /* emulating, the board's own network is off and its section says nothing useful */
+    net.el.style.display = st.zbhost && st.zbhost.emulating ? 'none' : '';
     net.draw(st);
+    emu.draw(st);
   }
   put(chans, h('h2', {}, tr('Canales')), canvas,
     h('div', { class: 'btns', style: 'margin-top:10px' },
@@ -3866,7 +3936,8 @@ async function pageZigbee() {
     h('p', { class: 'note' }, tr('La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.')));
   put(sniff, h('h2', {}, tr('Escuchar')),
     h('div', { class: 'btns' }, chSel, h('label', { class: 'small' }, pcapBox, ' ', tr('Guardar para Wireshark')), goBtn), counts, list);
-  put(main, h('h1', {}, tr('Zigbee y Thread')), status, h('div', { style: 'height:16px' }), net.el, h('div', { style: 'height:16px' }), chans, h('div', { style: 'height:16px' }), sniff,
+  put(main, h('h1', {}, tr('Zigbee y Thread')), status, h('div', { style: 'height:16px' }), net.el, h('div', { style: 'height:16px' }), emu.el,
+    h('div', { style: 'height:16px' }), chans, h('div', { style: 'height:16px' }), sniff,
     h('div', { style: 'height:16px' }), devs, h('div', { style: 'height:16px' }), caps);
   clearTimeout(zbT);
   post('154/hello').catch(() => {});

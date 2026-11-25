@@ -38,6 +38,8 @@
 
 static int s_zb_fd = -1, s_c6_fd = -1;
 static volatile uint8_t s_state;        /* AOS_ZB_* */
+static bool s_emu;                      /* started as a router emulating a device (aos_zigbee_emu.c) */
+extern volatile bool g_aos_zb_emu_nvs;  /* aos_zigbee_nvs.c */
 static uint8_t s_channel;
 static uint32_t s_to_c6, s_from_c6;
 
@@ -121,8 +123,20 @@ void aos_zigbee_devices_endpoint(ezb_af_ep_desc_t ep);
 void aos_zigbee_devices_network_up(void);
 bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig);
 
+/* aos_zigbee_emu.c */
+void aos_zigbee_emu_endpoints(ezb_af_device_desc_t dev);
+void aos_zigbee_emu_handlers(void);
+bool aos_zigbee_emu_signal(const ezb_app_signal_t *sig);
+
 static bool on_signal(const ezb_app_signal_t *sig)
 {
+    if (s_emu) {
+        if (aos_zigbee_emu_signal(sig)) return true;
+        ezb_app_signal_type_t t = ezb_app_signal_get_type(sig);
+        const ezb_bdb_signal_simple_params_t *p = ezb_app_signal_get_params(sig);
+        aos_hal_log(TAG, "emu: signal %s (0x%04x) status %d", ezb_app_signal_to_string(t), t, p ? p->status : -1);
+        return false;
+    }
     if (aos_zigbee_devices_signal(sig)) return true;
     ezb_app_signal_type_t t = ezb_app_signal_get_type(sig);
     const ezb_bdb_signal_simple_params_t *p = ezb_app_signal_get_params(sig);
@@ -203,9 +217,15 @@ static void stack_task(void *arg)
     esp_log_level_set("ESP_RADIO_SPINEL", ESP_LOG_DEBUG);
     const char *part = aos_hal_pref_partition();
     aos_hal_log(TAG, "the stack's storage: NVS partition %s", part ? part : "nvs");
+    /* emulating: a router that takes no children (the job site's devices
+     * should not make the board their parent, and leave with it); a
+     * preference to try more if Home Assistant's coordinator minds */
+    int32_t kids = 0;
+    if (s_emu) aos_hal_pref_get_i32("zbe_children", &kids);
     esp_zigbee_config_t cfg = {
-        .device_config = { .device_type = EZB_NWK_DEVICE_TYPE_COORDINATOR, .install_code_policy = false,
-                           .zczr_config = { .max_children = 32 } },
+        .device_config = { .device_type = s_emu ? EZB_NWK_DEVICE_TYPE_ROUTER : EZB_NWK_DEVICE_TYPE_COORDINATOR,
+                           .install_code_policy = false,
+                           .zczr_config = { .max_children = s_emu ? (uint8_t)kids : 32 } },
         .platform_config = {
             .storage_partition_name = part ? part : "nvs",
             .radio_config = {
@@ -222,6 +242,24 @@ static void stack_task(void *arg)
     if (esp_zigbee_init(&cfg) != ESP_OK) {
         s_state = AOS_ZB_FAILED;
         aos_hal_log(TAG, "the stack did not start");
+        vTaskDelete(NULL);
+        return;
+    }
+    if (s_emu) {
+        /* the emulated device's endpoints and the log's hooks; none of the
+         * board's own network (its gateway, its device list: that one would
+         * add Home Assistant's coordinator to "My network") */
+        ezb_af_device_desc_t dev = ezb_af_create_device_desc();
+        aos_zigbee_emu_endpoints(dev);
+        ezb_af_device_desc_register(dev);
+        /* as a Zigbee 3.0 device does: it asks the trust center for its own key */
+        ezb_secur_set_tclk_exchange_required(true);
+        ezb_bdb_set_primary_channel_set(0x07FFF800u);
+        ezb_bdb_set_secondary_channel_set(0x07FFF800u);
+        ezb_app_signal_add_handler(on_signal);
+        aos_zigbee_emu_handlers();
+        if (esp_zigbee_start(false) != ESP_OK) s_state = AOS_ZB_FAILED;
+        else esp_zigbee_launch_mainloop();
         vTaskDelete(NULL);
         return;
     }
@@ -254,11 +292,25 @@ static void stack_task(void *arg)
     vTaskDelete(NULL);
 }
 
+bool aos_zigbee_p4_running(void) { return s_state == AOS_ZB_STARTING || s_state == AOS_ZB_FORMED; }
+
+bool aos_zigbee_p4_start(int channel, bool emu);
+
 bool aos_zigbee_start(int channel)
 {
-    if (s_state == AOS_ZB_STARTING || s_state == AOS_ZB_FORMED) return true;
+    if (s_emu) return false;            /* emulating: the board's own network comes back with a restart */
+    return aos_zigbee_p4_start(channel, false);
+}
+
+/* the stack as the board's own network's coordinator, or as a router
+ * emulating a device (aos_zigbee_emu.c); once a boot */
+bool aos_zigbee_p4_start(int channel, bool emu)
+{
+    if (s_state == AOS_ZB_STARTING || s_state == AOS_ZB_FORMED) return emu == s_emu;
     if (channel < 11 || channel > 26) return false;
     s_channel = (uint8_t)channel;
+    s_emu = emu;
+    g_aos_zb_emu_nvs = emu;
     /* the C6 becomes the RCP, and the link must answer before the stack speaks */
     aos_154_rcp_start();
     char v[128];
@@ -287,13 +339,17 @@ bool aos_zigbee_start(int channel)
         xTaskCreate(bridge, "zb_bridge", 4096, NULL, 6, NULL);
     }
     s_state = AOS_ZB_STARTING;
-    aos_hal_log(TAG, "starting a coordinator on channel %d (RCP %s)", channel, v);
+    if (emu) aos_hal_log(TAG, "starting a router to emulate a device (RCP %s)", v);
+    else aos_hal_log(TAG, "starting a coordinator on channel %d (RCP %s)", channel, v);
     return xTaskCreate(stack_task, "zigbee", 8192, NULL, 5, NULL) == pdPASS;
 }
 
 void aos_zigbee_info(aos_zigbee_info_t *out)
 {
-    out->state = s_state;
+    /* emulating, the board's own network is off: what it does is
+     * aos_zigbee_emu_info's */
+    out->emu = s_emu;
+    out->state = s_emu ? AOS_ZB_OFF : s_state;
     out->channel = s_channel;
     out->to_c6 = s_to_c6;
     out->from_c6 = s_from_c6;

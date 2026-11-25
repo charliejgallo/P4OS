@@ -11115,3 +11115,70 @@ factor de potencia	Leistungsfaktor
 frecuencia	Frequenz
 energía entregada	erzeugte Energie
 salida %d	Ausgang %d
+La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	Die Platine emuliert ein Gerät in einem anderen Netz (Reiter Emulieren). Das eigene Netz und seine Geräte bleiben gespeichert: Sie kommen mit Zurück zu Mein Netz zurück, was die Platine neu startet.
+Reiniciando para emular...	Neustart zum Emulieren...
+Volviendo a la red propia: la placa se reinicia	Zurück zum eigenen Netz: Die Platine startet neu
+Luz y sensor de temperatura	Licht und Temperatursensor
+Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1: ein Licht zum Ein- und Ausschalten (0x0100). Endpoint 2: Temperatur, Feuchte und Batterie (0x0302). Hersteller P4OS, Modell P4OS-EMU-LT.
+La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	Die Platine tritt einem anderen Zigbee-Netz bei, etwa dem von Home Assistant, und gibt sich als dieses Gerät aus, um zu sehen, ob der Koordinator es liest und steuert und was er fragt. Sie tritt als Router mit Netzstrom bei: Ein Batteriegerät lässt sich nicht emulieren. Vorher in Home Assistant: Gerät hinzufügen (ZHA) oder Beitritt erlauben (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Ein Netz vom letzten Mal ist gespeichert: Die Platine kehrt dorthin zurück, ohne dass es geöffnet werden muss.
+Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	Zum Emulieren verlässt die Platine ihr Netz für eine Weile: Sie startet als Gerät neu. Deine Geräte bleiben gespeichert und kommen mit Zurück zu Mein Netz zurück.
+Reiniciar y emular	Neu starten und emulieren
+Buscando una red abierta... (intento %u de 36)	Suche ein offenes Netz... (Versuch %u von 36)
+Fuera de la red	Nicht im Netz
+No encontró una red abierta en 3 minutos	In 3 Minuten kein offenes Netz gefunden
+Abrí la red en Home Assistant (Agregar dispositivo, o Permitir unirse) y la placa entra sola. Busca en los 16 canales cada 5 s.	Öffne das Netz in Home Assistant (Gerät hinzufügen oder Beitritt erlauben), dann tritt die Platine von selbst bei. Sie sucht alle 5 s auf allen 16 Kanälen.
+Buscar otra vez	Erneut suchen
+Volver a Mi red	Zurück zu Mein Netz
+En la red 0x%04X, canal %u, como 0x%04X	Im Netz 0x%04X, Kanal %u, als 0x%04X
+Con su propia clave de enlace (Zigbee 3.0).	Mit eigenem Link-Key (Zigbee 3.0).
+Sin clave propia todavía (sólo la de la red).	Noch kein eigener Schlüssel (nur der des Netzes).
+Home Assistant pide que se identifique: %u s	Home Assistant bittet um Identifizierung: %u s
+Luz: prendida	Licht: an
+Luz: apagada	Licht: aus
+La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	Home Assistant schaltet das Licht ein und aus; ein Tippen hier auch, und Home Assistant sollte es mitbekommen.
+Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	Ein neuer Wert geht raus, wie der Koordinator die Berichte eingestellt hat (unten, bei dem, was er fragte): Eine kleine Änderung kann warten. Jetzt melden schickt sie sofort.
+Reportar ahora	Jetzt melden
+Salir de la red	Netz verlassen
+Lo que pidió el coordinador	Was der Koordinator fragte
+Emular	Emulieren
+la luz, tocada en la placa: %s	das Licht, auf der Platine angetippt: %s
+mandó todos los valores al coordinador	alle Werte an den Koordinator geschickt
+leyó %s (ep %u):%s	las %s (ep %u):%s
+escribió en %s (ep %u)	schrieb in %s (ep %u)
+configuró reportes de %s 0x%04x: cada %u s a %u s	stellte Berichte für %s 0x%04x ein: alle %u s bis %u s
+leyó la configuración de reportes de %s	las die Berichtseinstellung von %s
+preguntó qué atributos tiene %s	fragte, welche Attribute %s hat
+preguntó qué comandos tiene %s	fragte, welche Befehle %s hat
+comando general 0x%02x en %s	allgemeiner Befehl 0x%02x an %s
+Prender	Ein
+Cambiar	Umschalten
+mandó %s a la luz	schickte %s an das Licht
+pidió que se identifique %u s	bat um Identifizierung für %u s
+comando 0x%02x de %s	Befehl 0x%02x von %s
+pidió la dirección corta	fragte nach der kurzen Adresse
+pidió la dirección larga	fragte nach der langen Adresse
+pidió el descriptor del nodo	fragte nach dem Node-Deskriptor
+pidió el descriptor de energía	fragte nach dem Power-Deskriptor
+pidió el descriptor del endpoint %u	fragte nach dem Deskriptor von Endpoint %u
+pidió la lista de endpoints	fragte nach der Liste der Endpoints
+ató %s (ep %u) a sí mismo	band %s (ep %u) an sich
+desató %s (ep %u)	löste %s (ep %u)
+pidió la tabla de vecinos	fragte nach der Nachbartabelle
+pidió la tabla de rutas	fragte nach der Routingtabelle
+le pidió a la placa que se vaya de la red	bat die Platine, das Netz zu verlassen
+abrió la red para sumar por %u s	öffnete das Netz zum Beitreten für %u s
+pedido ZDO 0x%04x	ZDO-Anfrage 0x%04x
+la luz quedó %s	das Licht ist jetzt %s
+no encontró una red abierta en 3 minutos	in 3 Minuten kein offenes Netz gefunden
+adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	drin: Kanal %u, PAN 0x%04x, die Platine ist 0x%04x
+buscando una red abierta para sumarse	sucht ein offenes Netz zum Beitreten
+de vuelta en la red de antes	zurück im Netz von vorher
+la red de antes no está: buscando una abierta	das Netz von vorher ist nicht da: suche ein offenes
+el coordinador le dio su propia clave de enlace (Zigbee 3.0)	der Koordinator gab ihr einen eigenen Link-Key (Zigbee 3.0)
+salió de la red	hat das Netz verlassen
+el coordinador la sacó de la red	der Koordinator hat sie aus dem Netz genommen
+arrancando la pila como router	starte den Stack als Router
+la pila no arrancó (¿el C6 tiene su firmware 154?)	der Stack startete nicht (hat der C6 seine 154-Firmware?)
+pidió irse de la red y olvidarla	bat, das Netz zu verlassen und zu vergessen
+vuelve a la red propia (se reinicia)	zurück zum eigenen Netz (Neustart)

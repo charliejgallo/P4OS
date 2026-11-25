@@ -2552,3 +2552,26 @@ La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a
 Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Offen zum Hinzufügen: setze die Geräte einzeln zurück; jedes erscheint hier, sobald es beitritt. Läuft es mit Batterie, drücke ab und zu seine Taste, während es eingerichtet wird.
 Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Netz auf Kanal %s, %s Geräte. Die Werte kommen, wenn das Gerät sie sendet: eines mit Batterie kann eine Weile brauchen. Blinkt ein Gerät weiter und tritt nie ganz bei, versuche Zigbee 3.0 hinzufügen.
 Todavía no se sumó ningún equipo.	Noch ist kein Gerät beigetreten.
+No se pudo	Ging nicht
+Emular un equipo	Ein Gerät emulieren
+La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	Die Platine tritt einem anderen Zigbee-Netz (dem von Home Assistant) bei und gibt sich als Gerät aus: ein Licht auf Endpoint 1 und ein Temperatur-, Feuchte- und Batteriesensor auf 2 (Hersteller P4OS, Modell P4OS-EMU-LT). So sieht man, ob der Koordinator es liest, steuert und was er fragt. Vorher in Home Assistant: Gerät hinzufügen (ZHA) oder Beitritt erlauben (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Ein Netz vom letzten Mal ist gespeichert: Die Platine kehrt dorthin zurück, ohne dass es geöffnet werden muss.
+La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	Die Platine startet als Gerät neu. Deine Geräte bleiben gespeichert und kommen mit Zurück zu Mein Netz zurück. Weiter?
+Reiniciando para emular...	Neustart zum Emulieren...
+Reiniciar y emular	Neu starten und emulieren
+Buscando una red abierta... (intento %s de 36)	Suche ein offenes Netz... (Versuch %s von 36)
+Fuera de la red	Nicht im Netz
+No encontró una red abierta en 3 minutos	In 3 Minuten kein offenes Netz gefunden
+Buscar otra vez	Erneut suchen
+Volviendo a la red propia: la placa se reinicia	Zurück zum eigenen Netz: Die Platine startet neu
+Volver a Mi red	Zurück zu Mein Netz
+En la red 0x%s, canal %s, como 0x%s	Im Netz 0x%s, Kanal %s, als 0x%s
+con su propia clave de enlace	mit eigenem Link-Key
+sin clave propia todavía	noch kein eigener Schlüssel
+Home Assistant pide que se identifique: %s s	Home Assistant bittet um Identifizierung: %s s
+Luz: prendida	Licht: an
+Luz: apagada	Licht: aus
+Reportar ahora	Jetzt melden
+¿Seguro? Tocá otra vez	Sicher? Nochmal tippen
+Salir de la red	Netz verlassen
+Lo que pidió el coordinador	Was der Koordinator fragte

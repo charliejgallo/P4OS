@@ -19,6 +19,7 @@
 #include "esp_heap_trace.h"
 #endif
 
+#include "aos_zigbee.h"
 #include "aos_hal.h"
 #include "aos_ui.h"
 #include "aos_apps.h"
@@ -177,6 +178,7 @@ void app_main(void)
     aos_portal_start(80);           /* serves as soon as the Wi-Fi is up */
     aos_ssh_start(22);              /* listens only while Settings has SSH on */
     aos_eth_boot();                 /* the wire, when it was left on and its module answers */
+    aos_zigbee_boot();              /* the Zigbee stack, when a switch to or from emulating asked for it */
     /* The apps on the card (.so files in /sdcard/apps): only their descriptors are
      * read now; the code is loaded when one is opened. */
     /* Safe mode: the BOOT button held while the boot screen shows (not at

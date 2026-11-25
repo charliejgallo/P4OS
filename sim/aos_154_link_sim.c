@@ -13,6 +13,7 @@
 #include "aos_hal.h"
 
 #include <pthread.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -266,9 +267,15 @@ static bool sim_ir(void)
     return e && e[0] == '1';
 }
 
+static bool sim_emu_active(void);
+
 void aos_zigbee_info(aos_zigbee_info_t *out)
 {
     memset(out, 0, sizeof *out);
+    if (sim_emu_active()) {
+        out->emu = true;
+        return;
+    }
     if (sim_ir()) {
         out->state = AOS_ZB_FORMED;
         out->channel = 26;
@@ -406,4 +413,152 @@ int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n)
     memcpy(ieee, sim_ir() ? SIM_IR_IEEE : (const uint8_t[8]){ 0 }, 8);
     if (n) snprintf(code, n, "%s", s_sir.learned);
     return s_sir.state;
+}
+
+/* ---- P4_SIM_ZB_EMU=1: a make-believe Home Assistant coordinator for the
+ * board emulating a device (aos_zigbee_emu.c): it "opens" a network on
+ * channel 15 three seconds after the board starts looking, lets it in,
+ * interviews it as Zigbee2MQTT does (to fill the log) and switches the
+ * light every 20 s. A switch that needs a restart on the board is made at
+ * once here. Nothing goes anywhere. */
+
+static struct {
+    bool active, saved, tclk;
+    int state;
+    int64_t t0, joined, next_toggle;
+    int step;
+    int32_t v[AOS_ZBE_V_N];
+    aos_zigbee_emu_log_t log[160];
+    uint32_t n;
+} s_emu = { .v = { 2150, 5000, 100, 0 } };
+
+static bool sim_emu(void)
+{
+    const char *e = getenv("P4_SIM_ZB_EMU");
+    return e && e[0] == '1';
+}
+
+static bool sim_emu_active(void) { return s_emu.active; }
+
+static void emu_log(bool out, const char *fmt, ...)
+{
+    aos_zigbee_emu_log_t *e = &s_emu.log[s_emu.n % 160];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(e->text, sizeof e->text, fmt, ap);
+    va_end(ap);
+    e->ms = (uint32_t)aos_hal_uptime_ms();
+    e->out = out;
+    s_emu.n++;
+}
+
+static void sim_emu_advance(void)
+{
+    if (!s_emu.active) return;
+    int64_t now = (int64_t)aos_hal_uptime_ms();
+    if (s_emu.state == AOS_ZBE_SEARCHING && now - s_emu.t0 > 3000) {
+        s_emu.state = AOS_ZBE_JOINED;
+        s_emu.joined = now;
+        s_emu.saved = true;
+        s_emu.step = 0;
+        s_emu.next_toggle = now + 20000;
+        emu_log(true, "adentro: canal 15, PAN 0x1A62, la placa es 0x5C3E");
+    }
+    if (s_emu.state != AOS_ZBE_JOINED) return;
+    static const char *const INTERVIEW[] = {
+        "pidió el descriptor del nodo", "pidió la lista de endpoints", "pidió el descriptor del endpoint 1",
+        "pidió el descriptor del endpoint 2", "leyó Basic (ep 1): 0004 0000 0001 0005 0007 fffe",
+        "leyó Basic (ep 1): 4000", "ató On/Off (ep 1) a sí mismo", "ató temperatura (ep 2) a sí mismo",
+        "ató humedad (ep 2) a sí mismo", "ató batería (ep 2) a sí mismo",
+        "configuró reportes de On/Off 0x0000: cada 0 s a 3600 s",
+        "configuró reportes de temperatura 0x0000: cada 10 s a 3600 s",
+        "configuró reportes de humedad 0x0000: cada 10 s a 3600 s",
+        "configuró reportes de batería 0x0021: cada 3600 s a 62000 s", "leyó On/Off (ep 1): 0000" };
+    int n = (int)(sizeof INTERVIEW / sizeof INTERVIEW[0]);
+    while (s_emu.step < n && now - s_emu.joined > 400 * (s_emu.step + 1)) {
+        if (s_emu.step == 2) s_emu.tclk = true, emu_log(true, "el coordinador le dio su propia clave de enlace (Zigbee 3.0)");
+        emu_log(false, "%s", INTERVIEW[s_emu.step++]);
+    }
+    if (now > s_emu.next_toggle) {
+        s_emu.next_toggle = now + 20000;
+        s_emu.v[AOS_ZBE_V_ON] = !s_emu.v[AOS_ZBE_V_ON];
+        emu_log(false, "mandó %s a la luz", s_emu.v[AOS_ZBE_V_ON] ? "Prender" : "Apagar");
+        emu_log(false, "la luz quedó %s", s_emu.v[AOS_ZBE_V_ON] ? "prendida" : "apagada");
+    }
+}
+
+bool aos_zigbee_emu_join(int kind, bool restart_ok, bool *restart)
+{
+    if (restart) *restart = false;
+    if (!sim_emu() || kind != AOS_ZBE_LIGHT_TEMP) return false;
+    if (!s_emu.active && sim_ir()) {
+        if (restart) *restart = true;
+        if (!restart_ok) return false;
+    }
+    if (s_emu.active && s_emu.state == AOS_ZBE_JOINED) return true;
+    s_emu.active = true;
+    s_emu.state = AOS_ZBE_SEARCHING;
+    s_emu.t0 = (int64_t)aos_hal_uptime_ms();
+    emu_log(true, "arrancando la pila como router");
+    emu_log(true, "buscando una red abierta para sumarse");
+    return true;
+}
+
+bool aos_zigbee_emu_set(int value, int32_t v)
+{
+    if (value < 0 || value >= AOS_ZBE_V_N) return false;
+    s_emu.v[value] = v;
+    if (s_emu.active && value == AOS_ZBE_V_ON) emu_log(true, "la luz, tocada en la placa: %s", v ? "prendida" : "apagada");
+    return true;
+}
+
+bool aos_zigbee_emu_report_now(void)
+{
+    if (!s_emu.active || s_emu.state != AOS_ZBE_JOINED) return false;
+    emu_log(true, "mandó todos los valores al coordinador");
+    return true;
+}
+
+bool aos_zigbee_emu_leave(void)
+{
+    if (!s_emu.active) return false;
+    emu_log(true, "pidió irse de la red y olvidarla");
+    emu_log(true, "salió de la red");
+    s_emu.saved = false;
+    s_emu.active = false;               /* the board would restart into its own network */
+    return true;
+}
+
+bool aos_zigbee_emu_home(void)
+{
+    s_emu.active = false;
+    return true;
+}
+
+void aos_zigbee_emu_info(aos_zigbee_emu_t *out)
+{
+    sim_emu_advance();
+    memset(out, 0, sizeof *out);
+    out->state = s_emu.active ? (uint8_t)s_emu.state : AOS_ZBE_OFF;
+    out->saved = s_emu.saved;
+    out->tries = (uint16_t)(s_emu.active ? 1 + (aos_hal_uptime_ms() - s_emu.t0) / 5000 : 0);
+    out->tclk = s_emu.tclk;
+    memcpy(out->v, s_emu.v, sizeof s_emu.v);
+    if (out->state == AOS_ZBE_JOINED) {
+        out->channel = 15;
+        out->pan = 0x1A62;
+        out->nwk = 0x5C3E;
+        out->joined_ms = (uint32_t)s_emu.joined;
+    }
+}
+
+int aos_zigbee_emu_log(aos_zigbee_emu_log_t *out, uint32_t from, int max, uint32_t *next)
+{
+    sim_emu_advance();
+    uint32_t first = s_emu.n > 160 ? s_emu.n - 160 : 0;
+    if (from < first) from = first;
+    int n = 0;
+    for (uint32_t i = from; i < s_emu.n && n < max; i++) out[n++] = s_emu.log[i % 160];
+    if (next) *next = from + (uint32_t)n;
+    return n;
 }

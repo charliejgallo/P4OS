@@ -299,3 +299,7 @@ button.zbchip:hover { filter: brightness(1.15); }
 .zbraw summary { cursor: pointer; }
 .zbraw .mono { font-size: 12px; margin-top: 2px; }
 @media (max-width: 560px) { .zbnet { grid-template-columns: 1fr; } .zbslide { grid-template-columns: 70px 1fr 50px; } }
+
+/* Zigbee, Emular: the coordinator's requests */
+.zbemu-log { max-height: 360px; overflow-y: auto; font-size: 14px; line-height: 1.5; }
+.zbemu-board { color: var(--accent); }

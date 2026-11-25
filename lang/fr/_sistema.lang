@@ -11690,3 +11690,70 @@ factor de potencia	facteur de puissance
 frecuencia	fréquence
 energía entregada	énergie produite
 salida %d	sortie %d
+La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	La carte émule un appareil sur un autre réseau (onglet Émuler). Son propre réseau et ses appareils sont conservés : ils reviennent avec Retour à Mon réseau, qui redémarre la carte.
+Reiniciando para emular...	Redémarrage pour émuler...
+Volviendo a la red propia: la placa se reinicia	Retour au réseau propre : la carte redémarre
+Luz y sensor de temperatura	Lumière et capteur de température
+Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1 : une lumière qui s'allume et s'éteint (0x0100). Endpoint 2 : température, humidité et batterie (0x0302). Fabricant P4OS, modèle P4OS-EMU-LT.
+La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La carte rejoint un autre réseau Zigbee, celui de Home Assistant par exemple, en se faisant passer pour cet appareil, pour voir si le coordinateur le lit et le pilote, et ce qu'il demande. Elle entre comme routeur, sur secteur : un appareil sur pile ne peut pas être émulé. Avant, dans Home Assistant : Ajouter un appareil (ZHA) ou Permettre de rejoindre (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Un réseau de la dernière fois est conservé : la carte y retourne sans qu'on l'ouvre.
+Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	Pour émuler, la carte quitte son réseau un moment : elle redémarre comme appareil. Vos appareils sont conservés et reviennent avec Retour à Mon réseau.
+Reiniciar y emular	Redémarrer et émuler
+Buscando una red abierta... (intento %u de 36)	Recherche d'un réseau ouvert... (essai %u sur 36)
+Fuera de la red	Hors du réseau
+No encontró una red abierta en 3 minutos	Aucun réseau ouvert trouvé en 3 minutes
+Abrí la red en Home Assistant (Agregar dispositivo, o Permitir unirse) y la placa entra sola. Busca en los 16 canales cada 5 s.	Ouvrez le réseau dans Home Assistant (Ajouter un appareil, ou Permettre de rejoindre) et la carte entre seule. Elle cherche sur les 16 canaux toutes les 5 s.
+Buscar otra vez	Chercher à nouveau
+Volver a Mi red	Retour à Mon réseau
+En la red 0x%04X, canal %u, como 0x%04X	Dans le réseau 0x%04X, canal %u, en tant que 0x%04X
+Con su propia clave de enlace (Zigbee 3.0).	Avec sa propre clé de lien (Zigbee 3.0).
+Sin clave propia todavía (sólo la de la red).	Pas encore de clé propre (seulement celle du réseau).
+Home Assistant pide que se identifique: %u s	Home Assistant demande de s'identifier : %u s
+Luz: prendida	Lumière : allumée
+Luz: apagada	Lumière : éteinte
+La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	Home Assistant allume et éteint la lumière ; la toucher ici aussi, et Home Assistant devrait s'en apercevoir.
+Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	Une nouvelle valeur part selon les rapports configurés par le coordinateur (en bas, dans ce qu'il a demandé) : un petit changement peut attendre. Signaler maintenant les envoie tout de suite.
+Reportar ahora	Signaler maintenant
+Salir de la red	Quitter le réseau
+Lo que pidió el coordinador	Ce que le coordinateur a demandé
+Emular	Émuler
+la luz, tocada en la placa: %s	la lumière, touchée sur la carte : %s
+mandó todos los valores al coordinador	a envoyé toutes les valeurs au coordinateur
+leyó %s (ep %u):%s	a lu %s (ep %u) :%s
+escribió en %s (ep %u)	a écrit dans %s (ep %u)
+configuró reportes de %s 0x%04x: cada %u s a %u s	a configuré les rapports de %s 0x%04x : toutes les %u s à %u s
+leyó la configuración de reportes de %s	a lu la configuration des rapports de %s
+preguntó qué atributos tiene %s	a demandé quels attributs a %s
+preguntó qué comandos tiene %s	a demandé quelles commandes a %s
+comando general 0x%02x en %s	commande générale 0x%02x sur %s
+Prender	Allumer
+Cambiar	Basculer
+mandó %s a la luz	a envoyé %s à la lumière
+pidió que se identifique %u s	a demandé de s'identifier %u s
+comando 0x%02x de %s	commande 0x%02x de %s
+pidió la dirección corta	a demandé l'adresse courte
+pidió la dirección larga	a demandé l'adresse longue
+pidió el descriptor del nodo	a demandé le descripteur du nœud
+pidió el descriptor de energía	a demandé le descripteur d'alimentation
+pidió el descriptor del endpoint %u	a demandé le descripteur de l'endpoint %u
+pidió la lista de endpoints	a demandé la liste des endpoints
+ató %s (ep %u) a sí mismo	a lié %s (ep %u) à lui-même
+desató %s (ep %u)	a délié %s (ep %u)
+pidió la tabla de vecinos	a demandé la table des voisins
+pidió la tabla de rutas	a demandé la table de routage
+le pidió a la placa que se vaya de la red	a demandé à la carte de quitter le réseau
+abrió la red para sumar por %u s	a ouvert le réseau pour %u s
+pedido ZDO 0x%04x	requête ZDO 0x%04x
+la luz quedó %s	la lumière est maintenant %s
+no encontró una red abierta en 3 minutos	aucun réseau ouvert trouvé en 3 minutes
+adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	dedans : canal %u, PAN 0x%04x, la carte est 0x%04x
+buscando una red abierta para sumarse	cherche un réseau ouvert à rejoindre
+de vuelta en la red de antes	de retour dans le réseau d'avant
+la red de antes no está: buscando una abierta	le réseau d'avant n'est plus là : recherche d'un réseau ouvert
+el coordinador le dio su propia clave de enlace (Zigbee 3.0)	le coordinateur lui a donné sa propre clé de lien (Zigbee 3.0)
+salió de la red	a quitté le réseau
+el coordinador la sacó de la red	le coordinateur l'a retirée du réseau
+arrancando la pila como router	démarrage de la pile comme routeur
+la pila no arrancó (¿el C6 tiene su firmware 154?)	la pile n'a pas démarré (le C6 a-t-il son firmware 154 ?)
+pidió irse de la red y olvidarla	a demandé à quitter le réseau et l'oublier
+vuelve a la red propia (se reinicia)	retour au réseau propre (redémarrage)

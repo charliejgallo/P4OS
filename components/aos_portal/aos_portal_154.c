@@ -60,6 +60,13 @@
  *                                  "value": "hex" (little-endian, as on the air)}
  *   POST /api/154/zbdp             {"ieee", "dp", "type": 1 bool / 2 value / 4 enum,
  *                                  "value"}: a Tuya datapoint
+ *   POST /api/154/zbemu            the board emulating a device on another
+ *                                  network (docs/plan/ZIGBEE-EMULAR.md):
+ *                                  {"join": true[, "restart": true]}, {"set":
+ *                                  {"temp", "hum", "battery", "on"}},
+ *                                  {"report": true}, {"leave": true},
+ *                                  {"home": true}; its state and log under
+ *                                  "zbemu" in GET /api/154
  *   POST /api/154/zbname           {"ieee", "name"}: the user's name for a
  *                                  device ("" takes it away)
  *   POST /api/154/zbir             {"ieee", "learn": true|false} or {"ieee",
@@ -131,6 +138,41 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
         cJSON_AddNumberToObject(h, "to_c6", z.to_c6);
         cJSON_AddNumberToObject(h, "from_c6", z.from_c6);
         cJSON_AddNumberToObject(h, "open_s", aos_zigbee_permit_left());
+        cJSON_AddBoolToObject(h, "emulating", z.emu);
+        /* the board emulating a device on another network (aos_zigbee_emu.c) */
+        {
+            static const char *const ES[] = { "off", "searching", "joined", "left", "failed" };
+            aos_zigbee_emu_t m;
+            aos_zigbee_emu_info(&m);
+            cJSON *em = cJSON_AddObjectToObject(o, "zbemu");
+            cJSON_AddStringToObject(em, "state", m.state < 5 ? ES[m.state] : "?");
+            cJSON_AddStringToObject(em, "kind", "light_temp");
+            cJSON_AddBoolToObject(em, "saved", m.saved);
+            cJSON_AddNumberToObject(em, "tries", m.tries);
+            if (m.state == AOS_ZBE_JOINED) {
+                cJSON_AddNumberToObject(em, "channel", m.channel);
+                cJSON_AddNumberToObject(em, "pan", m.pan);
+                cJSON_AddNumberToObject(em, "nwk", m.nwk);
+                cJSON_AddBoolToObject(em, "tclk", m.tclk);
+                cJSON_AddNumberToObject(em, "identify_s", m.identify_s);
+            }
+            cJSON_AddNumberToObject(em, "temp", m.v[AOS_ZBE_V_TEMP] / 100.0);
+            cJSON_AddNumberToObject(em, "hum", m.v[AOS_ZBE_V_HUM] / 100.0);
+            cJSON_AddNumberToObject(em, "battery", m.v[AOS_ZBE_V_BATTERY]);
+            cJSON_AddBoolToObject(em, "on", m.v[AOS_ZBE_V_ON] != 0);
+            static aos_zigbee_emu_log_t lg[160];
+            uint32_t next;
+            int n = aos_zigbee_emu_log(lg, 0, 160, &next);
+            cJSON *la = cJSON_AddArrayToObject(em, "log");
+            uint32_t now_ms = (uint32_t)aos_hal_uptime_ms();
+            for (int k = n > 60 ? n - 60 : 0; k < n; k++) {
+                cJSON *x = cJSON_CreateObject();
+                cJSON_AddNumberToObject(x, "ago_s", (double)((now_ms - lg[k].ms) / 1000));
+                cJSON_AddBoolToObject(x, "board", lg[k].out);
+                cJSON_AddStringToObject(x, "text", lg[k].text);
+                cJSON_AddItemToArray(la, x);
+            }
+        }
         static aos_zigbee_dev_t dev[AOS_ZB_DEVICES_MAX];     /* the portal's one task */
         static const char *STEP[] = { "endpoints", "basic", "done", "failed", "left", "removed" };
         int n = aos_zigbee_devices(dev, AOS_ZB_DEVICES_MAX);
@@ -445,6 +487,30 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
                  ? aos_zigbee_permit_strict((int)num(b, "seconds", 180), cJSON_IsTrue(cJSON_GetObjectItem(b, "board")))
              : cJSON_IsTrue(cJSON_GetObjectItem(b, "board")) ? aos_zigbee_permit_board((int)num(b, "seconds", 180))
                                                               : aos_zigbee_permit((int)num(b, "seconds", 180));
+    }
+    else if (!strcmp(what, "zbemu")) {
+        /* {"join": true, "restart": true} | {"set": {"temp", "hum", "battery", "on"}} | {"report": true} |
+         * {"leave": true} | {"home": true} */
+        const cJSON *st = cJSON_GetObjectItem(b, "set");
+        if (cJSON_IsTrue(cJSON_GetObjectItem(b, "join"))) {
+            bool restart = false;
+            ok = aos_zigbee_emu_join(AOS_ZBE_LIGHT_TEMP, cJSON_IsTrue(cJSON_GetObjectItem(b, "restart")), &restart);
+            if (!ok && restart) {
+                cJSON_Delete(b);
+                api_state(r, false, "the board's own network is running: ask again with \"restart\": true");
+                return true;
+            }
+        } else if (cJSON_IsObject(st)) {
+            const cJSON *x;
+            ok = true;
+            if (cJSON_IsNumber(x = cJSON_GetObjectItem(st, "temp"))) ok &= aos_zigbee_emu_set(AOS_ZBE_V_TEMP, (int32_t)(x->valuedouble * 100));
+            if (cJSON_IsNumber(x = cJSON_GetObjectItem(st, "hum"))) ok &= aos_zigbee_emu_set(AOS_ZBE_V_HUM, (int32_t)(x->valuedouble * 100));
+            if (cJSON_IsNumber(x = cJSON_GetObjectItem(st, "battery"))) ok &= aos_zigbee_emu_set(AOS_ZBE_V_BATTERY, x->valueint);
+            if (cJSON_IsBool(x = cJSON_GetObjectItem(st, "on"))) ok &= aos_zigbee_emu_set(AOS_ZBE_V_ON, cJSON_IsTrue(x));
+        } else if (cJSON_IsTrue(cJSON_GetObjectItem(b, "report"))) ok = aos_zigbee_emu_report_now();
+        else if (cJSON_IsTrue(cJSON_GetObjectItem(b, "leave"))) ok = aos_zigbee_emu_leave();
+        else if (cJSON_IsTrue(cJSON_GetObjectItem(b, "home"))) ok = aos_zigbee_emu_home();
+        else ok = false;
     }
     else if (!strcmp(what, "zbname") || !strcmp(what, "zbremove") || !strcmp(what, "zbonoff") || !strcmp(what, "zblevel") || !strcmp(what, "zbcmd") ||
              !strcmp(what, "zbwrite") || !strcmp(what, "zbdp") || !strcmp(what, "zbir")) {

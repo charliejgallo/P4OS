@@ -2897,3 +2897,26 @@ La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a
 Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Aperta per aggiungere: resetta i dispositivi uno alla volta; ognuno compare qui quando entra. Se è a batteria, premi ogni tanto il suo pulsante mentre si configura.
 Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Rete sul canale %s, %s dispositivi. I valori arrivano quando il dispositivo li invia: uno a batteria può tardare a dare notizie. Se un dispositivo continua a lampeggiare e non finisce di entrare, prova Aggiungi Zigbee 3.0.
 Todavía no se sumó ningún equipo.	Nessun dispositivo è ancora entrato.
+No se pudo	Non è stato possibile
+Emular un equipo	Emula un dispositivo
+La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La scheda entra in un'altra rete Zigbee (quella di Home Assistant) fingendosi un dispositivo: una luce sull'endpoint 1 e un sensore di temperatura, umidità e batteria sul 2 (produttore P4OS, modello P4OS-EMU-LT). Così si vede se il coordinatore lo legge, lo comanda e cosa chiede. Prima, in Home Assistant: Aggiungi dispositivo (ZHA) o Permetti di unirsi (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	C'è una rete salvata dall'ultima volta: la scheda ci torna senza che venga aperta.
+La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	La scheda si riavvia come dispositivo. I tuoi dispositivi restano salvati e tornano con Torna a La mia rete. Continuare?
+Reiniciando para emular...	Riavvio per emulare...
+Reiniciar y emular	Riavvia ed emula
+Buscando una red abierta... (intento %s de 36)	Cerco una rete aperta... (tentativo %s di 36)
+Fuera de la red	Fuori dalla rete
+No encontró una red abierta en 3 minutos	Nessuna rete aperta trovata in 3 minuti
+Buscar otra vez	Cerca di nuovo
+Volviendo a la red propia: la placa se reinicia	Ritorno alla rete propria: la scheda si riavvia
+Volver a Mi red	Torna a La mia rete
+En la red 0x%s, canal %s, como 0x%s	Nella rete 0x%s, canale %s, come 0x%s
+con su propia clave de enlace	con la propria chiave di collegamento
+sin clave propia todavía	ancora nessuna chiave propria
+Home Assistant pide que se identifique: %s s	Home Assistant chiede di identificarsi: %s s
+Luz: prendida	Luce: accesa
+Luz: apagada	Luce: spenta
+Reportar ahora	Riporta ora
+¿Seguro? Tocá otra vez	Sicuro? Tocca di nuovo
+Salir de la red	Esci dalla rete
+Lo que pidió el coordinador	Cosa ha chiesto il coordinatore

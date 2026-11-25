@@ -42,7 +42,7 @@
 #define DB_MIN      (-100)
 #define DB_MAX      (-35)
 
-enum { P_CHANNELS = 0, P_SNIFF, P_DEVICES, P_NET, P_COUNT };
+enum { P_CHANNELS = 0, P_SNIFF, P_DEVICES, P_NET, P_EMU, P_COUNT };
 #define ZB_CHANNEL  26                  /* the board's network: away from Wi-Fi's 1, 6 and 11 */
 
 static struct {
@@ -83,6 +83,10 @@ static struct {
     bool name_dev;                      /* naming a device, not an IR code */
     int ir_armed;
     uint32_t ir_armed_ms;
+    /* Emular: the page, the slider being dragged's value shown, the leave
+     * button tapped once */
+    lv_obj_t *emu;
+    uint32_t emu_tick, leave_armed_ms;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -883,6 +887,15 @@ static void fill_net(int32_t w)
 {
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
+    if (z.emu) {
+        lv_obj_add_flag(U.net_btn, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(U.strict_btn, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
+        lv_label_set_text(U.net_note, _("La placa está emulando un equipo en otra red (pestaña Emular). La red propia y "
+                                        "sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa."));
+        lv_obj_clean(U.net);
+        return;
+    }
     int open = aos_zigbee_permit_left();
     uint32_t t = (uint32_t)aos_hal_uptime_ms();
     if (U.keep_open && z.state == AOS_ZB_FORMED && open < 5 && t - U.asked_ms > 5000) {
@@ -1173,6 +1186,207 @@ static void fill_net(int32_t w)
 }
 
 /* -------------------------------------------------------------------------- */
+/* Emular: the board as a device on someone else's network                     */
+/* (aos_zigbee.h, docs/plan/ZIGBEE-EMULAR.md)                                  */
+/* -------------------------------------------------------------------------- */
+
+enum { E_JOIN = 0, E_RESTART, E_HOME, E_LEAVE, E_REPORT, E_LIGHT };
+
+static void emu_btn_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    aos_zigbee_emu_t m;
+    aos_zigbee_emu_info(&m);
+    bool restart = false, ok = true;
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    switch (k) {
+    case E_JOIN: ok = aos_zigbee_emu_join(AOS_ZBE_LIGHT_TEMP, false, &restart); break;
+    case E_RESTART:
+        aos_ui_toast(_("Reiniciando para emular..."), 3000);
+        ok = aos_zigbee_emu_join(AOS_ZBE_LIGHT_TEMP, true, &restart);
+        break;
+    case E_HOME:
+        aos_ui_toast(_("Volviendo a la red propia: la placa se reinicia"), 3000);
+        ok = aos_zigbee_emu_home();
+        break;
+    case E_LEAVE:
+        if (now - U.leave_armed_ms < 4000) {
+            U.leave_armed_ms = 0;
+            ok = aos_zigbee_emu_leave();
+        } else
+            U.leave_armed_ms = now;
+        break;
+    case E_REPORT: ok = aos_zigbee_emu_report_now(); break;
+    case E_LIGHT: ok = aos_zigbee_emu_set(AOS_ZBE_V_ON, !m.v[AOS_ZBE_V_ON]); break;
+    }
+    if (!ok && !restart) aos_ui_toast(_("No se pudo"), 2000);
+    U.emu_tick = 0;
+}
+
+/* a value's slider: what it shows while dragged, set when let go */
+static void emu_val_text(int k, int32_t v, char *b, size_t n)
+{
+    if (k == AOS_ZBE_V_TEMP) snprintf(b, n, "%s %.1f °C", _("temperatura"), v / 100.0);
+    else if (k == AOS_ZBE_V_HUM) snprintf(b, n, "%s %.0f %%", _("humedad"), v / 100.0);
+    else snprintf(b, n, "%s %d %%", _("batería"), (int)v);
+}
+
+static int32_t emu_from_slider(int k, int32_t s) { return k == AOS_ZBE_V_TEMP ? s * 10 : k == AOS_ZBE_V_HUM ? s * 100 : s; }
+
+static void emu_slider_cb(lv_event_t *e)
+{
+    lv_obj_t *sl = lv_event_get_target(e);
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    lv_event_code_t c = lv_event_get_code(e);
+    int32_t v = emu_from_slider(k, lv_slider_get_value(sl));
+    lv_obj_t *lbl = lv_obj_get_child(lv_obj_get_parent(sl), 0);
+    char b[48];
+    emu_val_text(k, v, b, sizeof b);
+    if (lbl) lv_label_set_text(lbl, b);
+    if (c == LV_EVENT_PRESSED) U.dragging = true;
+    if (c == LV_EVENT_RELEASED || c == LV_EVENT_PRESS_LOST) {
+        U.dragging = false;
+        aos_zigbee_emu_set(k, v);
+        U.emu_tick = 0;
+    }
+}
+
+static void emu_slider(lv_obj_t *parent, int32_t w, int k, int32_t lo, int32_t hi, int32_t now)
+{
+    lv_obj_t *c = box(parent, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(c, 14, 0);
+    lv_obj_set_style_pad_bottom(c, 10, 0);
+    char b[48];
+    emu_val_text(k, now, b, sizeof b);
+    aos_label(c, b, aos_font_body, AOS_C_TEXT);
+    lv_obj_t *sl = lv_slider_create(c);
+    lv_obj_set_width(sl, w - 30);
+    lv_obj_set_height(sl, 14);
+    lv_slider_set_range(sl, lo, hi);
+    lv_slider_set_value(sl, k == AOS_ZBE_V_TEMP ? now / 10 : k == AOS_ZBE_V_HUM ? now / 100 : now, LV_ANIM_OFF);
+    lv_obj_set_style_bg_color(sl, AOS_C_CARD2, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(sl, k == AOS_ZBE_V_TEMP ? AOS_C_ORANGE : AOS_C_ACCENT, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(sl, AOS_C_TEXT, LV_PART_KNOB);
+    lv_obj_set_style_pad_all(sl, 10, LV_PART_KNOB);
+    lv_obj_set_ext_click_area(sl, 24);
+    lv_obj_add_event_cb(sl, emu_slider_cb, LV_EVENT_VALUE_CHANGED, (void *)(intptr_t)k);
+    lv_obj_add_event_cb(sl, emu_slider_cb, LV_EVENT_PRESSED, (void *)(intptr_t)k);
+    lv_obj_add_event_cb(sl, emu_slider_cb, LV_EVENT_RELEASED, (void *)(intptr_t)k);
+    lv_obj_add_event_cb(sl, emu_slider_cb, LV_EVENT_PRESS_LOST, (void *)(intptr_t)k);
+}
+
+static lv_obj_t *emu_row(lv_obj_t *parent, int32_t w)
+{
+    lv_obj_t *row = box(parent, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_column(row, 14, 0);
+    lv_obj_set_style_pad_row(row, 14, 0);
+    return row;
+}
+
+static void fill_emu(int32_t w)
+{
+    aos_zigbee_emu_t m;
+    aos_zigbee_emu_info(&m);
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    lv_obj_clean(U.emu);
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    lv_obj_t *c = card(U.emu, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(c, 18, 0);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(c, 12, 0);
+    int32_t cw = w - 36;
+
+    if (m.state == AOS_ZBE_OFF) {
+        aos_label(c, _("Luz y sensor de temperatura"), aos_font_body, AOS_C_TEXT);
+        wrap(c, _("Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería "
+                  "(0x0302). Fabricante P4OS, modelo P4OS-EMU-LT."), aos_font_caption, AOS_C_DIM, cw);
+        wrap(c, _("La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, "
+                  "para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un "
+                  "equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir "
+                  "unirse (Zigbee2MQTT)."), aos_font_caption, AOS_C_TEXT, cw);
+        if (m.saved) wrap(c, _("Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran."),
+                          aos_font_caption, AOS_C_ACCENT, cw);
+        lv_obj_t *row = emu_row(c, cw);
+        if (z.state != AOS_ZB_OFF) {
+            wrap(c, _("Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan "
+                      "guardados y vuelven con Volver a Mi red."), aos_font_caption, AOS_C_ORANGE, cw);
+            pill(row, _("Reiniciar y emular"), true, emu_btn_cb, (void *)(intptr_t)E_RESTART, NULL);
+        } else
+            pill(row, _("Unirse"), true, emu_btn_cb, (void *)(intptr_t)E_JOIN, NULL);
+    } else if (m.state == AOS_ZBE_SEARCHING || m.state == AOS_ZBE_FAILED || m.state == AOS_ZBE_LEFT) {
+        if (m.state == AOS_ZBE_SEARCHING)
+            lv_label_set_text_fmt(aos_label(c, "", aos_font_body, AOS_C_TEXT), _("Buscando una red abierta... (intento %u de 36)"),
+                                  (unsigned)m.tries);
+        else
+            aos_label(c, m.state == AOS_ZBE_LEFT ? _("Fuera de la red") : _("No encontró una red abierta en 3 minutos"),
+                      aos_font_body, AOS_C_ORANGE);
+        wrap(c, _("Abrí la red en Home Assistant (Agregar dispositivo, o Permitir unirse) y la placa entra sola. Busca en "
+                  "los 16 canales cada 5 s."), aos_font_caption, AOS_C_DIM, cw);
+        lv_obj_t *row = emu_row(c, cw);
+        if (m.state != AOS_ZBE_SEARCHING) pill(row, _("Buscar otra vez"), true, emu_btn_cb, (void *)(intptr_t)E_JOIN, NULL);
+        pill(row, _("Volver a Mi red"), false, emu_btn_cb, (void *)(intptr_t)E_HOME, NULL);
+    } else {
+        char b[160];
+        snprintf(b, sizeof b, _("En la red 0x%04X, canal %u, como 0x%04X"), m.pan, m.channel, m.nwk);
+        aos_label(c, b, aos_font_body, AOS_C_TEXT);
+        wrap(c, m.tclk ? _("Con su propia clave de enlace (Zigbee 3.0).") : _("Sin clave propia todavía (sólo la de la red)."),
+             aos_font_caption, m.tclk ? AOS_C_GREEN : AOS_C_DIM, cw);
+        if (m.identify_s) {
+            lv_obj_t *l = aos_label(c, "", aos_font_body, AOS_C_YELLOW);
+            lv_label_set_text_fmt(l, _("Home Assistant pide que se identifique: %u s"), m.identify_s);
+        }
+        lv_obj_t *row = emu_row(c, cw);
+        lv_obj_t *lb = pill(row, m.v[AOS_ZBE_V_ON] ? _("Luz: prendida") : _("Luz: apagada"), m.v[AOS_ZBE_V_ON] != 0, emu_btn_cb,
+                            (void *)(intptr_t)E_LIGHT, NULL);
+        if (m.v[AOS_ZBE_V_ON]) lv_obj_set_style_bg_color(lb, AOS_C_YELLOW, 0);
+        wrap(c, _("La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que "
+                  "enterarse."), aos_font_caption, AOS_C_DIM, cw);
+        emu_slider(c, cw, AOS_ZBE_V_TEMP, -200, 500, m.v[AOS_ZBE_V_TEMP]);
+        emu_slider(c, cw, AOS_ZBE_V_HUM, 0, 100, m.v[AOS_ZBE_V_HUM]);
+        emu_slider(c, cw, AOS_ZBE_V_BATTERY, 0, 100, m.v[AOS_ZBE_V_BATTERY]);
+        wrap(c, _("Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio "
+                  "chico puede esperar. Reportar ahora los manda ya."), aos_font_caption, AOS_C_DIM, cw);
+        row = emu_row(c, cw);
+        pill(row, _("Reportar ahora"), true, emu_btn_cb, (void *)(intptr_t)E_REPORT, NULL);
+        pill(row, _("Volver a Mi red"), false, emu_btn_cb, (void *)(intptr_t)E_HOME, NULL);
+        bool armed = now - U.leave_armed_ms < 4000;
+        lv_obj_t *lv = pill(row, armed ? _("¿Seguro? Tocá otra vez") : _("Salir de la red"), false, emu_btn_cb,
+                            (void *)(intptr_t)E_LEAVE, NULL);
+        if (armed) lv_obj_set_style_bg_color(lv, AOS_C_ORANGE, 0);
+    }
+
+    /* what the coordinator asked, the last first */
+    static aos_zigbee_emu_log_t lg[160];
+    uint32_t next;
+    int n = aos_zigbee_emu_log(lg, 0, 160, &next);
+    if (!n) return;
+    lv_obj_t *lc = card(U.emu, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(lc, 18, 0);
+    lv_obj_set_flex_flow(lc, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(lc, 6, 0);
+    aos_label(lc, _("Lo que pidió el coordinador"), aos_font_body, AOS_C_TEXT);
+    for (int i = n - 1; i >= 0 && i >= n - 50; i--) {
+        char b[140];
+        uint32_t ago = (now - lg[i].ms) / 1000;
+        if (ago < 120) snprintf(b, sizeof b, "%3us  %s", (unsigned)ago, lg[i].text);
+        else snprintf(b, sizeof b, "%3um  %s", (unsigned)(ago / 60), lg[i].text);
+        lv_obj_t *l = wrap(lc, b, aos_font_caption, lg[i].out ? AOS_C_ACCENT : AOS_C_TEXT, cw);
+        (void)l;
+    }
+}
+
+static void build_emu(lv_obj_t *page, int32_t w)
+{
+    U.emu = box(page, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(U.emu, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(U.emu, 14, 0);
+    U.emu_tick = 0;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Refresh                                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -1181,6 +1395,7 @@ static void refresh(void)
     if (U.page_no == P_DEVICES && U.devs && U.devs_tick++ % 4 == 0) fill_devices(U.W - 2 * AOS_UI_PAD);
     if (U.page_no == P_NET && U.net && !U.dragging && !U.naming && !finger_down() && U.devs_tick++ % 4 == 0)
         fill_net(U.W - 2 * AOS_UI_PAD);
+    if (U.page_no == P_EMU && U.emu && !U.dragging && !finger_down() && U.emu_tick++ % 4 == 0) fill_emu(U.W - 2 * AOS_UI_PAD);
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;
@@ -1257,6 +1472,7 @@ static void build(void)
     U.list = NULL;
     U.devs = NULL;
     U.net = NULL;
+    U.emu = NULL;
     int32_t w = U.W - 2 * AOS_UI_PAD;
     for (int i = 0; i < P_COUNT; i++)
         lv_obj_set_style_bg_color(U.tabs[i], i == U.page_no ? AOS_C_ACCENT : AOS_C_CARD, 0);
@@ -1266,7 +1482,8 @@ static void build(void)
     if (U.page_no == P_CHANNELS) build_channels(U.page, w);
     else if (U.page_no == P_SNIFF) build_sniff(U.page, w);
     else if (U.page_no == P_DEVICES) build_devices(U.page, w);
-    else build_net(U.page, w);
+    else if (U.page_no == P_NET) build_net(U.page, w);
+    else build_emu(U.page, w);
     refresh();
 }
 
@@ -1299,14 +1516,16 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     lv_obj_align(U.sub, LV_ALIGN_LEFT_MID, 62, 22);
     U.warn = wrap(U.col, "", aos_font_caption, AOS_C_ORANGE, w);
 
-    lv_obj_t *tabs = box(U.col, w, 60);
-    lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW);
+    /* five tabs: in one row in Spanish; a longer language wraps them */
+    lv_obj_t *tabs = box(U.col, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_style_pad_column(tabs, 10, 0);
-    static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos"), N_("Mi red") };
+    lv_obj_set_style_pad_row(tabs, 10, 0);
+    static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos"), N_("Mi red"), N_("Emular") };
     for (int i = 0; i < P_COUNT; i++) {
         lv_obj_t *c = box(tabs, LV_SIZE_CONTENT, 60);
         lv_obj_set_style_radius(c, 30, 0);
-        lv_obj_set_style_pad_hor(c, 24, 0);
+        lv_obj_set_style_pad_hor(c, 18, 0);
         lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
         lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(c, tab_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);

@@ -17,9 +17,10 @@ extern "C" {
 enum { AOS_ZB_OFF = 0, AOS_ZB_STARTING, AOS_ZB_FORMED, AOS_ZB_FAILED };
 
 typedef struct {
-    uint8_t  state;             /* AOS_ZB_* */
+    uint8_t  state;             /* AOS_ZB_*: the board's own network (OFF while emulating) */
     uint8_t  channel;
     uint32_t to_c6, from_c6;    /* spinel bytes through the link */
+    bool     emu;               /* the stack is emulating a device instead: aos_zigbee_emu_info */
 } aos_zigbee_info_t;
 
 /* The C6 becomes the radio (until it restarts) and the stack starts here. */
@@ -181,6 +182,61 @@ bool aos_zigbee_meas_text(const aos_zigbee_dev_t *d, const aos_zigbee_meas_t *m,
 int  aos_zigbee_meas_attrs(uint16_t cluster, uint16_t *out, int max);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
+/* Emulating a device (docs/plan/ZIGBEE-EMULAR.md, aos_zigbee_emu.c): the
+ * board joins someone else's network (Home Assistant's coordinator) as a
+ * router showing a device, instead of forming its own. One network at a
+ * time: the board's own stays in the stack's NVS namespace "zigbee", the
+ * other one in "zbemu" (aos_zigbee_nvs.c). Switching from one to the other
+ * restarts the board (stage 1): the stack does not start twice in one boot.
+ * Stage 1 has one kind: an on/off light on endpoint 1, and a temperature
+ * and humidity sensor (with a battery) on endpoint 2. */
+enum { AOS_ZBE_LIGHT_TEMP = 0, AOS_ZBE_KINDS };
+enum { AOS_ZBE_OFF = 0,             /* not emulating */
+       AOS_ZBE_SEARCHING,           /* looking for an open network to join */
+       AOS_ZBE_JOINED,
+       AOS_ZBE_LEFT,                /* it left (or was taken out of) the network */
+       AOS_ZBE_FAILED };
+enum { AOS_ZBE_V_TEMP = 0,          /* 0.01 degC */
+       AOS_ZBE_V_HUM,               /* 0.01 % */
+       AOS_ZBE_V_BATTERY,           /* % */
+       AOS_ZBE_V_ON,                /* the light: 0 or 1 */
+       AOS_ZBE_V_N };
+
+typedef struct {
+    uint8_t  state, kind;           /* AOS_ZBE_* */
+    bool     saved;                 /* a network to go back to is kept (until it leaves) */
+    uint8_t  channel;
+    uint16_t pan, nwk;              /* the network's PAN, the board's short address in it */
+    uint8_t  xpan[8];
+    bool     tclk;                  /* the trust center gave the board its own link key */
+    uint16_t tries;                 /* joining attempts so far */
+    uint16_t identify_s;            /* > 0: asked to identify itself, seconds left */
+    int32_t  v[AOS_ZBE_V_N];
+    uint32_t joined_ms;
+} aos_zigbee_emu_t;
+
+/* one thing the coordinator asked of the board (or the board did), in words */
+typedef struct {
+    uint32_t ms;
+    uint8_t  out;                   /* 0 asked of the board, 1 done by it */
+    char     text[96];
+} aos_zigbee_emu_log_t;
+
+/* Join as kind (any network open for joining). The board's own network
+ * running: false and *restart set; with restart_ok, the board restarts
+ * into emulating instead (and returns only if it could not). */
+bool aos_zigbee_emu_join(int kind, bool restart_ok, bool *restart);
+bool aos_zigbee_emu_set(int value, int32_t v);  /* AOS_ZBE_V_*: the attribute set, reported as configured */
+bool aos_zigbee_emu_report_now(void);           /* every value sent to the coordinator now */
+bool aos_zigbee_emu_leave(void);                /* leaves the network (it is told), forgets it, back home */
+bool aos_zigbee_emu_home(void);                 /* back to the board's own network, the other one kept */
+void aos_zigbee_emu_info(aos_zigbee_emu_t *out);
+/* the log from entry 'from' on (counted since the start); returns how many,
+ * *next the count to ask from next time */
+int  aos_zigbee_emu_log(aos_zigbee_emu_log_t *out, uint32_t from, int max, uint32_t *next);
+/* at boot (main.c): the stack started on its own when a switch asked for it */
+void aos_zigbee_boot(void);
+
 /* What a Tuya device is and what its datapoints mean, from the card's
  * zigbee/tuya.txt (tools/zigbee/gen_tuya.py, Zigbee2MQTT's definitions;
  * aos_zigbee_tuya.c). false: not in it, or no file. A datapoint's name

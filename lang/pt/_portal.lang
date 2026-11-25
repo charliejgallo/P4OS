@@ -2897,3 +2897,26 @@ La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a
 Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Aberta para adicionar: resete os dispositivos um de cada vez; cada um aparece aqui quando entra. Se for a pilha, toque no botão de vez em quando enquanto ele é configurado.
 Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Rede no canal %s, %s dispositivos. Os valores chegam quando o dispositivo os envia: um a pilha pode demorar a dar notícias. Se um dispositivo continua piscando e não termina de entrar, tente Adicionar Zigbee 3.0.
 Todavía no se sumó ningún equipo.	Nenhum dispositivo entrou ainda.
+No se pudo	Não foi possível
+Emular un equipo	Emular um dispositivo
+La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	A placa entra em outra rede Zigbee (a do Home Assistant) fingindo ser um dispositivo: uma luz no endpoint 1 e um sensor de temperatura, umidade e bateria no 2 (fabricante P4OS, modelo P4OS-EMU-LT). Assim se vê se o coordenador o lê, o controla e o que pede. Antes, no Home Assistant: Adicionar dispositivo (ZHA) ou Permitir entrar (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Há uma rede guardada da vez anterior: a placa volta a ela sem que a abram.
+La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	A placa reinicia como dispositivo. Seus dispositivos ficam guardados e voltam com Voltar a Minha rede. Continuar?
+Reiniciando para emular...	Reiniciando para emular...
+Reiniciar y emular	Reiniciar e emular
+Buscando una red abierta... (intento %s de 36)	Procurando uma rede aberta... (tentativa %s de 36)
+Fuera de la red	Fora da rede
+No encontró una red abierta en 3 minutos	Não encontrou uma rede aberta em 3 minutos
+Buscar otra vez	Procurar de novo
+Volviendo a la red propia: la placa se reinicia	Voltando à rede própria: a placa reinicia
+Volver a Mi red	Voltar a Minha rede
+En la red 0x%s, canal %s, como 0x%s	Na rede 0x%s, canal %s, como 0x%s
+con su propia clave de enlace	com sua própria chave de enlace
+sin clave propia todavía	ainda sem chave própria
+Home Assistant pide que se identifique: %s s	O Home Assistant pede que se identifique: %s s
+Luz: prendida	Luz: acesa
+Luz: apagada	Luz: apagada
+Reportar ahora	Reportar agora
+¿Seguro? Tocá otra vez	Certeza? Toque de novo
+Salir de la red	Sair da rede
+Lo que pidió el coordinador	O que o coordenador pediu

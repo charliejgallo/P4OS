@@ -20,7 +20,8 @@ para:
    existente como sensor, botón, enchufe o módulo de relés, para probar el
    lado del coordinador. Lo mismo con Thread. El diseño (como router,
    nunca a pila: el P4 sólo tiene la librería de coordinador y router) y
-   las etapas están en `ZIGBEE-EMULAR.md` (2026-11-25).
+   las etapas están en `ZIGBEE-EMULAR.md` (2026-11-25); la etapa 0 (todo
+   menos la placa) está hecha: la pestaña Emular.
 
 Un papel a la vez. Sólo en redes del usuario.
 

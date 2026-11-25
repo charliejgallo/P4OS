@@ -1,6 +1,23 @@
 # P4OS — La placa emula un equipo Zigbee
 
-Diseño, sin código todavía (2026-11-25). Sigue a `ZIGBEE.md` (la pila de
+**Dónde quedó (2026-11-25, de noche):** la etapa 0 está hecha y probada en
+el simulador; falta la etapa 1 en la placa, con el usuario
+(`PRUEBAS-PLACA.md`, arriba). Lo que hay: `aos_zigbee_emu.c` (el equipo
+"luz y sensor", la búsqueda de red cada 5 s, el registro en palabras de lo
+que pide el coordinador, salir y volver), `aos_zigbee_nvs.c` (el desvío de
+`"zigbee"` a `"zbemu"`, confirmado en el mapa del enlazador: la librería lo
+llama), `aos_zigbee_p4.c` (router o coordinador según el modo,
+`max_children` en la preferencia `zbe_children`, 0 por defecto), el
+arranque después del reinicio (`aos_zigbee_boot` en `main.c`, la
+preferencia `zbe_boot` de una vez), la pestaña Emular, `POST
+/api/154/zbemu` y su sección en la página Zigbee del portal, y el
+coordinador falso del simulador (`P4_SIM_ZB_EMU=1`). Quedó afuera de la
+etapa 0: la lista de redes abiertas (`aos_zigbee_emu_scan`; se une a la
+primera que encuentra), "Pausar" (Volver a Mi red guarda la otra red) y
+mostrar la configuración de reportes al lado de cada valor (está en el
+registro). Más abajo, el diseño como se escribió.
+
+Diseño, escrito antes del código (2026-11-25). Sigue a `ZIGBEE.md` (la pila de
 Espressif en el P4 con el C6 de radio, la red propia de la placa como
 coordinador) y es el punto 3 de "La idea" de ese documento.
 

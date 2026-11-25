@@ -2552,3 +2552,26 @@ La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a
 Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Open for adding: reset the devices one at a time; each one shows up here when it joins. If it runs on battery, press its button now and then while it is set up.
 Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Network on channel %s, %s devices. Values arrive when the device sends them: one on battery may take a while to give news. If a device keeps blinking and never finishes joining, try Add Zigbee 3.0.
 Todavía no se sumó ningún equipo.	No device has joined yet.
+No se pudo	Could not
+Emular un equipo	Emulate a device
+La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	The board joins another Zigbee network (Home Assistant's) posing as a device: a light on endpoint 1 and a temperature, humidity and battery sensor on 2 (manufacturer P4OS, model P4OS-EMU-LT). That shows whether the coordinator reads it, drives it and what it asks. First, in Home Assistant: Add device (ZHA) or Permit join (Zigbee2MQTT).
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	A network from last time is kept: the board goes back to it without it being opened.
+La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	The board restarts as a device. Your devices are kept and come back with Back to My network. Go on?
+Reiniciando para emular...	Restarting to emulate...
+Reiniciar y emular	Restart and emulate
+Buscando una red abierta... (intento %s de 36)	Looking for an open network... (try %s of 36)
+Fuera de la red	Out of the network
+No encontró una red abierta en 3 minutos	No open network found in 3 minutes
+Buscar otra vez	Look again
+Volviendo a la red propia: la placa se reinicia	Back to its own network: the board restarts
+Volver a Mi red	Back to My network
+En la red 0x%s, canal %s, como 0x%s	In network 0x%s, channel %s, as 0x%s
+con su propia clave de enlace	with its own link key
+sin clave propia todavía	no key of its own yet
+Home Assistant pide que se identifique: %s s	Home Assistant asks it to identify itself: %s s
+Luz: prendida	Light: on
+Luz: apagada	Light: off
+Reportar ahora	Report now
+¿Seguro? Tocá otra vez	Sure? Tap again
+Salir de la red	Leave the network
+Lo que pidió el coordinador	What the coordinator asked
