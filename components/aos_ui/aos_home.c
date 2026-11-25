@@ -878,8 +878,34 @@ static void add_picked(const char *type)
 
 static void add_clicked(lv_event_t *e) { (void)e; aos_wedit_add(add_picked); }
 
+/* While a full-screen app (a game) runs, the home screen holds nothing: its
+ * icons are pictures of 57 KB each in PSRAM (an icon pack's, ~1.8 MB for a
+ * page and the dock and folders), and rotating for a game in landscape made
+ * it decode them all again behind the game. With the "juguete" pack Planeo
+ * found 12.5 MB free instead of 16.1 and its world came out empty (on the
+ * board, 2026-11-25). aos_home_suspend() lets everything go and holds the
+ * rebuilds until the game closes. */
+static bool s_suspended, s_want_build;
+
+static void forget_objects(void)
+{
+    memset(s_page_obj, 0, sizeof s_page_obj);
+    memset(s_dock_cells, 0, sizeof s_dock_cells);
+    memset(s_dock_badges, 0, sizeof s_dock_badges);
+    s_pages = s_dots = s_dock_panel = s_done_btn = s_add_btn = NULL;
+    for (int i = 0; i < s_nitems; i++) {
+        s_items[i].cell = NULL;
+        s_items[i].badge = NULL;
+    }
+}
+
 static void build(void)
 {
+    if (s_suspended) {
+        s_want_build = true;
+        return;
+    }
+    s_want_build = false;
     const aos_geo_t *g = aos_ui_geo();
     layout_compute();
     folder_close(false);
@@ -1391,6 +1417,32 @@ void aos_home_create(lv_obj_t *parent)
 
 void aos_home_rebuild(void) { if (s_root) build(); }
 
+static void build_later(void *arg)
+{
+    (void)arg;
+    if (s_root && s_want_build && !s_suspended) build();
+}
+
+void aos_home_suspend(bool on)
+{
+    if (!s_root || on == s_suspended) return;
+    if (on) {
+        aos_wedit_close();
+        folder_close(false);
+        s_editing = false;
+        s_suspended = true;
+        lv_obj_clean(s_root);
+        forget_objects();
+        s_want_build = true;
+        return;
+    }
+    /* made again after this turn of LVGL's loop: going home turns the
+     * screen back first, and that rebuild is the one that counts */
+    s_suspended = false;
+    s_want_build = true;
+    lv_async_call(build_later, NULL);
+}
+
 bool aos_home_editing(void) { return s_editing; }
 
 /* nothing of its own open: no edit mode, folder or widget sheet (the
@@ -1406,6 +1458,7 @@ void aos_home_edit(bool on)
 
 bool aos_home_back(void)
 {
+    if (s_suspended) return false;
     if (aos_wedit_close()) return true;
     if (s_folder_ov) { folder_close(true); return true; }
     if (s_editing) { aos_home_edit(false); return true; }

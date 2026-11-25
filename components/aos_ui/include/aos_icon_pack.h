@@ -60,6 +60,9 @@ void aos_icon_pack_choose(const char *name);
 
 /* Look at the card again at the next icon (a pack was just installed). */
 void aos_icon_pack_reload(void);
+/* the decoded pictures no icon shows, kept for a screen made again: all let
+ * go now (a game is opening and wants the PSRAM) */
+void aos_icon_pack_let_go(void);
 
 /* The pack in use, or NULL. */
 const char *aos_icon_pack_current(void);

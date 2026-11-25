@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh, aos_154
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3711 simbolos.
+ * Total: 3713 simbolos.
  */
 
 #include <stddef.h>
@@ -750,6 +750,7 @@ extern int aos_home_editing;
 extern int aos_home_icon_rect;
 extern int aos_home_idle;
 extern int aos_home_rebuild;
+extern int aos_home_suspend;
 extern int aos_home_tick;
 extern int aos_http_stream_close;
 extern int aos_http_stream_init;
@@ -777,6 +778,7 @@ extern int aos_icon_pack_choose;
 extern int aos_icon_pack_create;
 extern int aos_icon_pack_current;
 extern int aos_icon_pack_has;
+extern int aos_icon_pack_let_go;
 extern int aos_icon_pack_list;
 extern int aos_icon_pack_refresh;
 extern int aos_icon_pack_reload;
@@ -4464,6 +4466,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_home_icon_rect),
     ESP_ELFSYM_EXPORT(aos_home_idle),
     ESP_ELFSYM_EXPORT(aos_home_rebuild),
+    ESP_ELFSYM_EXPORT(aos_home_suspend),
     ESP_ELFSYM_EXPORT(aos_home_tick),
     ESP_ELFSYM_EXPORT(aos_http_stream_close),
     ESP_ELFSYM_EXPORT(aos_http_stream_init),
@@ -4491,6 +4494,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_icon_pack_create),
     ESP_ELFSYM_EXPORT(aos_icon_pack_current),
     ESP_ELFSYM_EXPORT(aos_icon_pack_has),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_let_go),
     ESP_ELFSYM_EXPORT(aos_icon_pack_list),
     ESP_ELFSYM_EXPORT(aos_icon_pack_refresh),
     ESP_ELFSYM_EXPORT(aos_icon_pack_reload),

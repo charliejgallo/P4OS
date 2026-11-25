@@ -210,6 +210,11 @@ static void trim_cb(lv_timer_t *t)
     trim(KEEP_BYTES);
 }
 
+void aos_icon_pack_let_go(void)
+{
+    trim(0);
+}
+
 static void drop_index(void)
 {
     close_file();
