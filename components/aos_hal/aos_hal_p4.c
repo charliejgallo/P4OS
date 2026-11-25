@@ -622,6 +622,22 @@ bool aos_hal_c6_link_wait(uint32_t ms)
     return s_c6_link > 0;
 }
 
+/* Before any restart by software (an OTA's, the portal's, the system's):
+ * the card unmounted. A restart does not power the card off, and one in the
+ * middle of a transfer leaves it stuck: the next start finds no card, and
+ * the C6 on the same controller fell with it (no Wi-Fi): five times on
+ * 2026-11-24, every time after an OTA, whose restart comes from a task of
+ * its own while the screen may be reading an icon, never after a restart
+ * from the screen's own task. The unmount waits for the file operation
+ * under way and lets no new one start; it frees only the card's slot
+ * (SDMMC_HOST_DEFAULT's deinit_p), not the controller the C6 is on. */
+static void sd_on_restart(void)
+{
+    if (!s_card) return;
+    aos_hal_player_stop();              /* an open file under an unmount does not end well */
+    if (esp_vfs_fat_sdcard_unmount(SD_ROOT, s_card) == ESP_OK) s_card = NULL;
+}
+
 static void sd_mount(void)
 {
     sdmmc_host_t host;
@@ -645,6 +661,8 @@ static void sd_mount(void)
         vTaskDelay(pdMS_TO_TICKS(300));
     }
     if (e != ESP_OK) ESP_LOGW(TAG, "no microSD (%s)", esp_err_to_name(e));
+    static bool hooked;
+    if (!hooked && esp_register_shutdown_handler(sd_on_restart) == ESP_OK) hooked = true;
 }
 
 bool aos_hal_sd_present(void) { return s_card != NULL || s_sd_back; }
