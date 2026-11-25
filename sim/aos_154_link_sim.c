@@ -11,6 +11,7 @@
 #include "aos_154.h"
 #include "aos_154_proto.h"
 #include "aos_hal.h"
+#include "aos_i18n.h"
 
 #include <pthread.h>
 #include <stdarg.h>
@@ -462,28 +463,39 @@ static void sim_emu_advance(void)
         s_emu.saved = true;
         s_emu.step = 0;
         s_emu.next_toggle = now + 20000;
-        emu_log(true, "adentro: canal 15, PAN 0x1A62, la placa es 0x5C3E");
+        emu_log(true, _("adentro: canal %u, PAN 0x%04x, la placa es 0x%04x"), 15u, 0x1A62u, 0x5C3Eu);
     }
     if (s_emu.state != AOS_ZBE_JOINED) return;
-    static const char *const INTERVIEW[] = {
-        "pidió el descriptor del nodo", "pidió la lista de endpoints", "pidió el descriptor del endpoint 1",
-        "pidió el descriptor del endpoint 2", "leyó Basic (ep 1): 0004 0000 0001 0005 0007 fffe",
-        "leyó Basic (ep 1): 4000", "ató On/Off (ep 1) a sí mismo", "ató temperatura (ep 2) a sí mismo",
-        "ató humedad (ep 2) a sí mismo", "ató batería (ep 2) a sí mismo",
-        "configuró reportes de On/Off 0x0000: cada 0 s a 3600 s",
-        "configuró reportes de temperatura 0x0000: cada 10 s a 3600 s",
-        "configuró reportes de humedad 0x0000: cada 10 s a 3600 s",
-        "configuró reportes de batería 0x0021: cada 3600 s a 62000 s", "leyó On/Off (ep 1): 0000" };
-    int n = (int)(sizeof INTERVIEW / sizeof INTERVIEW[0]);
-    while (s_emu.step < n && now - s_emu.joined > 400 * (s_emu.step + 1)) {
-        if (s_emu.step == 2) s_emu.tclk = true, emu_log(true, "el coordinador le dio su propia clave de enlace (Zigbee 3.0)");
-        emu_log(false, "%s", INTERVIEW[s_emu.step++]);
+    /* Zigbee2MQTT's interview, in the firmware's own words (aos_zigbee_emu.c),
+     * so a screenshot in any language reads as the board's would */
+    while (s_emu.step < 15 && now - s_emu.joined > 400 * (s_emu.step + 1)) {
+        switch (s_emu.step++) {
+        case 0: emu_log(false, "%s", _("pidió el descriptor del nodo")); break;
+        case 1: emu_log(false, "%s", _("pidió la lista de endpoints")); break;
+        case 2:
+            s_emu.tclk = true;
+            emu_log(true, "%s", _("el coordinador le dio su propia clave de enlace (Zigbee 3.0)"));
+            emu_log(false, _("pidió el descriptor del endpoint %u"), 1u);
+            break;
+        case 3: emu_log(false, _("pidió el descriptor del endpoint %u"), 2u); break;
+        case 4: emu_log(false, _("leyó %s (ep %u):%s"), "Basic", 1u, " 0004 0000 0001 0005 0007 fffe"); break;
+        case 5: emu_log(false, _("leyó %s (ep %u):%s"), "Basic", 1u, " 4000"); break;
+        case 6: emu_log(false, _("ató %s (ep %u) a sí mismo"), "On/Off", 1u); break;
+        case 7: emu_log(false, _("ató %s (ep %u) a sí mismo"), _("temperatura"), 2u); break;
+        case 8: emu_log(false, _("ató %s (ep %u) a sí mismo"), _("humedad"), 2u); break;
+        case 9: emu_log(false, _("ató %s (ep %u) a sí mismo"), _("batería"), 2u); break;
+        case 10: emu_log(false, _("configuró reportes de %s 0x%04x: cada %u s a %u s"), "On/Off", 0u, 0u, 3600u); break;
+        case 11: emu_log(false, _("configuró reportes de %s 0x%04x: cada %u s a %u s"), _("temperatura"), 0u, 10u, 3600u); break;
+        case 12: emu_log(false, _("configuró reportes de %s 0x%04x: cada %u s a %u s"), _("humedad"), 0u, 10u, 3600u); break;
+        case 13: emu_log(false, _("configuró reportes de %s 0x%04x: cada %u s a %u s"), _("batería"), 0x21u, 3600u, 62000u); break;
+        case 14: emu_log(false, _("leyó %s (ep %u):%s"), "On/Off", 1u, " 0000"); break;
+        }
     }
     if (now > s_emu.next_toggle) {
         s_emu.next_toggle = now + 20000;
         s_emu.v[AOS_ZBE_V_ON] = !s_emu.v[AOS_ZBE_V_ON];
-        emu_log(false, "mandó %s a la luz", s_emu.v[AOS_ZBE_V_ON] ? "Prender" : "Apagar");
-        emu_log(false, "la luz quedó %s", s_emu.v[AOS_ZBE_V_ON] ? "prendida" : "apagada");
+        emu_log(false, _("mandó %s a la luz"), s_emu.v[AOS_ZBE_V_ON] ? _("Prender") : _("Apagar"));
+        emu_log(false, _("la luz quedó %s"), s_emu.v[AOS_ZBE_V_ON] ? _("prendida") : _("apagada"));
     }
 }
 
@@ -499,8 +511,8 @@ bool aos_zigbee_emu_join(int kind, bool restart_ok, bool *restart)
     s_emu.active = true;
     s_emu.state = AOS_ZBE_SEARCHING;
     s_emu.t0 = (int64_t)aos_hal_uptime_ms();
-    emu_log(true, "arrancando la pila como router");
-    emu_log(true, "buscando una red abierta para sumarse");
+    emu_log(true, "%s", _("arrancando la pila como router"));
+    emu_log(true, "%s", _("buscando una red abierta para sumarse"));
     return true;
 }
 
@@ -508,22 +520,22 @@ bool aos_zigbee_emu_set(int value, int32_t v)
 {
     if (value < 0 || value >= AOS_ZBE_V_N) return false;
     s_emu.v[value] = v;
-    if (s_emu.active && value == AOS_ZBE_V_ON) emu_log(true, "la luz, tocada en la placa: %s", v ? "prendida" : "apagada");
+    if (s_emu.active && value == AOS_ZBE_V_ON) emu_log(true, _("la luz, tocada en la placa: %s"), v ? _("prendida") : _("apagada"));
     return true;
 }
 
 bool aos_zigbee_emu_report_now(void)
 {
     if (!s_emu.active || s_emu.state != AOS_ZBE_JOINED) return false;
-    emu_log(true, "mandó todos los valores al coordinador");
+    emu_log(true, "%s", _("mandó todos los valores al coordinador"));
     return true;
 }
 
 bool aos_zigbee_emu_leave(void)
 {
     if (!s_emu.active) return false;
-    emu_log(true, "pidió irse de la red y olvidarla");
-    emu_log(true, "salió de la red");
+    emu_log(true, "%s", _("pidió irse de la red y olvidarla"));
+    emu_log(true, "%s", _("salió de la red"));
     s_emu.saved = false;
     s_emu.active = false;               /* the board would restart into its own network */
     return true;

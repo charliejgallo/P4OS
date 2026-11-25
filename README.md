@@ -4,7 +4,8 @@ An iPhone-style operating system for the
 [**Waveshare ESP32-P4-WIFI6-Touch-LCD-5**](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm)
 ([wiki](https://docs.waveshare.com/ESP32-P4-WIFI6-Touch-LCD-5)). It is a 5"
 720×1280 touch board with an ESP32-P4 (two RISC-V cores at 400 MHz and
-32 MB of PSRAM) and an ESP32-C6 that does the Wi-Fi.
+32 MB of PSRAM) and an ESP32-C6 that does the Wi-Fi, the Bluetooth and,
+since 0.34, the Zigbee radio.
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
@@ -55,6 +56,13 @@ loaded as shared objects:
   analyser with ten protocol decoders for the 24 MHz USB boxes or an
   ESP32 with its own firmware. Each one was tried on the bench with real
   parts, wiring diagrams and photos included.
+- **Zigbee, since 0.34:** the board is a **Zigbee hub** of its own, where
+  almost any device can be joined and tried (sensors, relays, dimmers,
+  Tuya devices, IR blasters), and it can **pose as a device** on Home
+  Assistant's network (ZHA or Zigbee2MQTT) to test the coordinator; both
+  from the board or from a phone through the portal. [More below](#zigbee-a-hub-a-test-bench-and-a-fake-device).
+- **Drawn icons, since 0.34:** two packs, 3D toy and Line, as System parts
+  in the Store; the usual circles stay a choice.
 - **A software radio:** an RTL-SDR stick on the USB host gives a live
   spectrum and waterfall, broadcast FM in stereo, AM for the airband and
   narrow FM for hams and PMR, and the 433/868 MHz remotes and weather
@@ -788,6 +796,66 @@ its own screen.
   <img src="docs/img/photo-ble-xiaomi.jpg" width="300" alt="BLE on the board showing a Xiaomi thermometer's decrypted readings next to the thermometer showing the same 24.6 °C and 65 %">
 </p>
 
+### Zigbee: a hub, a test bench and a fake device
+
+Since 0.34 the C6's 802.15.4 radio carries a whole Zigbee network:
+Espressif's Zigbee stack runs on the P4 and the C6 is its radio, an
+OpenThread RCP whose spinel travels over esp_hosted's peer_data. **It
+needs the C6's firmware 3.0.9-154.15**, which the board installs by
+itself: Store → System → *The radio's firmware (C6)*, then Settings →
+Update → *Install on the C6* (about 15 s without Wi-Fi; the board
+restarts by itself). The Zigbee app (a system app) has five tabs:
+Channels, Listen and Equipment, the scanner and the sniffer of before,
+and two new ones.
+
+<p align="center">
+  <img src="docs/img/photo-zigbee-hub.jpg" width="300" alt="The board's My network on its stand, listing an ORVIBO sensor, a Tuya two-relay module with both outputs on, a SONOFF temperature and humidity sensor reading 25.8 °C and 47.5 %, and a SONOFF water sensor reading dry; in front, the same sensors and the relay module">
+  <img src="docs/img/app-zigbee-net.png" width="230" alt="My network in the simulator: a Tuya temperature sensor named from its datapoints, and an IR blaster named Living room IR with four saved codes">
+  <img src="docs/img/app-zigbee-emu.png" width="230" alt="Emulate in the simulator: in a network on channel 15 with its own link key, the light on, sliders for temperature, humidity and battery, and the coordinator's requests below">
+</p>
+
+- **My network, the board as a hub.** The board forms its own network
+  (channel 26, away from Wi-Fi's 1, 6 and 11) and devices join it with
+  *Add devices*, or *Add Zigbee 3.0* for one that blinks and never
+  finishes joining. Each device shows what it is, what it measures and
+  what it reports: named where the board knows the cluster (temperature,
+  humidity, battery, contact, water, motion, light, pressure, CO2, energy,
+  power, covers, thermostats, locks, fans...) and raw where it does not,
+  so **almost any device can be tried**. Outputs switch with a tap,
+  dimmers, covers and colour temperature have sliders, Tuya devices show
+  their datapoints by name (a table of 1,400 devices from Zigbee2MQTT's
+  definitions, a System part). Devices can have names of your own, and
+  the list is kept: one that is off shows as "no news" until it speaks.
+  Tried with a SONOFF temperature sensor and water sensor, an ORVIBO
+  door and motion sensor, a Tuya two-relay module, a dimmer and a Tuya
+  IR blaster.
+- **IR blasters** (Tuya's TS1201, "Zosung"): learn a code from any
+  remote, keep it with a name, send it with a tap. The **Infrarrojo** app
+  can send and learn through a blaster instead of the board's LED, so
+  its remotes, air conditioners and SmartIR's code library go out
+  through the blaster.
+- **Emulate, the board as a device.** The board joins someone else's
+  network (Home Assistant's, through ZHA or Zigbee2MQTT) as a router posing
+  as a light and a temperature, humidity and battery sensor, and writes
+  down in words **everything the coordinator asks**: the interview, the
+  binds, the reporting it configures, the commands. It is a bench for the
+  other side: whether a coordinator reads a device, drives it and keeps
+  it. Its network is kept apart from the board's own; *Back to My network*
+  brings that one back as it was. Tried against Zigbee2MQTT with a Sonoff
+  ZBDongle-E:
+
+<p align="center">
+  <img src="docs/img/zigbee-emular.jpg" width="360" alt="The board emulating a device next to a laptop with Zigbee2MQTT: the same light on, 29 °C, 17 % and 35 % on both, the addresses blurred">
+</p>
+
+- **The portal's Zigbee page** has My network and Emulate too, so the
+  devices can be driven from a phone; and `/api/154` with its `zb*` and
+  `zbemu` requests for scripts.
+
+The plan, what was measured on the bench and the day-by-day of how it
+came to work are in [docs/plan/ZIGBEE.md](docs/plan/ZIGBEE.md) and
+[docs/plan/ZIGBEE-EMULAR.md](docs/plan/ZIGBEE-EMULAR.md) (in Spanish).
+
 ### CAS, a computer algebra system
 
 [Giac](https://www-fourier.univ-grenoble-alpes.fr/~parisse/giac.html), the
@@ -1418,6 +1486,12 @@ language); an app's page brings its own with the app.
   straight to the panel at 7-9 fps, its 1920x1080 one at about a frame a
   second) and an MJPEG one.
 - The screen recording, played back on a Mac.
+- Zigbee: the board's own network with seven devices (sensors, a two-relay
+  module, a dimmer and an IR blaster) joined, read and driven, back by
+  itself after every restart; a TV's IR code learned through the blaster
+  and sent from the board and from Infrarrojo; and the board emulating a
+  device on Zigbee2MQTT (a Sonoff ZBDongle-E): interviewed, the light
+  driven both ways, the values reported, and back to its own network.
 - I2C with a real BME280 on the header: found by itself, read once a second
   without errors. SPI with MOSI looped to MISO at 1, 10 and 40 MHz, the port's top speed.
 - Sensors (0.20), each found by itself or declared from the form and read
@@ -1771,8 +1845,8 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, tanques de juguete por turnos en 3D, un juego para aprender a programar con una tortuga, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods, un graficador de lo que llega por serie, el estado de los servicios de la casa), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, tanques de juguete por turnos en 3D, un juego para aprender a programar con una tortuga, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods, un graficador de lo que llega por serie, el estado de los servicios de la casa), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, Zigbee (la placa como concentrador propio donde se prueba casi cualquier equipo, emisores IR de Tuya, y la placa haciéndose pasar por un equipo en la red de Home Assistant), íconos dibujados en dos estilos, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera, y Zigbee: siete equipos en la red propia de la placa, un código IR de la tele aprendido y mandado por el emisor, y la placa emulando un equipo en un Zigbee2MQTT con un Sonoff ZBDongle-E |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
