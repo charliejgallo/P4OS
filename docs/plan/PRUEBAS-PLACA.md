@@ -17,8 +17,9 @@ de lo más rápido a lo que lleva más tiempo (detalle en
    la tabla Tuya: subir `build/zigbee/zigbee_tuya.txt` a
    `/sdcard/zigbee/tuya.txt` (lo arma `tools/zigbee/gen_tuya.py`).
 - [ ] La red propia vuelve sola con sus 7 equipos (Mi red, Armar la red).
-- [ ] **Nombre propio:** tocar el título de una tarjeta, ponerle nombre;
-      reiniciar y que siga.
+- [x] **Nombre propio:** tocar el título de una tarjeta, ponerle nombre;
+      reiniciar y que siga (2026-11-25: el TS1201 como "iR Test", siguió
+      después de dos reinicios).
 - [x] **Tabla Tuya:** el TS0002 dice "Tuya TS0002_basic, 2 gang switch
       module" (2026-11-25; el primer intento hizo caer el portal: el caché
       sin poner en cero, arreglado). Ningún TS0601 para probar los
@@ -30,7 +31,10 @@ de lo más rápido a lo que lleva más tiempo (detalle en
       nuevo (71 bytes, sin eco), guardado como "vol+", mandado en 0,5 s.
 - [x] **Infrarrojo por el hub** (2026-11-25: un comando de la biblioteca
       SmartIR de la tele del usuario salió por el TS1201 en 0,6 s y la tele
-      respondió; falta Aprender por el hub desde Infrarrojo): en Cableado, Salida = el TS1201; un
+      respondió. Aprender por el hub desde Infrarrojo: anda (68 bytes, 203
+      duraciones a la pestaña Aprender). Un envío lento (17 s) después de
+      prender y apagar la escucha del emisor cuatro veces en 3 s:
+      arreglado, y probado otra vez yendo y viniendo de Aprender: 0,5 s): en Cableado, Salida = el TS1201; un
       control de la biblioteca SmartIR (la tele del usuario) por el hub;
       Aprender por el hub. El primer envío puede tardar: mirar el log
       ("IR: from the blaster").
