@@ -38,7 +38,11 @@ de lo más rápido a lo que lleva más tiempo (detalle en
       control de la biblioteca SmartIR (la tele del usuario) por el hub;
       Aprender por el hub. El primer envío puede tardar: mirar el log
       ("IR: from the blaster").
-- [ ] **El portal:** la página Zigbee con Mi red, desde el celular.
+- [x] **El portal:** la página Zigbee con Mi red, desde el celular
+      (2026-11-25: "vol+" mandado desde ahí en 0,5 s, las salidas del
+      TS0002 prendidas y apagadas; los dos primeros pedidos al relé no
+      llegaron, 167, y los siguientes sí: el relé de siempre, no el
+      portal).
 - [x] **Emular**, hecho el 2026-11-25 contra Zigbee2MQTT (ember): entró,
       la entrevista, la luz en los dos sentidos, los valores, un reinicio
       vuelve solo, Volver a Mi red trae los 7 equipos
