@@ -33,7 +33,10 @@ h2 { font-size: 13px; text-transform: uppercase; color: var(--dim); font-weight:
 .row { display: flex; align-items: center; gap: 12px; padding: 13px 20px; border-top: 1px solid var(--line); min-height: 52px; }
 .row:first-child { border-top: 0; }
 .row .grow { flex: 1; min-width: 0; }
-.row .val { color: var(--dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .val { color: var(--dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* a long value that goes to a second line instead of being cut (a phone) */
+.row .val.wrap { white-space: normal; flex: 0 1 auto; }
+.row .grow:has(+ .val.wrap) { flex: 0 0 auto; }
 .row.click { cursor: pointer; } .row.click:hover { background: var(--card2); }
 .muted { color: var(--dim); } .small { font-size: 13px; } .ok { color: var(--green); } .bad { color: var(--red); } .warn { color: var(--orange); }
 .note { color: var(--dim); font-size: 13px; margin: 8px 4px; }

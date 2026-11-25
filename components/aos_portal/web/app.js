@@ -3893,7 +3893,7 @@ async function pageZigbee() {
       : st.state === 'scanning' ? tr('escaneando, canal %s', st.channel)
       : st.state === 'sniffing' ? tr('escuchando el canal %s', st.channel) : tr('sin usar');
     const busy = zb.emulating || zb.state === 'formed' || zb.state === 'starting';
-    put(status, row(tr('Radio 802.15.4'), radio, busy || st.reachable ? '' : 'warn'),
+    put(status, row(tr('Radio'), radio, (busy || st.reachable ? '' : 'warn') + ' wrap'),
       row(tr('Firmware del C6'), st.c6 || '?'),
       !st.reachable && !busy ? h('p', { class: 'note' }, tr('El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.')) : null,
       st.guarded ? h('p', { class: 'note warn' }, tr('El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.')) : null);
