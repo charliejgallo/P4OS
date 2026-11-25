@@ -1391,6 +1391,22 @@ proyecto).
   sirve su catálogo. Casi todas las apps se actualizan una vez: cada
   paquete trae ahora sus textos en los tres idiomas nuevos.
 
+- **La 0.34.0 salió el 2026-11-25** (tag `v0.34.0` en `da4ab480`): Zigbee
+  (la red propia, el emisor IR, emular un equipo, la página del portal),
+  el firmware nuevo de la radio (`c6.bin` 3.0.9-154.15) y los íconos HD en
+  dos packs. Orden: los cinco archivos nuevos (`c6.bin`, `zigbee_oui.bin`,
+  `zigbee_tuya.txt`, `juguete.pak`, `linea.pak`) subidos a `v0.33.0`, la
+  última publicada, comparados por SHA-256, y anotados con `gen_store.py
+  packs --tag v0.33.0`; **esta vez `c6.bin` se movió a propósito** (de
+  `v0.29.0` a `v0.33.0`): es el firmware nuevo, el que necesita Zigbee.
+  `main` y su CI (que había quedado rojo por `zigbee/tuya.txt`, una ruta
+  que la Tienda no aceptaba: arreglado), el catálogo revisado (11 partes
+  del sistema), tag, CI del tag (borrador con 77 archivos), los 455
+  archivos del catálogo buscados en su release con su tamaño, sin un
+  error, y las cinco partes nuevas por SHA-256; notas
+  (`docs/internal/RELEASE-0.34.0.md`, con el paso a paso de la radio),
+  publicada, y `releases/latest` sirve su catálogo.
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:

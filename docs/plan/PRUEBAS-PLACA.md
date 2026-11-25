@@ -5,6 +5,15 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
+## La 0.34.0 publicada (2026-11-25): lo que falta mirar en la placa
+
+- [ ] Actualizar la placa desde Ajustes, Actualización, desde GitHub, a la
+      0.34.0, y seguir el paso a paso de la radio de las notas tal cual
+      está escrito (su C6 ya tiene 154.15: ver qué dice la Tienda de
+      "Firmware de la radio (C6)", que no lo ofrezca de más).
+- [ ] Los íconos "línea" en la placa (bajados de la Tienda, Sistema).
+- [ ] Emular contra ZHA; un equipo Tuya TS0601 (los nombres de sus datapoints).
+
 ## Zigbee, para probar el 2026-11-25 (rama `zigbee-p4`, con el usuario)
 
 Todo esto anda en el simulador; nada se instaló en la placa. En orden,
