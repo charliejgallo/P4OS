@@ -543,7 +543,18 @@ static bool sd_host_config(sdmmc_host_t *out_host, sdmmc_slot_config_t *out_slot
     }
     sdmmc_host_t host = SDMMC_HOST_DEFAULT();
     host.slot = SDMMC_HOST_SLOT_0;
-    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+    /* 20 MHz, not 40 (high speed): the card shares the SDMMC controller with
+     * the C6's SDIO (slot 1, 40 MHz), and with both busy, the card writing
+     * (the first start of a new firmware writes the apps' cache and a new
+     * certificate) while Wi-Fi came up, the controller hung: the card's
+     * writes and the C6's link timed out together, esp_hosted restarted the
+     * board, and the card stayed stuck into the next start (no card, no
+     * Wi-Fi; on the board, 2026-11-24, five times in a day, all after an
+     * OTA). Espressif's own example of this pair (esp_hosted,
+     * examples/mcu_hosted_sdio_sdmmc_combined) runs the card at the default
+     * 20 MHz, and points at an IDF issue with the two on one controller
+     * (esp-idf #16233). */
+    host.max_freq_khz = SDMMC_FREQ_DEFAULT;
     host.pwr_ctrl_handle = pwr;
     /* A buffer that isn't DMA-ready (any malloc(): stdio's 8 KB of each FILE,
      * most apps' buffers) goes through a bounce buffer, and by default the
