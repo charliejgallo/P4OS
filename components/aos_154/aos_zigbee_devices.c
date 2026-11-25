@@ -170,9 +170,11 @@ static void load_all(void)
 {
     char key[16], v[160];
     lock();
+    int keys = 0;
     for (int i = 0; i < AOS_ZB_DEVICES_MAX; i++) {
         snprintf(key, sizeof key, SAVE_KEY, i);
         if (!aos_hal_pref_get_str(key, v, sizeof v)) break;
+        keys = i + 1;
         uint8_t ieee[8];
         unsigned nwk, cap, power, step, neps, e0, e1, e2, e3, zt, cls, oe = 0, le = 0;
         int at = 0;
@@ -188,6 +190,8 @@ static void load_all(void)
             sscanf(v + 16, " %u %u %u %u %u %u,%u,%u,%u %u %u%n", &nwk, &cap, &power, &step, &neps, &e0, &e1, &e2, &e3, &zt,
                    &cls, &at) != 11)
             continue;
+        static const uint8_t none[8] = { 0 }, all[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+        if (!memcmp(ieee, none, 8) || !memcmp(ieee, all, 8)) continue;     /* saved by mistake once */
         int j = add(ieee, (uint16_t)nwk);
         if (j < 0) break;
         aos_zigbee_dev_t *d = &s_dev[j];
@@ -213,9 +217,10 @@ static void load_all(void)
         }
         /* heard_ms 0: no news since the board started */
     }
-    s_saved = s_n;
+    s_saved = keys;                     /* the keys there: a save erases what is left over */
     unlock();
-    aos_hal_log(TAG, "%d devices in the saved list", s_saved);
+    aos_hal_log(TAG, "%d devices in the saved list", s_n);
+    if (s_n != keys) save_all();        /* one left out: the list rewritten without it */
 }
 
 /* one that listens all the time: a router, or on mains or DC (Basic's power
@@ -569,10 +574,13 @@ static void setup(int i)
     run(i);
 }
 
-/* a setup under way, or one that started a short while ago */
+/* a setup under way: requests still to go. (A minute's grace after one
+ * started kept a dimmer half set up: its first request went unanswered,
+ * still busy joining, and its announce 40 s later was let pass; on the
+ * board, 2026-11-24.) */
 static bool setting_up(int i)
 {
-    return s_jobs[i].n || (int64_t)aos_hal_uptime_ms() - s_jobs[i].setup_ms < 60000;
+    return s_jobs[i].n != 0;
 }
 
 /* a device the network let in: into the list and set up, if it is not
@@ -818,7 +826,7 @@ static bool on_raw(const ezb_zcl_raw_frame_t *f)
             aos_hal_log(TAG, "0x%04x spoke: asking again what is unknown (%u requests)", nwk, s_jobs[i].n);
             run(i);
         }
-    } else if (!named && unfinished && !setting_up(i)) {
+    } else if (!named && unfinished && !setting_up(i) && (int64_t)aos_hal_uptime_ms() - s_jobs[i].setup_ms > 20000) {
         /* half set up (asleep before it was done): it is awake now */
         aos_hal_log(TAG, "0x%04x spoke, its setup was not finished: again", nwk);
         setup(i);
@@ -939,6 +947,10 @@ void aos_zigbee_devices_network_up(void)
     ezb_nwk_neighbor_info_t nb;
     int added = 0;
     while (ezb_nwk_get_next_neighbor(&it, &nb) == EZB_ERR_NONE) {
+        if (ezb_eui64_is_invalid(&nb.ieee_addr)) {          /* an entry with no long address yet */
+            if (it == EZB_NWK_INFO_ITERATOR_EOT) break;
+            continue;
+        }
         lock();
         int i = find_ieee(nb.ieee_addr.u8);
         if (i < 0 && (i = add(nb.ieee_addr.u8, nb.short_addr)) >= 0) added++;

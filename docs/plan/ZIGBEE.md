@@ -432,8 +432,19 @@ velocidad que sin Zigbee. Lo de cada paso:
   equipo con el cluster Level Control (0x0008) muestra "brillo N %" y un
   deslizador; al soltarlo, *Move to Level with On/Off* (0 lo apaga, otro
   nivel lo prende) en 0,5 s, y el nivel se vuelve a leer. También
-  `POST /api/154/zblevel {"ieee", "ep", "level": 0-254}`. **Sin probar con
-  un dimmer todavía.**
+  `POST /api/154/zblevel {"ieee", "ep", "level": 0-254}`. **Probado con el
+  DomcomDimmer** (2026-11-24, noche): entra, se identifica (`DOMCOM` /
+  `DOMCOM-Dimmer`, On/Off, Level, su cluster 0xFC00) y obedece nivel y
+  encendido, pero con muchas tramas sin acuse de radio (75 de ~280 en el
+  log del C6, contra casi ninguna del módulo de relés, a -35 dBm las dos):
+  el dimmer recibe mal. Sin confirmar por qué (la antena de su placa C6, el
+  ruido del PWM de la tira); los reintentos de la placa lo terminan pasando,
+  lento. Dos arreglos en el camino: su primer pedido quedó sin respuesta
+  (todavía terminaba de unirse) y su anuncio 40 s después no reinició la
+  configuración (una espera de un minuto entre configuraciones, sacada: una
+  configuración está "en curso" sólo mientras tiene pedidos pendientes); y
+  una entrada fantasma `ffffffffffffffff` (una fila de la tabla de vecinos
+  sin dirección larga todavía) que ya no entra, ni a la lista guardada.
 - **Nota para probar desde la Mac:** zsh no parte `$var` en palabras: un
   `for p in "1 true"; set -- $p` armó JSON roto y la placa contestó
   `ok:false` (con razón). El portal estaba bien.
