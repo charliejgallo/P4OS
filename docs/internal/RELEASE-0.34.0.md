@@ -112,3 +112,18 @@ As before, a `.p4app` for each app. New System parts: the radio's firmware `c6.b
    desde GitHub; y probar los pasos 2 a 4 de arriba tal cual (su C6 ya
    tiene 154.15, así que la Tienda no debería ofrecerle nada: confirmar
    que no lo ofrece como actualización de más).
+
+## Cómo se hizo (2026-11-25)
+
+- Los cinco archivos subidos a `v0.33.0` (la última publicada), comparados
+  por SHA-256 con los locales, y anotados con `gen_store.py packs --tag
+  v0.33.0` (`c6.bin` se movió a propósito; nada más).
+- `main` en `da4ab480` y su CI, todo verde; su catálogo con las 11 partes
+  del sistema.
+- El tag `v0.34.0` y su CI: borrador con 77 archivos. Los **455 archivos**
+  que nombra el catálogo, buscados en su release con su tamaño, sin un
+  error (11 en `v0.34.0`, 117 en `v0.33.0`, 4 en `v0.32.1`, 16 en
+  `v0.32.0`, 65 en `v0.31.0`, 214 en `v0.30.0`, 13 en `v0.29.0`, 15 en
+  `v0.28.0`); las cinco partes nuevas con el SHA-256 de lo subido; las dos
+  imágenes dicen `v0.34.0`. Las notas de arriba, cargadas en el borrador.
+- Falta: **publicarla, cuando el usuario lo diga.**
