@@ -43,7 +43,10 @@
  *                                  devices that joined ("devices") and the
  *                                  seconds it stays open ("open_s")
  *   POST /api/154/zbpermit         {"seconds": 180}: lets devices join for
- *                                  that long (0 closes it, at most 254)
+ *                                  that long (0 closes it, at most 254);
+ *                                  "board": true, through the board alone;
+ *                                  "strict": true, the link key exchange
+ *                                  required of whoever joins
  *   POST /api/154/zbremove         {"ieee": "a4c13848f30143a5"}: asks that
  *                                  device to leave and forgets it
  *   POST /api/154/zbonoff          {"ieee": "...", "ep": 1, "on": true}:
@@ -402,7 +405,13 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
     else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
     else if (!strcmp(what, "zbhost")) ok = aos_zigbee_start((int)num(b, "channel", 26));
-    else if (!strcmp(what, "zbpermit")) ok = aos_zigbee_permit((int)num(b, "seconds", 180));
+    else if (!strcmp(what, "zbpermit")) {
+        aos_zigbee_static_kn(cJSON_IsTrue(cJSON_GetObjectItem(b, "static")));
+        ok = cJSON_IsTrue(cJSON_GetObjectItem(b, "strict"))
+                 ? aos_zigbee_permit_strict((int)num(b, "seconds", 180), cJSON_IsTrue(cJSON_GetObjectItem(b, "board")))
+             : cJSON_IsTrue(cJSON_GetObjectItem(b, "board")) ? aos_zigbee_permit_board((int)num(b, "seconds", 180))
+                                                              : aos_zigbee_permit((int)num(b, "seconds", 180));
+    }
     else if (!strcmp(what, "zbremove") || !strcmp(what, "zbonoff") || !strcmp(what, "zblevel") || !strcmp(what, "zbcmd") ||
              !strcmp(what, "zbwrite") || !strcmp(what, "zbdp") || !strcmp(what, "zbir")) {
         const cJSON *ie = cJSON_GetObjectItem(b, "ieee");

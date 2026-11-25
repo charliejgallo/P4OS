@@ -340,6 +340,18 @@ static void on_active_ep(const ezb_zdo_active_ep_req_result_t *res, void *ctx)
     aos_zigbee_dev_t *d = &s_dev[i];
     if (!res || res->error || !res->rsp || res->rsp->status != EZB_ZDP_STATUS_SUCCESS || !res->rsp->active_ep_count) {
         aos_hal_log(TAG, "0x%04x: no endpoints (%d)", d->nwk, res ? res->error : -1);
+        /* asked again, three times in all: a device busy finishing its join
+         * does not answer the first one (a Tuya IR blaster: authorized 15 s
+         * after its announce; on the board, 2026-11-24). Zigbee2MQTT's
+         * interview retries too. */
+        job_t j = s_jobs[i].q[s_jobs[i].head];
+        if (s_jobs[i].busy && j.type == J_ACTIVE && j.tries < 2) {
+            done(i);
+            j.tries++;
+            push_job_first(i, &j);
+            run(i);
+            return;
+        }
         notice(_("Zigbee: 0x%04x no contestó (dormido): tocale el botón"), d->nwk);
         lock();
         d->step = AOS_ZB_DEV_FAILED;
@@ -629,6 +641,11 @@ static void run(int i)
 
 static int64_t s_net_up_ms;              /* when the network came up, for the neighbor table's second looks */
 static void ir_tick(void);
+static void board_open_tick(void);
+static void setup(int i);
+static bool setting_up(int i);
+static int64_t s_board_open_at;          /* the board alone opened then (aos_zigbee_permit_board) */
+static uint8_t s_board_open_s;
 void aos_zigbee_devices_network_up(void);
 
 /* every second, in the stack's task: a job with no answer is let go */
@@ -640,12 +657,25 @@ static void tick(void *ctx)
     int64_t now = (int64_t)aos_hal_uptime_ms();
     switch_task(NULL);                  /* a command whose post did not go in */
     ir_tick();
+    board_open_tick();
     /* routers show in the neighbor table after their link status (every
      * 15 s): it is looked at again 30 s and 2 min after the start */
     static int looks;
     if (s_net_up_ms && ((looks == 0 && now - s_net_up_ms > 30000) || (looks == 1 && now - s_net_up_ms > 120000))) {
         looks++;
         aos_zigbee_devices_network_up();
+    }
+    /* once a minute: one that listens all the time and is still not set up
+     * (it did not answer when it joined) is asked again */
+    static int64_t again_ms;
+    if (now - again_ms > 60000) {
+        again_ms = now;
+        for (int i = 0; i < s_n; i++)
+            if ((s_dev[i].step == AOS_ZB_DEV_FAILED || s_dev[i].step == AOS_ZB_DEV_EPS) && awake(&s_dev[i]) &&
+                !setting_up(i)) {
+                aos_hal_log(TAG, "0x%04x is not set up yet: again", s_dev[i].nwk);
+                setup(i);
+            }
     }
     for (int i = 0; i < s_n; i++)
         if (s_jobs[i].busy && now - s_jobs[i].since_ms > JOB_WAIT_MS) {
@@ -1058,6 +1088,14 @@ static void ir_send00(void)
 static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, int n)
 {
     uint8_t b[64];
+    {
+        /* while it is measured: every frame of the transfer, in the log */
+        char hex[3 * 20 + 1];
+        int k = 0;
+        for (int m = 0; m < n && m < 20; m++) k += snprintf(hex + k, sizeof hex - (size_t)k, "%02x ", p[m]);
+        hex[k] = '\0';
+        aos_hal_log(TAG, "IR: from the blaster: %02x, %d bytes: %s(state %u, got02 %d)", cmd, n, hex, s_ir.state, s_ir.got02);
+    }
     switch (cmd) {
     case 0x00:                          /* learning: it has a code for the board */
         if (n < 16) return;
@@ -1135,7 +1173,8 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
         uint8_t sum = 0;
         for (int k = 0; k < part; k++) sum = (uint8_t)(sum + (b[8 + k] = (uint8_t)s_ir.msg[pos + k]));
         b[8 + part] = sum;
-        send_now(nwk, ep, CL_IR_TX, 0x03, b, 9 + part, true);
+        aos_hal_log(TAG, "IR: chunk at %u, %d bytes, sum %u: %d", (unsigned)pos, part, sum,
+                    send_now(nwk, ep, CL_IR_TX, 0x03, b, 9 + part, true));
         break;
     }
     case 0x04:                          /* sending: all of it went */
@@ -1153,12 +1192,13 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
 }
 
 /* every second: the sending's first frame again until the blaster answers,
- * and given up after 10 s */
+ * and given up after 15 s (right after learning, a TS1201 took its third or
+ * fourth first frame, 7 s; then half a second; on the board, 2026-11-24) */
 static void ir_tick(void)
 {
     if (s_ir.state != AOS_ZB_IR_SENDING) return;
     int64_t now = (int64_t)aos_hal_uptime_ms();
-    if (now - s_ir.t0_ms > 10000) {
+    if (now - s_ir.t0_ms > 15000) {
         s_ir.state = AOS_ZB_IR_FAILED;
         aos_hal_log(TAG, "IR: the blaster did not take the code");
         notice("%s", _("Zigbee: el emisor IR no tomó el código"));
@@ -1679,11 +1719,82 @@ int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n)
 
 /* ---- the portal's side -------------------------------------------------- */
 
+static void on_permit(const ezb_zdo_nwk_mgmt_permit_joining_req_result_t *res, void *ctx)
+{
+    (void)ctx;
+    aos_hal_log(TAG, "permit joining on the board alone: %d/%d", res ? res->error : -1, res && res->rsp ? res->rsp->status : -1);
+}
+
+static void board_open_tick(void)
+{
+    if (!s_board_open_at || (int64_t)aos_hal_uptime_ms() < s_board_open_at) return;
+    s_board_open_at = 0;
+    ezb_zdo_nwk_mgmt_permit_joining_req_t r = { .dst_nwk_addr = 0x0000,
+                                                .field = { .permit_duration = s_board_open_s, .tc_significance = 1 },
+                                                .cb = on_permit };
+    aos_hal_log(TAG, "opening the board alone for %u s: %d", s_board_open_s, ezb_zdo_nwk_mgmt_permit_joining_req(&r));
+    s_permit_until_ms = (int64_t)aos_hal_uptime_ms() + (int64_t)s_board_open_s * 1000;
+}
+
 static void permit(void *ctx)
 {
-    uint8_t s = (uint8_t)(uintptr_t)ctx;
+    uintptr_t a = (uintptr_t)ctx;
+    uint8_t s = (uint8_t)a;
+    /* "strict": the link key exchange required of whoever joins now (a
+     * Zigbee 3.0 device that wants its own key and blinked on without it);
+     * otherwise not required, for those from before 3.0 (aos_zigbee_p4.c) */
+    bool strict = (a & 0x200) != 0;
+    aos_hal_log(TAG, "link key exchange %s for these joins: %d", strict ? "required" : "not required",
+                ezb_secur_set_tclk_exchange_required(strict));
+    aos_hal_log(TAG, "key negotiation: static %d, ECSPEKE AES-MMO %d, ECSPEKE SHA-256 %d",
+                ezb_secur_get_kn_method_enabled(EZB_SECUR_KN_METHOD_STATIC_REQUEST_KEY),
+                ezb_secur_get_kn_method_enabled(EZB_SECUR_KN_METHOD_ECSPEKE_CURVE25519_AESMMO),
+                ezb_secur_get_kn_method_enabled(EZB_SECUR_KN_METHOD_ECSPEKE_CURVE25519_SHA256));
+    if (a & 0x400) {
+        /* the classic Request Key alone, as a Zigbee 3.0 (R21/R22) device
+         * expects it: the R23 negotiations (ECSPEKE) off */
+        ezb_secur_set_kn_method_enabled(EZB_SECUR_KN_METHOD_STATIC_REQUEST_KEY, true);
+        ezb_secur_set_kn_method_enabled(EZB_SECUR_KN_METHOD_ECSPEKE_CURVE25519_AESMMO, false);
+        ezb_secur_set_kn_method_enabled(EZB_SECUR_KN_METHOD_ECSPEKE_CURVE25519_SHA256, false);
+        aos_hal_log(TAG, "key negotiation now: the static Request Key alone");
+    }
+    if (a & 0x100) {
+        /* the board alone: closed everywhere first (the routers too), then
+         * open on the board's own address. A blaster that joined through the
+         * relay module never finished (its first answer lost, then
+         * re-joining over and over; on the board, 2026-11-24): this way it
+         * has to join the board itself. */
+        aos_hal_log(TAG, "closing the network everywhere: %d", ezb_bdb_close_network());
+        /* the close is a broadcast, which reaches the board too a moment
+         * later: the opening goes 1.5 s after it (board_open_tick) */
+        s_board_open_s = s;
+        s_board_open_at = (int64_t)aos_hal_uptime_ms() + 1500;
+        return;
+    }
     if (s) aos_hal_log(TAG, "opening the network for %u s: %d", s, ezb_bdb_open_network(s));
     else aos_hal_log(TAG, "closing the network: %d", ezb_bdb_close_network());
+}
+
+bool aos_zigbee_permit_board(int seconds)
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_FORMED || seconds < 1) return false;
+    if (seconds > 254) seconds = 254;
+    return esp_zigbee_task_queue_post(permit, (void *)(uintptr_t)(0x100 | seconds)) == ESP_OK;
+}
+
+static bool s_static_kn;
+void aos_zigbee_static_kn(bool on) { s_static_kn = on; }
+
+bool aos_zigbee_permit_strict(int seconds, bool board)
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_FORMED || seconds < 1) return false;
+    if (seconds > 254) seconds = 254;
+    return esp_zigbee_task_queue_post(permit, (void *)(uintptr_t)(0x200 | (board ? 0x100 : 0) | (s_static_kn ? 0x400 : 0) |
+                                                                  seconds)) == ESP_OK;
 }
 
 bool aos_zigbee_permit(int seconds)

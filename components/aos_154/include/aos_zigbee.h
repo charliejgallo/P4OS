@@ -113,6 +113,13 @@ typedef struct {
 } aos_zigbee_dev_t;
 
 bool aos_zigbee_permit(int seconds);
+/* the same, open on the board alone (the routers closed): a device that
+ * does not finish joining through a router has to join the board itself */
+bool aos_zigbee_permit_board(int seconds);
+/* the same with the link key exchange required of whoever joins (a Zigbee
+ * 3.0 device that will not finish joining without its own key) */
+bool aos_zigbee_permit_strict(int seconds, bool board);
+void aos_zigbee_static_kn(bool on);     /* measuring: the next strict opening with the static Request Key alone */
 /* asks a device to leave the network, and forgets it */
 bool aos_zigbee_remove(const uint8_t ieee[8]);
 /* an output of a device (its On/Off cluster on endpoint ep): 0 off, 1 on,

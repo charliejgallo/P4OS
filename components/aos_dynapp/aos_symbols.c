@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3686 simbolos.
+ * Total: 3698 simbolos.
  */
 
 #include <stddef.h>
@@ -86,6 +86,7 @@ extern int aos_app_soon_register;
 extern int aos_app_store_get;
 extern int aos_app_store_service_tick;
 extern int aos_app_sysmon_get;
+extern int aos_app_zigbee_get;
 extern int aos_apps_register_builtin;
 extern int aos_apps_service_tick;
 extern int aos_audio_close;
@@ -261,6 +262,7 @@ extern int aos_hal_bt_peer;
 extern int aos_hal_bt_phone_battery;
 extern int aos_hal_bt_state;
 extern int aos_hal_button_is_down;
+extern int aos_hal_c6_link_wait;
 extern int aos_hal_caps;
 extern int aos_hal_code_sync;
 extern int aos_hal_coredump_boot_check;
@@ -551,6 +553,7 @@ extern int aos_hal_pref_erase;
 extern int aos_hal_pref_foreach;
 extern int aos_hal_pref_get_i32;
 extern int aos_hal_pref_get_str;
+extern int aos_hal_pref_partition;
 extern int aos_hal_pref_set_i32;
 extern int aos_hal_pref_set_str;
 extern int aos_hal_probe_devices;
@@ -769,6 +772,14 @@ extern int aos_icon_create_ops;
 extern int aos_icon_ops_builtin;
 extern int aos_icon_ops_check;
 extern int aos_icon_ops_for;
+extern int aos_icon_pack_choice;
+extern int aos_icon_pack_choose;
+extern int aos_icon_pack_create;
+extern int aos_icon_pack_current;
+extern int aos_icon_pack_has;
+extern int aos_icon_pack_list;
+extern int aos_icon_pack_refresh;
+extern int aos_icon_pack_reload;
 extern int aos_icon_scan_files;
 extern int aos_icon_set_ops;
 extern int aos_icon_source;
@@ -1130,6 +1141,7 @@ extern int aos_panel_release;
 extern int aos_panels_create;
 extern int aos_panels_layout;
 extern int aos_panels_tick;
+extern int aos_qoi_decode;
 extern int aos_radio_buffered;
 extern int aos_radio_busy;
 extern int aos_radio_fail;
@@ -3775,6 +3787,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_app_store_get),
     ESP_ELFSYM_EXPORT(aos_app_store_service_tick),
     ESP_ELFSYM_EXPORT(aos_app_sysmon_get),
+    ESP_ELFSYM_EXPORT(aos_app_zigbee_get),
     ESP_ELFSYM_EXPORT(aos_apps_register_builtin),
     ESP_ELFSYM_EXPORT(aos_apps_service_tick),
     ESP_ELFSYM_EXPORT(aos_audio_close),
@@ -3950,6 +3963,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_bt_phone_battery),
     ESP_ELFSYM_EXPORT(aos_hal_bt_state),
     ESP_ELFSYM_EXPORT(aos_hal_button_is_down),
+    ESP_ELFSYM_EXPORT(aos_hal_c6_link_wait),
     ESP_ELFSYM_EXPORT(aos_hal_caps),
     ESP_ELFSYM_EXPORT(aos_hal_code_sync),
     ESP_ELFSYM_EXPORT(aos_hal_coredump_boot_check),
@@ -4240,6 +4254,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_pref_foreach),
     ESP_ELFSYM_EXPORT(aos_hal_pref_get_i32),
     ESP_ELFSYM_EXPORT(aos_hal_pref_get_str),
+    ESP_ELFSYM_EXPORT(aos_hal_pref_partition),
     ESP_ELFSYM_EXPORT(aos_hal_pref_set_i32),
     ESP_ELFSYM_EXPORT(aos_hal_pref_set_str),
     ESP_ELFSYM_EXPORT(aos_hal_probe_devices),
@@ -4458,6 +4473,14 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_icon_ops_builtin),
     ESP_ELFSYM_EXPORT(aos_icon_ops_check),
     ESP_ELFSYM_EXPORT(aos_icon_ops_for),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_choice),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_choose),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_create),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_current),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_has),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_list),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_refresh),
+    ESP_ELFSYM_EXPORT(aos_icon_pack_reload),
     ESP_ELFSYM_EXPORT(aos_icon_scan_files),
     ESP_ELFSYM_EXPORT(aos_icon_set_ops),
     ESP_ELFSYM_EXPORT(aos_icon_source),
@@ -4819,6 +4842,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_panels_create),
     ESP_ELFSYM_EXPORT(aos_panels_layout),
     ESP_ELFSYM_EXPORT(aos_panels_tick),
+    ESP_ELFSYM_EXPORT(aos_qoi_decode),
     ESP_ELFSYM_EXPORT(aos_radio_buffered),
     ESP_ELFSYM_EXPORT(aos_radio_busy),
     ESP_ELFSYM_EXPORT(aos_radio_fail),

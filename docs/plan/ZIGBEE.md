@@ -481,7 +481,27 @@ velocidad que sin Zigbee. Lo de cada paso:
     pedazos de 50 que el emisor va pidiendo, el primer marco de nuevo cada
     2 s hasta que conteste). En Mi red: "Aprender un código" y "Enviar el
     último aprendido"; `POST /api/154/zbir`. El usuario tiene uno
-    (`_TZ3290_nba3knpsarkawgnt`, TS1201): entró a la red, falta probarlo.
+    (`_TZ3290_nba3knpsarkawgnt`, TS1201). **Anda** (2026-11-24, noche): el
+    usuario aprendió un código del control remoto de su televisor (73
+    bytes) y manejó el volumen con "Enviar el último aprendido". Para
+    unirse necesitó la apertura "Zigbee 3.0" (fila 15 de la bitácora).
+    El primer envío después de aprender a veces tarda: el emisor recién
+    contestó al tercer o cuarto primer marco (7 s) y una vez a ninguno
+    en 10 s; los siguientes salieron en medio segundo. Por eso la espera
+    es de 15 s, y cada marco de la transferencia queda en el log
+    ("IR: from the blaster") para mirar el próximo que falle. El código
+    aprendido vive en la RAM: se pierde al reiniciar (guardarlo por
+    nombre es lo que sigue).
+  - **"Sumar Zigbee 3.0"** en Mi red (`POST /api/154/zbpermit` con
+    `board`, `strict` y `static`): abre la red sólo en la placa (no en los
+    routers: cierra todo y abre la placa 1,5 s después, si no un "cerrar"
+    a todos que llega tarde la cierra), exige el intercambio de clave de
+    Zigbee 3.0 y ofrece sólo el Request Key clásico. Para el equipo que
+    titila y nunca termina de sumarse con el botón común. Los anteriores a
+    Zigbee 3.0 (los ORVIBO) no entran así: el botón común es el suyo.
+  - **Lo que no terminó de configurarse se vuelve a pedir:** el pedido de
+    endpoints con tres intentos, y cada minuto se rehace la configuración
+    de un equipo despierto que quedó a medias.
 - **Nota para probar desde la Mac:** zsh no parte `$var` en palabras: un
   `for p in "1 true"; set -- $p` armó JSON roto y la placa contestó
   `ok:false` (con razón). El portal estaba bien.
@@ -524,6 +544,7 @@ quien siga no repita las vueltas:
 | 12 | El sensor no encontraba la red | el Wi-Fi rechazaba 4 de 5 beacons que le contestaban (prioridad MEDIO) | prioridad ALTA al mandar: 0 rechazos |
 | 13 | El fabricante y el modelo llegaban rotos ("dropping radio frame: Parse") | la pila lee su "UART" de a 128 bytes y, de un datagrama más largo, el resto se pierde | el túnel le entrega datagramas de 64 bytes |
 | 14 | La placa "colgada" en el primer arranque después de un OTA (cinco veces en el día): sin tarjeta y sin Wi-Fi | la microSD y el C6 comparten el único controlador SDMMC del P4; primero pareció un cruce al arrancar (y se cambió el orden: la tarjeta y después el enlace del C6, que quedó, y la pantalla sale antes), pero el puerto serie mostró la causa: 8 s después de un arranque bueno, con la tarjeta escribiendo (el primer arranque de un firmware nuevo escribe el caché de las apps y un certificado) y el Wi-Fi levantando, el controlador se colgó, esp_hosted reinició la placa, y la tarjeta quedó trabada (un reinicio por software no le corta la corriente) | la tarjeta a 20 MHz en vez de 40, como el ejemplo de Espressif de este mismo par (`mcu_hosted_sdio_sdmmc_combined`, que cita esp-idf #16233); cinco rondas bajo carga sin error. **No era de Zigbee: en `main`** (`e701299d`). Hay que seguir mirando: si vuelve, el puerto serie grabando |
+| 15 | El emisor IR (TS1201) se unía, titilaba y nunca terminaba: la placa lo veía anunciarse y a los segundos desaparecía | es Zigbee 3.0 de Tuya: espera el intercambio de la clave del centro de confianza (que la placa no exige, fila 11) y, al abrir la red en todos los routers, a veces se colgaba de uno (el relé) que no lo terminaba | "Sumar Zigbee 3.0": abre sólo la placa, exige el intercambio y ofrece el Request Key clásico; entró a la primera. El usuario aprendió un código de su televisor y le manejó el volumen. **No reiniciar la placa mientras un equipo se está configurando** (pasó una vez, y hubo que unirlo de nuevo) |
 
 Y lo que lo hizo visible: contadores en cada llamada entre la pila y su
 plataforma (`aos_zigbee_trace.c`), el volcado de los bytes de spinel en cada

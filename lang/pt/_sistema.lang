@@ -11600,7 +11600,7 @@ Mi red	Minha rede
 Zigbee: %s, salida %u %s	Zigbee: %s, saída %u %s
 Abierta para sumar	Aberta para adicionar
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	A rede fica aberta enquanto você estiver aqui, até Fechar. Resete os dispositivos um de cada vez: a tela avisa quando cada um entra e o que é. Se for a pilha, aperte o botão de vez em quando enquanto ele é configurado.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola.	Rede no canal %u. %d dispositivos. Os valores chegam quando o dispositivo os envia: um a pilha pode demorar para dar notícias (aperte o botão para acordá-lo). Toque numa saída para ligá-la ou desligá-la.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Rede no canal %u. %d dispositivos. Os valores chegam quando o dispositivo os envia: um a pilha pode demorar para dar notícias (aperte o botão para acordá-lo). Toque numa saída para ligá-la ou desligá-la. Se um dispositivo continua piscando e não termina de entrar, tente Adicionar Zigbee 3.0.
 ¿Seguro?	Certeza?
 Sacar	Remover
 sin noticias desde que arrancó la placa	sem notícias desde que a placa ligou
@@ -11656,3 +11656,4 @@ baja	baixa
 alta	alta
 prendido	ligado
 inteligente	inteligente
+Sumar Zigbee 3.0	Adicionar Zigbee 3.0

@@ -237,6 +237,9 @@ bool aos_154_link_spinel(const uint8_t *data, size_t len)
 bool aos_zigbee_start(int channel) { (void)channel; return false; }
 void aos_zigbee_info(aos_zigbee_info_t *out) { memset(out, 0, sizeof *out); }
 bool aos_zigbee_permit(int seconds) { (void)seconds; return false; }
+bool aos_zigbee_permit_board(int seconds) { (void)seconds; return false; }
+bool aos_zigbee_permit_strict(int seconds, bool board) { (void)seconds; (void)board; return false; }
+void aos_zigbee_static_kn(bool on) { (void)on; }
 bool aos_zigbee_remove(const uint8_t ieee[8]) { (void)ieee; return false; }
 bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd) { (void)ieee; (void)ep; (void)cmd; return false; }
 bool aos_zigbee_level(const uint8_t ieee[8], uint8_t ep, int level) { (void)ieee; (void)ep; (void)level; return false; }

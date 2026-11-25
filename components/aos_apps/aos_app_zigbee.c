@@ -60,7 +60,7 @@ static struct {
     int rows;
     bool deep;                          /* a scan of 2 s a channel, not 250 ms */
     uint32_t devs_tick;
-    lv_obj_t *net, *net_note, *net_btn, *net_lbl, *close_btn;
+    lv_obj_t *net, *net_note, *net_btn, *net_lbl, *close_btn, *strict_btn;
     volatile bool starting;             /* the network being started, off LVGL's task */
     bool keep_open;                     /* "Sumar equipos": open again each time it closes, until Cerrar */
     uint32_t asked_ms;
@@ -485,6 +485,22 @@ static void net_cb(lv_event_t *e)
     }
 }
 
+/* "Add Zigbee 3.0": for a device that blinks on and never finishes with
+ * the plain opening. On the board alone, the link key exchange required, the
+ * classic Request Key alone (a Tuya TS1201 IR blaster joined only so; on the
+ * board, 2026-11-24). Those from before Zigbee 3.0 (an ORVIBO's sensors) do
+ * not join so: the plain button is theirs. */
+static void strict_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_FORMED) return;
+    U.keep_open = false;
+    aos_zigbee_static_kn(true);
+    if (!aos_zigbee_permit_strict(254, true)) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+}
+
 static void close_cb(lv_event_t *e)
 {
     (void)e;
@@ -499,6 +515,7 @@ static void build_net(lv_obj_t *page, int32_t w)
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, 20, 0);
     U.net_btn = pill(row, "", true, net_cb, NULL, &U.net_lbl);
+    U.strict_btn = pill(row, _("Sumar Zigbee 3.0"), false, strict_cb, NULL, NULL);
     U.close_btn = pill(row, _("Cerrar"), false, close_cb, NULL, NULL);
     U.net_note = wrap(page, "", aos_font_caption, AOS_C_DIM, w);
     U.net = box(page, w, LV_SIZE_CONTENT);
@@ -741,6 +758,8 @@ static void fill_net(int32_t w)
     else if (U.keep_open) lv_label_set_text(U.net_lbl, _("Abierta para sumar"));
     else if (open) lv_label_set_text_fmt(U.net_lbl, _("Abierta: %d s"), open);
     else lv_label_set_text(U.net_lbl, _("Sumar equipos"));
+    if (z.state == AOS_ZB_FORMED && !open && !U.keep_open) lv_obj_remove_flag(U.strict_btn, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(U.strict_btn, LV_OBJ_FLAG_HIDDEN);
     if (open || U.keep_open) lv_obj_remove_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
     else lv_obj_add_flag(U.close_btn, LV_OBJ_FLAG_HIDDEN);
 
@@ -757,7 +776,8 @@ static void fill_net(int32_t w)
     else
         lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: "
                                             "uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). "
-                                            "Una salida se prende o se apaga tocándola."),
+                                            "Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no "
+                                            "termina de sumarse, probá con Sumar Zigbee 3.0."),
                               z.channel, n);
     lv_obj_clean(U.net);
     U.nout = 0;

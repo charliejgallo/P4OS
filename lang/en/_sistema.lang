@@ -11025,7 +11025,7 @@ Mi red	My network
 Zigbee: %s, salida %u %s	Zigbee: %s, output %u %s
 Abierta para sumar	Open to add
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	The network stays open while you are here, until Close. Reset the devices one at a time: the screen tells when each one joins and what it is. If it runs on battery, press its button now and then while it is set up.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola.	Network on channel %u. %d devices. Values arrive when the device sends them: one on battery may take a while to give news (press its button to wake it up). Tap an output to switch it on or off.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Network on channel %u. %d devices. Values arrive when the device sends them: one on battery may take a while to give news (press its button to wake it up). Tap an output to switch it on or off. If a device keeps blinking and never finishes joining, try Add Zigbee 3.0.
 ¿Seguro?	Sure?
 Sacar	Remove
 sin noticias desde que arrancó la placa	no news since the board started
@@ -11081,3 +11081,4 @@ baja	low
 alta	high
 prendido	on
 inteligente	smart
+Sumar Zigbee 3.0	Add Zigbee 3.0
