@@ -67,6 +67,10 @@ static struct {
     uint8_t rm_ieee[AOS_ZB_DEVICES_MAX][8];     /* each card's device, for its Sacar */
     uint8_t armed[8];                   /* the one whose Sacar was tapped once */
     uint32_t armed_ms;
+    struct { uint8_t ieee[8], ep; } out[24];    /* each output chip on the page, for its tap */
+    int nout;
+    uint8_t pend_ieee[8], pend_ep;      /* the output just tapped, "..." until it answers */
+    uint32_t pend_ms;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -556,7 +560,23 @@ static const char *cluster_name(uint16_t c)
     }
 }
 
-static void add_value(lv_obj_t *row, const char *text, lv_color_t c)
+/* an output's chip, tapped: toggled (the On/Off cluster's Toggle, which any
+ * switch takes without the board knowing its state first) */
+static void out_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    if (k < 0 || k >= U.nout) return;
+    if (!aos_zigbee_onoff(U.out[k].ieee, U.out[k].ep, 2)) {
+        aos_ui_toast(_("La red no tomó el pedido"), 2000);
+        return;
+    }
+    memcpy(U.pend_ieee, U.out[k].ieee, 8);
+    U.pend_ep = U.out[k].ep;
+    U.pend_ms = (uint32_t)aos_hal_uptime_ms();
+    U.devs_tick = 0;
+}
+
+static lv_obj_t *add_value(lv_obj_t *row, const char *text, lv_color_t c)
 {
     lv_obj_t *v = box(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_style_bg_opa(v, LV_OPA_COVER, 0);
@@ -565,6 +585,7 @@ static void add_value(lv_obj_t *row, const char *text, lv_color_t c)
     lv_obj_set_style_pad_hor(v, 14, 0);
     lv_obj_set_style_pad_ver(v, 6, 0);
     aos_label(v, text, aos_font_small, c);
+    return v;
 }
 
 static void fill_net(int32_t w)
@@ -597,9 +618,11 @@ static void fill_net(int32_t w)
                                         "botón cada tanto mientras se configura."));
     else
         lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: "
-                                            "uno a pila puede tardar en dar noticias (tocale el botón para despertarlo)."),
+                                            "uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). "
+                                            "Una salida se prende o se apaga tocándola."),
                               z.channel, n);
     lv_obj_clean(U.net);
+    U.nout = 0;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = n - 1; i >= 0; i--) {
         const aos_zigbee_dev_t *e = &d[i];
@@ -662,8 +685,21 @@ static void fill_net(int32_t w)
         for (int q = 0; q < e->neps; q++)
             if ((e->onoff_known >> q) & 1) {
                 bool on = (e->onoff >> q) & 1;
-                snprintf(v, sizeof v, _("salida %d: %s"), q + 1, on ? _("prendida") : _("apagada"));
-                add_value(vals, v, on ? AOS_C_YELLOW : AOS_C_DIM);
+                bool pend = !memcmp(U.pend_ieee, e->ieee, 8) && U.pend_ep == e->eps_list[q] && now - U.pend_ms < 1500;
+                snprintf(v, sizeof v, _("salida %d: %s"), q + 1, pend ? "..." : on ? _("prendida") : _("apagada"));
+                lv_obj_t *chip = add_value(vals, v, on ? AOS_C_YELLOW : AOS_C_DIM);
+                if (U.nout < (int)(sizeof U.out / sizeof U.out[0])) {
+                    /* a button: tapped, the output switches */
+                    memcpy(U.out[U.nout].ieee, e->ieee, 8);
+                    U.out[U.nout].ep = e->eps_list[q];
+                    lv_obj_set_style_border_width(chip, 2, 0);
+                    lv_obj_set_style_border_color(chip, on ? AOS_C_YELLOW : AOS_C_DIM, 0);
+                    lv_obj_set_style_pad_hor(chip, 22, 0);
+                    lv_obj_set_style_pad_ver(chip, 12, 0);
+                    lv_obj_add_flag(chip, LV_OBJ_FLAG_CLICKABLE);
+                    lv_obj_add_event_cb(chip, out_cb, LV_EVENT_CLICKED, (void *)(intptr_t)U.nout);
+                    U.nout++;
+                }
             }
         if (e->battery != 0xFF) {
             snprintf(v, sizeof v, "%s %u %%", _("batería"), e->battery / 2);

@@ -77,6 +77,9 @@ typedef struct {
 bool aos_zigbee_permit(int seconds);
 /* asks a device to leave the network, and forgets it */
 bool aos_zigbee_remove(const uint8_t ieee[8]);
+/* an output of a device (its On/Off cluster on endpoint ep): 0 off, 1 on,
+ * 2 toggle. Its new state comes back in the device's values. */
+bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
 

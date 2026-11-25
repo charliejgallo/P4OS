@@ -46,6 +46,8 @@
  *                                  that long (0 closes it, at most 254)
  *   POST /api/154/zbremove         {"ieee": "a4c13848f30143a5"}: asks that
  *                                  device to leave and forgets it
+ *   POST /api/154/zbonoff          {"ieee": "...", "ep": 1, "on": true}:
+ *                                  switches an output ("on" left out: toggles)
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -327,7 +329,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
     else if (!strcmp(what, "zbhost")) ok = aos_zigbee_start((int)num(b, "channel", 26));
     else if (!strcmp(what, "zbpermit")) ok = aos_zigbee_permit((int)num(b, "seconds", 180));
-    else if (!strcmp(what, "zbremove")) {
+    else if (!strcmp(what, "zbremove") || !strcmp(what, "zbonoff")) {
         const cJSON *ie = cJSON_GetObjectItem(b, "ieee");
         uint8_t ieee[8];
         ok = cJSON_IsString(ie) && strlen(ie->valuestring) == 16;
@@ -336,7 +338,11 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
             ok = sscanf(ie->valuestring + 2 * k, "%2x", &v) == 1;
             ieee[7 - k] = (uint8_t)v;
         }
-        if (ok) ok = aos_zigbee_remove(ieee);
+        if (ok && what[2] == 'r') ok = aos_zigbee_remove(ieee);
+        else if (ok) {
+            const cJSON *on = cJSON_GetObjectItem(b, "on");
+            ok = aos_zigbee_onoff(ieee, (uint8_t)num(b, "ep", 1), cJSON_IsBool(on) ? cJSON_IsTrue(on) : 2);
+        }
     }
     else if (!strcmp(what, "c6log")) ok = aos_154_c6_log(cJSON_IsTrue(cJSON_GetObjectItem(b, "on")));
     else if (!strcmp(what, "zigbee"))

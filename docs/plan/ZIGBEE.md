@@ -398,6 +398,17 @@ velocidad que sin Zigbee. Lo de cada paso:
   routers aparecen después de su "link status"). **Sacar** (dos toques) le
   pide al equipo que se vaya de la red (Mgmt_Leave) y lo olvida; también
   `POST /api/154/zbremove {"ieee": ...}`.
+- **Salidas** (2026-11-24, noche, pedido del usuario): en Mi red, la
+  ficha de una salida ("salida 1: prendida") es un botón: tocada, el
+  cluster On/Off recibe `Toggle` (lo entiende cualquier interruptor sin
+  saber antes su estado) y la placa vuelve a leer el estado (uno que lo
+  reporta lo dice igual; uno que no, contesta). También
+  `POST /api/154/zbonoff {"ieee": ..., "ep": 1, "on": true}` ("on" sin
+  poner: Toggle). Probado con el módulo de relés Tuya TS0002: apagar y
+  prender la salida 1 desde el portal. **Visto en la foto del usuario,
+  para pulir:** el contacto ORVIBO sale como "alarma: normal" (no contestó
+  su tipo de zona, 0x0015 "contacto") y su batería en 15 % (ORVIBO manda
+  el porcentaje entero, no en medios: Zigbee2MQTT lo corrige por modelo).
 - **Para qué** (el usuario, 2026-11-24): un banco de pruebas de campo. Si
   un equipo en una obra no se une al Home Assistant o anda raro, se lo une
   a la placa y se ve qué es, qué manda y si sus salidas responden; y al

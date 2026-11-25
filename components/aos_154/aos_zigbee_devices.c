@@ -56,6 +56,7 @@
 #include "ezbee/zcl.h"
 #include "ezbee/zcl/cluster/power_config_desc.h"
 #include "ezbee/zcl/cluster/on_off_desc.h"
+#include "ezbee/zcl/cluster/on_off.h"
 #include "ezbee/zcl/cluster/temperature_measurement_desc.h"
 #include "ezbee/zcl/cluster/rel_humidity_measurement_desc.h"
 #include "ezbee/zcl/cluster/occupancy_sensing_desc.h"
@@ -219,7 +220,7 @@ static int ep_index(const aos_zigbee_dev_t *d, uint8_t ep)
 /* A sleepy device holds its parent's queue for it short, and answers right
  * after it joined or spoke: its requests go out one after another, each on
  * the answer to the one before, or after JOB_WAIT_MS without one. */
-enum { J_ACTIVE, J_BASIC, J_SIMPLE, J_BIND, J_CIE, J_ENROLL, J_READ };
+enum { J_ACTIVE, J_BASIC, J_SIMPLE, J_BIND, J_CIE, J_ENROLL, J_READ, J_ONOFF };     /* J_ONOFF's "cluster": 0 off, 1 on, 2 toggle */
 typedef struct { uint8_t type, ep; uint16_t cluster; } job_t;
 #define JOBS        32
 #define JOB_WAIT_MS 5000
@@ -411,6 +412,15 @@ static void start_job(int i)
         };
         ezb_address_set_short(&r.cmd_ctrl.dst_addr, d->nwk);
         e = ezb_zcl_ias_zone_enroll_cmd_resp(&r);
+        break;
+    }
+    case J_ONOFF: {
+        ezb_zcl_on_off_cmd_t c = { .cmd_ctrl = { .dst_ep = j->ep, .src_ep = 1, .cnf_ctx = { .cb = on_cnf, .user_ctx = ctx } } };
+        ezb_address_set_short(&c.cmd_ctrl.dst_addr, d->nwk);
+        e = j->cluster == 0 ? ezb_zcl_on_off_off_cmd_req(&c) : j->cluster == 1 ? ezb_zcl_on_off_on_cmd_req(&c)
+                                                                                : ezb_zcl_on_off_toggle_cmd_req(&c);
+        aos_hal_log(TAG, "0x%04x: output on %u: %s (%d)", d->nwk, j->ep,
+                    j->cluster == 0 ? "off" : j->cluster == 1 ? "on" : "toggle", e);
         break;
     }
     case J_BASIC:
@@ -901,6 +911,50 @@ bool aos_zigbee_remove(const uint8_t ieee[8])
     if (z.state != AOS_ZB_FORMED) return false;
     memcpy(s_rm_ieee, ieee, 8);
     return esp_zigbee_task_queue_post(remove_task, NULL) == ESP_OK;
+}
+
+/* ---- an output switched (a relay, a plug, a light) ------------------------- */
+
+/* a few taps may come before the stack's task takes them */
+static struct { uint8_t ieee[8], ep, cmd; } s_sw[4];
+static volatile uint8_t s_sw_head, s_sw_tail;
+
+static void switch_task(void *ctx)
+{
+    (void)ctx;
+    while (s_sw_tail != s_sw_head) {
+        uint8_t ieee[8], ep, cmd;
+        lock();
+        memcpy(ieee, s_sw[s_sw_tail % 4].ieee, 8);
+        ep = s_sw[s_sw_tail % 4].ep;
+        cmd = s_sw[s_sw_tail % 4].cmd;
+        s_sw_tail++;
+        int i = find_ieee(ieee);
+        unlock();
+        if (i < 0) continue;
+        /* the command, and then its state read back: a device that reports
+         * it says so anyway, one that does not is asked */
+        push(i, J_ONOFF, ep, cmd);
+        push(i, J_READ, ep, CL_ONOFF);
+        run(i);
+    }
+}
+
+bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd)
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_FORMED || cmd < 0 || cmd > 2) return false;
+    lock();
+    bool room = (uint8_t)(s_sw_head - s_sw_tail) < 4;
+    if (room) {
+        memcpy(s_sw[s_sw_head % 4].ieee, ieee, 8);
+        s_sw[s_sw_head % 4].ep = ep;
+        s_sw[s_sw_head % 4].cmd = (uint8_t)cmd;
+        s_sw_head++;
+    }
+    unlock();
+    return room && esp_zigbee_task_queue_post(switch_task, NULL) == ESP_OK;
 }
 
 /* ---- the portal's side -------------------------------------------------- */
