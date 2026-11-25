@@ -500,6 +500,15 @@ velocidad que sin Zigbee. Lo de cada paso:
     dos veces lo borra. Portal: `zbir` con `save`, `saved` (mandar),
     `forget`, y `raw` (duraciones cualesquiera); la lista en
     `zbhost.ir.codes`.
+    **En la placa (2026-11-25):** aprender, guardar y mandar andan; cada
+    envío sale entero en ~1 s (doce pedazos de 50 que pide el emisor, el
+    primer marco contestado al toque). Apareció un **eco**: un cuarto de
+    segundo después de mandar, el TS1201 ofreció como "aprendido" un
+    código de 371 bytes que nadie pidió (se oyó a sí mismo, todavía
+    escuchando), y pisó al aprendido de verdad (197 bytes), que fue el que
+    se guardó. Desde entonces la placa toma un código aprendido sólo
+    mientras ella pidió aprender, y si llega otro le repite al emisor que
+    deje de escuchar.
   - **El formato del código** (`aos_zigbee_ir.c`, también en el
     simulador): base64 de FastLZ nivel 1 sobre duraciones de 16 bits LE
     en µs, empezando por una marca. La placa lo lee y lo arma (copias

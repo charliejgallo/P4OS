@@ -1111,6 +1111,19 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
     switch (cmd) {
     case 0x00:                          /* learning: it has a code for the board */
         if (n < 16) return;
+        /* only while the board asked it to learn: a TS1201 still listening
+         * heard its own sending a quarter of a second later and offered
+         * that echo as a learned code, which took the place of the one
+         * learned (on the board, 2026-11-25). Not taken, and told again to
+         * stop learning. */
+        if (s_ir.state != AOS_ZB_IR_LEARNING) {
+            aos_hal_log(TAG, "IR: a code the board did not ask for (%u bytes, state %u): left aside", (unsigned)get32(p + 2),
+                        s_ir.state);
+            s_ir.nwk = nwk;
+            s_ir.ep = ep;
+            ir_study(false);
+            return;
+        }
         if (!s_ir.buf) s_ir.buf = heap_caps_malloc(IR_CAP, MALLOC_CAP_SPIRAM);
         if (!s_ir.buf) return;
         s_ir.nwk = nwk;

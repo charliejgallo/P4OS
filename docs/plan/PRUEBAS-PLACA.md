@@ -19,10 +19,15 @@ de lo más rápido a lo que lleva más tiempo (detalle en
 - [ ] La red propia vuelve sola con sus 7 equipos (Mi red, Armar la red).
 - [ ] **Nombre propio:** tocar el título de una tarjeta, ponerle nombre;
       reiniciar y que siga.
-- [ ] **Tabla Tuya:** el TS0002 dice "Tuya TS0002_basic, 2 gang switch
-      module". (Ningún TS0601 para probar los datapoints.)
-- [ ] **Códigos IR guardados:** aprender uno, "Guardarlo...", reiniciar,
+- [x] **Tabla Tuya:** el TS0002 dice "Tuya TS0002_basic, 2 gang switch
+      module" (2026-11-25; el primer intento hizo caer el portal: el caché
+      sin poner en cero, arreglado). Ningún TS0601 para probar los
+      datapoints.
+- [~] **Códigos IR guardados:** aprender uno, "Guardarlo...", reiniciar,
       tocarlo: la tele responde. Mantener dos veces: se borra.
+      2026-11-25: guardar y mandar andan (~1 s por envío); el primero
+      guardado fue un eco del emisor (arreglado e instalado): borrarlo,
+      aprender de nuevo y confirmar que la tele responde.
 - [ ] **Infrarrojo por el hub:** en Cableado, Salida = el TS1201; un
       control de la biblioteca SmartIR (la tele del usuario) por el hub;
       Aprender por el hub. El primer envío puede tardar: mirar el log
