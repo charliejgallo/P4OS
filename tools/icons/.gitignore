@@ -1,0 +1,7 @@
+# Blender's 4x renders (12 MB, made again by style_b_chubby.py)
+muestra/b_chubby/raw/
+# the simulator runs of sim_shots.py: packs, links, prefs, screenshots
+muestra/sim/
+__pycache__/
+# the production renders and the pack (made again from the scripts)
+out/
