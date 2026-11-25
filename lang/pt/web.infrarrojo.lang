@@ -440,3 +440,18 @@ Mandar el código pegado	Enviar o código colado
 
 #: apps/infrarrojo/web/infrarrojo.js:561
 Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.	Os códigos da base são do SmartIR (licença MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). O receptor funciona com 3,3 V e o LED com um transistor: a fiação está na aba Fiação do app.
+el emisor Zigbee %s	o emissor Zigbee %s
+el emisor Zigbee %s (no está en la red)	o emissor Zigbee %s (não está na rede)
+el LED de la placa	o LED da placa
+Va por el emisor Zigbee: %s	Vai pelo emissor Zigbee: %s
+La de la app (%s)	A do app (%s)
+LED de la placa	LED da placa
+Emisor Zigbee %s	Emissor Zigbee %s
+Sale por	Sai por
+sale por %s	sai por %s
+Apuntá el control al emisor Zigbee y apretá un botón.	Aponte o controle para o emissor Zigbee e aperte um botão.
+El emisor Zigbee no tomó el código	O emissor Zigbee não aceitou o código
+LED de la placa (GPIO%s)	LED da placa (GPIO%s)
+La placa está escuchando por %s	A placa está escutando por %s
+Sale y escucha por	Sai e escuta por
+La placa escucha por %s y cada botón que apretás aparece acá, decodificado.	A placa escuta por %s e cada botão que você aperta aparece aqui, decodificado.

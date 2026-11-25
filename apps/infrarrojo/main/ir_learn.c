@@ -14,6 +14,12 @@
  *
  * The carrier cannot be measured: the receiver takes it away. What is shown
  * is the protocol's, and 38 kHz for a raw frame, the most common one.
+ *
+ * When the output is a Zigbee IR blaster (the app's, or the device's being
+ * learned for), the blaster listens instead of the receiver: ir_out.c turns
+ * its learning on and hands what it learns to ir_hw.c as a capture, so it
+ * comes here the same way. Each press there is one learning, started again
+ * by itself.
  */
 #include "ir.h"
 #include "aos_hal.h"
@@ -49,6 +55,7 @@ static struct {
     take_t    hist[HIST];
     int       nhist;
     uint32_t  blink_ms;
+    int       ls;               /* ir_out_learn_state() shown */
     /* the save sheet */
     lv_obj_t *ta_name, *dd_role, *dd_dev, *ta_new;
 } L;
@@ -57,6 +64,18 @@ static char s_target[48];
 static int  s_target_btn = -1;
 
 static void refresh(void);
+
+/* where this listens and sends: the device's being learned for, or the app's */
+static const char *learn_via(void)
+{
+    ir_dev_t *d = s_target[0] ? ir_remote_find(s_target) : NULL;
+    return d ? d->via : "";
+}
+
+static void listen_now(void)
+{
+    ir_out_listen(IR_WHO_UI, L.shown && !L.paused, learn_via());
+}
 
 /* --------------------------------------------------------------- the wave */
 
@@ -382,7 +401,7 @@ static void send_cb(lv_event_t *e)
     ir_button_t b;
     memset(&b, 0, sizeof b);
     take_into(&L.cand, &b);
-    ir_hw_send_button(&b, false);
+    ir_out_send_button(learn_via(), &b, false);
     ir_button_clear(&b);
 }
 
@@ -398,7 +417,7 @@ static void pause_cb(lv_event_t *e)
 {
     (void)e;
     L.paused = !L.paused;
-    ir_hw_listen(IR_WHO_UI, L.shown && !L.paused);
+    listen_now();
     refresh();
 }
 
@@ -438,12 +457,28 @@ static void take_title(const take_t *t, char *out, size_t n)
     else snprintf(out, n, "%s", _("Crudo (protocolo desconocido)"));
 }
 
+static void status_text(void)
+{
+    L.ls = ir_out_learn_state();
+    if (L.paused) { lv_label_set_text(L.status, _("En pausa.")); return; }
+    if (!ir_out_is_zigbee(learn_via())) {
+        lv_label_set_text(L.status, _("Escuchando. Apuntá el control al receptor y apretá un botón."));
+        return;
+    }
+    char who[80], t[200];
+    ir_out_label(learn_via(), who, sizeof who);
+    if (L.ls == IR_LS_RX) snprintf(t, sizeof t, "%s", _("Recibiendo el código del emisor Zigbee…"));
+    else if (L.ls == IR_LS_NONET)
+        snprintf(t, sizeof t, _("No se puede escuchar por %s: la red Zigbee tiene que estar andando, con el emisor en ella."), who);
+    else snprintf(t, sizeof t, _("Escuchando por %s. Apuntá el control al emisor y apretá un botón."), who);
+    lv_label_set_text(L.status, t);
+}
+
 static void refresh(void)
 {
     if (!L.page) return;
     bool listening = L.shown && !L.paused;
-    lv_label_set_text(L.status, L.paused ? _("En pausa.") :
-                      _("Escuchando. Apuntá el control al receptor y apretá un botón."));
+    status_text();
     lv_label_set_text(L.pause_lbl, L.paused ? _("Escuchar") : _("Pausar"));
     lv_obj_set_style_bg_color(L.dot, listening ? AOS_C_RED : AOS_C_CARD2, 0);
 
@@ -572,6 +607,7 @@ void ir_learn_target(const char *file, int button)
     take_free(&L.cand);
     L.confirm = 0;
     L.paused = false;
+    listen_now();
     refresh();
 }
 
@@ -579,14 +615,17 @@ void ir_learn_shown(bool shown)
 {
     if (shown && !L.shown) L.seen = ir_hw_capture_seq();
     L.shown = shown;
-    ir_hw_listen(IR_WHO_UI, shown && !L.paused);
+    listen_now();
     if (L.page) refresh();
 }
 
 void ir_learn_tick(void)
 {
     if (!L.page || !L.shown || !L.cap) return;
+    /* again each time: the output may have changed in Cableado or the portal */
+    listen_now();
     if (ir_hw_capture(&L.seen, L.cap)) got(L.cap);
+    if (ir_out_learn_state() != L.ls) status_text();
     /* the dot blinks with each capture */
     if (L.dot && !L.paused) {
         uint32_t now = (uint32_t)aos_hal_uptime_ms();
@@ -597,7 +636,7 @@ void ir_learn_tick(void)
 
 void ir_learn_free(void)
 {
-    ir_hw_listen(IR_WHO_UI, false);
+    ir_out_listen(IR_WHO_UI, false, NULL);
     /* the takes survive a turn of the screen; only the objects go */
     L.page = NULL;
     L.dot = L.status = L.pause_lbl = L.target_card = L.target_lbl = NULL;

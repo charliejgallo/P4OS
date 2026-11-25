@@ -764,3 +764,29 @@ Amarillo	Giallo
 
 #: apps/infrarrojo/main/ir_store.c:204
 Azul	Blu
+Salida	Uscita
+Por el LED del GPIO%d	Tramite il LED sul GPIO%d
+LED de la placa	LED della scheda
+Emisor Zigbee %s	Emettitore Zigbee %s
+Un emisor IR de la red Zigbee de la placa	Un emettitore IR della rete Zigbee della scheda
+Los controles, los aires y las pruebas de Códigos salen por acá, salvo un aparato que tenga la suya (Editar, Nombre y tipo). Aprender escucha por el mismo lado: con un emisor, el control se apunta al emisor.	I telecomandi, i condizionatori e le prove di Codici escono da qui, salvo un apparecchio che abbia la sua (Modifica, Nome e tipo). Impara ascolta dallo stesso lato: con un emettitore, punta il telecomando verso l'emettitore.
+Por un emisor Zigbee cada código tarda de medio segundo a unos segundos en salir, y un botón apretado no se repite.	Con un emettitore Zigbee ogni codice impiega da mezzo secondo a qualche secondo per uscire, e un tasto tenuto premuto non si ripete.
+Recibiendo el código del emisor Zigbee…	Ricezione del codice dall'emettitore Zigbee…
+No se puede escuchar por %s: la red Zigbee tiene que estar andando, con el emisor en ella.	Impossibile ascoltare tramite %s: la rete Zigbee deve essere attiva, con l'emettitore dentro.
+Escuchando por %s. Apuntá el control al emisor y apretá un botón.	In ascolto tramite %s. Punta il telecomando verso l'emettitore e premi un tasto.
+el LED de la placa	il LED della scheda
+el emisor Zigbee %s	l'emettitore Zigbee %s
+el emisor Zigbee %s (no está en la red)	l'emettitore Zigbee %s (non è nella rete)
+El emisor Zigbee no tomó el código	L'emettitore Zigbee non ha preso il codice
+La red Zigbee no está andando	La rete Zigbee non è attiva
+Ese código es muy largo para el emisor Zigbee	Quel codice è troppo lungo per l'emettitore Zigbee
+Ese emisor Zigbee no está en la red	Quell'emettitore Zigbee non è nella rete
+El emisor Zigbee está ocupado: esperá que termine	L'emettitore Zigbee è occupato: aspetta che finisca
+Mandando por el emisor Zigbee… (%d en espera)	Invio tramite l'emettitore Zigbee… (%d in attesa)
+Mandando por el emisor Zigbee…	Invio tramite l'emettitore Zigbee…
+El emisor Zigbee está ocupado	L'emettitore Zigbee è occupato
+Va por el emisor Zigbee	Va tramite l'emettitore Zigbee
+Sale por %s	Esce da %s
+Sale por	Esce da
+La de Cableado	Quella di Cablaggio
+La de Cableado ahora: %s.	Quella di Cablaggio ora: %s.

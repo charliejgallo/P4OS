@@ -9,6 +9,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/../common.cmake)
 # does not bring: this is the first card app that uses the pins.
 idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_io/include" APPEND)
 idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_io/include" APPEND)
+# The Zigbee network's IR blasters (aos_zigbee.h), an output besides the LED.
+idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_154/include" APPEND)
+idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_154/include" APPEND)
 
 # Genera infrarrojo.so en lugar de un firmware completo.
 include(elf_loader)

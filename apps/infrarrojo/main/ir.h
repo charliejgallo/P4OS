@@ -121,6 +121,8 @@ uint32_t ir_total_us(const uint32_t *d, int n);
 
 enum { IR_K_TV = 0, IR_K_AUDIO, IR_K_AC, IR_K_FAN, IR_K_LIGHT, IR_K_OTHER, IR_K_COUNT };
 
+#define IR_VIA_LEN 20           /* "led", or a Zigbee blaster's IEEE in hex (16), and the NUL */
+
 typedef struct {
     char      name[40];
     char      role[12];         /* "power", "vol_up"... or "" (ir_roles) */
@@ -136,6 +138,7 @@ typedef struct {
     char        file[48];       /* "tele.json" in ir_store_dir() */
     char        name[48];
     int         kind;
+    char        via[IR_VIA_LEN];    /* its output (ir_out.c): "" the app's, "led", a blaster */
     ir_button_t *btn;
     int         nbtn;
     /* an air conditioner from the library */
@@ -253,6 +256,44 @@ int  ir_hw_find_progress(void);             /* -1 idle, 0..99, 100 done */
 int  ir_hw_find_results(ir_match_t *out, int max);
 void ir_hw_loop_test(void);                 /* sends a frame and listens for it */
 int  ir_hw_loop_result(void);               /* -1 waiting, 0 nothing heard, 1 heard */
+void ir_hw_inject(const uint32_t *d, int n);    /* a capture from elsewhere (a Zigbee blaster) */
+
+/* -------------------------------------------------------------------------- */
+/* Where codes go out and are learned (ir_out.c): the LED or a Zigbee blaster  */
+/* -------------------------------------------------------------------------- */
+
+#define IR_OUT_MAX 6
+
+typedef struct {
+    uint8_t ieee[8];
+    char    via[IR_VIA_LEN];    /* the IEEE in hex, most significant byte first */
+    char    name[48];           /* "TS1201", or "TS1201 · 4b7a" when two share a name */
+} ir_blaster_t;
+
+int  ir_out_blasters(const ir_blaster_t **out);    /* the network's, looked at every 2 s */
+const char *ir_out_default(void);           /* the app's output: "" the LED, or a blaster */
+void ir_out_set_default(const char *via);   /* saved */
+const char *ir_out_resolve(const char *via);    /* a device's ("" the app's, "led", a blaster) -> "" or a blaster */
+bool ir_out_is_zigbee(const char *via);     /* resolved, it goes through a blaster */
+void ir_out_label(const char *via, char *out, size_t n);   /* resolved, for showing */
+/* Every send of the app. > 0 sent or on its way, 0 failed (the caller may
+ * say so), < 0 failed and already said, or a held key's repeat through a
+ * blaster, which is not sent. */
+enum { IR_OUT_REPEAT = 1, IR_OUT_STATE = 2 };   /* a held key's repeat; an air conditioner's state */
+int  ir_out_send(const char *via, const uint32_t *d, int n, uint32_t carrier, int flags);
+int  ir_out_send_button(const char *via, const ir_button_t *b, bool repeat);
+void ir_out_quiet(bool quiet);              /* the portal's sends: no toasts on the screen */
+/* Listening through the receiver or a blaster: who is IR_WHO_*. Called
+ * again whenever, the latest counts. */
+void ir_out_listen(int who, bool on, const char *via);
+enum { IR_LS_NONE = 0, IR_LS_NONET, IR_LS_WAIT, IR_LS_ON, IR_LS_RX };
+int  ir_out_learn_state(void);              /* of the blaster, for the learn tab */
+bool ir_out_busy(char *text, size_t n);     /* a blaster's transfer going, and what to show */
+uint32_t ir_out_sent(void);                 /* transmissions done, by the LED or a blaster */
+uint32_t ir_out_failed(void);               /* a blaster's that did not go */
+const char *ir_out_why(void);               /* and why the last one did not */
+void ir_out_tick(void);
+void ir_out_stop(void);
 
 /* -------------------------------------------------------------------------- */
 /* The UI                                                                      */

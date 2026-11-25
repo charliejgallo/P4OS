@@ -625,3 +625,20 @@ int ir_hw_loop_result(void)
     unlock();
     return r;
 }
+
+void ir_hw_inject(const uint32_t *d, int n)
+{
+    /* as the worker hands a capture over: a learned code is one press,
+     * frames apart where a space is as long as the receiver's gap */
+    if (!s_mx || !s_cap || n <= 0) return;
+    if (n > IR_CAP_MAX) n = IR_CAP_MAX;
+    if (!(n & 1)) n--;
+    int frames = 1;
+    for (int i = 1; i < n; i += 2) if (d[i] >= IR_GAP_US) frames++;
+    lock();
+    memcpy(s_cap->d, d, (size_t)n * sizeof *d);
+    s_cap->n = n;
+    s_cap->frames = frames;
+    s_cap->seq++;
+    unlock();
+}

@@ -192,7 +192,8 @@ static void send_code(int code)
 {
     static uint32_t buf[IR_TX_MAX];
     int n = ir_pack_code(&B.blob, code, buf, IR_TX_MAX);
-    if (n <= 0 || !ir_hw_send(buf, n, 38000)) ir_ui_toast(_("No se pudo mandar"));
+    /* a try before the device exists: the app's output */
+    if (n <= 0 || ir_out_send("", buf, n, 38000, 0) == 0) ir_ui_toast(_("No se pudo mandar"));
 }
 
 static void cmd_cb(lv_event_t *e)

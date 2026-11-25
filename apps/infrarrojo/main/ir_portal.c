@@ -11,10 +11,20 @@
  *                          {"id": 10, "op": "ac", "file": "aire.json"}   its state, as saved
  *                          {"id": 11, "op": "learn"}   listen for 30 s more
  *                          {"id": 12, "op": "stop"}
+ *                          {"id": 13, "op": "out", "via": "a42f8efeff0c4b7a"}   the app's
+ *                                                 output ("" the LED, ir_out.c)
  *   /data/ir_estado.json   {"id": 7, "ok": true, "msg": "...", "listening": false,
- *                           "rx": 28, "tx": 32, "captures": [ newest first, up to 6:
+ *                           "rx": 28, "tx": 32, "sent": 5,
+ *                           "out": "", "outs": [{"via": "a42f...", "name": "TS1201 · 4b7a"}],
+ *                           "zb_busy": false, "zb_msg": "", "zb_fails": 0, "zb_why": "",
+ *                           "captures": [ newest first, up to 6:
  *                             {"seq": 3, "proto": "NEC", "addr": 4, "cmd": 8, "text": "...",
  *                              "desc": "...", "freq": 38000, "raw": [...]} ]}
+ *
+ * "outs" are the Zigbee IR blasters in the network; a device's own output
+ * is "via" in its file, which the page writes itself. A send through a
+ * blaster answers "ok" when it is on its way; the page learns how it went
+ * from "zb_busy" and "zb_fails".
  *
  * The page writes through the portal's upload, which goes to a .part and is
  * renamed at the end, so a request is never read half written. The app
@@ -48,7 +58,24 @@ static struct {
     ir_capture_t *tmp;
     char     msg[96];
     bool     ok, dirty;
+    /* what the state shows of the outputs, to write it again when it changes */
+    uint32_t out_sig;
 } P;
+
+static uint32_t out_signature(void)
+{
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    char t[96];
+    uint32_t h = 2166136261u;
+    for (const char *c = ir_out_default(); *c; c++) h = (h ^ (uint8_t)*c) * 16777619u;
+    for (int i = 0; i < n; i++)
+        for (const char *c = bl[i].via; *c; c++) h = (h ^ (uint8_t)*c) * 16777619u;
+    h = (h ^ (uint32_t)n) * 16777619u;
+    h = (h ^ (ir_out_busy(t, sizeof t) ? 1u : 0u)) * 16777619u;
+    h = (h ^ ir_out_failed()) * 16777619u;
+    return h;
+}
 
 static void path_of(const char *name, char *out, size_t n)
 {
@@ -62,8 +89,24 @@ static void write_state(void)
     ir_hw_pins(&rx, &tx);
     ir_sb_printf(&sb, "{\"id\": %u, \"ok\": %s, \"msg\": ", (unsigned)P.last_id, P.ok ? "true" : "false");
     ir_sb_json(&sb, P.msg);
-    ir_sb_printf(&sb, ", \"listening\": %s, \"rx\": %d, \"tx\": %d, \"sent\": %u, \"captures\": [",
-                 P.listening ? "true" : "false", rx, tx, (unsigned)ir_hw_sent());
+    ir_sb_printf(&sb, ", \"listening\": %s, \"rx\": %d, \"tx\": %d, \"sent\": %u, \"out\": ",
+                 P.listening ? "true" : "false", rx, tx, (unsigned)ir_out_sent());
+    ir_sb_json(&sb, ir_out_default());
+    const ir_blaster_t *bl;
+    int nbl = ir_out_blasters(&bl);
+    ir_sb_put(&sb, ", \"outs\": [", -1);
+    for (int i = 0; i < nbl; i++) {
+        ir_sb_printf(&sb, "%s{\"via\": \"%s\", \"name\": ", i ? ", " : "", bl[i].via);
+        ir_sb_json(&sb, bl[i].name);
+        ir_sb_put(&sb, "}", 1);
+    }
+    char zt[96] = "";
+    bool busy = ir_out_busy(zt, sizeof zt);
+    ir_sb_printf(&sb, "], \"zb_busy\": %s, \"zb_msg\": ", busy ? "true" : "false");
+    ir_sb_json(&sb, zt);
+    ir_sb_printf(&sb, ", \"zb_fails\": %u, \"zb_why\": ", (unsigned)ir_out_failed());
+    ir_sb_json(&sb, ir_out_why());
+    ir_sb_put(&sb, ", \"captures\": [", -1);
     for (int i = 0; i < P.ncap; i++) {
         pcap_t *c = &P.cap[i];
         char t[200];
@@ -109,6 +152,14 @@ static void say(bool ok, const char *msg)
     P.dirty = true;
 }
 
+/* how a send went, as far as it is known now */
+static void sent(bool ok, bool zb)
+{
+    if (ok) say(true, zb ? _("Va por el emisor Zigbee") : _("Mandado"));
+    else if (zb && ir_out_why()[0]) say(false, ir_out_why());
+    else say(false, _("No se pudo mandar"));
+}
+
 static void do_request(const ij_doc_t *j)
 {
     P.last_id = (uint32_t)ij_num(j, ij_get(j, 0, "id"), 0);
@@ -117,25 +168,32 @@ static void do_request(const ij_doc_t *j)
         if (!P.listening) P.seen = ir_hw_capture_seq();
         P.listening = true;
         P.listen_until = (uint32_t)aos_hal_uptime_ms() + LISTEN_MS;
-        ir_hw_listen(IR_WHO_PORTAL, true);
+        ir_out_listen(IR_WHO_PORTAL, true, "");
         say(true, _("Escuchando"));
     } else if (!strcmp(op, "stop")) {
         P.listening = false;
-        ir_hw_listen(IR_WHO_PORTAL, false);
+        ir_out_listen(IR_WHO_PORTAL, false, NULL);
         say(true, _("Listo"));
+    } else if (!strcmp(op, "out")) {
+        ir_out_set_default(ij_str(j, ij_get(j, 0, "via"), ""));
+        char t[96], w[80];
+        ir_out_label("", w, sizeof w);
+        snprintf(t, sizeof t, _("Sale por %s"), w);
+        say(true, t);
     } else if (!strcmp(op, "send") || !strcmp(op, "ac")) {
         const char *file = ij_str(j, ij_get(j, 0, "file"), "");
         ir_dev_t d;
         if (!file[0] || strchr(file, '/') || !ir_dev_load(file, &d)) { say(false, _("No encuentro ese aparato")); return; }
         bool ok;
+        bool zb = ir_out_is_zigbee(d.via);
         if (!strcmp(op, "ac")) {
             ok = ir_ac_send(&d);
         } else {
             int b = (int)ij_num(j, ij_get(j, 0, "button"), -1);
-            ok = b >= 0 && b < d.nbtn && ir_hw_send_button(&d.btn[b], ij_num(j, ij_get(j, 0, "repeat"), 0) != 0);
+            ok = b >= 0 && b < d.nbtn && ir_out_send_button(d.via, &d.btn[b], ij_num(j, ij_get(j, 0, "repeat"), 0) != 0) > 0;
         }
         ir_dev_clear(&d);
-        say(ok, ok ? _("Mandado") : _("No se pudo mandar"));
+        sent(ok, zb);
     } else if (!strcmp(op, "raw") || !strcmp(op, "code")) {
         ir_button_t b;
         memset(&b, 0, sizeof b);
@@ -161,9 +219,9 @@ static void do_request(const ij_doc_t *j)
             ir_button_set_raw(&b, d, k, (uint32_t)ij_num(j, ij_get(j, 0, "freq"), 38000));
             ir_free(d);
         }
-        bool ok = ir_hw_send_button(&b, false);
+        bool ok = ir_out_send_button("", &b, false) > 0;
         ir_button_clear(&b);
-        say(ok, ok ? _("Mandado") : _("No se pudo mandar"));
+        sent(ok, ir_out_is_zigbee(""));
     } else if (!strcmp(op, "reload")) {
         ir_remote_reload();
         say(true, _("Listo"));
@@ -212,7 +270,10 @@ void ir_portal_tick(void)
             remove(path);
             ij_doc_t j;
             if (got && ij_parse(&j, text, len)) {
+                /* what the page asks for fails on the page, not on the screen */
+                ir_out_quiet(true);
                 do_request(&j);
+                ir_out_quiet(false);
                 ij_free(&j);
             } else {
                 say(false, _("Pedido ilegible"));
@@ -221,14 +282,16 @@ void ir_portal_tick(void)
         }
     }
     if (P.listening) {
-        ir_hw_listen(IR_WHO_PORTAL, true);     /* again: the worker may be new */
+        ir_out_listen(IR_WHO_PORTAL, true, "");    /* again: the worker may be new, the output another */
         if (!P.tmp) P.tmp = ir_alloc(sizeof *P.tmp);
         if (P.tmp && ir_hw_capture(&P.seen, P.tmp)) take(P.tmp);
         if ((int32_t)(now - P.listen_until) >= 0) {
             P.listening = false;
-            ir_hw_listen(IR_WHO_PORTAL, false);
+            ir_out_listen(IR_WHO_PORTAL, false, NULL);
             P.dirty = true;
         }
     }
+    uint32_t sig = out_signature();
+    if (sig != P.out_sig) { P.out_sig = sig; P.dirty = true; }
     if (P.dirty) write_state();
 }

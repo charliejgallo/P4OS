@@ -20,6 +20,10 @@
  *
  *   { "name": "Aire", "kind": "ac", "smartir": 1000,
  *     "state": { "on": true, "mode": "cool", "levels": ["auto"], "temp": 24 } }
+ *
+ * A device may say where it goes out ("via", ir_out.c): "led" for the
+ * board's LED, or a Zigbee IR blaster's IEEE in hex ("a42f8efeff0c4b7a").
+ * Without it, the app's output (the Cableado tab).
  */
 #include "ir.h"
 #include "aos_hal.h"
@@ -275,6 +279,7 @@ void ir_dev_json(const ir_dev_t *d, ir_sb_t *sb)
     ir_sb_put(sb, "{\n  \"name\": ", -1);
     ir_sb_json(sb, d->name);
     ir_sb_printf(sb, ",\n  \"kind\": \"%s\"", ir_kind_key(d->kind));
+    if (d->via[0]) { ir_sb_put(sb, ",\n  \"via\": ", -1); ir_sb_json(sb, d->via); }
     if (d->smartir) {
         ir_sb_printf(sb, ",\n  \"smartir\": %d,\n  \"state\": { \"on\": %s, \"mode\": ", d->smartir,
                      d->ac_on ? "true" : "false");
@@ -334,6 +339,8 @@ bool ir_dev_from_json(ir_dev_t *d, const ij_doc_t *j)
     ir_copy(d->name, sizeof d->name, ij_str(j, ij_get(j, 0, "name"), "?"));
     d->kind = ir_kind_from(ij_str(j, ij_get(j, 0, "kind"), "other"));
     d->smartir = (int)ij_num(j, ij_get(j, 0, "smartir"), 0);
+    const char *via = ij_str(j, ij_get(j, 0, "via"), "");
+    if (strlen(via) < sizeof d->via) ir_copy(d->via, sizeof d->via, via);
     int st = ij_get(j, 0, "state");
     if (st >= 0) {
         d->ac_on = ij_num(j, ij_get(j, st, "on"), 0) != 0;

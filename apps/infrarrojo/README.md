@@ -2,7 +2,9 @@
 
 A learning remote for the bench, T3 of the workshop. Id `aos.infrarrojo`.
 It needs the firmware with `aos_io_ir_*` (0.10, `docs/MODULES.md`, "PWM, an
-analog level, infrared and CAN").
+analog level, infrared and CAN") and, since 2026-11-25, the one with the
+Zigbee network's IR blasters (`aos_zigbee_ir_*`, the `zigbee-p4` branch):
+the app does not load on an older one.
 
 - **Learn.** The receiver listens while the Aprender tab is in front. Each
   capture is decoded - NEC, NEC extended and 32-bit, Samsung, Sony SIRC 12,
@@ -23,6 +25,21 @@ analog level, infrared and CAN").
   with a tap before the device is added. "¿De qué control es?" searches the
   library for a captured button: exact protocol fields for a known
   protocol, SmartIR's duration matching for a raw frame.
+- **Through a Zigbee IR blaster** (a Tuya "Zosung" TS1201 joined to the
+  board's Zigbee network) instead of the LED: the output is chosen in
+  Cableado (the LED or any blaster in the network, shown once there is
+  one), and a device can have its own in its sheet (Editar, Nombre y
+  tipo), "via" in its file. Everything goes that way: the remotes, the
+  air conditioners, the library's tries, the portal. A code takes from
+  half a second to a few seconds over the air and the blaster takes one
+  at a time, so a held key is not repeated through it, one more press
+  waits its turn (a newer air conditioner state replaces the waiting
+  one), a press beyond that is told the blaster is busy, and a pill over
+  the tab bar says while it sends. Learning goes through the blaster too:
+  the Aprender tab (and the portal) turn its learning on, and what it
+  learns is decoded and confirmed like a capture of the receiver. The
+  logic is in `main/ir_out.c`; `P4_SIM_ZB_IR=1` gives the simulator one
+  such blaster.
 - **Wiring** (Cableado): the pins (any free GPIO of the header; receiver
   GPIO28 and LED GPIO32 by default), the receiver and the LED drawn, and a
   loop test with the LED aimed at the receiver.

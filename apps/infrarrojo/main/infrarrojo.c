@@ -14,8 +14,9 @@
  *              confirmed by pressing again (ir_learn.c)
  *   Códigos    SmartIR's library by kind, brand and model, and the search
  *              of "which remote is this button from" (ir_base.c)
- *   Cableado   which pins, how to wire the receiver and the LED, and a loop
- *              test (this file)
+ *   Cableado   where codes go out (the LED or a Zigbee IR blaster of the
+ *              board's network, ir_out.c), which pins, how to wire the
+ *              receiver and the LED, and a loop test (this file)
  *
  * The portal's page (web/infrarrojo.js) reads and writes the same files,
  * and asks the app to send or to listen through two files in /data
@@ -71,6 +72,10 @@ struct ir_app {
     void     *ask_user;
     /* wiring */
     lv_obj_t *pin_rx, *pin_tx, *loop_lbl;
+    lv_obj_t *out_card;
+    uint32_t  out_sig, out_ms;
+    /* a Zigbee blaster's transfer going, over every tab */
+    lv_obj_t *busy;
     bool      loop_wait;
     int       pick_rx;
     bool      hidden;
@@ -443,6 +448,8 @@ void ir_ui_learn_for(const char *file, int button)
 
 /* ------------------------------------------------------------------ wiring */
 
+static void out_refresh(void);
+
 static const char *pin_text(int gpio, char *out, size_t n)
 {
     const aos_io_pin_t *p = aos_io_pin_of_gpio(gpio);
@@ -479,6 +486,7 @@ static void pick_cb(lv_event_t *e)
     ir_hw_set_pins(rx, tx);
     ir_sheet_close();
     pins_refresh();
+    out_refresh();
 }
 
 static void pick_close(lv_event_t *e) { (void)e; ir_sheet_close(); }
@@ -694,6 +702,101 @@ static lv_obj_t *pin_row(lv_obj_t *card, const char *what, lv_obj_t **val, lv_ev
     return r;
 }
 
+/* the output: the LED, or one of the network's Zigbee IR blasters */
+
+static uint32_t out_signature(void)
+{
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    uint32_t h = 2166136261u ^ (uint32_t)n;
+    for (const char *c = ir_out_default(); *c; c++) h = (h ^ (uint8_t)*c) * 16777619u;
+    for (int i = 0; i < n; i++)
+        for (const char *c = bl[i].name; *c; c++) h = (h ^ (uint8_t)*c) * 16777619u;
+    return h;
+}
+
+static void out_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    ir_out_set_default(i >= 0 && i < n ? bl[i].via : "");
+    out_refresh();
+}
+
+static void out_row(lv_obj_t *card, const char *text, const char *sub, bool on, int i)
+{
+    lv_obj_t *r = lv_button_create(card);
+    lv_obj_remove_style_all(r);
+    lv_obj_set_size(r, LV_PCT(100), sub ? 104 : AOS_UI_TAP_MIN);
+    lv_obj_set_style_bg_color(r, on ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    lv_obj_set_style_bg_opa(r, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_opa(r, LV_OPA_70, LV_STATE_PRESSED);
+    lv_obj_set_style_radius(r, 18, 0);
+    lv_obj_set_style_pad_hor(r, 20, 0);
+    lv_obj_set_style_pad_right(r, 64, 0);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(r, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_t *l = lv_label_create(r);
+    lv_label_set_text(l, text);
+    lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_obj_set_style_text_font(l, aos_font_body, 0);
+    lv_obj_set_style_text_color(l, AOS_C_TEXT, 0);
+    if (sub) {
+        l = lv_label_create(r);
+        lv_label_set_text(l, sub);
+        lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
+        lv_obj_set_width(l, LV_PCT(100));
+        lv_obj_set_style_text_font(l, aos_font_small, 0);
+        lv_obj_set_style_text_color(l, on ? AOS_C_TEXT : AOS_C_DIM, 0);
+    }
+    if (on) {
+        l = lv_label_create(r);
+        lv_label_set_text(l, AOS_SYM_CHECK);
+        lv_obj_set_style_text_font(l, &aos_sym_28, 0);
+        lv_obj_set_style_text_color(l, AOS_C_TEXT, 0);
+        lv_obj_add_flag(l, LV_OBJ_FLAG_IGNORE_LAYOUT);
+        lv_obj_align(l, LV_ALIGN_RIGHT_MID, 44, 0);
+    }
+    lv_obj_add_event_cb(r, out_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+}
+
+static void out_refresh(void)
+{
+    if (!A->out_card) return;
+    A->out_sig = out_signature();
+    lv_obj_t *c = A->out_card;
+    lv_obj_clean(c);
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    const char *def = ir_out_default();
+    /* only when there is a choice, or one was made that is not there now */
+    if (!n && !def[0]) { lv_obj_add_flag(c, LV_OBJ_FLAG_HIDDEN); return; }
+    lv_obj_remove_flag(c, LV_OBJ_FLAG_HIDDEN);
+    card_title(c, _("Salida"));
+    int rx, tx;
+    ir_hw_pins(&rx, &tx);
+    char sub[48];
+    snprintf(sub, sizeof sub, _("Por el LED del GPIO%d"), tx);
+    out_row(c, _("LED de la placa"), sub, !def[0], -1);
+    bool found = false;
+    for (int i = 0; i < n; i++) {
+        bool on = !strcmp(def, bl[i].via);
+        found |= on;
+        char t[80];
+        snprintf(t, sizeof t, _("Emisor Zigbee %s"), bl[i].name);
+        out_row(c, t, _("Un emisor IR de la red Zigbee de la placa"), on, i);
+    }
+    if (def[0] && !found) {
+        char t[96];
+        ir_out_label("", t, sizeof t);
+        note(c, t, AOS_C_ORANGE);
+    }
+    note(c, _("Los controles, los aires y las pruebas de Códigos salen por acá, salvo un aparato que tenga la suya (Editar, Nombre y tipo). Aprender escucha por el mismo lado: con un emisor, el control se apunta al emisor."), AOS_C_DIM);
+    note(c, _("Por un emisor Zigbee cada código tarda de medio segundo a unos segundos en salir, y un botón apretado no se repite."), AOS_C_DIM);
+}
+
 static void wiring_build(lv_obj_t *page)
 {
     ir_ui_header(page, _("Cableado"), NULL, NULL, NULL);
@@ -703,6 +806,10 @@ static void wiring_build(lv_obj_t *page)
         lv_obj_set_style_pad_column(s, 18, 0);
     }
     int32_t cw = A->land ? (A->w - 2 * AOS_UI_PAD - 18) / 2 : A->w - 2 * AOS_UI_PAD;
+
+    A->out_card = ir_ui_card(s);
+    lv_obj_set_width(A->out_card, cw);
+    out_refresh();
 
     lv_obj_t *c = ir_ui_card(s);
     lv_obj_set_width(c, cw);
@@ -744,6 +851,11 @@ static void wiring_build(lv_obj_t *page)
 
 static void wiring_tick(void)
 {
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    if (A->out_card && now - A->out_ms > 1000 && !ir_sheet_is_open()) {
+        A->out_ms = now;
+        if (out_signature() != A->out_sig) out_refresh();
+    }
     if (!A->loop_wait) return;
     int r = ir_hw_loop_result();
     if (r < 0) return;
@@ -813,6 +925,22 @@ static void build(void)
         lv_obj_add_event_cb(b, tab_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
         A->tab_btn[i] = b;
     }
+    /* the pill over the tab bar while a Zigbee blaster sends */
+    A->busy = lv_label_create(root);
+    lv_obj_set_style_bg_color(A->busy, lv_color_hex(0x10284A), 0);
+    lv_obj_set_style_bg_opa(A->busy, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(A->busy, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_pad_hor(A->busy, 28, 0);
+    lv_obj_set_style_pad_ver(A->busy, 14, 0);
+    lv_obj_set_style_text_font(A->busy, aos_font_small, 0);
+    lv_obj_set_style_text_color(A->busy, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_color(A->busy, AOS_C_ACCENT, 0);
+    lv_obj_set_style_border_width(A->busy, 2, 0);
+    lv_label_set_text(A->busy, "");
+    lv_obj_align(A->busy, LV_ALIGN_BOTTOM_MID, 0, -bar_h - 18);
+    lv_obj_add_flag(A->busy, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(A->busy, LV_OBJ_FLAG_CLICKABLE);
+
     ir_remote_build(A->page[TAB_REMOTES]);
     ir_learn_build(A->page[TAB_LEARN]);
     ir_base_build(A->page[TAB_BASE]);
@@ -841,6 +969,7 @@ static void ir_destroy(aos_app_t *self, void *inst)
     ir_learn_free();
     ir_remote_free();
     ir_base_free();
+    ir_out_stop();
     ir_hw_stop();
     ir_pack_close();
     ir_free(A);
@@ -881,8 +1010,18 @@ static void ir_tick(aos_app_t *self, void *inst)
     (void)inst;
     if (!A) return;
     ir_portal_tick();
+    ir_out_tick();
     const char *err = ir_hw_error();
     if (err[0]) aos_ui_toast(err, 3000);
+    if (A->busy) {
+        char t[96];
+        bool busy = ir_out_busy(t, sizeof t);
+        if (busy && strcmp(lv_label_get_text(A->busy), t)) lv_label_set_text(A->busy, t);
+        if (busy == lv_obj_has_flag(A->busy, LV_OBJ_FLAG_HIDDEN)) {
+            if (busy) lv_obj_remove_flag(A->busy, LV_OBJ_FLAG_HIDDEN);
+            else lv_obj_add_flag(A->busy, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
     if (A->hidden) {
         /* a minute in the background with nothing to send: the LED's pin goes back */
         if ((uint32_t)aos_hal_uptime_ms() - A->hidden_ms > 60000) {

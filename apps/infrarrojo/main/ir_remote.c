@@ -54,6 +54,8 @@ static struct {
     int         kind;
     lv_obj_t   *kind_btn[IR_K_COUNT];
     bool        dev_new;
+    char        via[IR_VIA_LEN];    /* the sheet's choice of output */
+    lv_obj_t   *via_btn[IR_OUT_MAX + 2];
 } R = { .open = -1, .blob_dev = -1 };
 
 static char s_open_file[48];    /* across a rebuild */
@@ -234,8 +236,9 @@ static void key_cb(lv_event_t *e)
         if (code == LV_EVENT_PRESSED) ir_ui_toast(_("Este botón todavía no tiene código: Editar"));
         return;
     }
-    if (code == LV_EVENT_PRESSED) ir_hw_send_button(b, false);
-    else if (code == LV_EVENT_LONG_PRESSED_REPEAT) ir_hw_send_button(b, true);
+    /* through a Zigbee blaster a held key is not repeated (ir_out.c) */
+    if (code == LV_EVENT_PRESSED) ir_out_send_button(d->via, b, false);
+    else if (code == LV_EVENT_LONG_PRESSED_REPEAT) ir_out_send_button(d->via, b, true);
 }
 
 static lv_obj_t *key(lv_obj_t *parent, int idx, int32_t w, int32_t h, lv_color_t color)
@@ -647,6 +650,22 @@ static lv_obj_t *chip(lv_obj_t *parent, const char *text, bool on, lv_event_cb_t
     return b;
 }
 
+/* where it goes out, once there is more than the LED */
+static void via_line(lv_obj_t *s, const ir_dev_t *d)
+{
+    const ir_blaster_t *bl;
+    if (!ir_out_blasters(&bl) && !ir_out_is_zigbee(d->via)) return;
+    char w[80], t[112];
+    ir_out_label(d->via, w, sizeof w);
+    snprintf(t, sizeof t, _("Sale por %s"), w);
+    lv_obj_t *l = lv_label_create(s);
+    lv_label_set_text(l, t);
+    lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_obj_set_style_text_font(l, aos_font_caption, 0);
+    lv_obj_set_style_text_color(l, AOS_C_DIM, 0);
+}
+
 static void ac_build(void)
 {
     if (!R.ac_body) return;
@@ -669,6 +688,7 @@ static void ac_build(void)
     }
     ir_ac_shape_t sh;
     int tnode = ac_fix(d, j, &sh);
+    via_line(s, d);
 
     /* power and the temperature */
     lv_obj_t *c = ir_ui_card(s);
@@ -777,13 +797,15 @@ bool ir_ac_send(ir_dev_t *d)
     const ij_doc_t *j = &b->js;
     int cmds = ij_get(j, 0, "commands");
     static uint32_t buf[IR_TX_MAX];
-    bool ok = false;
+    /* the state as a state: through a Zigbee blaster that is busy, a newer
+     * one replaces the one waiting (ir_out.c) */
+    int n = 0, r = 0;
     if (!d->ac_on) {
         int off = ij_get(j, cmds, "off");
         if (off >= 0) {
             int code = j->n[off].type == IJ_ARR ? (int)ij_num(j, j->n[off].kid, -1) : (int)ij_num(j, off, -1);
-            int n = ir_pack_code(b, code, buf, IR_TX_MAX);
-            ok = n > 0 && ir_hw_send(buf, n, 38000);
+            n = ir_pack_code(b, code, buf, IR_TX_MAX);
+            if (n > 0) r = ir_out_send(d->via, buf, n, 38000, IR_OUT_STATE);
         }
         R.ac_sent_on = false;
     } else {
@@ -791,17 +813,18 @@ bool ir_ac_send(ir_dev_t *d)
         int on = ij_get(j, cmds, "on");
         if (on >= 0 && !R.ac_sent_on) {
             int code = (int)ij_num(j, j->n[on].type == IJ_ARR ? j->n[on].kid : on, -1);
-            int n = ir_pack_code(b, code, buf, IR_TX_MAX);
-            if (n > 0) ir_hw_send(buf, n, 38000);
+            int k = ir_pack_code(b, code, buf, IR_TX_MAX);
+            if (k > 0) ir_out_send(d->via, buf, k, 38000, 0);
         }
         int code = ir_ac_code(b, d);
-        int n = ir_pack_code(b, code, buf, IR_TX_MAX);
-        ok = n > 0 && ir_hw_send(buf, n, 38000);
+        n = ir_pack_code(b, code, buf, IR_TX_MAX);
+        if (n > 0) r = ir_out_send(d->via, buf, n, 38000, IR_OUT_STATE);
         R.ac_sent_on = true;
     }
     if (loaded_here) ir_pack_blob_free(&tmp);
-    if (!ok) ir_ui_toast(_("Ese estado no está en la base de este aire"));
-    return ok;
+    if (n <= 0) ir_ui_toast(_("Ese estado no está en la base de este aire"));
+    else if (r == 0) ir_ui_toast(_("No se pudo mandar"));
+    return n > 0 && r > 0;
 }
 
 /* -------------------------------------------------------------- the remote */
@@ -831,7 +854,7 @@ static void show_remote(void)
     lv_obj_align(R.led, LV_ALIGN_LEFT_MID, -28, 0);
     lv_obj_t *el = lv_obj_get_child(ed, 0);
     lv_obj_align(el, LV_ALIGN_RIGHT_MID, 0, 0);
-    R.sent_seen = ir_hw_sent();
+    R.sent_seen = ir_out_sent();
 
     lv_obj_t *s = ir_ui_scroll(R.page);
     bool land = ir_ui_landscape();
@@ -843,6 +866,7 @@ static void show_remote(void)
 
     memset(&C, 0, sizeof C);
     C.one = s;
+    if (!d->smartir) via_line(s, d);
     if (d->smartir) {
         int pi = ir_pack_find((uint16_t)d->smartir);
         if (pi != R.blob_dev) {
@@ -978,7 +1002,7 @@ static void sheet_test(lv_event_t *e)
             if (!strcmp(p->name, "Kaseikyo")) tmp.code.extra = 0x2002;
         }
     }
-    if (!ir_hw_send_button(&tmp, false)) ir_ui_toast(_("No hay código para mandar"));
+    if (ir_out_send_button(d->via, &tmp, false) == 0) ir_ui_toast(_("No hay código para mandar"));
     ir_button_clear(&tmp);
 }
 
@@ -1111,6 +1135,58 @@ static void kind_cb(lv_event_t *e)
         lv_obj_set_style_bg_color(R.kind_btn[k], k == R.kind ? AOS_C_ACCENT : AOS_C_CARD2, 0);
 }
 
+/* the output's chips: 0 the app's, 1 the LED, then the blasters */
+static void via_mark(void)
+{
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    for (int k = 0; k < n + 2 && k < IR_OUT_MAX + 2; k++) {
+        if (!R.via_btn[k]) continue;
+        bool on = k == 0 ? !R.via[0] : k == 1 ? !strcmp(R.via, "led") : !strcmp(R.via, bl[k - 2].via);
+        lv_obj_set_style_bg_color(R.via_btn[k], on ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    }
+}
+
+static void via_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    if (k == 0) R.via[0] = 0;
+    else if (k == 1) ir_copy(R.via, sizeof R.via, "led");
+    else if (k - 2 < n) ir_copy(R.via, sizeof R.via, bl[k - 2].via);
+    via_mark();
+}
+
+static void via_chips(lv_obj_t *s, const ir_dev_t *d)
+{
+    const ir_blaster_t *bl;
+    int n = ir_out_blasters(&bl);
+    memset(R.via_btn, 0, sizeof R.via_btn);
+    ir_copy(R.via, sizeof R.via, d ? d->via : "");
+    if (!n && !R.via[0]) return;
+    lv_obj_t *l = lv_label_create(s);
+    lv_label_set_text(l, _("Sale por"));
+    lv_obj_set_style_text_font(l, aos_font_small, 0);
+    lv_obj_set_style_text_color(l, AOS_C_DIM, 0);
+    lv_obj_t *row = ir_sheet_buttons(s);
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    R.via_btn[0] = chip(row, _("La de Cableado"), false, via_cb, (void *)(intptr_t)0);
+    R.via_btn[1] = chip(row, _("LED de la placa"), false, via_cb, (void *)(intptr_t)1);
+    for (int i = 0; i < n && i < IR_OUT_MAX; i++)
+        R.via_btn[i + 2] = chip(row, bl[i].name, false, via_cb, (void *)(intptr_t)(i + 2));
+    via_mark();
+    char w[80], t[112];
+    ir_out_label("", w, sizeof w);
+    snprintf(t, sizeof t, _("La de Cableado ahora: %s."), w);
+    l = lv_label_create(s);
+    lv_label_set_text(l, t);
+    lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_obj_set_style_text_font(l, aos_font_caption, 0);
+    lv_obj_set_style_text_color(l, AOS_C_DIM, 0);
+}
+
 static void dev_save_cb(lv_event_t *e)
 {
     (void)e;
@@ -1121,6 +1197,7 @@ static void dev_save_cb(lv_event_t *e)
         memset(&d, 0, sizeof d);
         ir_copy(d.name, sizeof d.name, name);
         d.kind = R.kind;
+        ir_copy(d.via, sizeof d.via, R.via);
         if (!ir_dev_save(&d)) { ir_ui_toast(_("No se pudo escribir en la tarjeta")); return; }
         ir_sheet_close();
         s_edit = true;
@@ -1133,6 +1210,7 @@ static void dev_save_cb(lv_event_t *e)
     if (!d) return;
     ir_copy(d->name, sizeof d->name, name);
     if (!d->smartir) d->kind = R.kind;
+    ir_copy(d->via, sizeof d->via, R.via);
     ir_sheet_close();
     ir_remote_saved(d->file);
 }
@@ -1158,6 +1236,7 @@ static void dev_sheet(bool is_new)
         lv_obj_set_style_text_font(n, aos_font_caption, 0);
         lv_obj_set_style_text_color(n, AOS_C_DIM, 0);
     }
+    via_chips(s, d);
     lv_obj_t *r = ir_sheet_buttons(s);
     ir_ui_btn(r, _("Cancelar"), AOS_C_CARD2, sheet_cancel, NULL);
     ir_ui_btn(r, is_new ? _("Crear") : _("Guardar"), AOS_C_GREEN, dev_save_cb, NULL);
@@ -1177,7 +1256,7 @@ void ir_remote_tick(void)
     if (!R.page) return;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     /* the LED in the header lights with each transmission */
-    uint32_t sent = ir_hw_sent();
+    uint32_t sent = ir_out_sent();
     if (R.led) {
         if (sent != R.sent_seen) {
             R.sent_seen = sent;

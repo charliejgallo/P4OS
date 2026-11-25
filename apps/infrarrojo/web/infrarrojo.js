@@ -9,6 +9,13 @@
  * (ir_portal.c): the page writes /data/ir_pedido.json with an id, the app
  * does it, deletes it and answers in /data/ir_estado.json with that id.
  *
+ * Codes go out through the board's IR LED or a Zigbee IR blaster of its
+ * network (a Tuya TS1201): the app's output is chosen here or in its
+ * Cableado tab (op "out"), and a device can have its own, "via" in its
+ * file ("led" or the blaster's IEEE). Through a blaster a code takes from
+ * half a second to a few seconds; the state says while it goes
+ * ("zb_busy") and counts the ones that did not ("zb_fails", "zb_why").
+ *
  * SmartIR's library is read from the card's pack, infrarrojo_p4.pak, with
  * Range requests: the index once, and the JSON of the air conditioner that
  * is open (its modes, fans and temperatures). Codes pasted or imported are
@@ -250,6 +257,15 @@ P.registerPage({
     const { h, put } = P;
     let gone = false, listening = false, lastSeq = 0, timer = null, keepAlive = null;
     let devices = [];
+    /* the outputs, as the app said them last */
+    let outs = [], out = '', statusKey = '', fails = null;
+    const outName = via => {
+      const b = outs.find(o => o.via === via);
+      return b ? tr('el emisor Zigbee %s', b.name) : tr('el emisor Zigbee %s (no está en la red)', via.slice(12));
+    };
+    /* where a device goes out: its own, or the app's; '' the LED */
+    const devOut = d => d.via === 'led' ? '' : (d.via || out);
+    const outText = via => via ? outName(via) : tr('el LED de la placa');
     const status = h('div', { class: 'card pad' }, h('span', { class: 'muted' }, tr('Cargando…')));
     const devBox = h('div', {});
     const capBox = h('div', {});
@@ -276,7 +292,8 @@ P.registerPage({
 
     const send = (dev, i, btn) => {
       btn?.classList.add('pri');
-      ask('send', { file: dev.file, button: i }).then(() => P.toast(tr('Mandado: %s', dev.d.buttons[i].name))).catch(fail)
+      const zb = !!devOut(dev.d), name = dev.d.buttons[i].name;
+      ask('send', { file: dev.file, button: i }).then(() => P.toast(zb ? tr('Va por el emisor Zigbee: %s', name) : tr('Mandado: %s', name))).catch(fail)
         .finally(() => btn?.classList.remove('pri'));
     };
 
@@ -296,15 +313,22 @@ P.registerPage({
       });
       const nm = h('input', { value: d.name || '' });
       const kind = select(trOpts(KINDS), d.kind || 'other');
+      /* its output, once there is more than the LED */
+      const vias = [['', tr('La de la app (%s)', outText(out))], ['led', tr('LED de la placa')],
+        ...outs.map(o => [o.via, tr('Emisor Zigbee %s', o.name)])];
+      if (d.via && !vias.some(v => v[0] === d.via)) vias.push([d.via, outName(d.via)]);
+      const via = select(vias, d.via || '');
       put(box,
         h('div', { class: 'irgrid' },
           h('label', {}, tr('Nombre'), nm),
-          d.smartir ? null : h('label', {}, tr('Tipo'), kind)),
+          d.smartir ? null : h('label', {}, tr('Tipo'), kind),
+          outs.length || d.via ? h('label', {}, tr('Sale por'), via) : null),
         rows.length ? h('table', { class: 'irtab' }, h('tbody', {}, rows)) : h('p', { class: 'muted' }, tr('Sin botones.')),
         h('div', { class: 'btns', style: 'margin-top:10px' },
           h('button', { class: 'btn pri', onclick: async () => {
             d.name = nm.value.trim() || d.name;
             if (!d.smartir) d.kind = kind.value;
+            if (via.value) d.via = via.value; else delete d.via;
             try { await save(dev); P.toast(tr('Guardado')); refresh(); } catch (e) { fail(e); }
           } }, tr('Guardar')),
           h('button', { class: 'btn', onclick: () => refresh() }, tr('Descartar')),
@@ -390,7 +414,8 @@ P.registerPage({
       const card = h('div', { class: 'card pad irdev' },
         h('div', { class: 'row' },
           h('div', { class: 'grow' }, h('h3', {}, d.name || dev.file),
-            h('div', { class: 'sub' }, `${kind} · ${d.smartir ? 'SmartIR ' + d.smartir : tr('%s botones', (d.buttons || []).length)} · ir/${dev.file}`)),
+            h('div', { class: 'sub' }, `${kind} · ${d.smartir ? 'SmartIR ' + d.smartir : tr('%s botones', (d.buttons || []).length)} · ir/${dev.file}`
+              + (outs.length || devOut(d) ? ' · ' + tr('sale por %s', outText(devOut(d))) : ''))),
           editBtn),
         d.smartir ? null : keys, body);
       if (d.smartir) {
@@ -438,24 +463,46 @@ P.registerPage({
                 refresh();
               } catch (e) { fail(e); }
             } }, tr('Guardar')),
-            h('button', { class: 'btn', onclick: () => ask('raw', { freq: c.freq, raw: c.raw }).then(() => P.toast(tr('Mandado'))).catch(fail) }, tr('Mandar')),
+            h('button', { class: 'btn', onclick: () => ask('raw', { freq: c.freq, raw: c.raw }).then(s => P.toast(s.msg || tr('Mandado'))).catch(fail) }, tr('Mandar')),
             h('button', { class: 'btn', onclick: () => navigator.clipboard?.writeText(JSON.stringify(c.raw)).then(() => P.toast(tr('Copiado'))) }, tr('Copiar las duraciones'))));
-      }) : h('p', { class: 'muted' }, listening ? tr('Apuntá el control al receptor y apretá un botón.') : tr('Tocá Escuchar y apretá un botón del control.')));
+      }) : h('p', { class: 'muted' }, !listening ? tr('Tocá Escuchar y apretá un botón del control.')
+        : out ? tr('Apuntá el control al emisor Zigbee y apretá un botón.') : tr('Apuntá el control al receptor y apretá un botón.')));
     }
 
     async function poll() {
       const st = await readState();
       if (gone) return;
       if (st) {
-        put(status,
-          h('div', {}, h('span', { class: 'irdot' + (st.listening ? ' on' : '') }),
-            st.listening ? tr('La placa está escuchando') : tr('La placa no está escuchando')),
-          h('div', { class: 'muted small' }, tr('Receptor en GPIO%s, LED en GPIO%s (se cambian en la app, pestaña Cableado)', st.rx, st.tx)),
-          h('div', { class: 'btns' }, h('button', { class: 'btn', onclick: openApp }, tr('Abrir la app en la placa'))));
+        const was = JSON.stringify([out, outs]);
+        out = st.out || '';
+        outs = st.outs || [];
+        if (fails !== null && (st.zb_fails || 0) > fails) P.toast(st.zb_why || tr('El emisor Zigbee no tomó el código'), true);
+        fails = st.zb_fails || 0;
+        /* drawn again only when it changed: a select open in it would close */
+        const key = JSON.stringify([st.listening, st.rx, st.tx, out, outs, st.zb_busy, st.zb_msg]);
+        if (key !== statusKey) {
+          statusKey = key;
+          let pick = null;
+          if (outs.length || out) {
+            const opts = [['', tr('LED de la placa (GPIO%s)', st.tx)], ...outs.map(o => [o.via, tr('Emisor Zigbee %s', o.name)])];
+            if (out && !outs.some(o => o.via === out)) opts.push([out, outName(out)]);
+            pick = select(opts, out);
+            pick.onchange = () => ask('out', { via: pick.value }).then(s => { P.toast(s.msg); poll(); refresh(); }).catch(fail);
+          }
+          put(status,
+            h('div', {}, h('span', { class: 'irdot' + (st.listening ? ' on' : '') }),
+              st.listening ? tr('La placa está escuchando por %s', outText(out)) : tr('La placa no está escuchando')),
+            pick ? h('div', { class: 'irgrid', style: 'margin-top:8px' }, h('label', {}, tr('Sale y escucha por'), pick)) : null,
+            st.zb_busy ? h('div', { class: 'small', style: 'color:var(--accent);margin-top:6px' }, st.zb_msg) : null,
+            h('div', { class: 'muted small' }, tr('Receptor en GPIO%s, LED en GPIO%s (se cambian en la app, pestaña Cableado)', st.rx, st.tx)),
+            h('div', { class: 'btns' }, h('button', { class: 'btn', onclick: openApp }, tr('Abrir la app en la placa'))));
+        }
+        if (was !== JSON.stringify([out, outs])) { refresh(); learnNote.textContent = learnText(); }
         const seq = st.captures?.[0]?.seq || 0;
         if (seq !== lastSeq) { lastSeq = seq; drawCaptures(st); }
         if (listening && !st.listening) stopLearn(false);
       } else {
+        statusKey = '';
         put(status, h('p', { class: 'muted' }, tr('La app todavía no habló: abrila en la placa.')),
           h('div', { class: 'btns' }, h('button', { class: 'btn pri', onclick: openApp }, tr('Abrir la app en la placa'))));
       }
@@ -480,6 +527,10 @@ P.registerPage({
         drawCaptures(await readState());
       } catch (e) { fail(e); }
     };
+
+    const learnText = () => out ? tr('La placa escucha por %s y cada botón que apretás aparece acá, decodificado.', outName(out))
+      : tr('La placa escucha con su receptor y cada botón que apretás aparece acá, decodificado.');
+    const learnNote = h('div', { class: 'grow note' }, learnText());
 
     /* a new device, an import, a code by hand */
     const newName = h('input', { placeholder: tr('Nombre (Tele del living)') });
@@ -537,9 +588,7 @@ P.registerPage({
       devBox,
       h('h2', {}, tr('Aprender')),
       h('div', { class: 'card pad' },
-        h('div', { class: 'row' },
-          h('div', { class: 'grow note' }, tr('La placa escucha con su receptor y cada botón que apretás aparece acá, decodificado.')),
-          learnBtn),
+        h('div', { class: 'row' }, learnNote, learnBtn),
         capBox),
       h('h2', {}, tr('Agregar')),
       h('div', { class: 'card pad' },
@@ -551,11 +600,11 @@ P.registerPage({
       h('div', { class: 'card pad' },
         h('div', { class: 'irgrid' }, h('label', {}, tr('Protocolo'), proto), h('label', {}, tr('Dirección (hexa)'), addr), h('label', {}, tr('Comando (hexa)'), cmd)),
         h('div', { class: 'btns', style: 'margin-top:10px' },
-          h('button', { class: 'btn pri', onclick: () => { try { ask('code', handCode()).then(() => P.toast(tr('Mandado'))).catch(fail); } catch (e) { fail(e); } } }, tr('Mandar'))),
+          h('button', { class: 'btn pri', onclick: () => { try { ask('code', handCode()).then(s => P.toast(s.msg || tr('Mandado'))).catch(fail); } catch (e) { fail(e); } } }, tr('Mandar'))),
         paste,
         h('div', { class: 'btns', style: 'margin-top:10px' },
           h('button', { class: 'btn', onclick: () => {
-            try { const { raw, freq } = toRaw(paste.value); ask('raw', { raw, freq }).then(() => P.toast(tr('Mandado: %s duraciones', raw.length))).catch(fail); }
+            try { const { raw, freq } = toRaw(paste.value); ask('raw', { raw, freq }).then(s => P.toast(out ? s.msg : tr('Mandado: %s duraciones', raw.length))).catch(fail); }
             catch (e) { fail(e); }
           } }, tr('Mandar el código pegado')))),
       h('p', { class: 'note' }, tr("Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.")));

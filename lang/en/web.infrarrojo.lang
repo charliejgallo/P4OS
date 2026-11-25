@@ -5,438 +5,481 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/infrarrojo/web/infrarrojo.js:65
+#: apps/infrarrojo/web/infrarrojo.js:72
 NEC extendido	NEC extended
 
-#: apps/infrarrojo/web/infrarrojo.js:65
+#: apps/infrarrojo/web/infrarrojo.js:72
 NEC 32 bits	NEC 32-bit
 
-#: apps/infrarrojo/web/infrarrojo.js:70
+#: apps/infrarrojo/web/infrarrojo.js:77
 Otro botón	Other button
 
-#: apps/infrarrojo/web/infrarrojo.js:70
+#: apps/infrarrojo/web/infrarrojo.js:77
 Encender/apagar	Power
 
-#: apps/infrarrojo/web/infrarrojo.js:70
+#: apps/infrarrojo/web/infrarrojo.js:77
 Encender	Turn on
 
-#: apps/infrarrojo/web/infrarrojo.js:70
+#: apps/infrarrojo/web/infrarrojo.js:77
 Apagar	Turn off
 
-#: apps/infrarrojo/web/infrarrojo.js:71
+#: apps/infrarrojo/web/infrarrojo.js:78
 Fuente	Source
 
-#: apps/infrarrojo/web/infrarrojo.js:71
+#: apps/infrarrojo/web/infrarrojo.js:78
 Silencio	Mute
 
-#: apps/infrarrojo/web/infrarrojo.js:71
+#: apps/infrarrojo/web/infrarrojo.js:78
 Volumen +	Volume +
 
-#: apps/infrarrojo/web/infrarrojo.js:71
+#: apps/infrarrojo/web/infrarrojo.js:78
 Volumen −	Volume −
 
-#: apps/infrarrojo/web/infrarrojo.js:72
+#: apps/infrarrojo/web/infrarrojo.js:79
 Canal +	Channel +
 
-#: apps/infrarrojo/web/infrarrojo.js:72
+#: apps/infrarrojo/web/infrarrojo.js:79
 Canal −	Channel −
 
-#: apps/infrarrojo/web/infrarrojo.js:72
-#: apps/infrarrojo/web/infrarrojo.js:85
-#: apps/infrarrojo/web/infrarrojo.js:85
+#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:92
+#: apps/infrarrojo/web/infrarrojo.js:92
 Arriba	Up
 
-#: apps/infrarrojo/web/infrarrojo.js:72
-#: apps/infrarrojo/web/infrarrojo.js:85
-#: apps/infrarrojo/web/infrarrojo.js:85
+#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:92
+#: apps/infrarrojo/web/infrarrojo.js:92
 Abajo	Down
 
-#: apps/infrarrojo/web/infrarrojo.js:72
+#: apps/infrarrojo/web/infrarrojo.js:79
 Izquierda	Left
 
-#: apps/infrarrojo/web/infrarrojo.js:73
+#: apps/infrarrojo/web/infrarrojo.js:80
 Derecha	Right
 
-#: apps/infrarrojo/web/infrarrojo.js:73
+#: apps/infrarrojo/web/infrarrojo.js:80
 Volver	Back
 
-#: apps/infrarrojo/web/infrarrojo.js:73
+#: apps/infrarrojo/web/infrarrojo.js:80
 Inicio	Home
 
-#: apps/infrarrojo/web/infrarrojo.js:73
+#: apps/infrarrojo/web/infrarrojo.js:80
 Menú	Menu
 
-#: apps/infrarrojo/web/infrarrojo.js:73
+#: apps/infrarrojo/web/infrarrojo.js:80
 Info	Info
 
-#: apps/infrarrojo/web/infrarrojo.js:74
+#: apps/infrarrojo/web/infrarrojo.js:81
 Guía	Guide
 
-#: apps/infrarrojo/web/infrarrojo.js:74
+#: apps/infrarrojo/web/infrarrojo.js:81
 Reproducir	Play
 
-#: apps/infrarrojo/web/infrarrojo.js:74
+#: apps/infrarrojo/web/infrarrojo.js:81
 Pausa	Pause
 
-#: apps/infrarrojo/web/infrarrojo.js:74
+#: apps/infrarrojo/web/infrarrojo.js:81
 Reproducir/pausa	Play/pause
 
-#: apps/infrarrojo/web/infrarrojo.js:75
+#: apps/infrarrojo/web/infrarrojo.js:82
 Detener	Stop
 
-#: apps/infrarrojo/web/infrarrojo.js:75
+#: apps/infrarrojo/web/infrarrojo.js:82
 Retroceder	Rewind
 
-#: apps/infrarrojo/web/infrarrojo.js:75
+#: apps/infrarrojo/web/infrarrojo.js:82
 Adelantar	Fast forward
 
-#: apps/infrarrojo/web/infrarrojo.js:75
+#: apps/infrarrojo/web/infrarrojo.js:82
 Anterior	Previous
 
-#: apps/infrarrojo/web/infrarrojo.js:75
+#: apps/infrarrojo/web/infrarrojo.js:82
 Siguiente	Next
 
-#: apps/infrarrojo/web/infrarrojo.js:76
+#: apps/infrarrojo/web/infrarrojo.js:83
 Grabar	Record
 
-#: apps/infrarrojo/web/infrarrojo.js:76
+#: apps/infrarrojo/web/infrarrojo.js:83
 Rojo	Red
 
-#: apps/infrarrojo/web/infrarrojo.js:76
+#: apps/infrarrojo/web/infrarrojo.js:83
 Verde	Green
 
-#: apps/infrarrojo/web/infrarrojo.js:76
+#: apps/infrarrojo/web/infrarrojo.js:83
 Amarillo	Yellow
 
-#: apps/infrarrojo/web/infrarrojo.js:76
+#: apps/infrarrojo/web/infrarrojo.js:83
 Azul	Blue
 
-#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:86
 Tele	TV
 
-#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:86
 Audio	Audio
 
-#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:86
 Aire	Air con
 
-#: apps/infrarrojo/web/infrarrojo.js:79
-#: apps/infrarrojo/web/infrarrojo.js:331
+#: apps/infrarrojo/web/infrarrojo.js:86
+#: apps/infrarrojo/web/infrarrojo.js:355
 Ventilador	Fan
 
-#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:86
 Luz	Light
 
-#: apps/infrarrojo/web/infrarrojo.js:79
+#: apps/infrarrojo/web/infrarrojo.js:86
 Otro	Other
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Frío	Cool
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Calor	Heat
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Seco	Dry
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Ventilación	Fan
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Auto	Auto
 
-#: apps/infrarrojo/web/infrarrojo.js:81
+#: apps/infrarrojo/web/infrarrojo.js:88
 Frío/calor	Heat/cool
 
-#: apps/infrarrojo/web/infrarrojo.js:82
+#: apps/infrarrojo/web/infrarrojo.js:89
 Bajo	Low
 
-#: apps/infrarrojo/web/infrarrojo.js:82
+#: apps/infrarrojo/web/infrarrojo.js:89
 Mínimo	Lowest
 
-#: apps/infrarrojo/web/infrarrojo.js:82
-#: apps/infrarrojo/web/infrarrojo.js:82
-#: apps/infrarrojo/web/infrarrojo.js:82
+#: apps/infrarrojo/web/infrarrojo.js:89
+#: apps/infrarrojo/web/infrarrojo.js:89
+#: apps/infrarrojo/web/infrarrojo.js:89
 Medio	Medium
 
-#: apps/infrarrojo/web/infrarrojo.js:82
+#: apps/infrarrojo/web/infrarrojo.js:89
 Alto	High
 
-#: apps/infrarrojo/web/infrarrojo.js:82
-#: apps/infrarrojo/web/infrarrojo.js:83
+#: apps/infrarrojo/web/infrarrojo.js:89
+#: apps/infrarrojo/web/infrarrojo.js:90
 Máximo	Highest
 
-#: apps/infrarrojo/web/infrarrojo.js:83
-#: apps/infrarrojo/web/infrarrojo.js:83
+#: apps/infrarrojo/web/infrarrojo.js:90
+#: apps/infrarrojo/web/infrarrojo.js:90
 Silencioso	Quiet
 
-#: apps/infrarrojo/web/infrarrojo.js:83
-#: apps/infrarrojo/web/infrarrojo.js:83
+#: apps/infrarrojo/web/infrarrojo.js:90
+#: apps/infrarrojo/web/infrarrojo.js:90
 Turbo	Turbo
 
-#: apps/infrarrojo/web/infrarrojo.js:83
+#: apps/infrarrojo/web/infrarrojo.js:90
 Eco	Eco
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Noche	Sleep
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Ninguno	None
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Normal	Normal
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Sí	Yes
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 No	No
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Oscila	Swing
 
-#: apps/infrarrojo/web/infrarrojo.js:84
+#: apps/infrarrojo/web/infrarrojo.js:91
 Fijo	Fixed
 
-#: apps/infrarrojo/web/infrarrojo.js:92
+#: apps/infrarrojo/web/infrarrojo.js:99
 crudo · %s duraciones · %s kHz	raw · %s durations · %s kHz
 
-#: apps/infrarrojo/web/infrarrojo.js:92
+#: apps/infrarrojo/web/infrarrojo.js:99
 sin código	no code
 
-#: apps/infrarrojo/web/infrarrojo.js:101
+#: apps/infrarrojo/web/infrarrojo.js:108
 no es un código IR de Broadlink	not a Broadlink IR code
 
-#: apps/infrarrojo/web/infrarrojo.js:127
+#: apps/infrarrojo/web/infrarrojo.js:134
 Pronto mal formado	malformed Pronto code
 
-#: apps/infrarrojo/web/infrarrojo.js:149
+#: apps/infrarrojo/web/infrarrojo.js:156
 no reconozco el formato del código	unrecognized code format
 
-#: apps/infrarrojo/web/infrarrojo.js:157
+#: apps/infrarrojo/web/infrarrojo.js:164
 sin la base de códigos	the code database is missing
 
-#: apps/infrarrojo/web/infrarrojo.js:163
+#: apps/infrarrojo/web/infrarrojo.js:170
 la base de códigos no es válida	the code database is not valid
 
-#: apps/infrarrojo/web/infrarrojo.js:179
+#: apps/infrarrojo/web/infrarrojo.js:186
 ese aire no está en la base	that air conditioner is not in the database
 
-#: apps/infrarrojo/web/infrarrojo.js:204
+#: apps/infrarrojo/web/infrarrojo.js:211
 no se pudo	it failed
 
-#: apps/infrarrojo/web/infrarrojo.js:208
+#: apps/infrarrojo/web/infrarrojo.js:215
 la app no contesta: ¿está abierta en la placa?	the app does not answer: is it open on the board?
 
-#: apps/infrarrojo/web/infrarrojo.js:247
-#: apps/infrarrojo/web/infrarrojo.js:534
+#: apps/infrarrojo/web/infrarrojo.js:254
+#: apps/infrarrojo/web/infrarrojo.js:585
 Infrarrojo	Infrared
 
-#: apps/infrarrojo/web/infrarrojo.js:253
+#: apps/infrarrojo/web/infrarrojo.js:264
+el emisor Zigbee %s	the Zigbee blaster %s
+
+#: apps/infrarrojo/web/infrarrojo.js:264
+el emisor Zigbee %s (no está en la red)	the Zigbee blaster %s (not in the network)
+
+#: apps/infrarrojo/web/infrarrojo.js:268
+el LED de la placa	the board's LED
+
+#: apps/infrarrojo/web/infrarrojo.js:269
 Cargando…	Loading…
 
-#: apps/infrarrojo/web/infrarrojo.js:256
-#: apps/infrarrojo/web/infrarrojo.js:466
+#: apps/infrarrojo/web/infrarrojo.js:272
+#: apps/infrarrojo/web/infrarrojo.js:513
 Escuchar	Listen
 
-#: apps/infrarrojo/web/infrarrojo.js:259
+#: apps/infrarrojo/web/infrarrojo.js:275
 Abierta en la placa	Opened on the board
 
-#: apps/infrarrojo/web/infrarrojo.js:279
+#: apps/infrarrojo/web/infrarrojo.js:296
+Va por el emisor Zigbee: %s	On its way through the Zigbee blaster: %s
+
+#: apps/infrarrojo/web/infrarrojo.js:296
 Mandado: %s	Sent: %s
 
-#: apps/infrarrojo/web/infrarrojo.js:293
-#: apps/infrarrojo/web/infrarrojo.js:441
-#: apps/infrarrojo/web/infrarrojo.js:554
+#: apps/infrarrojo/web/infrarrojo.js:310
+#: apps/infrarrojo/web/infrarrojo.js:466
+#: apps/infrarrojo/web/infrarrojo.js:603
 Mandar	Send
 
-#: apps/infrarrojo/web/infrarrojo.js:294
+#: apps/infrarrojo/web/infrarrojo.js:311
 Subir	Move up
 
-#: apps/infrarrojo/web/infrarrojo.js:295
+#: apps/infrarrojo/web/infrarrojo.js:312
 Borrar	Delete
 
-#: apps/infrarrojo/web/infrarrojo.js:301
-#: apps/infrarrojo/web/infrarrojo.js:422
+#: apps/infrarrojo/web/infrarrojo.js:317
+La de la app (%s)	The app's (%s)
+
+#: apps/infrarrojo/web/infrarrojo.js:317
+LED de la placa	The board's LED
+
+#: apps/infrarrojo/web/infrarrojo.js:318
+#: apps/infrarrojo/web/infrarrojo.js:487
+Emisor Zigbee %s	Zigbee blaster %s
+
+#: apps/infrarrojo/web/infrarrojo.js:323
+#: apps/infrarrojo/web/infrarrojo.js:447
 Nombre	Name
 
-#: apps/infrarrojo/web/infrarrojo.js:302
-#: apps/infrarrojo/web/infrarrojo.js:546
+#: apps/infrarrojo/web/infrarrojo.js:324
+#: apps/infrarrojo/web/infrarrojo.js:595
 Tipo	Type
 
-#: apps/infrarrojo/web/infrarrojo.js:303
+#: apps/infrarrojo/web/infrarrojo.js:325
+Sale por	Goes out through
+
+#: apps/infrarrojo/web/infrarrojo.js:326
 Sin botones.	No buttons.
 
-#: apps/infrarrojo/web/infrarrojo.js:308
+#: apps/infrarrojo/web/infrarrojo.js:332
 Guardado	Saved
 
-#: apps/infrarrojo/web/infrarrojo.js:309
-#: apps/infrarrojo/web/infrarrojo.js:440
+#: apps/infrarrojo/web/infrarrojo.js:333
+#: apps/infrarrojo/web/infrarrojo.js:465
 Guardar	Save
 
-#: apps/infrarrojo/web/infrarrojo.js:310
+#: apps/infrarrojo/web/infrarrojo.js:334
 Descartar	Discard
 
-#: apps/infrarrojo/web/infrarrojo.js:311
+#: apps/infrarrojo/web/infrarrojo.js:335
 Bajar el JSON	Download the JSON
 
-#: apps/infrarrojo/web/infrarrojo.js:313
+#: apps/infrarrojo/web/infrarrojo.js:337
 ¿Borrar %s y sus botones?	Delete %s and its buttons?
 
-#: apps/infrarrojo/web/infrarrojo.js:315
+#: apps/infrarrojo/web/infrarrojo.js:339
 Borrar aparato	Delete device
 
-#: apps/infrarrojo/web/infrarrojo.js:331
+#: apps/infrarrojo/web/infrarrojo.js:355
 Modo especial	Preset
 
-#: apps/infrarrojo/web/infrarrojo.js:331
+#: apps/infrarrojo/web/infrarrojo.js:355
 Oscilación	Swing
 
-#: apps/infrarrojo/web/infrarrojo.js:339
+#: apps/infrarrojo/web/infrarrojo.js:363
 Opción	Option
 
-#: apps/infrarrojo/web/infrarrojo.js:358
+#: apps/infrarrojo/web/infrarrojo.js:382
 ⏻ Encendido	⏻ On
 
-#: apps/infrarrojo/web/infrarrojo.js:358
+#: apps/infrarrojo/web/infrarrojo.js:382
 ⏻ Apagado	⏻ Off
 
-#: apps/infrarrojo/web/infrarrojo.js:363
+#: apps/infrarrojo/web/infrarrojo.js:387
 Modo	Mode
 
-#: apps/infrarrojo/web/infrarrojo.js:364
+#: apps/infrarrojo/web/infrarrojo.js:388
 %s · %s · código %s de SmartIR (licencia MIT). Cada cambio se guarda y se manda con el estado entero.	%s · %s · SmartIR code %s (MIT license). Every change is saved and sent with the whole state.
 
-#: apps/infrarrojo/web/infrarrojo.js:371
-#: apps/infrarrojo/web/infrarrojo.js:441
-#: apps/infrarrojo/web/infrarrojo.js:554
+#: apps/infrarrojo/web/infrarrojo.js:395
+#: apps/infrarrojo/web/infrarrojo.js:466
+#: apps/infrarrojo/web/infrarrojo.js:603
 Mandado	Sent
 
-#: apps/infrarrojo/web/infrarrojo.js:371
+#: apps/infrarrojo/web/infrarrojo.js:395
 Apagado	Turned off
 
-#: apps/infrarrojo/web/infrarrojo.js:379
+#: apps/infrarrojo/web/infrarrojo.js:403
 No se pudo leer: %s	Could not read: %s
 
-#: apps/infrarrojo/web/infrarrojo.js:388
+#: apps/infrarrojo/web/infrarrojo.js:412
 Editar	Edit
 
-#: apps/infrarrojo/web/infrarrojo.js:393
+#: apps/infrarrojo/web/infrarrojo.js:417
 %s botones	%s buttons
 
-#: apps/infrarrojo/web/infrarrojo.js:409
+#: apps/infrarrojo/web/infrarrojo.js:418
+sale por %s	goes out through %s
+
+#: apps/infrarrojo/web/infrarrojo.js:434
 Todavía no hay aparatos. Creá uno abajo, importalo, o agregalo desde Códigos en la placa.	No devices yet. Create one below, import one, or add one from Codes on the board.
 
-#: apps/infrarrojo/web/infrarrojo.js:416
+#: apps/infrarrojo/web/infrarrojo.js:441
 Nombre del botón	Button name
 
-#: apps/infrarrojo/web/infrarrojo.js:417
+#: apps/infrarrojo/web/infrarrojo.js:442
 Aparato nuevo…	New device…
 
-#: apps/infrarrojo/web/infrarrojo.js:422
+#: apps/infrarrojo/web/infrarrojo.js:447
 Guardar en	Save to
 
-#: apps/infrarrojo/web/infrarrojo.js:425
-#: apps/infrarrojo/web/infrarrojo.js:426
+#: apps/infrarrojo/web/infrarrojo.js:450
+#: apps/infrarrojo/web/infrarrojo.js:451
 Botón	Button
 
-#: apps/infrarrojo/web/infrarrojo.js:430
+#: apps/infrarrojo/web/infrarrojo.js:455
 Nombre del aparato nuevo	Name of the new device
 
-#: apps/infrarrojo/web/infrarrojo.js:430
-#: apps/infrarrojo/web/infrarrojo.js:546
+#: apps/infrarrojo/web/infrarrojo.js:455
+#: apps/infrarrojo/web/infrarrojo.js:595
 Aparato nuevo	New device
 
-#: apps/infrarrojo/web/infrarrojo.js:437
+#: apps/infrarrojo/web/infrarrojo.js:462
 Guardado en %s	Saved to %s
 
-#: apps/infrarrojo/web/infrarrojo.js:442
+#: apps/infrarrojo/web/infrarrojo.js:467
 Copiado	Copied
 
-#: apps/infrarrojo/web/infrarrojo.js:442
+#: apps/infrarrojo/web/infrarrojo.js:467
 Copiar las duraciones	Copy the durations
 
-#: apps/infrarrojo/web/infrarrojo.js:443
-Apuntá el control al receptor y apretá un botón.	Point the remote at the receiver and press a button.
-
-#: apps/infrarrojo/web/infrarrojo.js:443
+#: apps/infrarrojo/web/infrarrojo.js:468
 Tocá Escuchar y apretá un botón del control.	Tap Listen and press a button on the remote.
 
-#: apps/infrarrojo/web/infrarrojo.js:452
-La placa está escuchando	The board is listening
+#: apps/infrarrojo/web/infrarrojo.js:469
+Apuntá el control al emisor Zigbee y apretá un botón.	Point the remote at the Zigbee blaster and press a button.
 
-#: apps/infrarrojo/web/infrarrojo.js:452
+#: apps/infrarrojo/web/infrarrojo.js:469
+Apuntá el control al receptor y apretá un botón.	Point the remote at the receiver and press a button.
+
+#: apps/infrarrojo/web/infrarrojo.js:479
+El emisor Zigbee no tomó el código	The Zigbee blaster did not take the code
+
+#: apps/infrarrojo/web/infrarrojo.js:487
+LED de la placa (GPIO%s)	The board's LED (GPIO%s)
+
+#: apps/infrarrojo/web/infrarrojo.js:494
+La placa está escuchando por %s	The board is listening through %s
+
+#: apps/infrarrojo/web/infrarrojo.js:494
 La placa no está escuchando	The board is not listening
 
-#: apps/infrarrojo/web/infrarrojo.js:453
+#: apps/infrarrojo/web/infrarrojo.js:495
+Sale y escucha por	Sends and listens through
+
+#: apps/infrarrojo/web/infrarrojo.js:497
 Receptor en GPIO%s, LED en GPIO%s (se cambian en la app, pestaña Cableado)	Receiver on GPIO%s, LED on GPIO%s (changed in the app, Wiring tab)
 
-#: apps/infrarrojo/web/infrarrojo.js:454
-#: apps/infrarrojo/web/infrarrojo.js:460
+#: apps/infrarrojo/web/infrarrojo.js:498
+#: apps/infrarrojo/web/infrarrojo.js:507
 Abrir la app en la placa	Open the app on the board
 
-#: apps/infrarrojo/web/infrarrojo.js:459
+#: apps/infrarrojo/web/infrarrojo.js:506
 La app todavía no habló: abrila en la placa.	The app has not reported yet: open it on the board.
 
-#: apps/infrarrojo/web/infrarrojo.js:476
+#: apps/infrarrojo/web/infrarrojo.js:523
 Parar	Stop
 
-#: apps/infrarrojo/web/infrarrojo.js:485
-Nombre (Tele del living)	Name (Living room TV)
+#: apps/infrarrojo/web/infrarrojo.js:531
+La placa escucha por %s y cada botón que apretás aparece acá, decodificado.	The board listens through %s and every button you press shows up here, decoded.
 
-#: apps/infrarrojo/web/infrarrojo.js:489
-Falta el nombre	The name is missing
-
-#: apps/infrarrojo/web/infrarrojo.js:504
-un aire de SmartIR se agrega desde Códigos en la placa (la base ya lo trae)	a SmartIR air conditioner is added from Codes on the board (the database already has it)
-
-#: apps/infrarrojo/web/infrarrojo.js:514
-no es un aparato ni un archivo de SmartIR	neither a device nor a SmartIR file
-
-#: apps/infrarrojo/web/infrarrojo.js:518
-Importado: %s, %s botones	Imported: %s, %s buttons
-
-#: apps/infrarrojo/web/infrarrojo.js:524
-Un código: Broadlink en base64, Pronto (0000 006D …), Tuya, o duraciones [9000, 4500, 560, …]	A code: Broadlink in base64, Pronto (0000 006D …), Tuya, or durations [9000, 4500, 560, …]
-
-#: apps/infrarrojo/web/infrarrojo.js:529
-dirección y comando en hexa	address and command in hex
-
-#: apps/infrarrojo/web/infrarrojo.js:536
-Aparatos	Devices
-
-#: apps/infrarrojo/web/infrarrojo.js:538
-Aprender	Learn
-
-#: apps/infrarrojo/web/infrarrojo.js:541
+#: apps/infrarrojo/web/infrarrojo.js:532
 La placa escucha con su receptor y cada botón que apretás aparece acá, decodificado.	The board listens with its receiver and every button you press shows up here, decoded.
 
-#: apps/infrarrojo/web/infrarrojo.js:544
+#: apps/infrarrojo/web/infrarrojo.js:536
+Nombre (Tele del living)	Name (Living room TV)
+
+#: apps/infrarrojo/web/infrarrojo.js:540
+Falta el nombre	The name is missing
+
+#: apps/infrarrojo/web/infrarrojo.js:555
+un aire de SmartIR se agrega desde Códigos en la placa (la base ya lo trae)	a SmartIR air conditioner is added from Codes on the board (the database already has it)
+
+#: apps/infrarrojo/web/infrarrojo.js:565
+no es un aparato ni un archivo de SmartIR	neither a device nor a SmartIR file
+
+#: apps/infrarrojo/web/infrarrojo.js:569
+Importado: %s, %s botones	Imported: %s, %s buttons
+
+#: apps/infrarrojo/web/infrarrojo.js:575
+Un código: Broadlink en base64, Pronto (0000 006D …), Tuya, o duraciones [9000, 4500, 560, …]	A code: Broadlink in base64, Pronto (0000 006D …), Tuya, or durations [9000, 4500, 560, …]
+
+#: apps/infrarrojo/web/infrarrojo.js:580
+dirección y comando en hexa	address and command in hex
+
+#: apps/infrarrojo/web/infrarrojo.js:587
+Aparatos	Devices
+
+#: apps/infrarrojo/web/infrarrojo.js:589
+Aprender	Learn
+
+#: apps/infrarrojo/web/infrarrojo.js:593
 Agregar	Add
 
-#: apps/infrarrojo/web/infrarrojo.js:547
+#: apps/infrarrojo/web/infrarrojo.js:596
 Crear	Create
 
-#: apps/infrarrojo/web/infrarrojo.js:548
+#: apps/infrarrojo/web/infrarrojo.js:597
 Importar un aparato (un JSON bajado de acá) o un archivo de SmartIR de televisor, ventilador o luz:	Import a device (a JSON downloaded from here) or a SmartIR file for a TV, fan or light:
 
-#: apps/infrarrojo/web/infrarrojo.js:550
+#: apps/infrarrojo/web/infrarrojo.js:599
 Mandar un código	Send a code
 
-#: apps/infrarrojo/web/infrarrojo.js:552
+#: apps/infrarrojo/web/infrarrojo.js:601
 Protocolo	Protocol
 
-#: apps/infrarrojo/web/infrarrojo.js:552
+#: apps/infrarrojo/web/infrarrojo.js:601
 Dirección (hexa)	Address (hex)
 
-#: apps/infrarrojo/web/infrarrojo.js:552
+#: apps/infrarrojo/web/infrarrojo.js:601
 Comando (hexa)	Command (hex)
 
-#: apps/infrarrojo/web/infrarrojo.js:558
+#: apps/infrarrojo/web/infrarrojo.js:607
 Mandado: %s duraciones	Sent: %s durations
 
-#: apps/infrarrojo/web/infrarrojo.js:560
+#: apps/infrarrojo/web/infrarrojo.js:609
 Mandar el código pegado	Send the pasted code
 
-#: apps/infrarrojo/web/infrarrojo.js:561
+#: apps/infrarrojo/web/infrarrojo.js:610
 Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.	The database codes come from SmartIR (MIT license, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). The receiver runs on 3.3 V and the LED through a transistor: the wiring is in the app's Wiring tab.

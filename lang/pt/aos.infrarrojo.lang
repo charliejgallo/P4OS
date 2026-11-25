@@ -764,3 +764,29 @@ Amarillo	Amarelo
 
 #: apps/infrarrojo/main/ir_store.c:204
 Azul	Azul
+Salida	Saída
+Por el LED del GPIO%d	Pelo LED do GPIO%d
+LED de la placa	LED da placa
+Emisor Zigbee %s	Emissor Zigbee %s
+Un emisor IR de la red Zigbee de la placa	Um emissor IR da rede Zigbee da placa
+Los controles, los aires y las pruebas de Códigos salen por acá, salvo un aparato que tenga la suya (Editar, Nombre y tipo). Aprender escucha por el mismo lado: con un emisor, el control se apunta al emisor.	Os controles, os ares e os testes de Códigos saem por aqui, salvo um aparelho que tenha a sua (Editar, Nome e tipo). Aprender escuta pelo mesmo lado: com um emissor, aponte o controle para o emissor.
+Por un emisor Zigbee cada código tarda de medio segundo a unos segundos en salir, y un botón apretado no se repite.	Por um emissor Zigbee cada código leva de meio segundo a alguns segundos para sair, e um botão segurado não se repete.
+Recibiendo el código del emisor Zigbee…	Recebendo o código do emissor Zigbee…
+No se puede escuchar por %s: la red Zigbee tiene que estar andando, con el emisor en ella.	Não é possível escutar por %s: a rede Zigbee tem que estar funcionando, com o emissor nela.
+Escuchando por %s. Apuntá el control al emisor y apretá un botón.	Escutando por %s. Aponte o controle para o emissor e aperte um botão.
+el LED de la placa	o LED da placa
+el emisor Zigbee %s	o emissor Zigbee %s
+el emisor Zigbee %s (no está en la red)	o emissor Zigbee %s (não está na rede)
+El emisor Zigbee no tomó el código	O emissor Zigbee não aceitou o código
+La red Zigbee no está andando	A rede Zigbee não está funcionando
+Ese código es muy largo para el emisor Zigbee	Esse código é longo demais para o emissor Zigbee
+Ese emisor Zigbee no está en la red	Esse emissor Zigbee não está na rede
+El emisor Zigbee está ocupado: esperá que termine	O emissor Zigbee está ocupado: espere terminar
+Mandando por el emisor Zigbee… (%d en espera)	Enviando pelo emissor Zigbee… (%d na fila)
+Mandando por el emisor Zigbee…	Enviando pelo emissor Zigbee…
+El emisor Zigbee está ocupado	O emissor Zigbee está ocupado
+Va por el emisor Zigbee	Vai pelo emissor Zigbee
+Sale por %s	Sai por %s
+Sale por	Sai por
+La de Cableado	A da Fiação
+La de Cableado ahora: %s.	A da Fiação agora: %s.
