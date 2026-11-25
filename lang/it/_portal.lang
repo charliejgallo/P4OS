@@ -2827,3 +2827,73 @@ A fondo (2 s por canal)	A fondo (2 s per canale)
 La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	La barra è l'energia del canale; il numero, i pacchetti sentiti. Una rete Zigbee o Thread appare come un canale con pacchetti.
 Guardar para Wireshark	Salva per Wireshark
 Zigbee y Thread	Zigbee e Thread
+contacto	contatto
+abierto	aperto
+cerrado	chiuso
+movimiento	movimento
+sin movimiento	nessun movimento
+agua	acqua
+¡agua!	acqua!
+seco	asciutto
+humo	fumo
+alarma	allarme
+normal	normale
+gas	gas
+batería	batteria
+encendido	acceso/spento
+nivel	livello
+color	colore
+temperatura	temperatura
+presión	pressione
+humedad	umidità
+presencia	presenza
+luz	luce
+medidor	contatore
+eléctrico	elettrico
+La red no tomó el pedido	La rete non ha accettato la richiesta
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Impossibile creare la rete: il C6 ha il firmware 154.15?
+Nombre del equipo	Nome del dispositivo
+¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Rimuovere %s dalla rete? Per aggiungerlo di nuovo va resettato.
+router	router
+a red eléctrica	a rete elettrica
+a pila	a batteria
+sin noticias desde que arrancó la placa	nessuna notizia dall'avvio della scheda
+se fue	uscito
+no contestó	non ha risposto
+configurándolo	lo configuro
+hay alguien	c'è qualcuno
+nadie	nessuno
+salida %d: %s	uscita %d: %s
+prendida	accesa
+enviando...	invio...
+no tomó el código	non ha preso il codice
+Arriba	Su
+Abajo	Giù
+Cerrar con llave	Chiudi a chiave
+Ventilador: otro modo	Ventola: modalità successiva
+Esperando el control remoto... (tocá para cancelar)	In attesa del telecomando... (tocca per annullare)
+Aprender un código	Impara un codice
+Enviar el último aprendido	Invia l'ultimo appreso
+Guardarlo...	Salvalo...
+Nombre del código	Nome del codice
+Guardados: tocá uno para mandarlo.	Salvati: toccane uno per inviarlo.
+¿Borrar el código %s?	Eliminare il codice %s?
+Código borrado	Codice eliminato
+brillo	luminosità
+posición	posizione
+tono	tonalità
+Lo que mandó, crudo (%s)	Quello che ha inviato, grezzo (%s)
+comando	comando
+antes	prima
+Sacar	Rimuovi
+Mi red	La mia rete
+Armando la red...	Creo la rete...
+Armar la red	Crea la rete
+Sumar equipos	Aggiungi dispositivi
+Sumar Zigbee 3.0	Aggiungi Zigbee 3.0
+Abierta: %d s	Aperta: %d s
+Cerrar	Chiudi
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La scheda crea la propria rete Zigbee, con il C6 come radio, e i dispositivi vi entrano: così si può provarne qualunque. Un dispositivo sta in una sola rete: per aggiungerlo qui va resettato (di solito, tenendo premuto il pulsante finché lampeggia).
+Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Aperta per aggiungere: resetta i dispositivi uno alla volta; ognuno compare qui quando entra. Se è a batteria, premi ogni tanto il suo pulsante mentre si configura.
+Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Rete sul canale %s, %s dispositivi. I valori arrivano quando il dispositivo li invia: uno a batteria può tardare a dare notizie. Se un dispositivo continua a lampeggiare e non finisce di entrare, prova Aggiungi Zigbee 3.0.
+Todavía no se sumó ningún equipo.	Nessun dispositivo è ancora entrato.

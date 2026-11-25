@@ -275,3 +275,27 @@ a.redport { color: var(--accent); }
 .login { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; }
 .login form { width: 100%; max-width: 380px; }
 .login h1 { margin-top: 0; }
+
+/* Zigbee, "Mi red" */
+.zbnet { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-top: 14px; }
+.zbcard { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; min-width: 0; }
+.zbcard .btn { padding: 6px 13px; font-size: 14px; white-space: normal; text-align: left; }
+.zbtop { display: flex; align-items: center; gap: 8px; }
+.zbname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; font-size: 17px; }
+.zbchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.zbchip { display: inline-block; background: var(--card2); border: 2px solid transparent; border-radius: 999px; padding: 3px 11px; font-size: 13px; }
+button.zbchip { cursor: pointer; color: var(--dim); border-color: var(--line); padding: 6px 14px; }
+button.zbchip.on { color: var(--yellow); border-color: var(--yellow); }
+button.zbchip:hover { filter: brightness(1.15); }
+.zb-or { color: var(--orange); } .zb-teal { color: #64d2ff; } .zb-red { color: var(--red); } .zb-green { color: var(--green); }
+.zb-dim { color: var(--dim); } .zb-acc { color: var(--accent); }
+.zbctl { gap: 8px; }
+.zbcodes .btns { gap: 8px; margin-top: 4px; }
+.zbcode { display: inline-flex; }
+.zbcode .btn:first-child { border-radius: 999px 0 0 999px; padding-right: 10px; }
+.zbcode .btn:last-child { border-radius: 0 999px 999px 0; padding: 6px 10px 6px 8px; color: var(--dim); border-left: 1px solid var(--line); }
+.zbslide { display: grid; grid-template-columns: 90px 1fr 58px; align-items: center; gap: 10px; }
+.zbslide .zbsv { text-align: right; font-variant-numeric: tabular-nums; }
+.zbraw summary { cursor: pointer; }
+.zbraw .mono { font-size: 12px; margin-top: 2px; }
+@media (max-width: 560px) { .zbnet { grid-template-columns: 1fr; } .zbslide { grid-template-columns: 70px 1fr 50px; } }

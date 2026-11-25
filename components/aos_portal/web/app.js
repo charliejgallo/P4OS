@@ -3543,9 +3543,245 @@ function zbDecode(hex) {
   if (at < len && (f[at] & 0xe0) === 0x60) return [l1, '6LoWPAN (Thread)'];
   return [l1, ''];
 }
+
+/* "Mi red": the board's own Zigbee network (aos_zigbee, the P4's stack with
+ * the C6 for its radio), as the board's Zigbee app shows it in its tab of
+ * the same name (aos_app_zigbee.c, fill_net): a card per device with its
+ * values and what drives it, to see and work them from away. The page
+ * already asks for /api/154 every second; this redraws from it every two,
+ * and never under the user: not while a pointer is down on it (a press that
+ * outlived its button would be lost, and a slider's drag with it), and not
+ * when nothing it shows changed. What was just asked for shows as asked
+ * until the device says so, a few seconds at most. */
+const ZB_ZONE = { 0x0015: [N_('contacto'), N_('abierto'), N_('cerrado')], 0x000d: [N_('movimiento'), N_('movimiento'), N_('sin movimiento')],
+  0x002a: [N_('agua'), N_('¡agua!'), N_('seco')], 0x0028: [N_('humo'), N_('alarma'), N_('normal')], 0x002b: [N_('gas'), N_('alarma'), N_('normal')] };
+const ZB_CLUSTER = { 0x0001: N_('batería'), 0x0006: N_('encendido'), 0x0008: N_('nivel'), 0x0300: N_('color'), 0x0402: N_('temperatura'),
+  0x0403: N_('presión'), 0x0405: N_('humedad'), 0x0406: N_('presencia'), 0x0400: N_('luz'), 0x0500: 'IAS', 0x0702: N_('medidor'),
+  0x0b04: N_('eléctrico'), 0xef00: 'Tuya' };
+/* a value as it goes on the air: little-endian, n bytes in hex */
+const zbHex = (v, n) => Array.from({ length: n }, (_, i) => ((v >> 8 * i) & 255).toString(16).padStart(2, '0')).join('');
+const zbH4 = v => '0x' + v.toString(16).padStart(4, '0');
+const zbMeas = (d, cl, at, def) => { const m = (d.measures || []).find(x => x.cluster === cl && x.attr === at); return m ? m.raw : def; };
+const zbAgo = s => s < 120 ? tr('hace %s s', s) : tr('hace %s min', Math.floor(s / 60));
+/* a name for the board: 32 bytes at most, cut between characters */
+function zbCut(s) {
+  let out = '';
+  for (const ch of s.trim()) { if (new TextEncoder().encode(out + ch).length > 32) break; out += ch; }
+  return out;
+}
+/* what the board already shows by name, left out of the raw lines */
+function zbNamed(d, a) {
+  if (a.command != null) return a.cluster === 0x0500 && a.command === 0;
+  if ((d.measures || []).some(m => m.cluster === a.cluster && m.attr === a.attr)) return true;
+  if (a.cluster === 0x0001) return a.attr === 0x20 || a.attr === 0x21;
+  if ([0x0006, 0x0008, 0x0402, 0x0405, 0x0406].includes(a.cluster)) return a.attr === 0;
+  return a.cluster === 0x0500 && (a.attr === 1 || a.attr === 2);
+}
+function zbNet() {
+  const head = h('div', { class: 'card pad' }), list = h('div', { class: 'zbnet' }), el = h('div', {}, head, list);
+  let st = null, sig = '', last = 0, downs = 0, starting = false;
+  const pend = new Map();           /* what was just asked: key -> [value, until] */
+  const raw = new Set();            /* the devices whose raw lines are open */
+  const pendSet = (k, v, ms) => pend.set(k, [v, Date.now() + ms]);
+  const pendGet = (k, now) => {
+    const p = pend.get(k);
+    if (p && (p[1] < Date.now() || p[0] === now)) { pend.delete(k); return undefined; }
+    return p ? p[0] : undefined;
+  };
+  el.addEventListener('pointerdown', () => {
+    downs++;
+    const up = () => {
+      document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up);
+      /* after the click the release brings, or the button would be gone */
+      setTimeout(() => { downs = Math.max(0, downs - 1); draw(null, true); }, 400);
+    };
+    document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+  });
+  const act = async (what, body, done) => {
+    try { const s = await post('154/' + what, body); if (done) toast(done); draw(s, true); }
+    catch (e) { toast(e.status === 400 ? tr('La red no tomó el pedido') : e.message, true); }
+  };
+  const start = async () => {
+    starting = true;
+    draw(null, true);
+    let s = null;
+    try {
+      if (st && (st.state === 'scanning' || st.state === 'sniffing')) await post('154/stop');
+      s = await post('154/zbhost', { channel: 26 });     /* the board app's: away from Wi-Fi's 1, 6 and 11 */
+    } catch { toast(tr('No se pudo armar la red: ¿el C6 tiene su firmware 154.15?'), true); }
+    starting = false;
+    draw(s, true);
+  };
+
+  function card(d, z) {
+    const ie = d.ieee, idn = d.ident, v = d.values || {}, c = d.controls || {}, ir = z.ir || {};
+    const what = idn ? idn.vendor + ' ' + idn.model : ((d.manufacturer || '') + ' ' + (d.model || '')).trim();
+    const title = d.name || what || ie.toUpperCase().match(/..../g).join(':');
+    const news = d.heard_s != null;
+    const rename = () => {
+      const n = prompt(tr('Nombre del equipo'), d.name || '');
+      if (n != null && n.trim() !== d.name) act('zbname', { ieee: ie, name: zbCut(n) });
+    };
+    const remove = () => { if (confirm(tr('¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.', title))) act('zbremove', { ieee: ie }); };
+    const line = [idn && idn.description, d.name && what, '0x' + d.nwk.toString(16).toUpperCase().padStart(4, '0'),
+      d.router ? tr('router') : d.power === 1 ? tr('a red eléctrica') : tr('a pila'), d.rssi ? d.rssi + ' dBm' : null,
+      news ? zbAgo(d.heard_s) : tr('sin noticias desde que arrancó la placa'),
+      d.step === 'left' ? tr('se fue') : d.step === 'failed' ? tr('no contestó') : d.setup ? tr('configurándolo') : null].filter(Boolean).join(' · ');
+
+    /* what the board names, a chip each; the ones that do something are buttons */
+    const chips = [], chip = (text, cls) => chips.push(h('span', { class: 'zbchip ' + (cls || '') }, text));
+    const tog = (text, on, fn) => chips.push(h('button', { class: 'zbchip tog' + (on ? ' on' : ''), onclick: fn }, text));
+    if (v.temperature != null) chip(num(v.temperature, 1) + ' °C', 'zb-or');
+    if (v.humidity != null) chip(num(v.humidity, 1) + ' %', 'zb-teal');
+    if (v.zone && v.zone.alarm != null) {
+      const zn = ZB_ZONE[v.zone.type] || [N_('alarma'), N_('alarma'), N_('normal')];
+      chip(tr(zn[0]) + ': ' + tr(v.zone.alarm ? zn[1] : zn[2]), v.zone.alarm ? 'zb-red' : 'zb-green');
+    }
+    if (v.occupancy != null) chip(v.occupancy ? tr('hay alguien') : tr('nadie'));
+    (v.on || []).forEach((on, q) => {
+      if (on == null) return;
+      const ep = d.endpoints[q], k = ie + ':o' + ep, p = pendGet(k, on);
+      /* On or Off, from what it shows: two Toggles that cross undo each other */
+      tog(tr('salida %d: %s', q + 1, p != null ? '...' : on ? tr('prendida') : tr('apagada')), p != null ? p : on, () => {
+        if (pendGet(k, on) != null) return;                 /* a second tap while the first goes */
+        pendSet(k, !on, 3000);
+        act('zbonoff', { ieee: ie, ep, on: !on });
+      });
+    });
+    if (v.battery != null) chip(tr('batería') + ' ' + Math.round(v.battery) + ' %', v.battery < 20 ? 'zb-red' : 'zb-dim');
+    else if (v.voltage) chip(tr('batería') + ' ' + num(v.voltage, 1) + ' V', 'zb-dim');
+    for (const m of d.measures || []) chip(m.name + ' ' + m.value);
+    /* Tuya's datapoints: by name when the card's table knows the device; a bool one is a button */
+    for (const dp of d.datapoints || []) {
+      const named = dp.name ? dp.name + ' ' + dp.text : null;
+      if (dp.type === 1) {
+        const k = ie + ':d' + dp.dp, now = !!dp.value, p = pendGet(k, now), on = p != null ? p : now;
+        tog(named && p == null ? named : 'dp ' + dp.dp + ': ' + (p != null ? '...' : on ? tr('sí') : tr('no')), on, () => {
+          pendSet(k, !on, 3000);
+          act('zbdp', { ieee: ie, dp: dp.dp, type: 1, value: on ? 0 : 1 });
+        });
+      } else if (named) chip(named);
+      else if (dp.value != null) chip('dp ' + dp.dp + ': ' + dp.value);
+      else chip('dp ' + dp.dp + ': ' + (dp.hex || ''), 'zb-dim');
+    }
+    const mine = ir.ieee === ie;
+    if (c.ir && mine && ir.state === 'sending') chip(tr('enviando...'), 'zb-acc');
+    if (c.ir && mine && ir.state === 'failed') chip(tr('no tomó el código'), 'zb-or');
+
+    /* its controls */
+    const ctl = [], btn = (text, fn, cls) => ctl.push(h('button', { class: 'btn' + (cls ? ' ' + cls : ''), onclick: fn }, text));
+    if (c.cover) for (const [t, cmd] of [[N_('Arriba'), 0], [N_('Parar'), 2], [N_('Abajo'), 1]])
+      btn(tr(t), () => act('zbcmd', { ieee: ie, ep: c.cover, cluster: 0x0102, cmd, data: '', read: 0x0008 }));
+    if (c.thermostat) {
+      /* half a degree from the one asked last, so that taps in a row add up */
+      const k = ie + ':t', m = zbMeas(d, 0x0201, 0x0012, 2000);
+      for (const step of [-50, 50]) btn((step < 0 ? '−' : '+') + num(0.5, 1) + ' °C', () => {
+        const p = pendGet(k, m), x = (p != null ? p : m) + step;
+        pendSet(k, x, 4000);
+        act('zbwrite', { ieee: ie, ep: c.thermostat, cluster: 0x0201, attr: 0x0012, type: 0x29, value: zbHex(x & 0xffff, 2) });
+      });
+    }
+    if (c.lock) {
+      /* an empty code: those that need none take it */
+      btn(tr('Cerrar con llave'), () => act('zbcmd', { ieee: ie, ep: c.lock, cluster: 0x0101, cmd: 0, data: '00', read: 0 }));
+      btn(tr('Abrir'), () => act('zbcmd', { ieee: ie, ep: c.lock, cluster: 0x0101, cmd: 1, data: '00', read: 0 }));
+    }
+    if (c.fan) {
+      const NEXT = [1, 2, 3, 5, 5, 0, 0], m = zbMeas(d, 0x0202, 0x0000, 0);   /* off, low, medium, high, auto, off */
+      btn(tr('Ventilador: otro modo'), () => act('zbwrite', { ieee: ie, ep: c.fan, cluster: 0x0202, attr: 0, type: 0x30,
+        value: zbHex(m >= 0 && m <= 6 ? NEXT[m] : 0, 1) }));
+    }
+    let codes = null;
+    if (c.ir) {
+      const learning = mine && (ir.state === 'learning' || ir.state === 'receiving');
+      btn(learning ? tr('Esperando el control remoto... (tocá para cancelar)') : tr('Aprender un código'),
+        () => act('zbir', { ieee: ie, learn: !learning }), learning ? 'pri' : '');
+      if (ir.learned) {
+        const code = ir.learned;
+        btn(tr('Enviar el último aprendido'), () => act('zbir', { ieee: ie, send: code }));
+        btn(tr('Guardarlo...'), () => {
+          const n = prompt(tr('Nombre del código'), '');
+          if (n && n.trim()) act('zbir', { ieee: ie, save: zbCut(n) }, tr('Guardado'));
+        });
+      }
+      /* its saved codes, a button each (the index is into the whole list) */
+      const mineCodes = (ir.codes || []).map((x, i) => [x, i]).filter(([x]) => x.ieee === ie);
+      if (mineCodes.length) codes = h('div', { class: 'zbcodes' }, h('div', { class: 'small muted' }, tr('Guardados: tocá uno para mandarlo.')),
+        h('div', { class: 'btns' }, mineCodes.map(([x, i]) => h('span', { class: 'zbcode' },
+          h('button', { class: 'btn', onclick: () => act('zbir', { ieee: ie, saved: i }) }, x.name),
+          h('button', { class: 'btn', title: tr('Borrar'), onclick: () => { if (confirm(tr('¿Borrar el código %s?', x.name))) act('zbir', { ieee: ie, forget: i }, tr('Código borrado')); } }, '×')))));
+    }
+
+    /* the sliders: sent when let go. A dimmer's level (Move to Level with
+     * On/Off: 0 turns it off), a curtain's position (Go To Lift Percentage),
+     * a light's color temperature (Move to Color Temperature, in mireds) */
+    const sliders = [];
+    const slider = (label, k, min, max, val, fmt, send) => {
+      const p = pendGet(k, val), cur = p != null ? p : val, out = h('span', { class: 'small muted zbsv' }, fmt(cur));
+      sliders.push(h('label', { class: 'zbslide' }, h('span', { class: 'small' }, label),
+        h('input', { type: 'range', min, max, value: cur, oninput: e => { out.textContent = fmt(+e.target.value); },
+          onchange: e => { const x = +e.target.value; pendSet(k, x, 4000); send(x); } }), out));
+    };
+    const lep = d.level_ep || (v.level ? v.level.ep : 0) || +((d.clusters || []).find(x => /:0008$/.test(x)) || '0:').split(':')[0];
+    if (lep) slider(tr('brillo'), ie + ':l', 0, 254, v.level ? v.level.value : 0, x => Math.round(x * 100 / 254) + ' %',
+      x => act('zblevel', { ieee: ie, ep: lep, level: x }));
+    if (c.cover) slider(tr('posición'), ie + ':c', 0, 100, zbMeas(d, 0x0102, 0x0008, 0), x => x + ' %',
+      x => act('zbcmd', { ieee: ie, ep: c.cover, cluster: 0x0102, cmd: 0x05, data: zbHex(x, 1), read: 0x0008 }));
+    if (c.color) slider(tr('tono'), ie + ':k', 153, 500, zbMeas(d, 0x0300, 0x0007, 300), x => Math.round(1e6 / x) + ' K',
+      x => act('zbcmd', { ieee: ie, ep: c.color, cluster: 0x0300, cmd: 0x0A, data: zbHex(x, 2) + '0500', read: 0x0007 }));
+
+    /* and what it said raw, the newest first */
+    const rest = (d.attributes || []).filter(a => !zbNamed(d, a)).sort((a, b) => a.ago_s - b.ago_s);
+    const rawBox = rest.length ? h('details', { class: 'zbraw', open: raw.has(ie), ontoggle: e => { if (e.target.open) raw.add(ie); else raw.delete(ie); } },
+      h('summary', { class: 'small muted' }, tr('Lo que mandó, crudo (%s)', rest.length)),
+      rest.map(a => h('div', { class: 'small muted mono' }, 'ep' + a.ep + ' ' + (ZB_CLUSTER[a.cluster] ? tr(ZB_CLUSTER[a.cluster]) + ' ' : '') + zbH4(a.cluster) +
+        (a.command != null ? ' ' + tr('comando') + ' 0x' + a.command.toString(16).padStart(2, '0') + ': ' : '/' + zbH4(a.attr) + ' = ') + a.hex +
+        ' · ' + (a.ago_s < 60 ? tr('recién') : tr('antes'))))) : null;
+
+    return h('div', { class: 'card pad zbcard' },
+      h('div', { class: 'zbtop' },
+        h('b', { class: 'zbname' + (d.step === 'left' || !news ? ' muted' : ''), title: tr('Nombre del equipo'), onclick: rename }, title),
+        h('button', { class: 'btn', title: tr('Nombre del equipo'), onclick: rename }, '✎'),
+        h('button', { class: 'btn', onclick: remove }, tr('Sacar'))),
+      h('div', { class: 'small muted' }, line),
+      chips.length ? h('div', { class: 'zbchips' }, chips) : null,
+      d.event ? h('div', { class: 'small ' + (d.event.ago_s < 60 ? 'zb-acc' : 'muted') }, d.event.text + ' · ' + (d.event.ago_s < 60 ? tr('recién') : tr('antes'))) : null,
+      ctl.length ? h('div', { class: 'btns zbctl' }, ctl) : null, codes, sliders, rawBox);
+  }
+
+  function draw(s, force) {
+    if (s) st = s;
+    if (!st || !st.zbhost || downs > 0) return;
+    const t = Date.now();
+    if (!force && t - last < 1900) return;
+    const z = st.zbhost, open = z.open_s || 0, formed = z.state === 'formed', devs = z.devices || [];
+    /* what it shows: the counters left out, the times as they read */
+    const now = JSON.stringify(z, (k, x) => k === 'to_c6' || k === 'from_c6' ? undefined : k === 'ago_s' ? x < 60
+      : k === 'heard_s' ? (x == null ? x : zbAgo(x)) : x) + starting + JSON.stringify([...pend].filter(([, p]) => p[1] >= t));
+    if (now === sig) return;
+    sig = now;
+    last = t;
+    const busy = starting || z.state === 'starting';
+    put(head, h('h2', { style: 'margin-top:0' }, tr('Mi red')),
+      h('div', { class: 'btns' },
+        !formed ? h('button', { class: 'btn pri', disabled: busy, onclick: start }, busy ? tr('Armando la red...') : tr('Armar la red')) : null,
+        formed && !open ? h('button', { class: 'btn pri', onclick: () => act('zbpermit', { seconds: 254 }) }, tr('Sumar equipos')) : null,
+        formed && !open ? h('button', { class: 'btn', onclick: () => act('zbpermit', { seconds: 254, board: true, strict: true, static: true }) }, tr('Sumar Zigbee 3.0')) : null,
+        formed && open ? h('span', { class: 'zbchip zb-acc' }, tr('Abierta: %d s', open)) : null,
+        formed && open ? h('button', { class: 'btn', onclick: () => act('zbpermit', { seconds: 0 }) }, tr('Cerrar')) : null),
+      z.state === 'failed' ? h('p', { class: 'note warn' }, tr('No se pudo armar la red: ¿el C6 tiene su firmware 154.15?')) : null,
+      h('p', { class: 'note' }, !formed ? tr('La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).')
+        : open ? tr('Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.')
+        : tr('Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.', z.channel, devs.length)));
+    put(list, formed && !devs.length ? h('p', { class: 'note' }, tr('Todavía no se sumó ningún equipo.')) : null,
+      devs.slice().reverse().map(d => card(d, z)));        /* the newest first, as on the board */
+  }
+  return { el, draw };
+}
+
 async function pageZigbee() {
   const status = h('div', { class: 'card pad' }), chans = h('div', { class: 'card pad' }), sniff = h('div', { class: 'card pad' });
-  const devs = h('div', { class: 'card pad' }), caps = h('div', { class: 'card pad' });
+  const devs = h('div', { class: 'card pad' }), caps = h('div', { class: 'card pad' }), net = zbNet();
   const canvas = h('canvas', { width: 1200, height: 400, style: 'width:100%;height:auto;display:block' });
   let st = null, from = 1, rows = [], chan = 15, pcap = true;
   const act = (what, body) => post('154/' + what, body).then(s => { st = s; draw(); }).catch(e => toast(e.message, true));
@@ -3621,6 +3857,7 @@ async function pageZigbee() {
     const best = (st.channels || []).filter(c => c.frames).sort((a, b) => b.frames - a.frames)[0];
     if (best && st.state !== 'sniffing') chan = best.ch;
     draw();
+    net.draw(st);
   }
   put(chans, h('h2', {}, tr('Canales')), canvas,
     h('div', { class: 'btns', style: 'margin-top:10px' },
@@ -3629,7 +3866,7 @@ async function pageZigbee() {
     h('p', { class: 'note' }, tr('La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.')));
   put(sniff, h('h2', {}, tr('Escuchar')),
     h('div', { class: 'btns' }, chSel, h('label', { class: 'small' }, pcapBox, ' ', tr('Guardar para Wireshark')), goBtn), counts, list);
-  put(main, h('h1', {}, tr('Zigbee y Thread')), status, h('div', { style: 'height:16px' }), chans, h('div', { style: 'height:16px' }), sniff,
+  put(main, h('h1', {}, tr('Zigbee y Thread')), status, h('div', { style: 'height:16px' }), net.el, h('div', { style: 'height:16px' }), chans, h('div', { style: 'height:16px' }), sniff,
     h('div', { style: 'height:16px' }), devs, h('div', { style: 'height:16px' }), caps);
   clearTimeout(zbT);
   post('154/hello').catch(() => {});

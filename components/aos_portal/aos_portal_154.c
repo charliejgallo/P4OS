@@ -197,6 +197,7 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
                 cJSON_AddItemToArray(cl, cJSON_CreateString(t));
             }
             /* what the board names */
+            if (d->level_ep) cJSON_AddNumberToObject(e, "level_ep", d->level_ep);   /* a dimmer, its level known or not */
             cJSON *v = cJSON_AddObjectToObject(e, "values");
             if (d->temp != INT16_MIN) cJSON_AddNumberToObject(v, "temperature", d->temp / 100.0);
             if (d->hum != 0xFFFF) cJSON_AddNumberToObject(v, "humidity", d->hum / 100.0);

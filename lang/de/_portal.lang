@@ -2482,3 +2482,73 @@ A fondo (2 s por canal)	Gründlich (2 s pro Kanal)
 La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	Der Balken ist die Energie des Kanals, die Zahl die empfangenen Pakete. Ein Zigbee- oder Thread-Netz zeigt sich als Kanal mit Paketen.
 Guardar para Wireshark	Für Wireshark speichern
 Zigbee y Thread	Zigbee und Thread
+contacto	Kontakt
+abierto	offen
+cerrado	geschlossen
+movimiento	Bewegung
+sin movimiento	keine Bewegung
+agua	Wasser
+¡agua!	Wasser!
+seco	trocken
+humo	Rauch
+alarma	Alarm
+normal	normal
+gas	Gas
+batería	Batterie
+encendido	Ein/Aus
+nivel	Pegel
+color	Farbe
+temperatura	Temperatur
+presión	Druck
+humedad	Feuchte
+presencia	Anwesenheit
+luz	Licht
+medidor	Zähler
+eléctrico	elektrisch
+La red no tomó el pedido	Das Netz hat die Anfrage nicht angenommen
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Netz konnte nicht gestartet werden: hat der C6 die Firmware 154.15?
+Nombre del equipo	Gerätename
+¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	%s aus dem Netz entfernen? Um es wieder hinzuzufügen, muss es zurückgesetzt werden.
+router	Router
+a red eléctrica	Netzbetrieb
+a pila	Batterie
+sin noticias desde que arrancó la placa	keine Nachricht seit dem Start der Platine
+se fue	gegangen
+no contestó	keine Antwort
+configurándolo	wird eingerichtet
+hay alguien	jemand da
+nadie	niemand
+salida %d: %s	Ausgang %d: %s
+prendida	an
+enviando...	sende...
+no tomó el código	hat den Code nicht angenommen
+Arriba	Hoch
+Abajo	Runter
+Cerrar con llave	Abschließen
+Ventilador: otro modo	Lüfter: nächster Modus
+Esperando el control remoto... (tocá para cancelar)	Warte auf die Fernbedienung... (antippen zum Abbrechen)
+Aprender un código	Code lernen
+Enviar el último aprendido	Den zuletzt gelernten senden
+Guardarlo...	Speichern...
+Nombre del código	Name des Codes
+Guardados: tocá uno para mandarlo.	Gespeichert: zum Senden antippen.
+¿Borrar el código %s?	Den Code %s löschen?
+Código borrado	Code gelöscht
+brillo	Helligkeit
+posición	Position
+tono	Farbtemperatur
+Lo que mandó, crudo (%s)	Was es gesendet hat, roh (%s)
+comando	Befehl
+antes	früher
+Sacar	Entfernen
+Mi red	Mein Netz
+Armando la red...	Netz wird gestartet...
+Armar la red	Netz starten
+Sumar equipos	Geräte hinzufügen
+Sumar Zigbee 3.0	Zigbee 3.0 hinzufügen
+Abierta: %d s	Offen: %d s
+Cerrar	Schließen
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	Die Platine startet ihr eigenes Zigbee-Netz, mit dem C6 als Funk, und Geräte treten ihm bei: so lässt sich jedes testen. Ein Gerät ist nur in einem Netz: um es hier hinzuzufügen, setze es zurück (meist die Taste halten, bis es blinkt).
+Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Offen zum Hinzufügen: setze die Geräte einzeln zurück; jedes erscheint hier, sobald es beitritt. Läuft es mit Batterie, drücke ab und zu seine Taste, während es eingerichtet wird.
+Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Netz auf Kanal %s, %s Geräte. Die Werte kommen, wenn das Gerät sie sendet: eines mit Batterie kann eine Weile brauchen. Blinkt ein Gerät weiter und tritt nie ganz bei, versuche Zigbee 3.0 hinzufügen.
+Todavía no se sumó ningún equipo.	Noch ist kein Gerät beigetreten.

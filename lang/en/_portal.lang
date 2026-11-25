@@ -2482,3 +2482,73 @@ A fondo (2 s por canal)	Thorough (2 s per channel)
 La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	The bar is the channel's energy; the number, the packets heard. A Zigbee or Thread network shows as a channel with packets.
 Guardar para Wireshark	Save for Wireshark
 Zigbee y Thread	Zigbee and Thread
+contacto	contact
+abierto	open
+cerrado	closed
+movimiento	motion
+sin movimiento	no motion
+agua	water
+¡agua!	water!
+seco	dry
+humo	smoke
+alarma	alarm
+normal	normal
+gas	gas
+batería	battery
+encendido	on/off
+nivel	level
+color	color
+temperatura	temperature
+presión	pressure
+humedad	humidity
+presencia	occupancy
+luz	light
+medidor	meter
+eléctrico	electrical
+La red no tomó el pedido	The network did not take the request
+No se pudo armar la red: ¿el C6 tiene su firmware 154.15?	Could not start the network: does the C6 run its 154.15 firmware?
+Nombre del equipo	Device name
+¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Remove %s from the network? To add it again, it has to be reset.
+router	router
+a red eléctrica	mains powered
+a pila	on battery
+sin noticias desde que arrancó la placa	no news since the board started
+se fue	left
+no contestó	did not answer
+configurándolo	setting it up
+hay alguien	someone there
+nadie	nobody
+salida %d: %s	output %d: %s
+prendida	on
+enviando...	sending...
+no tomó el código	it did not take the code
+Arriba	Up
+Abajo	Down
+Cerrar con llave	Lock
+Ventilador: otro modo	Fan: next mode
+Esperando el control remoto... (tocá para cancelar)	Waiting for the remote... (tap to cancel)
+Aprender un código	Learn a code
+Enviar el último aprendido	Send the last one learned
+Guardarlo...	Save it...
+Nombre del código	Code name
+Guardados: tocá uno para mandarlo.	Saved: tap one to send it.
+¿Borrar el código %s?	Delete the code %s?
+Código borrado	Code deleted
+brillo	brightness
+posición	position
+tono	color temp
+Lo que mandó, crudo (%s)	What it sent, raw (%s)
+comando	command
+antes	earlier
+Sacar	Remove
+Mi red	My network
+Armando la red...	Starting the network...
+Armar la red	Start the network
+Sumar equipos	Add devices
+Sumar Zigbee 3.0	Add Zigbee 3.0
+Abierta: %d s	Open: %d s
+Cerrar	Close
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	The board starts its own Zigbee network, with the C6 as its radio, and devices join it: that is how any of them can be tried. A device is on one network only: to add it here, reset it (usually, hold its button until it blinks).
+Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Open for adding: reset the devices one at a time; each one shows up here when it joins. If it runs on battery, press its button now and then while it is set up.
+Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Network on channel %s, %s devices. Values arrive when the device sends them: one on battery may take a while to give news. If a device keeps blinking and never finishes joining, try Add Zigbee 3.0.
+Todavía no se sumó ningún equipo.	No device has joined yet.
