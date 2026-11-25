@@ -424,6 +424,7 @@ static void joined(void)
 static void home_cb(void *arg)
 {
     (void)arg;
+    aos_hal_pref_set_i32("zbe_mode", 0);
     aos_hal_pref_set_i32("zbe_boot", 1);
     aos_hal_reboot();
 }
@@ -491,6 +492,7 @@ static bool start_now(int kind)
     s_tries = 0;
     s_state = AOS_ZBE_SEARCHING;
     aos_hal_pref_set_i32("zbe_kind", kind);
+    aos_hal_pref_set_i32("zbe_mode", 1);    /* until Back to My network: a restart comes back here */
     logf_(true, "%s", _("arrancando la pila como router"));
     if (aos_zigbee_p4_start(26, true)) return true;
     s_active = false;
@@ -595,8 +597,13 @@ static void boot_task(void *arg)
 
 void aos_zigbee_boot(void)
 {
-    int32_t mode = 0;
-    if (!aos_hal_pref_get_i32("zbe_boot", &mode) || !mode) return;
-    aos_hal_pref_erase("zbe_boot");     /* once: a restart that hangs does not loop */
+    /* a switch asked for this boot ("zbe_boot", once: a restart that hangs
+     * does not loop), or the board was emulating when it went down
+     * ("zbe_mode", until Back to My network): it goes back to that network
+     * by itself, as a real device would */
+    int32_t mode = 0, emu = 0;
+    if (aos_hal_pref_get_i32("zbe_boot", &mode) && mode) aos_hal_pref_erase("zbe_boot");
+    else if (aos_hal_pref_get_i32("zbe_mode", &emu) && emu) mode = 2;
+    if (!mode) return;
     xTaskCreate(boot_task, "zb_boot", 4096, (void *)(intptr_t)mode, 4, NULL);
 }
