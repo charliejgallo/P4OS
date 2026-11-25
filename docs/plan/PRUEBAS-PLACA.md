@@ -23,12 +23,14 @@ de lo más rápido a lo que lleva más tiempo (detalle en
       module" (2026-11-25; el primer intento hizo caer el portal: el caché
       sin poner en cero, arreglado). Ningún TS0601 para probar los
       datapoints.
-- [~] **Códigos IR guardados:** aprender uno, "Guardarlo...", reiniciar,
+- [x] **Códigos IR guardados:** aprender uno, "Guardarlo...", reiniciar,
       tocarlo: la tele responde. Mantener dos veces: se borra.
       2026-11-25: guardar y mandar andan (~1 s por envío); el primero
-      guardado fue un eco del emisor (arreglado e instalado): borrarlo,
-      aprender de nuevo y confirmar que la tele responde.
-- [ ] **Infrarrojo por el hub:** en Cableado, Salida = el TS1201; un
+      guardado fue un eco del emisor (arreglado e instalado). Aprendido de
+      nuevo (71 bytes, sin eco), guardado como "vol+", mandado en 0,5 s.
+- [x] **Infrarrojo por el hub** (2026-11-25: un comando de la biblioteca
+      SmartIR de la tele del usuario salió por el TS1201 en 0,6 s y la tele
+      respondió; falta Aprender por el hub desde Infrarrojo): en Cableado, Salida = el TS1201; un
       control de la biblioteca SmartIR (la tele del usuario) por el hub;
       Aprender por el hub. El primer envío puede tardar: mirar el log
       ("IR: from the blaster").
