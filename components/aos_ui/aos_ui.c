@@ -238,7 +238,11 @@ static void closed_check_tick(void)
 {
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = 0; i < AOS_MAX_APPS; i++) {
-        if (!s_closed_ms[i] || now - s_closed_ms[i] < 1500) continue;
+        /* 5 s: at 1.5 s the wallpaper was still reading its photo back and
+         * the home screen making its icons again after a game, and Planeo
+         * looked 2 MB short that a moment later were there (on the board,
+         * 2026-11-25) */
+        if (!s_closed_ms[i] || now - s_closed_ms[i] < 5000) continue;
         if (s_cur || s_closed_creates[i] != s_creates) {      /* something else took memory since */
             s_closed_ms[i] = 0;
             continue;
