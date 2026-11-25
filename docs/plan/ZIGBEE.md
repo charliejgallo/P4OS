@@ -445,6 +445,43 @@ velocidad que sin Zigbee. Lo de cada paso:
   configuración está "en curso" sólo mientras tiene pedidos pendientes); y
   una entrada fantasma `ffffffffffffffff` (una fila de la tabla de vecinos
   sin dirección larga todavía) que ya no entra, ni a la lista guardada.
+- **Más equipos, aunque no se puedan probar acá** (2026-11-24, noche, pedido
+  del usuario; dos subagentes leyeron las fuentes de Zigbee2MQTT para lo de
+  Tuya). **Sin probar en la placa salvo que diga lo contrario.**
+  - **Una tabla de valores** (`components/aos_154/aos_zigbee_fmt.c`, para la
+    pantalla y el portal): luz (lux, 0x0400), presión (0x0403), CO2
+    (0x040D), PM2.5 (0x042A), humedad del suelo (0x0408), caudal (0x0404),
+    energía y consumo (Metering 0x0702, con su multiplicador y divisor),
+    tensión, corriente y potencia (0x0B04, ídem), posición de cortina
+    (0x0102), termostato (0x0201: ambiente, consigna, modo), temperatura de
+    color (0x0300), cerradura (0x0101), ventilador (0x0202), Analog y
+    Multistate Input. Se leen al configurar y se nombran con su unidad.
+  - **Controles**, por un camino genérico (cualquier comando del cluster o
+    escritura de atributo, con reintento y lectura de vuelta;
+    `POST /api/154/zbcmd` y `zbwrite`): cortina (subir, parar, bajar y un
+    deslizador de posición), termostato (consigna ±0,5 °C), luz de color (un
+    deslizador de temperatura de color), cerradura (cerrar con llave, abrir),
+    ventilador (el modo siguiente).
+  - **Botones y controles remotos**: los comandos que manda el equipo (On/Off,
+    Level, escenas, el 0xFD de los TS004x de Tuya, el Multistate de los
+    botones tipo Aqara) se muestran como "botón N: doble" con aviso en
+    pantalla; para eso se atan también los clusters de salida del equipo.
+  - **Tuya 0xEF00** (casi todo lo barato de Tuya: sensores, válvulas,
+    cortinas, presencia): los datapoints se decodifican genéricamente (dp,
+    tipo, valor: `dp | tipo | largo BE | valor BE`, varios por trama), un dp
+    booleano se cambia tocándolo, cualquiera por `POST /api/154/zbdp`; la
+    placa contesta la hora (0x24, UTC y local, desde 1970) y el estado de
+    conexión (0x25), y pide todos los datapoints al configurar (dataQuery).
+    Qué significa cada dp es de cada equipo (Zigbee2MQTT lo tiene por
+    modelo): por ahora se ven los números.
+  - **Emisor IR de Tuya** ("Zosung": ZS06, TS1201): aprender un código del
+    control remoto (`{"study":0}` por 0xE004, la transferencia por 0xED00 en
+    pedazos con suma de bytes, el código en base64 como lo muestra
+    Zigbee2MQTT) y mandarlo (el JSON `{"key_num":1,...,"key_code":...}` en
+    pedazos de 50 que el emisor va pidiendo, el primer marco de nuevo cada
+    2 s hasta que conteste). En Mi red: "Aprender un código" y "Enviar el
+    último aprendido"; `POST /api/154/zbir`. El usuario tiene uno
+    (`_TZ3290_nba3knpsarkawgnt`, TS1201): entró a la red, falta probarlo.
 - **Nota para probar desde la Mac:** zsh no parte `$var` en palabras: un
   `for p in "1 true"; set -- $p` armó JSON roto y la placa contestó
   `ok:false` (con razón). El portal estaba bien.

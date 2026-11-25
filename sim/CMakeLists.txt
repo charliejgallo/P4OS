@@ -220,6 +220,7 @@ add_executable(p4os_sim
     ble_sim.c
     aos_154_link_sim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_154.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_zigbee_fmt.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_hid_keys.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_http.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tcp.c

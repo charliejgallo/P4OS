@@ -71,7 +71,9 @@ static struct {
     int nout;
     uint8_t pend_ieee[8], pend_ep;      /* the output just tapped, "..." until it answers */
     uint32_t pend_ms;
-    struct { uint8_t ieee[8], ep; } lvl[8];     /* each dimmer's slider on the page */
+    struct { uint8_t ieee[8], ep, kind; } lvl[12];      /* each slider on the page: SL_* */
+    struct { uint8_t ieee[8], ep, kind; int32_t arg; } ctl[40];     /* each control button: B_* */
+    int nctl;
     int nlvl;
     bool dragging;                      /* a slider held: the page is not redrawn under the finger */
 } U;
@@ -585,8 +587,12 @@ static void out_cb(lv_event_t *e)
     U.devs_tick = 0;
 }
 
-/* a dimmer's slider: held, the page waits; let go, the level is sent (Move
- * to Level with On/Off: 0 turns it off, any other level on) */
+/* A slider: held, the page waits; let go, the value is sent. A dimmer's
+ * level (Move to Level with On/Off: 0 turns it off), a curtain's position
+ * (Go To Lift Percentage), a light's color temperature (Move to Color
+ * Temperature, in mireds) */
+enum { SL_LEVEL = 0, SL_COVER, SL_CT };
+
 static void lvl_cb(lv_event_t *e)
 {
     int k = (int)(intptr_t)lv_event_get_user_data(e);
@@ -596,15 +602,110 @@ static void lvl_cb(lv_event_t *e)
         U.dragging = false;
         if (k < 0 || k >= U.nlvl) return;
         int v = lv_slider_get_value(lv_event_get_target(e));
-        if (!aos_zigbee_level(U.lvl[k].ieee, U.lvl[k].ep, v)) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+        bool ok;
+        if (U.lvl[k].kind == SL_COVER) {
+            uint8_t pct = (uint8_t)v;
+            ok = aos_zigbee_command(U.lvl[k].ieee, U.lvl[k].ep, 0x0102, 0x05, &pct, 1, 0x0008);
+        } else if (U.lvl[k].kind == SL_CT) {
+            uint8_t b[4] = { (uint8_t)v, (uint8_t)(v >> 8), 5, 0 };     /* mireds, 0.5 s */
+            ok = aos_zigbee_command(U.lvl[k].ieee, U.lvl[k].ep, 0x0300, 0x0A, b, 4, 0x0007);
+        } else ok = aos_zigbee_level(U.lvl[k].ieee, U.lvl[k].ep, v);
+        if (!ok) aos_ui_toast(_("La red no tomó el pedido"), 2000);
         U.devs_tick = 1;                /* redrawn in a moment, with its answer */
     }
+}
+
+static void add_slider(lv_obj_t *card, int32_t w, const uint8_t ieee[8], uint8_t ep, int kind, int min, int max, int val,
+                       lv_color_t c)
+{
+    if (U.nlvl >= (int)(sizeof U.lvl / sizeof U.lvl[0])) return;
+    lv_obj_t *sl = lv_slider_create(card);
+    lv_obj_set_width(sl, w - 36 - 40);
+    lv_obj_set_style_margin_hor(sl, 20, 0);
+    lv_obj_set_style_margin_ver(sl, 14, 0);
+    lv_slider_set_range(sl, min, max);
+    lv_slider_set_value(sl, val < min ? min : val > max ? max : val, LV_ANIM_OFF);
+    lv_obj_set_style_bg_color(sl, c, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(sl, AOS_C_TEXT, LV_PART_KNOB);
+    memcpy(U.lvl[U.nlvl].ieee, ieee, 8);
+    U.lvl[U.nlvl].ep = ep;
+    U.lvl[U.nlvl].kind = (uint8_t)kind;
+    lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESSED, (void *)(intptr_t)U.nlvl);
+    lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_RELEASED, (void *)(intptr_t)U.nlvl);
+    lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESS_LOST, (void *)(intptr_t)U.nlvl);
+    U.nlvl++;
+}
+
+/* A control's button: a curtain's up, stop and down; a thermostat's setpoint
+ * half a degree either way; a lock; a fan's mode, the next one; a Tuya
+ * datapoint (a bool, flipped); the IR blaster's learning and sending */
+enum { B_COVER = 0, B_SETPOINT, B_LOCK, B_FAN, B_DP, B_IR_LEARN, B_IR_SEND };
+
+static void ctl_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    if (k < 0 || k >= U.nctl) return;
+    const uint8_t *ie = U.ctl[k].ieee;
+    uint8_t ep = U.ctl[k].ep;
+    int32_t a = U.ctl[k].arg;
+    bool ok = false;
+    switch (U.ctl[k].kind) {
+    case B_COVER: ok = aos_zigbee_command(ie, ep, 0x0102, (uint8_t)a, NULL, 0, 0x0008); break;
+    case B_SETPOINT: {
+        int16_t sp = (int16_t)a;
+        uint8_t b[2] = { (uint8_t)sp, (uint8_t)(sp >> 8) };
+        ok = aos_zigbee_write(ie, ep, 0x0201, 0x0012, 0x29, b, 2);
+        break;
+    }
+    case B_LOCK: {
+        uint8_t pin = 0;                /* an empty code: those that need none take it */
+        ok = aos_zigbee_command(ie, ep, 0x0101, (uint8_t)a, &pin, 1, 0x0000);
+        break;
+    }
+    case B_FAN: {
+        uint8_t m = (uint8_t)a;
+        ok = aos_zigbee_write(ie, ep, 0x0202, 0x0000, 0x30, &m, 1);
+        break;
+    }
+    case B_DP: ok = aos_zigbee_tuya_dp(ie, (uint8_t)ep, 1, a); break;
+    case B_IR_LEARN: ok = aos_zigbee_ir_learn(ie, a != 0); break;
+    case B_IR_SEND: {
+        static char code[3000];
+        uint8_t who[8];
+        aos_zigbee_ir_state(who, code, sizeof code);
+        ok = code[0] && aos_zigbee_ir_send(ie, code);
+        break;
+    }
+    }
+    if (!ok) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+    U.devs_tick = 1;
+}
+
+static void add_ctl(lv_obj_t *row, const char *text, const uint8_t ieee[8], uint8_t ep, int kind, int32_t arg, bool strong)
+{
+    if (U.nctl >= (int)(sizeof U.ctl / sizeof U.ctl[0])) return;
+    memcpy(U.ctl[U.nctl].ieee, ieee, 8);
+    U.ctl[U.nctl].ep = ep;
+    U.ctl[U.nctl].kind = (uint8_t)kind;
+    U.ctl[U.nctl].arg = arg;
+    lv_obj_t *b = pill(row, text, strong, ctl_cb, (void *)(intptr_t)U.nctl, NULL);
+    lv_obj_set_height(b, 52);
+    U.nctl++;
+}
+
+/* a measured value of a device, by cluster and attribute (or def) */
+static int32_t meas_of(const aos_zigbee_dev_t *d, uint16_t cl, uint16_t at, int32_t def)
+{
+    for (int i = 0; i < d->nmeas; i++)
+        if (d->meas[i].cluster == cl && d->meas[i].attr == at) return d->meas[i].v;
+    return def;
 }
 
 /* what the board already shows by name, left out of the raw lines */
 static bool named_attr(const aos_zigbee_attr_t *a)
 {
     if (a->type == 0xFF) return a->cluster == 0x0500 && a->attr == 0x00;   /* IAS zone status change */
+    if (aos_zigbee_meas_known(a->cluster, a->attr)) return true;            /* the table's, shown by name */
     switch (a->cluster) {
     case 0x0001: return a->attr == 0x0020 || a->attr == 0x0021;
     case 0x0006: case 0x0008: case 0x0402: case 0x0405: case 0x0406: return a->attr == 0x0000;
@@ -661,6 +762,7 @@ static void fill_net(int32_t w)
     lv_obj_clean(U.net);
     U.nout = 0;
     U.nlvl = 0;
+    U.nctl = 0;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = n - 1; i >= 0; i--) {
         const aos_zigbee_dev_t *e = &d[i];
@@ -705,7 +807,7 @@ static void fill_net(int32_t w)
         lv_obj_set_flex_flow(vals, LV_FLEX_FLOW_ROW_WRAP);
         lv_obj_set_style_pad_column(vals, 8, 0);
         lv_obj_set_style_pad_row(vals, 8, 0);
-        char v[48];
+        char v[112];
         if (e->temp != INT16_MIN) {
             snprintf(v, sizeof v, "%d.%d °C", e->temp / 100, abs(e->temp % 100) / 10);
             add_value(vals, v, AOS_C_ORANGE);
@@ -751,23 +853,90 @@ static void fill_net(int32_t w)
             snprintf(v, sizeof v, "%s %u.%u V", _("batería"), e->voltage / 10, e->voltage % 10);
             add_value(vals, v, AOS_C_DIM);
         }
-        if (!lv_obj_get_child_count(vals)) lv_obj_add_flag(vals, LV_OBJ_FLAG_HIDDEN);
-        if (e->level_ep && U.nlvl < (int)(sizeof U.lvl / sizeof U.lvl[0])) {
-            lv_obj_t *sl = lv_slider_create(r);
-            lv_obj_set_width(sl, w - 36 - 40);
-            lv_obj_set_style_margin_hor(sl, 20, 0);
-            lv_obj_set_style_margin_ver(sl, 14, 0);
-            lv_slider_set_range(sl, 0, 254);
-            lv_slider_set_value(sl, e->level == 0xFF ? 0 : e->level, LV_ANIM_OFF);
-            lv_obj_set_style_bg_color(sl, AOS_C_YELLOW, LV_PART_INDICATOR);
-            lv_obj_set_style_bg_color(sl, AOS_C_TEXT, LV_PART_KNOB);
-            memcpy(U.lvl[U.nlvl].ieee, e->ieee, 8);
-            U.lvl[U.nlvl].ep = e->level_ep;
-            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESSED, (void *)(intptr_t)U.nlvl);
-            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_RELEASED, (void *)(intptr_t)U.nlvl);
-            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESS_LOST, (void *)(intptr_t)U.nlvl);
-            U.nlvl++;
+        /* what the table names: light, pressure, CO2, energy, a thermostat's... */
+        for (int q = 0; q < e->nmeas; q++) {
+            const char *nm;
+            char val[48];
+            if (!aos_zigbee_meas_text(e, &e->meas[q], &nm, val, sizeof val)) continue;
+            snprintf(v, sizeof v, "%s %s", nm, val);
+            add_value(vals, v, AOS_C_TEXT);
         }
+        /* Tuya's datapoints: number, type and value (a bool one is a button) */
+        for (int q = 0; q < e->ndp; q++) {
+            const aos_zigbee_dp_t *dp = &e->dps[q];
+            if (dp->type == 1) {
+                snprintf(v, sizeof v, "dp %u: %s", dp->dp, dp->v ? _("sí") : _("no"));
+                lv_obj_t *chip = add_value(vals, v, dp->v ? AOS_C_YELLOW : AOS_C_DIM);
+                if (U.nctl < (int)(sizeof U.ctl / sizeof U.ctl[0])) {
+                    memcpy(U.ctl[U.nctl].ieee, e->ieee, 8);
+                    U.ctl[U.nctl].ep = dp->dp;                      /* the dp, in ep's place */
+                    U.ctl[U.nctl].kind = B_DP;
+                    U.ctl[U.nctl].arg = !dp->v;
+                    lv_obj_set_style_border_width(chip, 2, 0);
+                    lv_obj_set_style_border_color(chip, dp->v ? AOS_C_YELLOW : AOS_C_DIM, 0);
+                    lv_obj_add_flag(chip, LV_OBJ_FLAG_CLICKABLE);
+                    lv_obj_add_event_cb(chip, ctl_cb, LV_EVENT_CLICKED, (void *)(intptr_t)U.nctl);
+                    U.nctl++;
+                }
+            } else if (dp->type == 2 || dp->type == 4 || dp->type == 5)
+                snprintf(v, sizeof v, "dp %u: %ld", dp->dp, (long)dp->v), add_value(vals, v, AOS_C_TEXT);
+            else {
+                int l = dp->len < (int)sizeof dp->raw ? dp->len : (int)sizeof dp->raw, k2 = snprintf(v, sizeof v, "dp %u: ", dp->dp);
+                for (int m = 0; m < l && k2 < (int)sizeof v - 3; m++) k2 += snprintf(v + k2, sizeof v - (size_t)k2, "%02x", dp->raw[m]);
+                add_value(vals, v, AOS_C_DIM);
+            }
+        }
+        if (!lv_obj_get_child_count(vals)) lv_obj_add_flag(vals, LV_OBJ_FLAG_HIDDEN);
+        /* the last thing it did itself: a button, a remote */
+        if (e->event[0]) {
+            uint32_t ago = (now - e->event_ms) / 1000;
+            snprintf(b, sizeof b, "%s · %s", e->event, ago < 60 ? _("recién") : _("antes"));
+            lv_obj_t *l = aos_label(r, b, aos_font_small, ago < 60 ? AOS_C_ACCENT : AOS_C_DIM);
+            lv_obj_set_width(l, w - 36);
+            lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
+        }
+        /* its controls */
+        lv_obj_t *ctls = box(r, w - 36, LV_SIZE_CONTENT);
+        lv_obj_set_flex_flow(ctls, LV_FLEX_FLOW_ROW_WRAP);
+        lv_obj_set_style_pad_column(ctls, 10, 0);
+        lv_obj_set_style_pad_row(ctls, 10, 0);
+        uint8_t cep;
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_COVER])) {
+            add_ctl(ctls, _("Subir"), e->ieee, cep, B_COVER, 0x00, false);
+            add_ctl(ctls, _("Parar"), e->ieee, cep, B_COVER, 0x02, false);
+            add_ctl(ctls, _("Bajar"), e->ieee, cep, B_COVER, 0x01, false);
+        }
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_THERM])) {
+            int32_t sp = meas_of(e, 0x0201, 0x0012, 2000);
+            add_ctl(ctls, "-0.5 °C", e->ieee, cep, B_SETPOINT, sp - 50, false);
+            add_ctl(ctls, "+0.5 °C", e->ieee, cep, B_SETPOINT, sp + 50, false);
+        }
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_LOCK])) {
+            add_ctl(ctls, _("Cerrar con llave"), e->ieee, cep, B_LOCK, 0x00, false);
+            add_ctl(ctls, _("Abrir"), e->ieee, cep, B_LOCK, 0x01, false);
+        }
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_FAN])) {
+            static const int8_t NEXT[] = { 1, 2, 3, 5, 5, 0, 0 };      /* off, low, medium, high, auto, off */
+            int32_t m = meas_of(e, 0x0202, 0x0000, 0);
+            add_ctl(ctls, _("Ventilador: otro modo"), e->ieee, cep, B_FAN, m >= 0 && m <= 6 ? NEXT[m] : 0, false);
+        }
+        if (e->clusters & AOS_ZB_CL_IR) {
+            uint8_t who[8];
+            static char code[8];
+            int st = aos_zigbee_ir_state(who, code, sizeof code);
+            bool mine = !memcmp(who, e->ieee, 8);
+            bool learning = mine && (st == AOS_ZB_IR_LEARNING || st == AOS_ZB_IR_RECEIVING);
+            add_ctl(ctls, learning ? _("Esperando el control remoto... (tocá para cancelar)") : _("Aprender un código"),
+                    e->ieee, e->ep, B_IR_LEARN, !learning, learning);
+            if (code[0]) add_ctl(ctls, _("Enviar el último aprendido"), e->ieee, e->ep, B_IR_SEND, 0, false);
+            if (mine && st == AOS_ZB_IR_SENDING) add_value(vals, _("enviando..."), AOS_C_ACCENT);
+        }
+        if (!lv_obj_get_child_count(ctls)) lv_obj_add_flag(ctls, LV_OBJ_FLAG_HIDDEN);
+        if (e->level_ep) add_slider(r, w, e->ieee, e->level_ep, SL_LEVEL, 0, 254, e->level == 0xFF ? 0 : e->level, AOS_C_YELLOW);
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_COVER]))
+            add_slider(r, w, e->ieee, cep, SL_COVER, 0, 100, (int)meas_of(e, 0x0102, 0x0008, 0), AOS_C_ACCENT);
+        if ((cep = e->ctl_ep[AOS_ZB_CTL_COLOR]))
+            add_slider(r, w, e->ieee, cep, SL_CT, 153, 500, (int)meas_of(e, 0x0300, 0x0007, 300), AOS_C_ORANGE);
 
         /* and what it said raw, the newest first: any device's */
         int order[AOS_ZB_ATTRS];

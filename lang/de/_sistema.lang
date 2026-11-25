@@ -11031,3 +11031,53 @@ Sacar	Entfernen
 sin noticias desde que arrancó la placa	keine Nachricht seit dem Start der Platine
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, aus dem Netz entfernt
 brillo	Helligkeit
+Subir	Hoch
+Bajar	Runter
+Ventilador: otro modo	Lüfter: nächster Modus
+Esperando el control remoto... (tocá para cancelar)	Warte auf die Fernbedienung... (antippen zum Abbrechen)
+Aprender un código	Code lernen
+Enviar el último aprendido	Den zuletzt gelernten senden
+enviando...	sende...
+mantenido	gehalten
+un toque	einmal
+doble	doppelt
+triple	dreifach
+botón	Taste
+soltado	losgelassen
+alternar	umschalten
+encender un rato	eine Weile an
+a un nivel	auf eine Stufe
+bajar	runter
+subir	hoch
+un paso abajo	eine Stufe runter
+un paso arriba	eine Stufe hoch
+escena	Szene
+parar	stopp
+mover	bewegen
+Zigbee: código IR aprendido (%u bytes)	Zigbee: IR-Code gelernt (%u Bytes)
+Zigbee: código IR enviado	Zigbee: IR-Code gesendet
+Zigbee: el emisor IR no tomó el código	Zigbee: der IR-Sender hat den Code nicht angenommen
+humedad del suelo	Bodenfeuchte
+caudal	Durchfluss
+energía	Energie
+consumo	Verbrauch
+tensión	Spannung
+corriente	Strom
+potencia	Leistung
+cortina	Vorhang
+ambiente	Raum
+consigna	Sollwert
+modo	Modus
+tono	Farbtemperatur
+cerradura	Schloss
+ventilador	Lüfter
+estado	Zustand
+%d %% cerrada	%d %% geschlossen
+frío	Kühlen
+calor	Heizen
+con llave	verriegelt
+a medias	halb
+baja	niedrig
+alta	hoch
+prendido	an
+inteligente	smart

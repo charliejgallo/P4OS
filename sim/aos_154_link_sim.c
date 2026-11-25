@@ -240,5 +240,13 @@ bool aos_zigbee_permit(int seconds) { (void)seconds; return false; }
 bool aos_zigbee_remove(const uint8_t ieee[8]) { (void)ieee; return false; }
 bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd) { (void)ieee; (void)ep; (void)cmd; return false; }
 bool aos_zigbee_level(const uint8_t ieee[8], uint8_t ep, int level) { (void)ieee; (void)ep; (void)level; return false; }
+bool aos_zigbee_command(const uint8_t ieee[8], uint8_t ep, uint16_t cluster, uint8_t cmd, const void *data, int len,
+                        uint16_t read_attr) { (void)ieee; (void)ep; (void)cluster; (void)cmd; (void)data; (void)len; (void)read_attr; return false; }
+bool aos_zigbee_write(const uint8_t ieee[8], uint8_t ep, uint16_t cluster, uint16_t attr, uint8_t type, const void *value,
+                      int len) { (void)ieee; (void)ep; (void)cluster; (void)attr; (void)type; (void)value; (void)len; return false; }
+bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t value) { (void)ieee; (void)dp; (void)type; (void)value; return false; }
+bool aos_zigbee_ir_learn(const uint8_t ieee[8], bool start) { (void)ieee; (void)start; return false; }
+bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64) { (void)ieee; (void)code_b64; return false; }
+int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n) { memset(ieee, 0, 8); if (n) code[0] = 0; return 0; }
 int aos_zigbee_permit_left(void) { return 0; }
 int aos_zigbee_devices(aos_zigbee_dev_t *out, int max) { (void)out; (void)max; return 0; }

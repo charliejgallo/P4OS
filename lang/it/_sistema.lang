@@ -11606,3 +11606,53 @@ Sacar	Rimuovi
 sin noticias desde que arrancó la placa	nessuna notizia dall'avvio della scheda
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, rimosso dalla rete
 brillo	luminosità
+Subir	Su
+Bajar	Giù
+Ventilador: otro modo	Ventola: modalità successiva
+Esperando el control remoto... (tocá para cancelar)	In attesa del telecomando... (tocca per annullare)
+Aprender un código	Impara un codice
+Enviar el último aprendido	Invia l'ultimo appreso
+enviando...	invio...
+mantenido	tenuto
+un toque	pressione singola
+doble	doppio
+triple	triplo
+botón	pulsante
+soltado	rilasciato
+alternar	commuta
+encender un rato	accendi per un po'
+a un nivel	a un livello
+bajar	giù
+subir	su
+un paso abajo	un passo giù
+un paso arriba	un passo su
+escena	scena
+parar	ferma
+mover	muovi
+Zigbee: código IR aprendido (%u bytes)	Zigbee: codice IR appreso (%u byte)
+Zigbee: código IR enviado	Zigbee: codice IR inviato
+Zigbee: el emisor IR no tomó el código	Zigbee: il trasmettitore IR non ha preso il codice
+humedad del suelo	umidità del suolo
+caudal	portata
+energía	energia
+consumo	consumo
+tensión	tensione
+corriente	corrente
+potencia	potenza
+cortina	tenda
+ambiente	ambiente
+consigna	setpoint
+modo	modalità
+tono	tonalità
+cerradura	serratura
+ventilador	ventola
+estado	stato
+%d %% cerrada	%d %% chiusa
+frío	freddo
+calor	caldo
+con llave	chiusa a chiave
+a medias	a metà
+baja	bassa
+alta	alta
+prendido	acceso
+inteligente	intelligente

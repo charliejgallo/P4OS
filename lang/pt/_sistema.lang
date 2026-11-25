@@ -11606,3 +11606,53 @@ Sacar	Remover
 sin noticias desde que arrancó la placa	sem notícias desde que a placa ligou
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, removido da rede
 brillo	brilho
+Subir	Subir
+Bajar	Descer
+Ventilador: otro modo	Ventilador: próximo modo
+Esperando el control remoto... (tocá para cancelar)	Esperando o controle remoto... (toque para cancelar)
+Aprender un código	Aprender um código
+Enviar el último aprendido	Enviar o último aprendido
+enviando...	enviando...
+mantenido	segurado
+un toque	um toque
+doble	duplo
+triple	triplo
+botón	botão
+soltado	solto
+alternar	alternar
+encender un rato	ligar por um tempo
+a un nivel	para um nível
+bajar	descer
+subir	subir
+un paso abajo	um passo abaixo
+un paso arriba	um passo acima
+escena	cena
+parar	parar
+mover	mover
+Zigbee: código IR aprendido (%u bytes)	Zigbee: código IR aprendido (%u bytes)
+Zigbee: código IR enviado	Zigbee: código IR enviado
+Zigbee: el emisor IR no tomó el código	Zigbee: o emissor IR não aceitou o código
+humedad del suelo	umidade do solo
+caudal	vazão
+energía	energia
+consumo	consumo
+tensión	tensão
+corriente	corrente
+potencia	potência
+cortina	cortina
+ambiente	ambiente
+consigna	setpoint
+modo	modo
+tono	tom
+cerradura	fechadura
+ventilador	ventilador
+estado	estado
+%d %% cerrada	%d %% fechada
+frío	frio
+calor	calor
+con llave	trancada
+a medias	pela metade
+baja	baixa
+alta	alta
+prendido	ligado
+inteligente	inteligente

@@ -11031,3 +11031,53 @@ Sacar	Remove
 sin noticias desde que arrancó la placa	no news since the board started
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, removed from the network
 brillo	brightness
+Subir	Up
+Bajar	Down
+Ventilador: otro modo	Fan: next mode
+Esperando el control remoto... (tocá para cancelar)	Waiting for the remote... (tap to cancel)
+Aprender un código	Learn a code
+Enviar el último aprendido	Send the last one learned
+enviando...	sending...
+mantenido	held
+un toque	single press
+doble	double
+triple	triple
+botón	button
+soltado	released
+alternar	toggle
+encender un rato	on for a while
+a un nivel	to a level
+bajar	down
+subir	up
+un paso abajo	a step down
+un paso arriba	a step up
+escena	scene
+parar	stop
+mover	move
+Zigbee: código IR aprendido (%u bytes)	Zigbee: IR code learned (%u bytes)
+Zigbee: código IR enviado	Zigbee: IR code sent
+Zigbee: el emisor IR no tomó el código	Zigbee: the IR blaster did not take the code
+humedad del suelo	soil moisture
+caudal	flow
+energía	energy
+consumo	power draw
+tensión	voltage
+corriente	current
+potencia	power
+cortina	curtain
+ambiente	room
+consigna	setpoint
+modo	mode
+tono	color temp
+cerradura	lock
+ventilador	fan
+estado	state
+%d %% cerrada	%d %% closed
+frío	cool
+calor	heat
+con llave	locked
+a medias	not fully locked
+baja	low
+alta	high
+prendido	on
+inteligente	smart
