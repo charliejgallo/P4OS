@@ -60,6 +60,8 @@
  *                                  "value": "hex" (little-endian, as on the air)}
  *   POST /api/154/zbdp             {"ieee", "dp", "type": 1 bool / 2 value / 4 enum,
  *                                  "value"}: a Tuya datapoint
+ *   POST /api/154/zbname           {"ieee", "name"}: the user's name for a
+ *                                  device ("" takes it away)
  *   POST /api/154/zbir             {"ieee", "learn": true|false} or {"ieee",
  *                                  "send": "<base64>"}: the IR blaster; its
  *                                  state and last code under "zbhost.ir".
@@ -170,6 +172,14 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
             cJSON_AddNumberToObject(e, "eps", d->eps);
             cJSON_AddStringToObject(e, "manufacturer", d->manuf);
             cJSON_AddStringToObject(e, "model", d->model);
+            cJSON_AddStringToObject(e, "name", d->name);
+            char iv[24], im[40], idesc[64];
+            if (aos_zigbee_ident(d, iv, sizeof iv, im, sizeof im, idesc, sizeof idesc)) {
+                cJSON *id = cJSON_AddObjectToObject(e, "ident");
+                cJSON_AddStringToObject(id, "vendor", iv);
+                cJSON_AddStringToObject(id, "model", im);
+                cJSON_AddStringToObject(id, "description", idesc);
+            }
             cJSON_AddNumberToObject(e, "power", d->power);
             if (d->rssi) cJSON_AddNumberToObject(e, "rssi", d->rssi);
             uint32_t now = (uint32_t)aos_hal_uptime_ms();
@@ -244,6 +254,12 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
                     const aos_zigbee_dp_t *q = &d->dps[k];
                     cJSON *x = cJSON_CreateObject();
                     cJSON_AddNumberToObject(x, "dp", q->dp);
+                    char dn[40], dv[64];
+                    bool flip;
+                    if (aos_zigbee_dp_text(d, q, dn, sizeof dn, dv, sizeof dv, &flip)) {
+                        cJSON_AddStringToObject(x, "name", dn);
+                        cJSON_AddStringToObject(x, "text", dv);
+                    }
                     cJSON_AddNumberToObject(x, "type", q->type);
                     if (q->type == 0 || q->type == 3) {
                         char hex[2 * sizeof q->raw + 1];
@@ -429,7 +445,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
              : cJSON_IsTrue(cJSON_GetObjectItem(b, "board")) ? aos_zigbee_permit_board((int)num(b, "seconds", 180))
                                                               : aos_zigbee_permit((int)num(b, "seconds", 180));
     }
-    else if (!strcmp(what, "zbremove") || !strcmp(what, "zbonoff") || !strcmp(what, "zblevel") || !strcmp(what, "zbcmd") ||
+    else if (!strcmp(what, "zbname") || !strcmp(what, "zbremove") || !strcmp(what, "zbonoff") || !strcmp(what, "zblevel") || !strcmp(what, "zbcmd") ||
              !strcmp(what, "zbwrite") || !strcmp(what, "zbdp") || !strcmp(what, "zbir")) {
         const cJSON *ie = cJSON_GetObjectItem(b, "ieee");
         uint8_t ieee[8];
@@ -449,7 +465,11 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
                 if (sscanf(c, "%2x", &v) != 1) break;
                 hx[hn++] = (uint8_t)v;
             }
-        if (ok && !strcmp(what, "zbremove")) ok = aos_zigbee_remove(ieee);
+        if (ok && !strcmp(what, "zbname")) {
+            const cJSON *nm = cJSON_GetObjectItem(b, "name");
+            ok = aos_zigbee_set_name(ieee, cJSON_IsString(nm) ? nm->valuestring : "");
+        }
+        else if (ok && !strcmp(what, "zbremove")) ok = aos_zigbee_remove(ieee);
         else if (ok && !strcmp(what, "zblevel")) ok = aos_zigbee_level(ieee, (uint8_t)num(b, "ep", 1), (int)num(b, "level", 254));
         else if (ok && !strcmp(what, "zbcmd"))
             ok = aos_zigbee_command(ieee, (uint8_t)num(b, "ep", 1), (uint16_t)num(b, "cluster", 0), (uint8_t)num(b, "cmd", 0),

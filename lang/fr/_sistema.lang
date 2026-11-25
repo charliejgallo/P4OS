@@ -11600,7 +11600,7 @@ Mi red	Mon réseau
 Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s
 Abierta para sumar	Ouvert pour ajouter
 La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Le réseau reste ouvert tant que vous êtes ici, jusqu'à Fermer. Réinitialisez les appareils un par un : l'écran indique quand chacun rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut mettre du temps à donner des nouvelles (appuyez sur son bouton pour le réveiller). Touchez une sortie pour l'allumer ou l'éteindre. Si un appareil continue de clignoter sans finir de rejoindre, essayez Ajouter Zigbee 3.0.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0. Tocá el nombre de un equipo para ponerle uno tuyo.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut mettre du temps à donner des nouvelles (appuyez sur son bouton pour le réveiller). Touchez une sortie pour l'allumer ou l'éteindre. Si un appareil continue de clignoter sans finir de rejoindre, essayez Ajouter Zigbee 3.0. Touchez le nom d'un appareil pour lui en donner un à vous.
 ¿Seguro?	Sûr ?
 Sacar	Retirer
 sin noticias desde que arrancó la placa	aucune nouvelle depuis le démarrage de la carte
@@ -11667,3 +11667,29 @@ Mantenelo apretado otra vez para borrarlo	Maintenez-le à nouveau pour le suppri
 Guardarlo...	L'enregistrer...
 no tomó el código	il n'a pas pris le code
 Guardados (tocá para mandar, mantené para borrar):	Enregistrés (touchez pour envoyer, maintenez pour supprimer) :
+Nombre del equipo	Nom de l'appareil
+Por ejemplo: Sensor de la cocina	Par exemple : Capteur de la cuisine
+No se pudo guardar	Impossible d'enregistrer
+bloqueo de teclas	verrouillage des touches
+acción	action
+posición	position
+corrección	correction
+al volver la luz	après une coupure
+luz de fondo	rétroéclairage
+antiheladas	hors-gel
+funcionando	en marche
+sentido del motor	sens du moteur
+estado de la pila	état de la pile
+ventana abierta	fenêtre ouverte
+cuenta regresiva	compte à rebours
+tapa abierta	boîtier ouvert
+formaldehído	formaldéhyde
+distancia	distance
+sensibilidad	sensibilité
+válvula	vanne
+temperatura eco	température éco
+temperatura de confort	température de confort
+factor de potencia	facteur de puissance
+frecuencia	fréquence
+energía entregada	énergie produite
+salida %d	sortie %d

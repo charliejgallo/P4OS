@@ -80,6 +80,7 @@ static struct {
      * and the saved one held once (held again within 4 s, it is forgotten) */
     lv_obj_t *naming, *name_ta, *name_kb;
     uint8_t name_ieee[8];
+    bool name_dev;                      /* naming a device, not an IR code */
     int ir_armed;
     uint32_t ir_armed_ms;
 } U;
@@ -530,6 +531,19 @@ static void build_net(lv_obj_t *page, int32_t w)
     U.devs_tick = 0;
 }
 
+static void naming_open(const uint8_t ieee[8], bool dev, const char *now);
+
+/* a card's title tapped: the device's name, the user's own */
+static void title_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    if (i < 0 || i >= AOS_ZB_DEVICES_MAX) return;
+    static aos_zigbee_dev_t d[AOS_ZB_DEVICES_MAX];
+    int n = aos_zigbee_devices(d, AOS_ZB_DEVICES_MAX);
+    for (int k = 0; k < n; k++)
+        if (!memcmp(d[k].ieee, U.rm_ieee[i], 8)) naming_open(d[k].ieee, true, d[k].name);
+}
+
 /* Sacar: a first tap asks, a second one within 4 s does it */
 static void rm_cb(lv_event_t *e)
 {
@@ -686,6 +700,11 @@ static void naming_done(void)
 {
     const char *t = lv_textarea_get_text(U.name_ta);
     while (*t == ' ') t++;
+    if (U.name_dev) {
+        if (!aos_zigbee_set_name(U.name_ieee, t)) aos_ui_toast(_("No se pudo guardar"), 2000);
+        naming_close();
+        return;
+    }
     if (!*t) {
         aos_ui_toast(_("Ponele un nombre"), 1600);
         return;
@@ -708,10 +727,11 @@ static void naming_btn_cb(lv_event_t *e)
     else naming_close();
 }
 
-static void naming_open(const uint8_t ieee[8])
+static void naming_open(const uint8_t ieee[8], bool dev, const char *now)
 {
     if (U.naming) return;
     memcpy(U.name_ieee, ieee, 8);
+    U.name_dev = dev;
     U.naming = box(U.root, U.W, U.H);
     lv_obj_set_style_bg_color(U.naming, AOS_C_BG, 0);
     lv_obj_set_style_bg_opa(U.naming, LV_OPA_COVER, 0);
@@ -719,14 +739,15 @@ static void naming_open(const uint8_t ieee[8])
     lv_obj_t *head = box(U.naming, U.W, 96);
     lv_obj_t *cancel = pill(head, _("Cancelar"), false, naming_btn_cb, (void *)0, NULL);
     lv_obj_align(cancel, LV_ALIGN_LEFT_MID, AOS_UI_PAD, 0);
-    lv_obj_t *t = aos_label(head, _("Nombre del código"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *t = aos_label(head, dev ? _("Nombre del equipo") : _("Nombre del código"), aos_font_body, AOS_C_TEXT);
     lv_obj_center(t);
     lv_obj_t *ok = pill(head, _("Guardar"), true, naming_btn_cb, (void *)1, NULL);
     lv_obj_align(ok, LV_ALIGN_RIGHT_MID, -AOS_UI_PAD, 0);
     U.name_ta = lv_textarea_create(U.naming);
     lv_textarea_set_one_line(U.name_ta, true);
     lv_textarea_set_max_length(U.name_ta, AOS_ZB_IR_NAME);
-    lv_textarea_set_placeholder_text(U.name_ta, _("Por ejemplo: Tele, volumen +"));
+    lv_textarea_set_placeholder_text(U.name_ta, dev ? _("Por ejemplo: Sensor de la cocina") : _("Por ejemplo: Tele, volumen +"));
+    if (now && now[0]) lv_textarea_set_text(U.name_ta, now);
     lv_obj_set_size(U.name_ta, U.W - 2 * AOS_UI_PAD, 88);
     lv_obj_align(U.name_ta, LV_ALIGN_TOP_LEFT, AOS_UI_PAD, 112);
     lv_obj_set_style_text_font(U.name_ta, aos_font_body, 0);
@@ -798,7 +819,7 @@ static void ctl_cb(lv_event_t *e)
         ok = code[0] && aos_zigbee_ir_send(ie, code);
         break;
     }
-    case B_IR_SAVE: naming_open(ie); return;
+    case B_IR_SAVE: naming_open(ie, false, NULL); return;
     case B_IR_SAVED: ok = aos_zigbee_ir_send_saved((int)a); break;
     }
     if (!ok) aos_ui_toast(_("La red no tomó el pedido"), 2000);
@@ -892,7 +913,8 @@ static void fill_net(int32_t w)
         lv_label_set_text_fmt(U.net_note, _("Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: "
                                             "uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). "
                                             "Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no "
-                                            "termina de sumarse, probá con Sumar Zigbee 3.0."),
+                                            "termina de sumarse, probá con Sumar Zigbee 3.0. Tocá el nombre de un equipo "
+                                            "para ponerle uno tuyo."),
                               z.channel, n);
     lv_obj_clean(U.net);
     U.nout = 0;
@@ -906,22 +928,35 @@ static void fill_net(int32_t w)
         lv_obj_set_style_pad_ver(r, 12, 0);
         lv_obj_set_flex_flow(r, LV_FLEX_FLOW_COLUMN);
         lv_obj_set_style_pad_row(r, 6, 0);
-        char a[96], b[160];
-        if (e->manuf[0] || e->model[0]) snprintf(a, sizeof a, "%s %s", e->manuf, e->model);
+        char a[96], b[224];
+        /* what it is, from the card's table of Tuya's devices */
+        char iv[24], im[40], idesc[64];
+        bool known = aos_zigbee_ident(e, iv, sizeof iv, im, sizeof im, idesc, sizeof idesc);
+        if (e->name[0]) snprintf(a, sizeof a, "%s", e->name);
+        else if (known) snprintf(a, sizeof a, "%s %s", iv, im);
+        else if (e->manuf[0] || e->model[0]) snprintf(a, sizeof a, "%s %s", e->manuf, e->model);
         else snprintf(a, sizeof a, "%02X%02X:%02X%02X:%02X%02X:%02X%02X", e->ieee[7], e->ieee[6], e->ieee[5], e->ieee[4],
                       e->ieee[3], e->ieee[2], e->ieee[1], e->ieee[0]);
         bool news = e->heard_ms != 0;
         lv_obj_t *top = box(r, w - 36, LV_SIZE_CONTENT);
-        lv_obj_t *t = aos_label(top, a, aos_font_small, e->step == AOS_ZB_DEV_LEFT || !news ? AOS_C_DIM : AOS_C_TEXT);
+        lv_obj_t *t = aos_label(top, a, e->name[0] ? aos_font_body : aos_font_small,
+                                e->step == AOS_ZB_DEV_LEFT || !news ? AOS_C_DIM : AOS_C_TEXT);
         lv_obj_set_width(t, w - 36 - 170);
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);
+        lv_obj_add_flag(t, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_ext_click_area(t, 12);
+        lv_obj_add_event_cb(t, title_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
         memcpy(U.rm_ieee[i], e->ieee, 8);
         bool armed = !memcmp(U.armed, e->ieee, 8) && now - U.armed_ms < 4000;
         lv_obj_t *rm = pill(top, armed ? _("¿Seguro?") : _("Sacar"), armed, rm_cb, (void *)(intptr_t)i, NULL);
         lv_obj_set_height(rm, 48);
         lv_obj_align(rm, LV_ALIGN_TOP_RIGHT, 0, 0);
         const char *kind = (e->cap & 0x02) ? _("router") : (e->power == 1 ? _("a red eléctrica") : _("a pila"));
-        int k = snprintf(b, sizeof b, "0x%04X · %s", e->nwk, kind);
+        int k = 0;
+        if (known && idesc[0]) k = snprintf(b, sizeof b, "%s · ", idesc);
+        if (e->name[0] && known) k += snprintf(b + k, sizeof b - (size_t)k, "%s %s · ", iv, im);
+        else if (e->name[0] && (e->manuf[0] || e->model[0])) k += snprintf(b + k, sizeof b - (size_t)k, "%s %s · ", e->manuf, e->model);
+        k += snprintf(b + k, sizeof b - (size_t)k, "0x%04X · %s", e->nwk, kind);
         if (e->rssi) k += snprintf(b + k, sizeof b - (size_t)k, " · %d dBm", e->rssi);
         k += snprintf(b + k, sizeof b - (size_t)k, " · ");
         if (!news) k += snprintf(b + k, sizeof b - (size_t)k, "%s", _("sin noticias desde que arrancó la placa"));
@@ -999,8 +1034,17 @@ static void fill_net(int32_t w)
         /* Tuya's datapoints: number, type and value (a bool one is a button) */
         for (int q = 0; q < e->ndp; q++) {
             const aos_zigbee_dp_t *dp = &e->dps[q];
+            char dn[40], dv[48];
+            bool flip = false, named = aos_zigbee_dp_text(e, dp, dn, sizeof dn, dv, sizeof dv, &flip);
+            if (named) {
+                snprintf(v, sizeof v, "%s %s", dn, dv);
+                if (!flip) {
+                    add_value(vals, v, AOS_C_TEXT);
+                    continue;
+                }
+            }
             if (dp->type == 1) {
-                snprintf(v, sizeof v, "dp %u: %s", dp->dp, dp->v ? _("sí") : _("no"));
+                if (!named) snprintf(v, sizeof v, "dp %u: %s", dp->dp, dp->v ? _("sí") : _("no"));
                 lv_obj_t *chip = add_value(vals, v, dp->v ? AOS_C_YELLOW : AOS_C_DIM);
                 if (U.nctl < (int)(sizeof U.ctl / sizeof U.ctl[0])) {
                     memcpy(U.ctl[U.nctl].ieee, e->ieee, 8);

@@ -222,6 +222,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_154.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_zigbee_fmt.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_zigbee_ir.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_zigbee_tuya.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_hid_keys.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_http.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tcp.c

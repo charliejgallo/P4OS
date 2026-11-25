@@ -1283,6 +1283,11 @@ proyecto).
   se sube a la release publicada antes del tag como los packs y queda en
   `CARRIED_PACKS` (ya está). Hasta entonces el catálogo la deja afuera
   (`--missing-packs skip`).
+- **También para la próxima release (2026-11-25): `sys-zigbee-tuya`**
+  (qué es cada equipo Tuya y sus datapoints, `zigbee/tuya.txt`): se arma
+  con `python3 tools/zigbee/gen_tuya.py <zigbee-herdsman-converters>/src/devices/tuya.ts build/zigbee/zigbee_tuya.txt`
+  (el archivo de GitHub, MIT) y se sube igual que `zigbee_oui.bin`; ya
+  está en `CARRIED_PACKS` y en `store/system.json`.
 - **Fases 0 a 4, el merge y la release:** hechos. La 0.30.0 está
   publicada y la placa del usuario la corre, instalada por ella misma.
 - **De la fase 6**, adelantado: el firmware del P4 desde GitHub y las

@@ -79,6 +79,7 @@ typedef struct {
     uint32_t seen_ms;           /* aos_hal_uptime_ms() of its last announce */
     uint32_t heard_ms;          /* and of the last frame from it; 0: no news since the start */
     char     manuf[33], model[33];
+    char     name[33];          /* the user's for it ("" none): aos_zigbee_set_name */
     /* the clusters its endpoints serve: ep << 16 | cluster */
     uint8_t  ncl;
     uint32_t cl[AOS_ZB_CLUSTERS];
@@ -180,6 +181,16 @@ bool aos_zigbee_meas_text(const aos_zigbee_dev_t *d, const aos_zigbee_meas_t *m,
 int  aos_zigbee_meas_attrs(uint16_t cluster, uint16_t *out, int max);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
+/* What a Tuya device is and what its datapoints mean, from the card's
+ * zigbee/tuya.txt (tools/zigbee/gen_tuya.py, Zigbee2MQTT's definitions;
+ * aos_zigbee_tuya.c). false: not in it, or no file. A datapoint's name
+ * and its value as text ("temperatura", "21.5 °C"); is_bool: one a tap
+ * flips. */
+bool aos_zigbee_ident(const aos_zigbee_dev_t *d, char *vendor, size_t vn, char *model, size_t mn, char *desc, size_t dn);
+bool aos_zigbee_dp_text(const aos_zigbee_dev_t *d, const aos_zigbee_dp_t *q, char *name, size_t nn, char *val, size_t vn,
+                        bool *is_bool);
+/* the user's name for a device, kept with it ("" takes it away) */
+bool aos_zigbee_set_name(const uint8_t ieee[8], const char *name);
 
 #ifdef __cplusplus
 }

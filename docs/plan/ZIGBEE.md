@@ -508,8 +508,35 @@ velocidad que sin Zigbee. Lo de cada paso:
     `tools/gen_symbols.py`). Probado ida y vuelta (200 códigos al azar) y
     contra el lector de la página de Infrarrojo.
   - **Simulador:** `P4_SIM_ZB_IR=1` finge la red en el canal 26 con un
-    TS1201: aprender da un NEC (dirección 0x04) a los 3 s, mandar termina
-    en 0,8 s y queda en el log.
+    TS1201 y un sensor Tuya TS0601 (`_TZE200_ysm4dsb1`, datapoints de
+    temperatura, humedad y batería): aprender da un NEC (dirección 0x04)
+    a los 3 s, mandar termina en 0,8 s y queda en el log.
+- **Nombre propio** (2026-11-25): tocar el título de una tarjeta le pone
+  al equipo un nombre del usuario ("Sensor de la cocina"); va en la
+  preferencia del equipo (`zbdNN`, un tercer `|` después del modelo) y lo
+  ven la pantalla, el portal (`name`, `POST /api/154/zbname`) y la lista
+  de emisores IR.
+- **Qué es cada equipo Tuya y qué dice** (2026-11-25): la tarjeta lee
+  `zigbee/tuya.txt` (parte del sistema `sys-zigbee-tuya` de la Tienda,
+  asset `zigbee_tuya.txt`, 190 KB, no va a git), armado por
+  `tools/zigbee/gen_tuya.py` desde `src/devices/tuya.ts` de
+  zigbee-herdsman-converters (MIT): 1424 pares (modelo Zigbee,
+  fabricante) con marca, modelo y descripción, y 313 juegos de
+  datapoints con nombre, tipo y escala. Así un TS0601 dice "Tuya
+  RSH-HS06, Temperature and humidity sensor" y "temperatura 21.5 °C" en
+  vez de "dp 1: 215". Los nombres más comunes van en castellano
+  (`aos_zigbee_tuya.c`), el resto como los tiene Zigbee2MQTT. Lo que el
+  script no entiende (horarios de termostato, umbrales en bloques) queda
+  como número. Un equipo se busca una vez (dos pasadas al archivo) y
+  queda en PSRAM. Sólo `tuya.ts`: los Tuya que Zigbee2MQTT define en
+  otros archivos (el TS1201, los de Moes con nombre propio) no están.
+  **Sin probar con un equipo real**: ninguno de los del usuario es TS0601
+  (el TS0002 sí está, y su tarjeta ya dice "Tuya TS0002_basic, 2 gang
+  switch module" si el pack está en la tarjeta).
+  Para la próxima release: `python3 tools/zigbee/gen_tuya.py
+  <zigbee-herdsman-converters>/src/devices/tuya.ts
+  build/zigbee/zigbee_tuya.txt` y subirlo como `zigbee_oui.bin`
+  (ya está en `CARRIED_PACKS`).
   - **"Sumar Zigbee 3.0"** en Mi red (`POST /api/154/zbpermit` con
     `board`, `strict` y `static`): abre la red sólo en la placa (no en los
     routers: cierra todo y abre la placa 1,5 s después, si no un "cerrar"

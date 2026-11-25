@@ -228,5 +228,32 @@
     "asset": "zigbee_oui.bin"
    }
   ]
+ },
+ {
+  "file": "sys-zigbee-tuya",
+  "name": {
+   "es": "Equipos Tuya para Zigbee",
+   "en": "Tuya devices for Zigbee"
+  },
+  "about": {
+   "es": "Para que la app Zigbee diga qué es cada equipo Tuya y qué significa cada dato que manda.",
+   "en": "So the Zigbee app can tell what each Tuya device is and what each value it sends means."
+  },
+  "desc": {
+   "es": "De las definiciones de Zigbee2MQTT: unos 1400 equipos Tuya por su modelo y fabricante Zigbee (marca, modelo y qué es), y para los que hablan en datapoints (termostatos, sensores, cortinas, medidores), qué es cada uno y en qué unidad: \"temperatura 21,5 °C\" en vez de \"dp 1: 215\". 190 KB.\n\nSin este paquete la app anda igual, con los números.",
+   "en": "From Zigbee2MQTT's definitions: some 1,400 Tuya devices by their Zigbee model and manufacturer (brand, model and what it is), and for those that speak in datapoints (thermostats, sensors, covers, meters), what each one is and in which unit: \"temperature 21.5 °C\" instead of \"dp 1: 215\". 190 KB.\n\nWithout this pack the app works the same, with the numbers."
+  },
+  "glyph": "AOS_SYM_ACCESS_POINT",
+  "colors": [
+   "EB0443",
+   "9E0230"
+  ],
+  "license": "zigbee-herdsman-converters (MIT)",
+  "files": [
+   {
+    "path": "zigbee/tuya.txt",
+    "asset": "zigbee_tuya.txt"
+   }
+  ]
  }
 ]

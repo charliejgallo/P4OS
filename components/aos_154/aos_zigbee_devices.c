@@ -151,7 +151,7 @@ static int s_saved;                     /* how many keys the last save wrote */
  * before (without the controls; without onoff_eps and level_ep) still read. */
 static void save_all(void)
 {
-    char key[16], v[160];
+    char key[16], v[240];
     lock();
     int n = 0;
     for (int i = 0; i < s_n; i++) {
@@ -163,6 +163,10 @@ static void save_all(void)
                  d->cap, d->power, d->step == AOS_ZB_DEV_DONE ? AOS_ZB_DEV_DONE : AOS_ZB_DEV_EPS, d->neps, d->eps_list[0],
                  d->eps_list[1], d->eps_list[2], d->eps_list[3], d->zone_type, d->clusters, d->onoff_eps, d->level_ep,
                  d->ctl_ep[0], d->ctl_ep[1], d->ctl_ep[2], d->ctl_ep[3], d->ctl_ep[4], d->manuf, d->model);
+        if (d->name[0]) {
+            size_t l = strlen(v);
+            snprintf(v + l, sizeof v - l, "|%s", d->name);
+        }
         unlock();
         aos_hal_pref_set_str(key, v);
         lock();
@@ -177,7 +181,7 @@ static void save_all(void)
 
 static void load_all(void)
 {
-    char key[16], v[160];
+    char key[16], v[240];
     lock();
     int keys = 0;
     for (int i = 0; i < AOS_ZB_DEVICES_MAX; i++) {
@@ -226,7 +230,15 @@ static void load_all(void)
             if (l >= sizeof d->manuf) l = sizeof d->manuf - 1;
             memcpy(d->manuf, m + 1, l);
             d->manuf[l] = '\0';
-            if (m2) snprintf(d->model, sizeof d->model, "%s", m2 + 1);
+            if (m2) {
+                /* the model, and the user's name after another '|' (names have none) */
+                const char *m3 = strchr(m2 + 1, '|');
+                size_t ml = m3 ? (size_t)(m3 - m2 - 1) : strlen(m2 + 1);
+                if (ml >= sizeof d->model) ml = sizeof d->model - 1;
+                memcpy(d->model, m2 + 1, ml);
+                d->model[ml] = '\0';
+                if (m3) snprintf(d->name, sizeof d->name, "%s", m3 + 1);
+            }
         }
         /* heard_ms 0: no news since the board started */
     }
@@ -1713,7 +1725,7 @@ int aos_zigbee_ir_blasters(uint8_t (*ieee)[8], char (*name)[33], int max)
     for (int i = 0; i < s_n && n < max; i++) {
         if (s_dev[i].step == AOS_ZB_DEV_REMOVED || !(s_dev[i].clusters & AOS_ZB_CL_IR)) continue;
         memcpy(ieee[n], s_dev[i].ieee, 8);
-        snprintf(name[n], 33, "%s", s_dev[i].model[0] ? s_dev[i].model : "IR");
+        snprintf(name[n], 33, "%s", s_dev[i].name[0] ? s_dev[i].name : s_dev[i].model[0] ? s_dev[i].model : "IR");
         n++;
     }
     unlock();
@@ -1839,6 +1851,25 @@ int aos_zigbee_permit_left(void)
 {
     int64_t left = s_permit_until_ms - (int64_t)aos_hal_uptime_ms();
     return left > 0 ? (int)((left + 999) / 1000) : 0;
+}
+
+bool aos_zigbee_set_name(const uint8_t ieee[8], const char *name)
+{
+    char nm[sizeof s_dev[0].name];
+    int k = 0;
+    for (const char *p = name ? name : ""; *p && k < (int)sizeof nm - 1; p++)
+        nm[k++] = *p == '|' || *p == '\n' || *p == '\r' || *p == '\t' ? ' ' : *p;
+    while (k && nm[k - 1] == ' ') k--;
+    nm[k] = '\0';
+    const char *t = nm;
+    while (*t == ' ') t++;
+    lock();
+    int i = find_ieee(ieee);
+    if (i >= 0) snprintf(s_dev[i].name, sizeof s_dev[i].name, "%s", t);
+    unlock();
+    if (i < 0) return false;
+    save_all();
+    return true;
 }
 
 int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)

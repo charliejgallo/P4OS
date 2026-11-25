@@ -252,12 +252,13 @@ bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t
 int aos_zigbee_permit_left(void) { return 0; }
 
 /* ---- P4_SIM_ZB_IR=1: a network formed on channel 26 with a Tuya IR blaster
- * in it, for the Zigbee app's card and the Infrarrojo app's sending through
+ * and a Tuya TS0601 temperature sensor (datapoints) in it, for the Zigbee app's card and the Infrarrojo app's sending through
  * it. Learning gives an NEC code (address 0x04, the command counting up) 3 s
  * after it starts; a sending is done in 0.8 s. Nothing goes anywhere. */
 
 static const uint8_t SIM_IR_IEEE[8] = { 0x7a, 0x4b, 0x0c, 0xff, 0xfe, 0x8e, 0x2f, 0xa4 };
 static struct { int state; int64_t t0; uint8_t cmd; char learned[400]; } s_sir;
+static char s_sim_name[33];
 
 static bool sim_ir(void)
 {
@@ -296,7 +297,47 @@ int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
     out->seen_ms = out->heard_ms = aos_hal_uptime_ms();
     snprintf(out->manuf, sizeof out->manuf, "_TZ3290_nba3knpsarkawgnt");
     snprintf(out->model, sizeof out->model, "TS1201");
-    return 1;
+    snprintf(out->name, sizeof out->name, "%s", s_sim_name);
+    if (max < 2) return 1;
+    /* and a Tuya temperature sensor that speaks in datapoints (0xEF00) */
+    aos_zigbee_dev_t *t = &out[1];
+    memset(t, 0, sizeof *t);
+    static const uint8_t TIE[8] = { 0x31, 0x9c, 0x5a, 0xfe, 0xff, 0x22, 0x0b, 0xa4 };
+    memcpy(t->ieee, TIE, 8);
+    t->nwk = 0x7e02;
+    t->ep = 1;
+    t->step = AOS_ZB_DEV_DONE;
+    t->clusters = AOS_ZB_CL_TUYA;
+    t->cap = 0x80;
+    t->power = 0x03;
+    t->rssi = -61;
+    t->temp = INT16_MIN;
+    t->hum = 0xFFFF;
+    t->battery = 0xFF;
+    t->occupancy = 0xFF;
+    t->zone_type = 0xFFFF;
+    t->level = 0xFF;
+    t->seen_ms = t->heard_ms = aos_hal_uptime_ms();
+    snprintf(t->manuf, sizeof t->manuf, "_TZE200_ysm4dsb1");
+    snprintf(t->model, sizeof t->model, "TS0601");
+    static const struct { uint8_t dp, type; int32_t v; } DPS[] = { { 1, 2, 215 }, { 2, 2, 55 }, { 4, 2, 87 }, { 9, 4, 0 },
+                                                                  { 104, 1, 1 } };
+    for (size_t k = 0; k < sizeof DPS / sizeof DPS[0]; k++) {
+        t->dps[k].dp = DPS[k].dp;
+        t->dps[k].type = DPS[k].type;
+        t->dps[k].v = DPS[k].v;
+        t->dps[k].len = DPS[k].type == 2 ? 4 : 1;
+        t->dps[k].ms = aos_hal_uptime_ms();
+    }
+    t->ndp = (uint8_t)(sizeof DPS / sizeof DPS[0]);
+    return 2;
+}
+
+bool aos_zigbee_set_name(const uint8_t ieee[8], const char *name)
+{
+    if (!sim_ir() || memcmp(ieee, SIM_IR_IEEE, 8)) return false;
+    snprintf(s_sim_name, sizeof s_sim_name, "%s", name ? name : "");
+    return true;
 }
 
 int aos_zigbee_ir_blasters(uint8_t (*ieee)[8], char (*name)[33], int max)
