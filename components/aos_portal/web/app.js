@@ -3882,10 +3882,20 @@ async function pageZigbee() {
   }
   function draw() {
     if (!st) return;
-    put(status, row(tr('Radio'), !st.reachable ? tr('el C6 no contesta') : st.state === 'scanning' ? tr('escaneando, canal %s', st.channel)
-        : st.state === 'sniffing' ? tr('escuchando el canal %s', st.channel) : tr('apagada'), st.reachable ? '' : 'warn'),
+    /* what the 802.15.4 radio is doing: the board's Zigbee network (or a
+     * device it emulates) first, as the C6 is then the stack's radio and
+     * does not answer the scanner's hello; then the scan and the sniffer */
+    const zb = st.zbhost || {}, em = st.zbemu || {};
+    const radio = zb.emulating ? (em.state === 'joined' ? tr('emulando un equipo en otra red, canal %s', em.channel) : tr('emulando un equipo: buscando una red'))
+      : zb.state === 'formed' ? tr('la red Zigbee de la placa, canal %s', zb.channel)
+      : zb.state === 'starting' ? tr('armando la red Zigbee')
+      : !st.reachable ? tr('el C6 no contesta')
+      : st.state === 'scanning' ? tr('escaneando, canal %s', st.channel)
+      : st.state === 'sniffing' ? tr('escuchando el canal %s', st.channel) : tr('sin usar');
+    const busy = zb.emulating || zb.state === 'formed' || zb.state === 'starting';
+    put(status, row(tr('Radio 802.15.4'), radio, busy || st.reachable ? '' : 'warn'),
       row(tr('Firmware del C6'), st.c6 || '?'),
-      !st.reachable ? h('p', { class: 'note' }, tr('El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.')) : null,
+      !st.reachable && !busy ? h('p', { class: 'note' }, tr('El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.')) : null,
       st.guarded ? h('p', { class: 'note warn' }, tr('El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.')) : null);
     bars();
     goBtn.textContent = st.state === 'sniffing' ? tr('Parar') : tr('Escuchar');

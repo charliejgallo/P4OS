@@ -10959,7 +10959,6 @@ El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actua
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	The C6 fell over with the radio on and kept it off so as not to lose the Wi-Fi. Tap Scan or Listen to try again.
 Escaneando, canal %u	Scanning, channel %u
 Escuchando el canal %u	Listening on channel %u
-La radio, apagada	The radio, off
 Escaneando...	Scanning...
 Hay tráfico en el canal %d: en Escuchar se ve qué es.	There is traffic on channel %d: Listen shows what it is.
 No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	No packet was heard. Try a thorough scan: quiet networks send little.
@@ -11182,3 +11181,7 @@ arrancando la pila como router	starting the stack as a router
 la pila no arrancó (¿el C6 tiene su firmware 154?)	the stack did not start (does the C6 have its 154 firmware?)
 pidió irse de la red y olvidarla	asked to leave the network and forget it
 vuelve a la red propia (se reinicia)	back to its own network (restarting)
+La radio: emulando un equipo	The radio: emulating a device
+La radio: la red Zigbee, canal %u	The radio: the Zigbee network, channel %u
+La radio: armando la red Zigbee	The radio: starting the Zigbee network
+La radio, sin usar	The radio, idle

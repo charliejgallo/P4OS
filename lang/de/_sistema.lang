@@ -10959,7 +10959,6 @@ El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actua
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Der C6 ist mit eingeschaltetem Funk abgestürzt und lässt ihn aus, um das WLAN nicht zu verlieren. Auf Scannen oder Zuhören tippen, um es erneut zu versuchen.
 Escaneando, canal %u	Scanne, Kanal %u
 Escuchando el canal %u	Höre auf Kanal %u
-La radio, apagada	Funk aus
 Escaneando...	Scanne...
 Hay tráfico en el canal %d: en Escuchar se ve qué es.	Auf Kanal %d gibt es Verkehr: Unter Zuhören sieht man, was es ist.
 No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Kein Paket empfangen. Gründlich versuchen: ruhige Netze senden wenig.
@@ -11182,3 +11181,7 @@ arrancando la pila como router	starte den Stack als Router
 la pila no arrancó (¿el C6 tiene su firmware 154?)	der Stack startete nicht (hat der C6 seine 154-Firmware?)
 pidió irse de la red y olvidarla	bat, das Netz zu verlassen und zu vergessen
 vuelve a la red propia (se reinicia)	zurück zum eigenen Netz (Neustart)
+La radio: emulando un equipo	Das Funkmodul: emuliert ein Gerät
+La radio: la red Zigbee, canal %u	Das Funkmodul: das Zigbee-Netz, Kanal %u
+La radio: armando la red Zigbee	Das Funkmodul: baut das Zigbee-Netz auf
+La radio, sin usar	Das Funkmodul, frei

@@ -2920,3 +2920,9 @@ Reportar ahora	Signaler maintenant
 ¿Seguro? Tocá otra vez	Sûr ? Touchez encore
 Salir de la red	Quitter le réseau
 Lo que pidió el coordinador	Ce que le coordinateur a demandé
+emulando un equipo en otra red, canal %s	émule un appareil sur un autre réseau, canal %s
+emulando un equipo: buscando una red	émule un appareil : recherche d'un réseau
+la red Zigbee de la placa, canal %s	le réseau Zigbee de la carte, canal %s
+armando la red Zigbee	création du réseau Zigbee
+sin usar	inutilisée
+Radio 802.15.4	Radio 802.15.4

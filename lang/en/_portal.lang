@@ -2575,3 +2575,9 @@ Reportar ahora	Report now
 ¿Seguro? Tocá otra vez	Sure? Tap again
 Salir de la red	Leave the network
 Lo que pidió el coordinador	What the coordinator asked
+emulando un equipo en otra red, canal %s	emulating a device on another network, channel %s
+emulando un equipo: buscando una red	emulating a device: looking for a network
+la red Zigbee de la placa, canal %s	the board's Zigbee network, channel %s
+armando la red Zigbee	starting the Zigbee network
+sin usar	idle
+Radio 802.15.4	802.15.4 radio

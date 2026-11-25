@@ -1399,15 +1399,26 @@ static void refresh(void)
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;
-    bool old = !in.reachable && aos_hal_uptime_ms() - U.t_open > 2000;
+    /* with the stack running the C6 is its radio and does not answer the
+     * scanner: not an old firmware */
+    aos_zigbee_info_t zw;
+    aos_zigbee_info(&zw);
+    bool old = !in.reachable && !zw.emu && zw.state == AOS_ZB_OFF && aos_hal_uptime_ms() - U.t_open > 2000;
     lv_label_set_text(U.warn, old ? _("El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, "
                                       "Instalar en el C6. Se baja de la Tienda, en Sistema.")
                                   : in.guarded ? _("El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. "
                                                    "Tocá Escanear o Escuchar para probar otra vez.") : "");
+    /* what the radio is doing: the board's network (or a device it
+     * emulates) first, then the scan and the sniffer */
     char sub[96];
-    if (in.state == AOS_154_SCANNING) snprintf(sub, sizeof sub, _("Escaneando, canal %u"), in.channel);
+    aos_zigbee_info_t zi;
+    aos_zigbee_info(&zi);
+    if (zi.emu) snprintf(sub, sizeof sub, "%s", _("La radio: emulando un equipo"));
+    else if (zi.state == AOS_ZB_FORMED) snprintf(sub, sizeof sub, _("La radio: la red Zigbee, canal %u"), zi.channel);
+    else if (zi.state == AOS_ZB_STARTING) snprintf(sub, sizeof sub, "%s", _("La radio: armando la red Zigbee"));
+    else if (in.state == AOS_154_SCANNING) snprintf(sub, sizeof sub, _("Escaneando, canal %u"), in.channel);
     else if (in.state == AOS_154_SNIFFING) snprintf(sub, sizeof sub, _("Escuchando el canal %u"), in.channel);
-    else snprintf(sub, sizeof sub, "%s", in.reachable ? _("La radio, apagada") : "");
+    else snprintf(sub, sizeof sub, "%s", in.reachable ? _("La radio, sin usar") : "");
     lv_label_set_text(U.sub, sub);
 
     if (U.page_no == P_CHANNELS && U.bars[0]) {
@@ -1519,13 +1530,13 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     /* five tabs: in one row in Spanish; a longer language wraps them */
     lv_obj_t *tabs = box(U.col, w, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_style_pad_column(tabs, 10, 0);
+    lv_obj_set_style_pad_column(tabs, 8, 0);
     lv_obj_set_style_pad_row(tabs, 10, 0);
     static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos"), N_("Mi red"), N_("Emular") };
     for (int i = 0; i < P_COUNT; i++) {
         lv_obj_t *c = box(tabs, LV_SIZE_CONTENT, 60);
         lv_obj_set_style_radius(c, 30, 0);
-        lv_obj_set_style_pad_hor(c, 18, 0);
+        lv_obj_set_style_pad_hor(c, 10, 0);
         lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
         lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(c, tab_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);

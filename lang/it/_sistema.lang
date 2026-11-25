@@ -11534,7 +11534,6 @@ El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actua
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Il C6 è andato in crash con la radio accesa e l'ha lasciata spenta per non perdere il Wi-Fi. Tocca Scansiona o Ascolta per riprovare.
 Escaneando, canal %u	Scansione, canale %u
 Escuchando el canal %u	In ascolto sul canale %u
-La radio, apagada	La radio, spenta
 Escaneando...	Scansione...
 Hay tráfico en el canal %d: en Escuchar se ve qué es.	C'è traffico sul canale %d: in Ascolta si vede cos'è.
 No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Nessun pacchetto sentito. Prova a fondo: le reti tranquille trasmettono poco.
@@ -11757,3 +11756,7 @@ arrancando la pila como router	avvio dello stack come router
 la pila no arrancó (¿el C6 tiene su firmware 154?)	lo stack non è partito (il C6 ha il suo firmware 154?)
 pidió irse de la red y olvidarla	ha chiesto di uscire dalla rete e dimenticarla
 vuelve a la red propia (se reinicia)	torna alla rete propria (riavvio)
+La radio: emulando un equipo	La radio: emula un dispositivo
+La radio: la red Zigbee, canal %u	La radio: la rete Zigbee, canale %u
+La radio: armando la red Zigbee	La radio: avvio della rete Zigbee
+La radio, sin usar	La radio, inutilizzata

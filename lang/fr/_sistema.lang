@@ -11534,7 +11534,6 @@ El C6 no contesta. Necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actua
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Le C6 a planté avec la radio allumée et l'a laissée éteinte pour ne pas perdre le Wi-Fi. Touchez Scanner ou Écouter pour réessayer.
 Escaneando, canal %u	Analyse, canal %u
 Escuchando el canal %u	Écoute du canal %u
-La radio, apagada	La radio, éteinte
 Escaneando...	Analyse...
 Hay tráfico en el canal %d: en Escuchar se ve qué es.	Il y a du trafic sur le canal %d : Écouter montre ce que c'est.
 No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Aucun paquet entendu. Essayez en profondeur : les réseaux calmes émettent peu.
@@ -11757,3 +11756,7 @@ arrancando la pila como router	démarrage de la pile comme routeur
 la pila no arrancó (¿el C6 tiene su firmware 154?)	la pile n'a pas démarré (le C6 a-t-il son firmware 154 ?)
 pidió irse de la red y olvidarla	a demandé à quitter le réseau et l'oublier
 vuelve a la red propia (se reinicia)	retour au réseau propre (redémarrage)
+La radio: emulando un equipo	La radio : émule un appareil
+La radio: la red Zigbee, canal %u	La radio : le réseau Zigbee, canal %u
+La radio: armando la red Zigbee	La radio : création du réseau Zigbee
+La radio, sin usar	La radio, inutilisée
