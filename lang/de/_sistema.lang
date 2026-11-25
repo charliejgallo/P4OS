@@ -11054,9 +11054,6 @@ un paso arriba	eine Stufe hoch
 escena	Szene
 parar	stopp
 mover	bewegen
-Zigbee: código IR aprendido (%u bytes)	Zigbee: IR-Code gelernt (%u Bytes)
-Zigbee: código IR enviado	Zigbee: IR-Code gesendet
-Zigbee: el emisor IR no tomó el código	Zigbee: der IR-Sender hat den Code nicht angenommen
 humedad del suelo	Bodenfeuchte
 caudal	Durchfluss
 energía	Energie

@@ -11054,9 +11054,6 @@ un paso arriba	a step up
 escena	scene
 parar	stop
 mover	move
-Zigbee: código IR aprendido (%u bytes)	Zigbee: IR code learned (%u bytes)
-Zigbee: código IR enviado	Zigbee: IR code sent
-Zigbee: el emisor IR no tomó el código	Zigbee: the IR blaster did not take the code
 humedad del suelo	soil moisture
 caudal	flow
 energía	energy

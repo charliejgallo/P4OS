@@ -1170,7 +1170,6 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
         s_ir.state = AOS_ZB_IR_LEARNED;
         ir_study(false);
         aos_hal_log(TAG, "IR: code learned, %u bytes", (unsigned)s_ir.pos);
-        notice(_("Zigbee: código IR aprendido (%u bytes)"), (unsigned)s_ir.pos);
         break;
     case 0x02: {                        /* sending: it asks for a chunk */
         if (s_ir.state != AOS_ZB_IR_SENDING || n < 6 || !s_ir.msg) return;
@@ -1196,7 +1195,6 @@ static void ir_frame(uint16_t nwk, uint8_t ep, uint8_t cmd, const uint8_t *p, in
         send_now(nwk, ep, CL_IR_TX, 0x05, b, 4, true);
         s_ir.state = AOS_ZB_IR_SENT;
         aos_hal_log(TAG, "IR: code sent");
-        notice("%s", _("Zigbee: código IR enviado"));
         break;
     default:                            /* 01: the blaster took the 00 */
         break;
@@ -1213,7 +1211,6 @@ static void ir_tick(void)
     if (now - s_ir.t0_ms > 15000) {
         s_ir.state = AOS_ZB_IR_FAILED;
         aos_hal_log(TAG, "IR: the blaster did not take the code");
-        notice("%s", _("Zigbee: el emisor IR no tomó el código"));
     } else if (!s_ir.got02 && now - s_ir.last00_ms > 2000) ir_send00();
 }
 
@@ -1657,34 +1654,44 @@ bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t
 
 /* ---- the IR blaster, from the portal and the screen ------------------------ */
 
-static struct { uint8_t ieee[8]; bool learn, start; char *code; uint32_t freq; } s_ir_req;
+/* each request its own copy, handed to the stack's task: two in a row (a
+ * learning stopped and a sending, from the Infrarrojo app) do not overwrite
+ * each other. No notices on the screen for learning and sending: the apps
+ * that asked show what happened (the Zigbee app's card, Infrarrojo). */
+typedef struct { uint8_t ieee[8]; bool learn, start; uint32_t freq; char code[]; } ir_req_t;
 
 static void ir_task(void *ctx)
 {
-    (void)ctx;
+    ir_req_t *rq = ctx;
     lock();
-    int i = find_ieee(s_ir_req.ieee);
+    int i = find_ieee(rq->ieee);
     uint16_t nwk = i >= 0 ? s_dev[i].nwk : 0xFFFF;
     uint8_t ep = i >= 0 && s_dev[i].ep ? s_dev[i].ep : 1;
     unlock();
-    if (i < 0) return;
-    memcpy(s_ir.ieee, s_ir_req.ieee, 8);
+    if (i < 0) {
+        free(rq);
+        return;
+    }
+    memcpy(s_ir.ieee, rq->ieee, 8);
     s_ir.nwk = nwk;
     s_ir.ep = ep;
-    if (s_ir_req.learn) {
-        s_ir.state = s_ir_req.start ? AOS_ZB_IR_LEARNING : AOS_ZB_IR_IDLE;
-        ir_study(s_ir_req.start);
-        aos_hal_log(TAG, "0x%04x: IR learning %s", nwk, s_ir_req.start ? "on" : "off");
+    if (rq->learn) {
+        s_ir.state = rq->start ? AOS_ZB_IR_LEARNING : AOS_ZB_IR_IDLE;
+        ir_study(rq->start);
+        aos_hal_log(TAG, "0x%04x: IR learning %s", nwk, rq->start ? "on" : "off");
+        free(rq);
         return;
     }
     /* the code in Zigbee2MQTT's wrapper, as its ASCII text */
     if (!s_ir.msg) s_ir.msg = heap_caps_malloc(IR_CAP * 4 / 3 + 128, MALLOC_CAP_SPIRAM);
-    if (!s_ir.msg || !s_ir_req.code) return;
+    if (!s_ir.msg) {
+        free(rq);
+        return;
+    }
     int n = snprintf(s_ir.msg, IR_CAP * 4 / 3 + 128,
                      "{\"key_num\":1,\"delay\":300,\"key1\":{\"num\":1,\"freq\":%u,\"type\":1,\"key_code\":\"%s\"}}",
-                     (unsigned)(s_ir_req.freq ? s_ir_req.freq : 38000), s_ir_req.code);
-    free(s_ir_req.code);
-    s_ir_req.code = NULL;
+                     (unsigned)(rq->freq ? rq->freq : 38000), rq->code);
+    free(rq);
     if (n <= 0 || n >= IR_CAP * 4 / 3 + 128) return;
     s_ir.msg_len = (uint32_t)n;
     s_ir.seq = ++s_ir.out_seq;
@@ -1694,15 +1701,27 @@ static void ir_task(void *ctx)
     ir_send00();
 }
 
+static bool ir_post(const uint8_t ieee[8], bool learn, bool start, uint32_t freq, const char *code)
+{
+    size_t l = code ? strlen(code) : 0;
+    ir_req_t *rq = heap_caps_malloc(sizeof *rq + l + 1, MALLOC_CAP_SPIRAM);
+    if (!rq) return false;
+    memcpy(rq->ieee, ieee, 8);
+    rq->learn = learn;
+    rq->start = start;
+    rq->freq = freq;
+    memcpy(rq->code, code ? code : "", l + 1);
+    if (esp_zigbee_task_queue_post(ir_task, rq) == ESP_OK) return true;
+    free(rq);
+    return false;
+}
+
 bool aos_zigbee_ir_learn(const uint8_t ieee[8], bool start)
 {
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
     if (z.state != AOS_ZB_FORMED) return false;
-    memcpy(s_ir_req.ieee, ieee, 8);
-    s_ir_req.learn = true;
-    s_ir_req.start = start;
-    return esp_zigbee_task_queue_post(ir_task, NULL) == ESP_OK;
+    return ir_post(ieee, true, start, 0, NULL);
 }
 
 static bool ir_send_at(const uint8_t ieee[8], const char *code_b64, uint32_t freq);
@@ -1739,15 +1758,7 @@ static bool ir_send_at(const uint8_t ieee[8], const char *code_b64, uint32_t fre
     size_t l = code_b64 ? strlen(code_b64) : 0;
     if (z.state != AOS_ZB_FORMED || !l || l > IR_CAP * 4 / 3) return false;
     if (s_ir.state == AOS_ZB_IR_SENDING || s_ir.state == AOS_ZB_IR_RECEIVING) return false;     /* one at a time */
-    char *c = heap_caps_malloc(l + 1, MALLOC_CAP_SPIRAM);
-    if (!c) return false;
-    memcpy(c, code_b64, l + 1);
-    free(s_ir_req.code);
-    s_ir_req.code = c;
-    memcpy(s_ir_req.ieee, ieee, 8);
-    s_ir_req.learn = false;
-    s_ir_req.freq = freq;
-    return esp_zigbee_task_queue_post(ir_task, NULL) == ESP_OK;
+    return ir_post(ieee, false, false, freq, code_b64);
 }
 
 int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n)

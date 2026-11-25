@@ -11629,9 +11629,6 @@ un paso arriba	um passo acima
 escena	cena
 parar	parar
 mover	mover
-Zigbee: código IR aprendido (%u bytes)	Zigbee: código IR aprendido (%u bytes)
-Zigbee: código IR enviado	Zigbee: código IR enviado
-Zigbee: el emisor IR no tomó el código	Zigbee: o emissor IR não aceitou o código
 humedad del suelo	umidade do solo
 caudal	vazão
 energía	energia
