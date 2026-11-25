@@ -65,9 +65,9 @@
   "sha256": "18b2fc8a9d393075842033535da107e18e6ac51c18da58943c8a416501434ea8"
  },
  "c6.bin": {
-  "tag": "v0.29.0",
-  "size": 1399632,
-  "sha256": "2cb1bae33553fb5bf73e00d1e754d529234207ba0e1c6cc365d5a0279c72f717"
+  "tag": "v0.33.0",
+  "size": 1495424,
+  "sha256": "0053f99eff9893c882ee82f01361f5c22ed169b1760ad8f7bb3d559728150215"
  },
  "emoji.pak": {
   "tag": "v0.28.0",
@@ -98,6 +98,16 @@
   "tag": "v0.28.0",
   "size": 8289618,
   "sha256": "1da5fb3b4f682c4bab066033afe6770ad6573d4f88f9a35603004bc5e22a669c"
+ },
+ "juguete.pak": {
+  "tag": "v0.33.0",
+  "size": 4283530,
+  "sha256": "4ce3c62309b7e77995be407a957f367bb3dcf91349247e995574a5b362eb09ba"
+ },
+ "linea.pak": {
+  "tag": "v0.33.0",
+  "size": 3199399,
+  "sha256": "76388cde72f16140ed91aea7035cf15d0f40bf450a490f2a5b813f1efa92bc65"
  },
  "mesa_marmol_p4.pak": {
   "tag": "v0.30.0",
@@ -443,5 +453,15 @@
   "tag": "v0.30.0",
   "size": 939608,
   "sha256": "dab41cb483efab156f2b01910f59df9437e85a02bb6836a9155e6f4c7005f000"
+ },
+ "zigbee_oui.bin": {
+  "tag": "v0.33.0",
+  "size": 1297736,
+  "sha256": "eecbb7d97fc33ec4f52398263fc849216a05046ffb6358ce6b8240846417e693"
+ },
+ "zigbee_tuya.txt": {
+  "tag": "v0.33.0",
+  "size": 187472,
+  "sha256": "fbc019575cd9d2846a2b268ff68808683b41e2e483da459a2adb811c426343cd"
  }
 }

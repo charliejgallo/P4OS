@@ -1,8 +1,7 @@
 # Notas de la release 0.34.0 (borrador)
 
-Las notas de la release `v0.34.0`, todavía sin publicar: falta el pack
-"línea" (en pausa hasta que el usuario apruebe su estilo) y lo de "Cómo se
-hace", abajo. El texto entre las rayas, en inglés como las demás, es el
+Las notas de la release `v0.34.0`, todavía sin publicar: falta lo de
+"Cómo se hace", abajo, desde el punto 3. El texto entre las rayas, en inglés como las demás, es el
 que va a GitHub. **Lo más importante, por pedido del usuario: que el paso a
 paso para actualizar el firmware de la radio (el C6) quede clarísimo.**
 
@@ -85,7 +84,12 @@ As before, a `.p4app` for each app. New System parts: the radio's firmware `c6.b
 
 1. **El pack "línea"**: que el usuario apruebe la tanda de prueba, que la
    sesión de íconos haga las 103 apps y su `linea.pak`.
-2. **Los archivos de las partes del sistema, a la última release publicada
+2. **Hecho el 2026-11-25, con permiso del usuario:** los cinco archivos
+   subidos a `v0.33.0` y comparados después con los locales por SHA-256
+   (iguales); `gen_store.py packs --tag v0.33.0` movió exactamente esos
+   cinco (`c6.bin` de `v0.29.0` a `v0.33.0`, a propósito, y los otros
+   cuatro nuevos). Lo que decía el plan:
+   **Los archivos de las partes del sistema, a la última release publicada
    (`v0.33.0`)**, con permiso del usuario (es publicar):
    - `c6.bin`: el de `c6/build/p4os_c6.bin` (3.0.9-154.15, 1.495.424
      bytes). **Esta vez `c6.bin` sí se mueve** a `v0.33.0` en
