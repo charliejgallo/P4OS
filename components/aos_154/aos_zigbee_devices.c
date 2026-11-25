@@ -57,6 +57,8 @@
 #include "ezbee/zcl/cluster/power_config_desc.h"
 #include "ezbee/zcl/cluster/on_off_desc.h"
 #include "ezbee/zcl/cluster/on_off.h"
+#include "ezbee/zcl/cluster/level.h"
+#include "ezbee/zcl/cluster/level_desc.h"
 #include "ezbee/zcl/cluster/temperature_measurement_desc.h"
 #include "ezbee/zcl/cluster/rel_humidity_measurement_desc.h"
 #include "ezbee/zcl/cluster/occupancy_sensing_desc.h"
@@ -72,6 +74,7 @@
 #define CL_TEMP  0x0402
 #define CL_HUM   0x0405
 #define CL_OCC   0x0406
+#define CL_LEVEL 0x0008
 #define CL_IAS   0x0500
 
 static aos_zigbee_dev_t s_dev[AOS_ZB_DEVICES_MAX];
@@ -127,6 +130,7 @@ static int add(const uint8_t *ieee, uint16_t nwk)
     d->battery = 0xFF;
     d->occupancy = 0xFF;
     d->zone_type = 0xFFFF;
+    d->level = 0xFF;
     return s_n++;
 }
 
@@ -135,7 +139,8 @@ static int add(const uint8_t *ieee, uint16_t nwk)
 #define SAVE_KEY "zbd%02d"
 static int s_saved;                     /* how many keys the last save wrote */
 
-/* "ieee nwk cap power step neps ep,ep,ep,ep zone_type clusters|manuf|model" */
+/* "ieee nwk cap power step neps ep,ep,ep,ep zone_type clusters onoff_eps level_ep|manuf|model"
+ * (before 2026-11-24's last, without onoff_eps and level_ep: still read) */
 static void save_all(void)
 {
     char key[16], v[160];
@@ -145,10 +150,10 @@ static void save_all(void)
         const aos_zigbee_dev_t *d = &s_dev[i];
         if (d->step == AOS_ZB_DEV_REMOVED) continue;
         snprintf(key, sizeof key, SAVE_KEY, n++);
-        snprintf(v, sizeof v, "%02x%02x%02x%02x%02x%02x%02x%02x %u %u %u %u %u %u,%u,%u,%u %u %u|%s|%s", d->ieee[7], d->ieee[6],
-                 d->ieee[5], d->ieee[4], d->ieee[3], d->ieee[2], d->ieee[1], d->ieee[0], d->nwk, d->cap, d->power,
+        snprintf(v, sizeof v, "%02x%02x%02x%02x%02x%02x%02x%02x %u %u %u %u %u %u,%u,%u,%u %u %u %u %u|%s|%s", d->ieee[7],
+                 d->ieee[6], d->ieee[5], d->ieee[4], d->ieee[3], d->ieee[2], d->ieee[1], d->ieee[0], d->nwk, d->cap, d->power,
                  d->step == AOS_ZB_DEV_DONE ? AOS_ZB_DEV_DONE : AOS_ZB_DEV_EPS, d->neps, d->eps_list[0], d->eps_list[1],
-                 d->eps_list[2], d->eps_list[3], d->zone_type, d->clusters, d->manuf, d->model);
+                 d->eps_list[2], d->eps_list[3], d->zone_type, d->clusters, d->onoff_eps, d->level_ep, d->manuf, d->model);
         unlock();
         aos_hal_pref_set_str(key, v);
         lock();
@@ -169,7 +174,7 @@ static void load_all(void)
         snprintf(key, sizeof key, SAVE_KEY, i);
         if (!aos_hal_pref_get_str(key, v, sizeof v)) break;
         uint8_t ieee[8];
-        unsigned nwk, cap, power, step, neps, e0, e1, e2, e3, zt, cls;
+        unsigned nwk, cap, power, step, neps, e0, e1, e2, e3, zt, cls, oe = 0, le = 0;
         int at = 0;
         bool ok = true;
         for (int k = 0; k < 8 && ok; k++) {
@@ -177,8 +182,11 @@ static void load_all(void)
             ok = sscanf(v + 2 * k, "%2x", &b) == 1;
             ieee[7 - k] = (uint8_t)b;
         }
-        if (!ok || sscanf(v + 16, " %u %u %u %u %u %u,%u,%u,%u %u %u%n", &nwk, &cap, &power, &step, &neps, &e0, &e1, &e2, &e3,
-                          &zt, &cls, &at) != 11)
+        if (!ok) continue;
+        if (sscanf(v + 16, " %u %u %u %u %u %u,%u,%u,%u %u %u %u %u%n", &nwk, &cap, &power, &step, &neps, &e0, &e1, &e2, &e3,
+                   &zt, &cls, &oe, &le, &at) != 13 &&
+            sscanf(v + 16, " %u %u %u %u %u %u,%u,%u,%u %u %u%n", &nwk, &cap, &power, &step, &neps, &e0, &e1, &e2, &e3, &zt,
+                   &cls, &at) != 11)
             continue;
         int j = add(ieee, (uint16_t)nwk);
         if (j < 0) break;
@@ -192,6 +200,8 @@ static void load_all(void)
         d->eps = d->neps;
         d->zone_type = (uint16_t)zt;
         d->clusters = (uint16_t)cls;
+        d->onoff_eps = (uint8_t)oe;
+        d->level_ep = (uint8_t)le;
         const char *m = strchr(v + 16 + at, '|');
         if (m) {
             const char *m2 = strchr(m + 1, '|');
@@ -208,6 +218,14 @@ static void load_all(void)
     aos_hal_log(TAG, "%d devices in the saved list", s_saved);
 }
 
+/* one that listens all the time: a router, or on mains or DC (Basic's power
+ * source), so it can be asked anything at any moment */
+static bool awake(const aos_zigbee_dev_t *d)
+{
+    uint8_t p = d->power & 0x7F;
+    return (d->cap & 0x0A) || p == 0x01 || p == 0x02 || p == 0x04;
+}
+
 static int ep_index(const aos_zigbee_dev_t *d, uint8_t ep)
 {
     for (int i = 0; i < d->neps; i++)
@@ -220,8 +238,9 @@ static int ep_index(const aos_zigbee_dev_t *d, uint8_t ep)
 /* A sleepy device holds its parent's queue for it short, and answers right
  * after it joined or spoke: its requests go out one after another, each on
  * the answer to the one before, or after JOB_WAIT_MS without one. */
-enum { J_ACTIVE, J_BASIC, J_SIMPLE, J_BIND, J_CIE, J_ENROLL, J_READ, J_ONOFF };     /* J_ONOFF's "cluster": 0 off, 1 on, 2 toggle */
-typedef struct { uint8_t type, ep; uint16_t cluster; } job_t;
+enum { J_ACTIVE, J_BASIC, J_SIMPLE, J_BIND, J_CIE, J_ENROLL, J_READ, J_ONOFF, J_LEVEL };
+/* J_ONOFF's "cluster": 0 off, 1 on, 2 toggle; J_LEVEL's: the level */
+typedef struct { uint8_t type, ep; uint16_t cluster; uint8_t tries; } job_t;
 #define JOBS        32
 #define JOB_WAIT_MS 5000
 
@@ -231,6 +250,7 @@ static struct {
     bool    busy;
     int64_t since_ms;
     int64_t setup_ms;                   /* when its setup last started */
+    int64_t reask_ms;                   /* when what was unknown was last asked again */
 } s_jobs[AOS_ZB_DEVICES_MAX];
 
 static void run(int i);
@@ -238,7 +258,21 @@ static void run(int i);
 static void push(int i, uint8_t type, uint8_t ep, uint16_t cluster)
 {
     if (s_jobs[i].n == JOBS) return;
-    s_jobs[i].q[(s_jobs[i].head + s_jobs[i].n) % JOBS] = (job_t){ type, ep, cluster };
+    s_jobs[i].q[(s_jobs[i].head + s_jobs[i].n) % JOBS] = (job_t){ type, ep, cluster, 0 };
+    s_jobs[i].n++;
+}
+
+/* a command the person is waiting for: ahead of the setup's requests, just
+ * after the one under way (a tap waited behind a device's whole setup after
+ * a restart, a request without answer costing 5 s each, and two taps
+ * crossed; on the board, 2026-11-24) */
+static void push_first(int i, uint8_t type, uint8_t ep, uint16_t cluster)
+{
+    if (s_jobs[i].n == JOBS) return;
+    int at = s_jobs[i].busy ? 1 : 0;    /* the running one stays at the head */
+    for (int k = s_jobs[i].n; k > at; k--)
+        s_jobs[i].q[(s_jobs[i].head + k) % JOBS] = s_jobs[i].q[(s_jobs[i].head + k - 1) % JOBS];
+    s_jobs[i].q[(s_jobs[i].head + at) % JOBS] = (job_t){ type, ep, cluster, 0 };
     s_jobs[i].n++;
 }
 
@@ -298,9 +332,13 @@ static void on_simple(const ezb_zdo_simple_desc_req_result_t *res, void *ctx)
         for (int k = 0; k < sd->app_input_cluster_count; k++) {
             uint16_t c = sd->app_cluster_list[k];
             uint16_t bit = c == CL_POWER ? AOS_ZB_CL_POWER : c == CL_ONOFF ? AOS_ZB_CL_ONOFF : c == CL_TEMP ? AOS_ZB_CL_TEMP
-                         : c == CL_HUM ? AOS_ZB_CL_HUM : c == CL_OCC ? AOS_ZB_CL_OCC : c == CL_IAS ? AOS_ZB_CL_IAS : 0;
+                         : c == CL_HUM ? AOS_ZB_CL_HUM : c == CL_OCC ? AOS_ZB_CL_OCC : c == CL_IAS ? AOS_ZB_CL_IAS
+                         : c == CL_LEVEL ? AOS_ZB_CL_LEVEL : 0;
             lock();
             d->clusters |= bit;
+            int k = ep_index(d, ep);
+            if (c == CL_ONOFF && k >= 0) d->onoff_eps |= (uint8_t)(1 << k);
+            if (c == CL_LEVEL && !d->level_ep) d->level_ep = ep;
             if (d->ncl < AOS_ZB_CLUSTERS) d->cl[d->ncl++] = (uint32_t)ep << 16 | c;
             unlock();
             /* any device, not only the ones the board knows: every cluster
@@ -339,7 +377,25 @@ static void on_bind(const ezb_zdp_bind_req_result_t *res, void *ctx)
 
 static void on_cnf(ezb_af_user_cnf_t *cnf, void *ctx)
 {
-    (void)cnf;
+    int i = (int)(uintptr_t)ctx;
+    if (cnf && cnf->status) {
+        aos_hal_log(TAG, "0x%04x: cluster 0x%04x on %u: not delivered (%u)", s_dev[i].nwk, cnf->cluster_id, cnf->dst_ep,
+                    cnf->status);
+        /* A command the person asked for, not delivered: sent again, twice
+         * at most. A Tuya relay module took no frame for a few seconds after
+         * it switched (saving its state to flash, it seems: on the board,
+         * 2026-11-24, an Off right after an On came back "not delivered",
+         * and the same Off went through 8 s later); Zigbee2MQTT retries too. */
+        job_t j = s_jobs[i].q[s_jobs[i].head];
+        if (s_jobs[i].busy && (j.type == J_ONOFF || j.type == J_LEVEL) && j.tries < 2) {
+            done(i);
+            push_first(i, j.type, j.ep, j.cluster);
+            s_jobs[i].q[(s_jobs[i].head + (s_jobs[i].busy ? 1 : 0)) % JOBS].tries = (uint8_t)(j.tries + 1);
+            aos_hal_log(TAG, "0x%04x: it goes again (%u)", s_dev[i].nwk, j.tries + 1);
+            run(i);
+            return;
+        }
+    }
     on_zdo_cb(ctx);
 }
 
@@ -423,6 +479,17 @@ static void start_job(int i)
                     j->cluster == 0 ? "off" : j->cluster == 1 ? "on" : "toggle", e);
         break;
     }
+    case J_LEVEL: {
+        /* with On/Off: a dimmer that is off goes on at that level (and off at 0) */
+        ezb_zcl_level_move_to_level_cmd_t c = {
+            .cmd_ctrl = { .dst_ep = j->ep, .src_ep = 1, .cnf_ctx = { .cb = on_cnf, .user_ctx = ctx } },
+            .payload = { .level = (uint8_t)j->cluster, .transition_time = 5 },     /* 0.5 s */
+        };
+        ezb_address_set_short(&c.cmd_ctrl.dst_addr, d->nwk);
+        e = ezb_zcl_level_move_to_level_with_on_off_cmd_req(&c);
+        aos_hal_log(TAG, "0x%04x: level on %u: %u (%d)", d->nwk, j->ep, (unsigned)j->cluster, e);
+        break;
+    }
     case J_BASIC:
     case J_READ: {
         static uint16_t attrs[8];
@@ -459,10 +526,13 @@ static int64_t s_net_up_ms;              /* when the network came up, for the ne
 void aos_zigbee_devices_network_up(void);
 
 /* every second, in the stack's task: a job with no answer is let go */
+static void switch_task(void *ctx);
+
 static void tick(void *ctx)
 {
     (void)ctx;
     int64_t now = (int64_t)aos_hal_uptime_ms();
+    switch_task(NULL);                  /* a command whose post did not go in */
     /* routers show in the neighbor table after their link status (every
      * 15 s): it is looked at again 30 s and 2 min after the start */
     static int looks;
@@ -492,6 +562,8 @@ static void setup(int i)
     lock();
     s_dev[i].ncl = 0;
     s_dev[i].clusters = 0;
+    s_dev[i].onoff_eps = 0;
+    s_dev[i].level_ep = 0;
     unlock();
     push(i, J_ACTIVE, 0, 0);
     run(i);
@@ -637,6 +709,9 @@ static void apply(aos_zigbee_dev_t *d, uint16_t cl, uint8_t ep, uint16_t id, uin
     case CL_TEMP:
         if (id == 0x0000) d->temp = (int16_t)u16;
         break;
+    case CL_LEVEL:
+        if (id == 0x0000 && v[0] != 0xFF) d->level = v[0];
+        break;
     case CL_HUM:
         if (id == 0x0000) d->hum = u16;
         break;
@@ -720,6 +795,29 @@ static bool on_raw(const ezb_zcl_raw_frame_t *f)
     if (fresh) {
         aos_hal_log(TAG, "0x%04x spoke and is not in the list: setting it up", nwk);
         setup(i);
+    } else if (!unfinished && !s_jobs[i].n && (int64_t)aos_hal_uptime_ms() - s_jobs[i].reask_ms > 60000) {
+        /* set up, and awake now (it just spoke): what is still unknown of
+         * what it serves is asked for, at most once a minute (a sleepy
+         * sensor that slept through its first reads: an ORVIBO's zone type) */
+        s_jobs[i].reask_ms = (int64_t)aos_hal_uptime_ms();
+        lock();
+        const aos_zigbee_dev_t *e = &s_dev[i];
+        uint8_t ep1 = e->ep ? e->ep : 1;
+        bool ias = (e->clusters & AOS_ZB_CL_IAS) && e->zone_type == 0xFFFF;
+        bool bat = (e->clusters & AOS_ZB_CL_POWER) && e->battery == 0xFF && !e->voltage;
+        bool lvl = e->level_ep && e->level == 0xFF;
+        uint8_t lep = e->level_ep, oe = (uint8_t)(e->onoff_eps & ~e->onoff_known), eps[4];
+        memcpy(eps, e->eps_list, 4);
+        unlock();
+        if (ias) push(i, J_READ, ep1, CL_IAS);
+        if (bat) push(i, J_READ, ep1, CL_POWER);
+        if (lvl) push(i, J_READ, lep, CL_LEVEL);
+        for (int k = 0; k < 4; k++)
+            if ((oe >> k) & 1) push(i, J_READ, eps[k], CL_ONOFF);
+        if (s_jobs[i].n) {
+            aos_hal_log(TAG, "0x%04x spoke: asking again what is unknown (%u requests)", nwk, s_jobs[i].n);
+            run(i);
+        }
     } else if (!named && unfinished && !setting_up(i)) {
         /* half set up (asleep before it was done): it is awake now */
         aos_hal_log(TAG, "0x%04x spoke, its setup was not finished: again", nwk);
@@ -750,6 +848,7 @@ void aos_zigbee_devices_endpoint(ezb_af_ep_desc_t ep)
 {
     ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_power_config_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
     ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_on_off_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
+    ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_level_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
     ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_temperature_measurement_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
     ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_rel_humidity_measurement_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
     ezb_af_endpoint_add_cluster_desc(ep, ezb_zcl_occupancy_sensing_create_cluster_desc(NULL, EZB_ZCL_CLUSTER_CLIENT));
@@ -857,8 +956,8 @@ void aos_zigbee_devices_network_up(void)
     for (int i = 0; i < s_n; i++) {
         if (s_dev[i].step == AOS_ZB_DEV_LEFT || s_dev[i].step == AOS_ZB_DEV_REMOVED) continue;
         if (s_dev[i].step != AOS_ZB_DEV_DONE) {
-            if ((s_dev[i].cap & 0x08) && !setting_up(i)) setup(i);  /* awake: set it up now */
-        } else if ((s_dev[i].cap & 0x08) && !s_dev[i].heard_ms && !s_jobs[i].n) {
+            if (awake(&s_dev[i]) && !setting_up(i)) setup(i);       /* awake: set it up now */
+        } else if (awake(&s_dev[i]) && !s_dev[i].heard_ms && !s_jobs[i].n) {
             lock();
             s_dev[i].ncl = 0;
             unlock();
@@ -916,7 +1015,7 @@ bool aos_zigbee_remove(const uint8_t ieee[8])
 /* ---- an output switched (a relay, a plug, a light) ------------------------- */
 
 /* a few taps may come before the stack's task takes them */
-static struct { uint8_t ieee[8], ep, cmd; } s_sw[4];
+static struct { uint8_t ieee[8], ep, cmd; int level; } s_sw[4];     /* level < 0: an on/off */
 static volatile uint8_t s_sw_head, s_sw_tail;
 
 static void switch_task(void *ctx)
@@ -924,37 +1023,69 @@ static void switch_task(void *ctx)
     (void)ctx;
     while (s_sw_tail != s_sw_head) {
         uint8_t ieee[8], ep, cmd;
+        int level;
         lock();
         memcpy(ieee, s_sw[s_sw_tail % 4].ieee, 8);
         ep = s_sw[s_sw_tail % 4].ep;
         cmd = s_sw[s_sw_tail % 4].cmd;
+        level = s_sw[s_sw_tail % 4].level;
         s_sw_tail++;
         int i = find_ieee(ieee);
         unlock();
-        if (i < 0) continue;
+        if (i < 0) {
+            aos_hal_log(TAG, "switch: %02x%02x... is not in the list", ieee[7], ieee[6]);
+            continue;
+        }
+        aos_hal_log(TAG, "0x%04x: %s on %u asked (%u requests waiting%s)", s_dev[i].nwk,
+                    level >= 0 ? "level" : cmd == 0 ? "off" : cmd == 1 ? "on" : "toggle", ep, s_jobs[i].n,
+                    s_jobs[i].busy ? ", one under way" : "");
         /* the command, and then its state read back: a device that reports
          * it says so anyway, one that does not is asked */
-        push(i, J_ONOFF, ep, cmd);
-        push(i, J_READ, ep, CL_ONOFF);
+        /* pushed first in reverse: the command, then its reads */
+        push_first(i, J_READ, ep, CL_ONOFF);
+        if (level >= 0) {
+            push_first(i, J_READ, ep, CL_LEVEL);
+            push_first(i, J_LEVEL, ep, (uint16_t)level);
+        } else push_first(i, J_ONOFF, ep, cmd);
         run(i);
     }
 }
 
-bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd)
+static bool queue_switch(const uint8_t ieee[8], uint8_t ep, int cmd, int level)
 {
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
-    if (z.state != AOS_ZB_FORMED || cmd < 0 || cmd > 2) return false;
+    if (z.state != AOS_ZB_FORMED) return false;
     lock();
     bool room = (uint8_t)(s_sw_head - s_sw_tail) < 4;
     if (room) {
         memcpy(s_sw[s_sw_head % 4].ieee, ieee, 8);
         s_sw[s_sw_head % 4].ep = ep;
         s_sw[s_sw_head % 4].cmd = (uint8_t)cmd;
+        s_sw[s_sw_head % 4].level = level;
         s_sw_head++;
     }
     unlock();
-    return room && esp_zigbee_task_queue_post(switch_task, NULL) == ESP_OK;
+    if (!room) {
+        aos_hal_log(TAG, "switch: four already waiting");
+        return false;
+    }
+    /* one post for the ring: switch_task takes all that is in it */
+    esp_err_t e = esp_zigbee_task_queue_post(switch_task, NULL);
+    if (e != ESP_OK) aos_hal_log(TAG, "switch: the stack's queue did not take it (%s)", esp_err_to_name(e));
+    return true;                        /* in the ring: the next post (or tick) takes it */
+}
+
+bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd)
+{
+    return cmd >= 0 && cmd <= 2 && queue_switch(ieee, ep, cmd, -1);
+}
+
+bool aos_zigbee_level(const uint8_t ieee[8], uint8_t ep, int level)
+{
+    if (level < 0) level = 0;
+    if (level > 254) level = 254;
+    return queue_switch(ieee, ep, 0, level);
 }
 
 /* ---- the portal's side -------------------------------------------------- */

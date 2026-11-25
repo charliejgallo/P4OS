@@ -11030,3 +11030,4 @@ Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: u
 Sacar	Entfernen
 sin noticias desde que arrancó la placa	keine Nachricht seit dem Start der Platine
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, aus dem Netz entfernt
+brillo	Helligkeit

@@ -35,7 +35,7 @@ enum { AOS_ZB_DEV_EPS = 0, AOS_ZB_DEV_BASIC, AOS_ZB_DEV_DONE, AOS_ZB_DEV_FAILED,
        AOS_ZB_DEV_REMOVED };       /* removed: not listed, its slot kept until the next start */
 /* the clusters the board reads into values (aos_zigbee_dev_t.clusters) */
 enum { AOS_ZB_CL_POWER = 1 << 0, AOS_ZB_CL_ONOFF = 1 << 1, AOS_ZB_CL_TEMP = 1 << 2, AOS_ZB_CL_HUM = 1 << 3,
-       AOS_ZB_CL_OCC = 1 << 4, AOS_ZB_CL_IAS = 1 << 5 };
+       AOS_ZB_CL_OCC = 1 << 4, AOS_ZB_CL_IAS = 1 << 5, AOS_ZB_CL_LEVEL = 1 << 6 };
 typedef struct {
     uint16_t cluster, attr;
     uint8_t  ep, type, len;     /* ZCL type; len of v (a string: its first bytes) */
@@ -65,6 +65,9 @@ typedef struct {
     uint8_t  battery;           /* 0.5 % */
     uint8_t  voltage;           /* 0.1 V */
     uint8_t  onoff, onoff_known;        /* a bit per endpoint, eps_list's order */
+    uint8_t  onoff_eps;         /* the endpoints with an On/Off cluster, same bits */
+    uint8_t  level_ep;          /* the endpoint with Level Control (a dimmer), 0: none */
+    uint8_t  level;             /* its CurrentLevel, 0-254; 0xFF unknown */
     uint8_t  occupancy;
     uint16_t zone_type;         /* IAS: 0x0015 contact, 0x000d motion, 0x002a water, ... */
     uint16_t zone_status;       /* IAS: bit 0 alarm (open, motion, water), bit 3 battery low */
@@ -80,6 +83,8 @@ bool aos_zigbee_remove(const uint8_t ieee[8]);
 /* an output of a device (its On/Off cluster on endpoint ep): 0 off, 1 on,
  * 2 toggle. Its new state comes back in the device's values. */
 bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd);
+/* a dimmer's level (Level Control, Move to Level with On/Off), 0-254 */
+bool aos_zigbee_level(const uint8_t ieee[8], uint8_t ep, int level);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
 

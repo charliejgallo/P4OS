@@ -35,7 +35,7 @@ void ezb_tasklet_process(void);
 bool ezb_tasklet_has_pendings(void);
 
 #define NAME   "task_queue"
-#define DEPTH  16
+#define DEPTH  32                       /* the stack's own posts, the portal's and the screen's commands, the 1 s tick */
 
 typedef struct { taskq_cb_t cb; void *ctx; } item_t;
 

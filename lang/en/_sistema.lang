@@ -11030,3 +11030,4 @@ Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: u
 Sacar	Remove
 sin noticias desde que arrancó la placa	no news since the board started
 Zigbee: 0x%04x, sacado de la red	Zigbee: 0x%04x, removed from the network
+brillo	brightness

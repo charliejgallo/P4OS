@@ -67,10 +67,13 @@ static struct {
     uint8_t rm_ieee[AOS_ZB_DEVICES_MAX][8];     /* each card's device, for its Sacar */
     uint8_t armed[8];                   /* the one whose Sacar was tapped once */
     uint32_t armed_ms;
-    struct { uint8_t ieee[8], ep; } out[24];    /* each output chip on the page, for its tap */
+    struct { uint8_t ieee[8], ep, state; } out[24];     /* each output chip on the page; state: what a tap sends */
     int nout;
     uint8_t pend_ieee[8], pend_ep;      /* the output just tapped, "..." until it answers */
     uint32_t pend_ms;
+    struct { uint8_t ieee[8], ep; } lvl[8];     /* each dimmer's slider on the page */
+    int nlvl;
+    bool dragging;                      /* a slider held: the page is not redrawn under the finger */
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -566,7 +569,13 @@ static void out_cb(lv_event_t *e)
 {
     int k = (int)(intptr_t)lv_event_get_user_data(e);
     if (k < 0 || k >= U.nout) return;
-    if (!aos_zigbee_onoff(U.out[k].ieee, U.out[k].ep, 2)) {
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    /* a second tap while the first goes is not another command */
+    if (!memcmp(U.pend_ieee, U.out[k].ieee, 8) && U.pend_ep == U.out[k].ep && now - U.pend_ms < 1500) return;
+    /* On or Off, from the state the chip shows; Toggle only for one not
+     * known yet: two Toggles that cross undo each other (on the board,
+     * 2026-11-24, a relay that went on and would not go off) */
+    if (!aos_zigbee_onoff(U.out[k].ieee, U.out[k].ep, U.out[k].state)) {
         aos_ui_toast(_("La red no tomó el pedido"), 2000);
         return;
     }
@@ -574,6 +583,34 @@ static void out_cb(lv_event_t *e)
     U.pend_ep = U.out[k].ep;
     U.pend_ms = (uint32_t)aos_hal_uptime_ms();
     U.devs_tick = 0;
+}
+
+/* a dimmer's slider: held, the page waits; let go, the level is sent (Move
+ * to Level with On/Off: 0 turns it off, any other level on) */
+static void lvl_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    lv_event_code_t c = lv_event_get_code(e);
+    if (c == LV_EVENT_PRESSED) U.dragging = true;
+    else if (c == LV_EVENT_RELEASED || c == LV_EVENT_PRESS_LOST) {
+        U.dragging = false;
+        if (k < 0 || k >= U.nlvl) return;
+        int v = lv_slider_get_value(lv_event_get_target(e));
+        if (!aos_zigbee_level(U.lvl[k].ieee, U.lvl[k].ep, v)) aos_ui_toast(_("La red no tomó el pedido"), 2000);
+        U.devs_tick = 1;                /* redrawn in a moment, with its answer */
+    }
+}
+
+/* what the board already shows by name, left out of the raw lines */
+static bool named_attr(const aos_zigbee_attr_t *a)
+{
+    if (a->type == 0xFF) return a->cluster == 0x0500 && a->attr == 0x00;   /* IAS zone status change */
+    switch (a->cluster) {
+    case 0x0001: return a->attr == 0x0020 || a->attr == 0x0021;
+    case 0x0006: case 0x0008: case 0x0402: case 0x0405: case 0x0406: return a->attr == 0x0000;
+    case 0x0500: return a->attr == 0x0001 || a->attr == 0x0002;
+    default: return false;
+    }
 }
 
 static lv_obj_t *add_value(lv_obj_t *row, const char *text, lv_color_t c)
@@ -623,6 +660,7 @@ static void fill_net(int32_t w)
                               z.channel, n);
     lv_obj_clean(U.net);
     U.nout = 0;
+    U.nlvl = 0;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     for (int i = n - 1; i >= 0; i--) {
         const aos_zigbee_dev_t *e = &d[i];
@@ -692,6 +730,7 @@ static void fill_net(int32_t w)
                     /* a button: tapped, the output switches */
                     memcpy(U.out[U.nout].ieee, e->ieee, 8);
                     U.out[U.nout].ep = e->eps_list[q];
+                    U.out[U.nout].state = on ? 0 : 1;           /* on: off; off: on */
                     lv_obj_set_style_border_width(chip, 2, 0);
                     lv_obj_set_style_border_color(chip, on ? AOS_C_YELLOW : AOS_C_DIM, 0);
                     lv_obj_set_style_pad_hor(chip, 22, 0);
@@ -701,6 +740,10 @@ static void fill_net(int32_t w)
                     U.nout++;
                 }
             }
+        if (e->level_ep && e->level != 0xFF) {
+            snprintf(v, sizeof v, "%s %d %%", _("brillo"), (e->level * 100 + 127) / 254);
+            add_value(vals, v, AOS_C_YELLOW);
+        }
         if (e->battery != 0xFF) {
             snprintf(v, sizeof v, "%s %u %%", _("batería"), e->battery / 2);
             add_value(vals, v, e->battery < 40 ? AOS_C_RED : AOS_C_DIM);
@@ -709,6 +752,22 @@ static void fill_net(int32_t w)
             add_value(vals, v, AOS_C_DIM);
         }
         if (!lv_obj_get_child_count(vals)) lv_obj_add_flag(vals, LV_OBJ_FLAG_HIDDEN);
+        if (e->level_ep && U.nlvl < (int)(sizeof U.lvl / sizeof U.lvl[0])) {
+            lv_obj_t *sl = lv_slider_create(r);
+            lv_obj_set_width(sl, w - 36 - 40);
+            lv_obj_set_style_margin_hor(sl, 20, 0);
+            lv_obj_set_style_margin_ver(sl, 14, 0);
+            lv_slider_set_range(sl, 0, 254);
+            lv_slider_set_value(sl, e->level == 0xFF ? 0 : e->level, LV_ANIM_OFF);
+            lv_obj_set_style_bg_color(sl, AOS_C_YELLOW, LV_PART_INDICATOR);
+            lv_obj_set_style_bg_color(sl, AOS_C_TEXT, LV_PART_KNOB);
+            memcpy(U.lvl[U.nlvl].ieee, e->ieee, 8);
+            U.lvl[U.nlvl].ep = e->level_ep;
+            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESSED, (void *)(intptr_t)U.nlvl);
+            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_RELEASED, (void *)(intptr_t)U.nlvl);
+            lv_obj_add_event_cb(sl, lvl_cb, LV_EVENT_PRESS_LOST, (void *)(intptr_t)U.nlvl);
+            U.nlvl++;
+        }
 
         /* and what it said raw, the newest first: any device's */
         int order[AOS_ZB_ATTRS];
@@ -723,6 +782,7 @@ static void fill_net(int32_t w)
         for (int q = 0; q < e->nattr; q++) {
             int best = order[q];
             const aos_zigbee_attr_t *at = &e->attr[best];
+            if (named_attr(at)) continue;
             char hex[2 * sizeof at->v + 1];
             for (int m = 0; m < at->len; m++) snprintf(hex + 2 * m, 3, "%02x", at->v[m]);
             hex[2 * at->len] = '\0';
@@ -750,7 +810,7 @@ static void fill_net(int32_t w)
 static void refresh(void)
 {
     if (U.page_no == P_DEVICES && U.devs && U.devs_tick++ % 4 == 0) fill_devices(U.W - 2 * AOS_UI_PAD);
-    if (U.page_no == P_NET && U.net && U.devs_tick++ % 4 == 0) fill_net(U.W - 2 * AOS_UI_PAD);
+    if (U.page_no == P_NET && U.net && !U.dragging && U.devs_tick++ % 4 == 0) fill_net(U.W - 2 * AOS_UI_PAD);
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;

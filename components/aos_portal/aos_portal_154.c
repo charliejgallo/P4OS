@@ -48,6 +48,8 @@
  *                                  device to leave and forgets it
  *   POST /api/154/zbonoff          {"ieee": "...", "ep": 1, "on": true}:
  *                                  switches an output ("on" left out: toggles)
+ *   POST /api/154/zblevel          {"ieee": "...", "ep": 1, "level": 127}:
+ *                                  a dimmer's level, 0-254 (0: off)
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -149,6 +151,11 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
             if (d->battery != 0xFF) cJSON_AddNumberToObject(v, "battery", d->battery / 2.0);
             if (d->voltage) cJSON_AddNumberToObject(v, "voltage", d->voltage / 10.0);
             if (d->occupancy != 0xFF) cJSON_AddBoolToObject(v, "occupancy", d->occupancy & 1);
+            if (d->level_ep && d->level != 0xFF) {
+                cJSON *l = cJSON_AddObjectToObject(v, "level");
+                cJSON_AddNumberToObject(l, "ep", d->level_ep);
+                cJSON_AddNumberToObject(l, "value", d->level);
+            }
             if (d->onoff_known) {
                 cJSON *o = cJSON_AddArrayToObject(v, "on");
                 for (int k = 0; k < d->neps; k++)
@@ -329,7 +336,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
     else if (!strcmp(what, "zbhost")) ok = aos_zigbee_start((int)num(b, "channel", 26));
     else if (!strcmp(what, "zbpermit")) ok = aos_zigbee_permit((int)num(b, "seconds", 180));
-    else if (!strcmp(what, "zbremove") || !strcmp(what, "zbonoff")) {
+    else if (!strcmp(what, "zbremove") || !strcmp(what, "zbonoff") || !strcmp(what, "zblevel")) {
         const cJSON *ie = cJSON_GetObjectItem(b, "ieee");
         uint8_t ieee[8];
         ok = cJSON_IsString(ie) && strlen(ie->valuestring) == 16;
@@ -339,6 +346,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
             ieee[7 - k] = (uint8_t)v;
         }
         if (ok && what[2] == 'r') ok = aos_zigbee_remove(ieee);
+        else if (ok && what[2] == 'l') ok = aos_zigbee_level(ieee, (uint8_t)num(b, "ep", 1), (int)num(b, "level", 254));
         else if (ok) {
             const cJSON *on = cJSON_GetObjectItem(b, "on");
             ok = aos_zigbee_onoff(ieee, (uint8_t)num(b, "ep", 1), cJSON_IsBool(on) ? cJSON_IsTrue(on) : 2);

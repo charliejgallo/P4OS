@@ -405,10 +405,38 @@ velocidad que sin Zigbee. Lo de cada paso:
   reporta lo dice igual; uno que no, contesta). También
   `POST /api/154/zbonoff {"ieee": ..., "ep": 1, "on": true}` ("on" sin
   poner: Toggle). Probado con el módulo de relés Tuya TS0002: apagar y
-  prender la salida 1 desde el portal. **Visto en la foto del usuario,
-  para pulir:** el contacto ORVIBO sale como "alarma: normal" (no contestó
-  su tipo de zona, 0x0015 "contacto") y su batería en 15 % (ORVIBO manda
-  el porcentaje entero, no en medios: Zigbee2MQTT lo corrige por modelo).
+  prender la salida 1 desde el portal. Pulido con el usuario (2026-11-24,
+  noche):
+  - **On u Off explícito**, según lo que muestra la ficha (Toggle sólo si el
+    estado no se sabe): dos Toggle que se cruzan se anulan.
+  - **El pedido de la persona primero**: entra a la cola del equipo delante
+    de su configuración (después de un reinicio, un toque esperaba detrás
+    de todos los pedidos de configuración, 5 s cada uno sin respuesta).
+  - **Reintento**: un comando "no entregado" (167, sin acuse) se manda otra
+    vez, dos veces a lo sumo. El módulo Tuya TS0002 no toma nada por unos
+    segundos justo después de conmutar (guarda el estado en su flash, parece):
+    el Off justo después de un On volvía "no entregado".
+  - **Los de red eléctrica** (router, o fuente "red" o "continua" del Basic)
+    se tratan como despiertos al arrancar: el TS0002 volvía de la lista
+    guardada sin esa marca y no se le preguntaba nada (por eso mostraba una
+    sola salida).
+  - **Lo que falta se vuelve a pedir** cuando el equipo habla (está despierto):
+    tipo de zona, batería, nivel, salidas sin estado; a lo sumo una vez por
+    minuto.
+  - **Fichas más limpias**: las líneas crudas sólo para lo que la placa no
+    nombra.
+  Probado con el TS0002 desde el portal: ocho órdenes seguidas (On y Off en
+  las dos salidas), el estado leído siempre el pedido.
+- **Dimmers** (pedido del usuario, para el DomcomDimmer: `../DOMCOM-Dimmer`,
+  un *Dimmable Light* 0x0101 router con On/Off y Level Control): cualquier
+  equipo con el cluster Level Control (0x0008) muestra "brillo N %" y un
+  deslizador; al soltarlo, *Move to Level with On/Off* (0 lo apaga, otro
+  nivel lo prende) en 0,5 s, y el nivel se vuelve a leer. También
+  `POST /api/154/zblevel {"ieee", "ep", "level": 0-254}`. **Sin probar con
+  un dimmer todavía.**
+- **Nota para probar desde la Mac:** zsh no parte `$var` en palabras: un
+  `for p in "1 true"; set -- $p` armó JSON roto y la placa contestó
+  `ok:false` (con razón). El portal estaba bien.
 - **Para qué** (el usuario, 2026-11-24): un banco de pruebas de campo. Si
   un equipo en una obra no se une al Home Assistant o anda raro, se lo une
   a la placa y se ve qué es, qué manda y si sus salidas responden; y al
