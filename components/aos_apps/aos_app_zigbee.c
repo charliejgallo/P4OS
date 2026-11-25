@@ -76,6 +76,12 @@ static struct {
     int nctl;
     int nlvl;
     bool dragging;                      /* a slider held: the page is not redrawn under the finger */
+    /* the IR blaster's codes: the name being typed for the last one learned,
+     * and the saved one held once (held again within 4 s, it is forgotten) */
+    lv_obj_t *naming, *name_ta, *name_kb;
+    uint8_t name_ieee[8];
+    int ir_armed;
+    uint32_t ir_armed_ms;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -656,7 +662,106 @@ static void add_slider(lv_obj_t *card, int32_t w, const uint8_t ieee[8], uint8_t
 /* A control's button: a curtain's up, stop and down; a thermostat's setpoint
  * half a degree either way; a lock; a fan's mode, the next one; a Tuya
  * datapoint (a bool, flipped); the IR blaster's learning and sending */
-enum { B_COVER = 0, B_SETPOINT, B_LOCK, B_FAN, B_DP, B_IR_LEARN, B_IR_SEND };
+enum { B_COVER = 0, B_SETPOINT, B_LOCK, B_FAN, B_DP, B_IR_LEARN, B_IR_SEND, B_IR_SAVE, B_IR_SAVED };
+
+/* a finger on the screen: the page is not redrawn under it (a hold that
+ * outlived its button would be lost, and a tap with it) */
+static bool finger_down(void)
+{
+    for (lv_indev_t *i = lv_indev_get_next(NULL); i; i = lv_indev_get_next(i))
+        if (lv_indev_get_type(i) == LV_INDEV_TYPE_POINTER && lv_indev_get_state(i) == LV_INDEV_STATE_PRESSED) return true;
+    return false;
+}
+
+/* ---- naming the code just learned ---------------------------------------- */
+
+static void naming_close(void)
+{
+    if (U.naming) lv_obj_delete(U.naming);
+    U.naming = U.name_ta = U.name_kb = NULL;
+    U.devs_tick = 0;
+}
+
+static void naming_done(void)
+{
+    const char *t = lv_textarea_get_text(U.name_ta);
+    while (*t == ' ') t++;
+    if (!*t) {
+        aos_ui_toast(_("Ponele un nombre"), 1600);
+        return;
+    }
+    if (aos_zigbee_ir_save(U.name_ieee, t)) aos_ui_toast(_("Guardado"), 1400);
+    else aos_ui_toast(_("No se pudo guardar (¿hay tarjeta?)"), 2200);
+    naming_close();
+}
+
+static void naming_kb_cb(lv_event_t *e)
+{
+    lv_event_code_t c = lv_event_get_code(e);
+    if (c == LV_EVENT_READY) naming_done();
+    else if (c == LV_EVENT_CANCEL) naming_close();
+}
+
+static void naming_btn_cb(lv_event_t *e)
+{
+    if (lv_event_get_user_data(e)) naming_done();
+    else naming_close();
+}
+
+static void naming_open(const uint8_t ieee[8])
+{
+    if (U.naming) return;
+    memcpy(U.name_ieee, ieee, 8);
+    U.naming = box(U.root, U.W, U.H);
+    lv_obj_set_style_bg_color(U.naming, AOS_C_BG, 0);
+    lv_obj_set_style_bg_opa(U.naming, LV_OPA_COVER, 0);
+    lv_obj_add_flag(U.naming, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_t *head = box(U.naming, U.W, 96);
+    lv_obj_t *cancel = pill(head, _("Cancelar"), false, naming_btn_cb, (void *)0, NULL);
+    lv_obj_align(cancel, LV_ALIGN_LEFT_MID, AOS_UI_PAD, 0);
+    lv_obj_t *t = aos_label(head, _("Nombre del código"), aos_font_body, AOS_C_TEXT);
+    lv_obj_center(t);
+    lv_obj_t *ok = pill(head, _("Guardar"), true, naming_btn_cb, (void *)1, NULL);
+    lv_obj_align(ok, LV_ALIGN_RIGHT_MID, -AOS_UI_PAD, 0);
+    U.name_ta = lv_textarea_create(U.naming);
+    lv_textarea_set_one_line(U.name_ta, true);
+    lv_textarea_set_max_length(U.name_ta, AOS_ZB_IR_NAME);
+    lv_textarea_set_placeholder_text(U.name_ta, _("Por ejemplo: Tele, volumen +"));
+    lv_obj_set_size(U.name_ta, U.W - 2 * AOS_UI_PAD, 88);
+    lv_obj_align(U.name_ta, LV_ALIGN_TOP_LEFT, AOS_UI_PAD, 112);
+    lv_obj_set_style_text_font(U.name_ta, aos_font_body, 0);
+    lv_obj_set_style_bg_color(U.name_ta, AOS_C_CARD, 0);
+    lv_obj_set_style_text_color(U.name_ta, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(U.name_ta, 0, 0);
+    lv_obj_set_style_radius(U.name_ta, 20, 0);
+    lv_obj_set_style_pad_hor(U.name_ta, 24, 0);
+    lv_obj_set_style_pad_ver(U.name_ta, 22, 0);
+    lv_obj_add_state(U.name_ta, LV_STATE_FOCUSED);
+    U.name_kb = lv_keyboard_create(U.naming);
+    lv_obj_set_size(U.name_kb, U.W, U.W > U.H ? U.H / 2 : U.H * 2 / 5);
+    lv_obj_align(U.name_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+    aos_keyboard_style(U.name_kb, aos_font_body);
+    lv_keyboard_set_textarea(U.name_kb, U.name_ta);
+    lv_obj_add_event_cb(U.name_kb, naming_kb_cb, LV_EVENT_ALL, NULL);
+}
+
+/* a saved code held: armed the first time, forgotten the second */
+static void saved_hold_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    if (k < 0 || k >= U.nctl) return;
+    int i = (int)U.ctl[k].arg;
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    if (U.ir_armed == i && now - U.ir_armed_ms < 4000) {
+        U.ir_armed = -1;
+        aos_ui_toast(aos_zigbee_ir_forget(i) ? _("Código borrado") : _("No se pudo borrar"), 1600);
+    } else {
+        U.ir_armed = i;
+        U.ir_armed_ms = now;
+        aos_ui_toast(_("Mantenelo apretado otra vez para borrarlo"), 2200);
+    }
+    U.devs_tick = 0;
+}
 
 static void ctl_cb(lv_event_t *e)
 {
@@ -693,6 +798,8 @@ static void ctl_cb(lv_event_t *e)
         ok = code[0] && aos_zigbee_ir_send(ie, code);
         break;
     }
+    case B_IR_SAVE: naming_open(ie); return;
+    case B_IR_SAVED: ok = aos_zigbee_ir_send_saved((int)a); break;
     }
     if (!ok) aos_ui_toast(_("La red no tomó el pedido"), 2000);
     U.devs_tick = 1;
@@ -707,6 +814,14 @@ static void add_ctl(lv_obj_t *row, const char *text, const uint8_t ieee[8], uint
     U.ctl[U.nctl].arg = arg;
     lv_obj_t *b = pill(row, text, strong, ctl_cb, (void *)(intptr_t)U.nctl, NULL);
     lv_obj_set_height(b, 52);
+    if (kind == B_IR_SAVED) {
+        /* a tap sends it, a hold is for forgetting: the tap only when short */
+        lv_obj_remove_event_cb(b, ctl_cb);
+        lv_obj_add_event_cb(b, ctl_cb, LV_EVENT_SHORT_CLICKED, (void *)(intptr_t)U.nctl);
+        lv_obj_add_event_cb(b, saved_hold_cb, LV_EVENT_LONG_PRESSED, (void *)(intptr_t)U.nctl);
+        if (U.ir_armed == arg && (uint32_t)aos_hal_uptime_ms() - U.ir_armed_ms < 4000)
+            lv_obj_set_style_bg_color(b, AOS_C_ORANGE, 0);
+    }
     U.nctl++;
 }
 
@@ -948,8 +1063,29 @@ static void fill_net(int32_t w)
             bool learning = mine && (st == AOS_ZB_IR_LEARNING || st == AOS_ZB_IR_RECEIVING);
             add_ctl(ctls, learning ? _("Esperando el control remoto... (tocá para cancelar)") : _("Aprender un código"),
                     e->ieee, e->ep, B_IR_LEARN, !learning, learning);
-            if (code[0]) add_ctl(ctls, _("Enviar el último aprendido"), e->ieee, e->ep, B_IR_SEND, 0, false);
+            if (code[0]) {
+                add_ctl(ctls, _("Enviar el último aprendido"), e->ieee, e->ep, B_IR_SEND, 0, false);
+                add_ctl(ctls, _("Guardarlo..."), e->ieee, e->ep, B_IR_SAVE, 0, false);
+            }
             if (mine && st == AOS_ZB_IR_SENDING) add_value(vals, _("enviando..."), AOS_C_ACCENT);
+            if (mine && st == AOS_ZB_IR_FAILED) add_value(vals, _("no tomó el código"), AOS_C_ORANGE);
+            /* its saved codes, a button each */
+            static aos_zigbee_ir_code_t sv[48];
+            int ns = aos_zigbee_ir_codes(sv, 48), shown = 0;
+            lv_obj_t *codes = NULL;
+            for (int k = 0; k < ns; k++) {
+                if (memcmp(sv[k].ieee, e->ieee, 8)) continue;
+                if (!codes) {
+                    wrap(r, _("Guardados (tocá para mandar, mantené para borrar):"), aos_font_small, AOS_C_DIM, w - 36);
+                    codes = box(r, w - 36, LV_SIZE_CONTENT);
+                    lv_obj_set_flex_flow(codes, LV_FLEX_FLOW_ROW_WRAP);
+                    lv_obj_set_style_pad_column(codes, 10, 0);
+                    lv_obj_set_style_pad_row(codes, 10, 0);
+                }
+                add_ctl(codes, sv[k].name, e->ieee, e->ep, B_IR_SAVED, k, false);
+                shown++;
+            }
+            (void)shown;
         }
         if (!lv_obj_get_child_count(ctls)) lv_obj_add_flag(ctls, LV_OBJ_FLAG_HIDDEN);
         if (e->level_ep) add_slider(r, w, e->ieee, e->level_ep, SL_LEVEL, 0, 254, e->level == 0xFF ? 0 : e->level, AOS_C_YELLOW);
@@ -999,7 +1135,8 @@ static void fill_net(int32_t w)
 static void refresh(void)
 {
     if (U.page_no == P_DEVICES && U.devs && U.devs_tick++ % 4 == 0) fill_devices(U.W - 2 * AOS_UI_PAD);
-    if (U.page_no == P_NET && U.net && !U.dragging && U.devs_tick++ % 4 == 0) fill_net(U.W - 2 * AOS_UI_PAD);
+    if (U.page_no == P_NET && U.net && !U.dragging && !U.naming && !finger_down() && U.devs_tick++ % 4 == 0)
+        fill_net(U.W - 2 * AOS_UI_PAD);
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;
@@ -1095,6 +1232,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     memset(&U, 0, sizeof U);
     U.root = root;
     U.chan = 15;
+    U.ir_armed = -1;
     U.t_open = (uint32_t)aos_hal_uptime_ms();
     lv_obj_update_layout(root);
     U.W = lv_obj_get_width(root);

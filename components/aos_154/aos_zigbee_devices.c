@@ -1645,7 +1645,7 @@ bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t
 
 /* ---- the IR blaster, from the portal and the screen ------------------------ */
 
-static struct { uint8_t ieee[8]; bool learn, start; char *code; } s_ir_req;
+static struct { uint8_t ieee[8]; bool learn, start; char *code; uint32_t freq; } s_ir_req;
 
 static void ir_task(void *ctx)
 {
@@ -1669,8 +1669,8 @@ static void ir_task(void *ctx)
     if (!s_ir.msg) s_ir.msg = heap_caps_malloc(IR_CAP * 4 / 3 + 128, MALLOC_CAP_SPIRAM);
     if (!s_ir.msg || !s_ir_req.code) return;
     int n = snprintf(s_ir.msg, IR_CAP * 4 / 3 + 128,
-                     "{\"key_num\":1,\"delay\":300,\"key1\":{\"num\":1,\"freq\":38000,\"type\":1,\"key_code\":\"%s\"}}",
-                     s_ir_req.code);
+                     "{\"key_num\":1,\"delay\":300,\"key1\":{\"num\":1,\"freq\":%u,\"type\":1,\"key_code\":\"%s\"}}",
+                     (unsigned)(s_ir_req.freq ? s_ir_req.freq : 38000), s_ir_req.code);
     free(s_ir_req.code);
     s_ir_req.code = NULL;
     if (n <= 0 || n >= IR_CAP * 4 / 3 + 128) return;
@@ -1693,7 +1693,34 @@ bool aos_zigbee_ir_learn(const uint8_t ieee[8], bool start)
     return esp_zigbee_task_queue_post(ir_task, NULL) == ESP_OK;
 }
 
-bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64)
+static bool ir_send_at(const uint8_t ieee[8], const char *code_b64, uint32_t freq);
+
+bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64) { return ir_send_at(ieee, code_b64, 38000); }
+
+bool aos_zigbee_ir_send_raw(const uint8_t ieee[8], const uint32_t *d, int n, uint32_t freq)
+{
+    static char code[IR_CAP * 4 / 3 + 4];
+    if (aos_zigbee_ir_encode(d, n, code, sizeof code) <= 0) return false;
+    /* the carrier as remotes have it, within what an IR LED driver makes */
+    if (freq < 30000 || freq > 60000) freq = 38000;
+    return ir_send_at(ieee, code, freq);
+}
+
+int aos_zigbee_ir_blasters(uint8_t (*ieee)[8], char (*name)[33], int max)
+{
+    int n = 0;
+    lock();
+    for (int i = 0; i < s_n && n < max; i++) {
+        if (s_dev[i].step == AOS_ZB_DEV_REMOVED || !(s_dev[i].clusters & AOS_ZB_CL_IR)) continue;
+        memcpy(ieee[n], s_dev[i].ieee, 8);
+        snprintf(name[n], 33, "%s", s_dev[i].model[0] ? s_dev[i].model : "IR");
+        n++;
+    }
+    unlock();
+    return n;
+}
+
+static bool ir_send_at(const uint8_t ieee[8], const char *code_b64, uint32_t freq)
 {
     aos_zigbee_info_t z;
     aos_zigbee_info(&z);
@@ -1707,6 +1734,7 @@ bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64)
     s_ir_req.code = c;
     memcpy(s_ir_req.ieee, ieee, 8);
     s_ir_req.learn = false;
+    s_ir_req.freq = freq;
     return esp_zigbee_task_queue_post(ir_task, NULL) == ESP_OK;
 }
 

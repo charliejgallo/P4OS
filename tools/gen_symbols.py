@@ -36,13 +36,17 @@ DEFAULT_LIBS = ["lvgl__lvgl", "lvgl_port_lib",
                 # X25519, Ed25519, ChaCha20, Poly1305... for the SSH client app
                 "monocypher",
                 # of the SSH server, only what ONLY_PREFIXES lets through
-                "aos_ssh"]
+                "aos_ssh",
+                # of Zigbee, the IR blasters and what the network is (Infrarrojo
+                # sends through a blaster), through ONLY_PREFIXES too
+                "aos_154"]
 
 # Libraries of which only some names are the apps': aos_ssh is the board's
 # SSH server and its shell; an app gets the wire helpers, the packet cipher
 # and the signature check (aos_ssh_wire.h, aos_ssh_chacha.h), not the server.
 ONLY_PREFIXES = {"aos_ssh": ("wb_", "rb_", "namelist_has", "ssh_chachapoly_", "ssh_key_verify",
-                             "ssh_key_describe", "SSH_SIG_ALGS")}
+                             "ssh_key_describe", "SSH_SIG_ALGS"),
+                 "aos_154": ("aos_zigbee_ir_", "aos_zigbee_info$", "aos_zigbee_devices$")}
 
 # libc and libm functions nearly any app will need and that the table
 # elf_loader brings does NOT include (snprintf, for instance: there you only
@@ -288,7 +292,9 @@ def collect(nm, archive, only=None):
             continue
         if SKIP_OBJECTS.search(name):
             continue
-        if only and not name.startswith(only):
+        # a name ending in '$' in ONLY_PREFIXES is that name alone
+        if only and not name.startswith(tuple(o for o in only if not o.endswith("$"))) \
+                and name + "$" not in only:
             continue
         symbols.append(name)
     return symbols

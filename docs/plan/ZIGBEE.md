@@ -489,9 +489,27 @@ velocidad que sin Zigbee. Lo de cada paso:
     contestó al tercer o cuarto primer marco (7 s) y una vez a ninguno
     en 10 s; los siguientes salieron en medio segundo. Por eso la espera
     es de 15 s, y cada marco de la transferencia queda en el log
-    ("IR: from the blaster") para mirar el próximo que falle. El código
-    aprendido vive en la RAM: se pierde al reiniciar (guardarlo por
-    nombre es lo que sigue).
+    ("IR: from the blaster") para mirar el próximo que falle.
+  - **Códigos guardados** (2026-11-25): "Guardarlo..." le pone nombre al
+    último aprendido y queda en `zigbee/ir.txt` de la tarjeta (una línea
+    por código: IEEE del emisor, nombre, el código tal cual lo dio). En la
+    tarjeta del emisor, un botón por código: tocarlo lo manda, mantenerlo
+    dos veces lo borra. Portal: `zbir` con `save`, `saved` (mandar),
+    `forget`, y `raw` (duraciones cualesquiera); la lista en
+    `zbhost.ir.codes`.
+  - **El formato del código** (`aos_zigbee_ir.c`, también en el
+    simulador): base64 de FastLZ nivel 1 sobre duraciones de 16 bits LE
+    en µs, empezando por una marca. La placa lo lee y lo arma (copias
+    hacia atrás de 3 bytes o más; un aire acondicionado queda en una
+    fracción, y el emisor lo pide de a 50 bytes), así manda cualquier
+    código en duraciones: la biblioteca SmartIR de la app Infrarrojo, que
+    las apps alcanzan por `aos_zigbee_ir_*` (exportadas a las apps, sólo
+    esas, con `aos_zigbee_info` y `aos_zigbee_devices`:
+    `tools/gen_symbols.py`). Probado ida y vuelta (200 códigos al azar) y
+    contra el lector de la página de Infrarrojo.
+  - **Simulador:** `P4_SIM_ZB_IR=1` finge la red en el canal 26 con un
+    TS1201: aprender da un NEC (dirección 0x04) a los 3 s, mandar termina
+    en 0,8 s y queda en el log.
   - **"Sumar Zigbee 3.0"** en Mi red (`POST /api/154/zbpermit` con
     `board`, `strict` y `static`): abre la red sólo en la placa (no en los
     routers: cierra todo y abre la placa 1,5 s después, si no un "cerrar"

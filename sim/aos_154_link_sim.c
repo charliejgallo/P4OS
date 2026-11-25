@@ -13,6 +13,8 @@
 #include "aos_hal.h"
 
 #include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -235,7 +237,6 @@ bool aos_154_link_spinel(const uint8_t *data, size_t len)
 /* no Zigbee stack in the simulator (aos_zigbee_p4.c is the board's) */
 #include "aos_zigbee.h"
 bool aos_zigbee_start(int channel) { (void)channel; return false; }
-void aos_zigbee_info(aos_zigbee_info_t *out) { memset(out, 0, sizeof *out); }
 bool aos_zigbee_permit(int seconds) { (void)seconds; return false; }
 bool aos_zigbee_permit_board(int seconds) { (void)seconds; return false; }
 bool aos_zigbee_permit_strict(int seconds, bool board) { (void)seconds; (void)board; return false; }
@@ -248,8 +249,120 @@ bool aos_zigbee_command(const uint8_t ieee[8], uint8_t ep, uint16_t cluster, uin
 bool aos_zigbee_write(const uint8_t ieee[8], uint8_t ep, uint16_t cluster, uint16_t attr, uint8_t type, const void *value,
                       int len) { (void)ieee; (void)ep; (void)cluster; (void)attr; (void)type; (void)value; (void)len; return false; }
 bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t value) { (void)ieee; (void)dp; (void)type; (void)value; return false; }
-bool aos_zigbee_ir_learn(const uint8_t ieee[8], bool start) { (void)ieee; (void)start; return false; }
-bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64) { (void)ieee; (void)code_b64; return false; }
-int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n) { memset(ieee, 0, 8); if (n) code[0] = 0; return 0; }
 int aos_zigbee_permit_left(void) { return 0; }
-int aos_zigbee_devices(aos_zigbee_dev_t *out, int max) { (void)out; (void)max; return 0; }
+
+/* ---- P4_SIM_ZB_IR=1: a network formed on channel 26 with a Tuya IR blaster
+ * in it, for the Zigbee app's card and the Infrarrojo app's sending through
+ * it. Learning gives an NEC code (address 0x04, the command counting up) 3 s
+ * after it starts; a sending is done in 0.8 s. Nothing goes anywhere. */
+
+static const uint8_t SIM_IR_IEEE[8] = { 0x7a, 0x4b, 0x0c, 0xff, 0xfe, 0x8e, 0x2f, 0xa4 };
+static struct { int state; int64_t t0; uint8_t cmd; char learned[400]; } s_sir;
+
+static bool sim_ir(void)
+{
+    const char *e = getenv("P4_SIM_ZB_IR");
+    return e && e[0] == '1';
+}
+
+void aos_zigbee_info(aos_zigbee_info_t *out)
+{
+    memset(out, 0, sizeof *out);
+    if (sim_ir()) {
+        out->state = AOS_ZB_FORMED;
+        out->channel = 26;
+    }
+}
+
+int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
+{
+    if (!sim_ir() || max < 1) return 0;
+    memset(out, 0, sizeof *out);
+    memcpy(out->ieee, SIM_IR_IEEE, 8);
+    out->nwk = 0x3c1d;
+    out->ep = 1;
+    out->step = AOS_ZB_DEV_DONE;
+    out->clusters = AOS_ZB_CL_IR;
+    out->cap = 0x8e;                    /* a router, mains powered */
+    out->power = 0x01;
+    out->rssi = -48;
+    out->temp = INT16_MIN;
+    out->hum = 0xFFFF;
+    out->battery = 0xFF;
+    out->voltage = 0;
+    out->occupancy = 0xFF;
+    out->zone_type = 0xFFFF;
+    out->level = 0xFF;
+    out->seen_ms = out->heard_ms = aos_hal_uptime_ms();
+    snprintf(out->manuf, sizeof out->manuf, "_TZ3290_nba3knpsarkawgnt");
+    snprintf(out->model, sizeof out->model, "TS1201");
+    return 1;
+}
+
+int aos_zigbee_ir_blasters(uint8_t (*ieee)[8], char (*name)[33], int max)
+{
+    if (!sim_ir() || max < 1) return 0;
+    memcpy(ieee[0], SIM_IR_IEEE, 8);
+    snprintf(name[0], 33, "TS1201");
+    return 1;
+}
+
+static void sim_ir_advance(void)
+{
+    int64_t now = (int64_t)aos_hal_uptime_ms();
+    if (s_sir.state == AOS_ZB_IR_LEARNING && now - s_sir.t0 > 3000) {
+        uint32_t d[68];
+        int n = 0;
+        uint32_t bits = 0x04u | (uint32_t)(uint8_t)~0x04 << 8 | (uint32_t)s_sir.cmd << 16 | (uint32_t)(uint8_t)~s_sir.cmd << 24;
+        d[n++] = 9000;
+        d[n++] = 4500;
+        for (int k = 0; k < 32; k++) {
+            d[n++] = 560;
+            d[n++] = bits >> k & 1 ? 1690 : 560;
+        }
+        d[n++] = 560;
+        s_sir.cmd++;
+        if (aos_zigbee_ir_encode(d, n, s_sir.learned, sizeof s_sir.learned) > 0) s_sir.state = AOS_ZB_IR_LEARNED;
+        else s_sir.state = AOS_ZB_IR_FAILED;
+    } else if (s_sir.state == AOS_ZB_IR_SENDING && now - s_sir.t0 > 800) {
+        s_sir.state = AOS_ZB_IR_SENT;
+    }
+}
+
+bool aos_zigbee_ir_learn(const uint8_t ieee[8], bool start)
+{
+    if (!sim_ir() || memcmp(ieee, SIM_IR_IEEE, 8)) return false;
+    s_sir.state = start ? AOS_ZB_IR_LEARNING : AOS_ZB_IR_IDLE;
+    s_sir.t0 = (int64_t)aos_hal_uptime_ms();
+    return true;
+}
+
+static bool sim_ir_send(const uint8_t ieee[8], int n, uint32_t freq)
+{
+    if (!sim_ir() || memcmp(ieee, SIM_IR_IEEE, 8) || n <= 0) return false;
+    if (s_sir.state == AOS_ZB_IR_SENDING) return false;
+    aos_hal_log("zigbee", "sim: the IR blaster sends %d durations at %u Hz", n, (unsigned)freq);
+    s_sir.state = AOS_ZB_IR_SENDING;
+    s_sir.t0 = (int64_t)aos_hal_uptime_ms();
+    return true;
+}
+
+bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64)
+{
+    static uint32_t d[2048];
+    return sim_ir_send(ieee, aos_zigbee_ir_decode(code_b64, d, 2048), 38000);
+}
+
+bool aos_zigbee_ir_send_raw(const uint8_t ieee[8], const uint32_t *d, int n, uint32_t freq)
+{
+    (void)d;
+    return sim_ir_send(ieee, n, freq ? freq : 38000);
+}
+
+int aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n)
+{
+    sim_ir_advance();
+    memcpy(ieee, sim_ir() ? SIM_IR_IEEE : (const uint8_t[8]){ 0 }, 8);
+    if (n) snprintf(code, n, "%s", s_sir.learned);
+    return s_sir.state;
+}

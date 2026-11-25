@@ -148,6 +148,26 @@ bool aos_zigbee_ir_send(const uint8_t ieee[8], const char *code_b64);
 /* the state, whose it is, and the last code learned (base64, "" if none) */
 int  aos_zigbee_ir_state(uint8_t ieee[8], char *code, size_t n);
 
+/* A blaster's code is Tuya's: base64 of FastLZ-packed durations, 16-bit
+ * little-endian microseconds, mark first. To durations (how many, -1 if
+ * not such a code) and back (the text's length, -1 if it does not fit). */
+int  aos_zigbee_ir_decode(const char *b64, uint32_t *out, int max);
+int  aos_zigbee_ir_encode(const uint32_t *d, int n, char *b64, size_t size);
+/* sending durations (any remote's, SmartIR's library) at a carrier in Hz
+ * (0: 38 kHz); as aos_zigbee_ir_send, the progress in aos_zigbee_ir_state */
+bool aos_zigbee_ir_send_raw(const uint8_t ieee[8], const uint32_t *d, int n, uint32_t freq);
+/* the network's IR blasters: how many, their IEEEs and names, up to max */
+int  aos_zigbee_ir_blasters(uint8_t (*ieee)[8], char (*name)[33], int max);
+
+/* Codes kept by name, on the card (zigbee/ir.txt), each with its
+ * blaster: the last one learned saved, the list, one sent, one forgotten. */
+#define AOS_ZB_IR_NAME 32
+typedef struct { uint8_t ieee[8]; char name[AOS_ZB_IR_NAME + 1]; } aos_zigbee_ir_code_t;
+bool aos_zigbee_ir_save(const uint8_t ieee[8], const char *name);
+int  aos_zigbee_ir_codes(aos_zigbee_ir_code_t *out, int max);
+bool aos_zigbee_ir_send_saved(int i);
+bool aos_zigbee_ir_forget(int i);
+
 /* What a measured value means, for the screen and the portal
  * (aos_zigbee_fmt.c): whether the board knows (cluster, attr), and the
  * value as text with its unit ("21.5 °C", "430 ppm") and its name

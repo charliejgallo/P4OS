@@ -2,7 +2,7 @@
 # esp_hosted's peer_data channel (docs/plan/ZIGBEE.md). aos_154.c is the
 # simulator's too; the link is sim/aos_154_link_sim.c there.
 # aos_zigbee_p4.c: Espressif's Zigbee stack here with the C6 as its RCP.
-idf_component_register(SRCS "aos_154.c" "aos_zigbee_fmt.c" "aos_154_link_p4.c" "aos_zigbee_p4.c" "aos_zigbee_taskq.c" "aos_zigbee_trace.c"
+idf_component_register(SRCS "aos_154.c" "aos_zigbee_fmt.c" "aos_zigbee_ir.c" "aos_154_link_p4.c" "aos_zigbee_p4.c" "aos_zigbee_taskq.c" "aos_zigbee_trace.c"
                              "aos_zigbee_devices.c"
                        INCLUDE_DIRS "include"
                        REQUIRES aos_hal

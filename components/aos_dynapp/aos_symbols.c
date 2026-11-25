@@ -2,9 +2,9 @@
  * GENERADO POR tools/gen_symbols.py - no editar a mano.
  *
  * Simbolos que el firmware le presta a las apps dinamicas.
- * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
+ * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh, aos_154
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3698 simbolos.
+ * Total: 3711 simbolos.
  */
 
 #include <stddef.h>
@@ -1379,6 +1379,19 @@ extern int aos_ui_wallpaper_colors;
 extern int aos_ui_widget_find;
 extern int aos_widget_sensors_register;
 extern int aos_wifi_qr_text;
+extern int aos_zigbee_devices;
+extern int aos_zigbee_info;
+extern int aos_zigbee_ir_blasters;
+extern int aos_zigbee_ir_codes;
+extern int aos_zigbee_ir_decode;
+extern int aos_zigbee_ir_encode;
+extern int aos_zigbee_ir_forget;
+extern int aos_zigbee_ir_learn;
+extern int aos_zigbee_ir_save;
+extern int aos_zigbee_ir_send;
+extern int aos_zigbee_ir_send_raw;
+extern int aos_zigbee_ir_send_saved;
+extern int aos_zigbee_ir_state;
 extern int asinf;
 extern int atan2f;
 extern int atoi;
@@ -5080,6 +5093,19 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_widget_find),
     ESP_ELFSYM_EXPORT(aos_widget_sensors_register),
     ESP_ELFSYM_EXPORT(aos_wifi_qr_text),
+    ESP_ELFSYM_EXPORT(aos_zigbee_devices),
+    ESP_ELFSYM_EXPORT(aos_zigbee_info),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_blasters),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_codes),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_decode),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_encode),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_forget),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_learn),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_save),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_send),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_send_raw),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_send_saved),
+    ESP_ELFSYM_EXPORT(aos_zigbee_ir_state),
     ESP_ELFSYM_EXPORT(asinf),
     ESP_ELFSYM_EXPORT(atan2f),
     ESP_ELFSYM_EXPORT(atoi),

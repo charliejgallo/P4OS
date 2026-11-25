@@ -62,7 +62,13 @@
  *                                  "value"}: a Tuya datapoint
  *   POST /api/154/zbir             {"ieee", "learn": true|false} or {"ieee",
  *                                  "send": "<base64>"}: the IR blaster; its
- *                                  state and last code under "zbhost.ir"
+ *                                  state and last code under "zbhost.ir".
+ *                                  Also {"ieee", "raw": [µs, mark first],
+ *                                  "freq"}: any code; {"ieee", "save":
+ *                                  "<name>"}: the last learned kept by name;
+ *                                  {"ieee", "saved": i} sends one kept and
+ *                                  {"ieee", "forget": i} drops it (the list
+ *                                  in "zbhost.ir.codes")
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -137,6 +143,17 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
             snprintf(ieee, sizeof ieee, "%02x%02x%02x%02x%02x%02x%02x%02x", ie[7], ie[6], ie[5], ie[4], ie[3], ie[2], ie[1], ie[0]);
             cJSON_AddStringToObject(ir, "ieee", ieee);
             cJSON_AddStringToObject(ir, "learned", code);
+            static aos_zigbee_ir_code_t sv[96];
+            int ns = aos_zigbee_ir_codes(sv, 96);
+            cJSON *ca = cJSON_AddArrayToObject(ir, "codes");
+            for (int k = 0; k < ns; k++) {
+                cJSON *c = cJSON_CreateObject();
+                snprintf(ieee, sizeof ieee, "%02x%02x%02x%02x%02x%02x%02x%02x", sv[k].ieee[7], sv[k].ieee[6], sv[k].ieee[5],
+                         sv[k].ieee[4], sv[k].ieee[3], sv[k].ieee[2], sv[k].ieee[1], sv[k].ieee[0]);
+                cJSON_AddStringToObject(c, "ieee", ieee);
+                cJSON_AddStringToObject(c, "name", sv[k].name);
+                cJSON_AddItemToArray(ca, c);
+            }
         }
         cJSON *a = cJSON_AddArrayToObject(h, "devices");
         for (int i = 0; i < n; i++) {
@@ -444,7 +461,19 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
             ok = aos_zigbee_tuya_dp(ieee, (uint8_t)num(b, "dp", 1), (uint8_t)num(b, "type", 1), (int32_t)num(b, "value", 0));
         else if (ok && !strcmp(what, "zbir")) {
             const cJSON *code = cJSON_GetObjectItem(b, "send"), *learn = cJSON_GetObjectItem(b, "learn");
+            const cJSON *raw = cJSON_GetObjectItem(b, "raw"), *save = cJSON_GetObjectItem(b, "save");
+            const cJSON *saved = cJSON_GetObjectItem(b, "saved"), *forget = cJSON_GetObjectItem(b, "forget");
             if (cJSON_IsString(code)) ok = aos_zigbee_ir_send(ieee, code->valuestring);
+            else if (cJSON_IsArray(raw)) {
+                static uint32_t d[1024];
+                int n = 0;
+                const cJSON *x;
+                cJSON_ArrayForEach(x, raw) if (cJSON_IsNumber(x) && n < 1024) d[n++] = x->valuedouble > 0 ? (uint32_t)x->valuedouble : 0;
+                ok = n > 0 && aos_zigbee_ir_send_raw(ieee, d, n, (uint32_t)num(b, "freq", 38000));
+            }
+            else if (cJSON_IsString(save)) ok = aos_zigbee_ir_save(ieee, save->valuestring);
+            else if (cJSON_IsNumber(saved)) ok = aos_zigbee_ir_send_saved(saved->valueint);
+            else if (cJSON_IsNumber(forget)) ok = aos_zigbee_ir_forget(forget->valueint);
             else ok = aos_zigbee_ir_learn(ieee, !cJSON_IsFalse(learn));
         }
         else if (ok) {
