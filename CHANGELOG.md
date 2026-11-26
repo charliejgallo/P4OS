@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.34.1 — 2026-11-25
+
+Memory for the big apps, and Planeo's worlds.
+
+- **Planeo made an empty world** ("making the world" for ever) when the
+  board's PSRAM was in pieces: it took 7.3 MB at the start and only when
+  making the world asked for 3.5 MB more, a 2 MB block among them, which
+  did not fit with 15.8 MB free but the largest block 11.5 MB. The first
+  world's buffers are now taken at the start, the biggest first, and let
+  go once the world is made (the peak stays the same). On the board:
+  three worlds in a row, 36 fps. **Free flight has every world from the
+  start**; the missions still open them with stars.
+- **The board learns what each big app takes** (the most PSRAM it took
+  while in front, for those of 3 MB or more) and, opening one with less
+  free than that, closes first the apps waiting in the background that are
+  not busy (playing, recording, serving the portal, downloading), as it
+  does for a game.
+- **The Store's list draws an app's icon only near the screen**, and lets
+  go of the rest: with an icon pack, "Everything" held 3.3 MB of PSRAM, and
+  now 1.8 MB.
+- The README tells about Zigbee, with pictures.
+
 ## 0.34.0 — 2026-11-25
 
 The board becomes a Zigbee hub, a test bench and a fake device, and the home
