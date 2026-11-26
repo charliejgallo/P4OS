@@ -644,8 +644,9 @@ static void need_load(void)
         char *e = strchr(p, ';'), *eq = strchr(p, '=');
         if (e) *e = 0;
         if (eq && (!e || eq < e) && eq - p < (int)sizeof s_need[0].id) {
-            *eq = 0;
-            snprintf(s_need[s_nneed].id, sizeof s_need[0].id, "%s", p);
+            size_t l = (size_t)(eq - p);
+            memcpy(s_need[s_nneed].id, p, l);
+            s_need[s_nneed].id[l] = 0;
             s_need[s_nneed].kb = (uint32_t)strtoul(eq + 1, NULL, 10);
             if (s_need[s_nneed].kb) s_nneed++;
         }
