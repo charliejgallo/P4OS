@@ -100,14 +100,14 @@
   "sha256": "1da5fb3b4f682c4bab066033afe6770ad6573d4f88f9a35603004bc5e22a669c"
  },
  "juguete.pak": {
-  "tag": "v0.33.0",
-  "size": 4283530,
-  "sha256": "4ce3c62309b7e77995be407a957f367bb3dcf91349247e995574a5b362eb09ba"
+  "tag": "v0.34.1",
+  "size": 4323776,
+  "sha256": "f4c0c9f9c477a5fc8062fd40c28e3f6e0293ec8faa16c3f7de432906b74148e6"
  },
  "linea.pak": {
-  "tag": "v0.33.0",
-  "size": 3199399,
-  "sha256": "76388cde72f16140ed91aea7035cf15d0f40bf450a490f2a5b813f1efa92bc65"
+  "tag": "v0.34.1",
+  "size": 3232869,
+  "sha256": "0999c760b5d84ce3bebc5309586f697443f84b93d173bd6a53986dd2a0bc9983"
  },
  "mesa_marmol_p4.pak": {
   "tag": "v0.30.0",

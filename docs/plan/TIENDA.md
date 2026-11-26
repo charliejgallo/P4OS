@@ -1414,6 +1414,15 @@ proyecto).
   del catálogo, el paquete de Planeo. Los 457 archivos del catálogo, sin
   un error (`docs/internal/RELEASE-0.34.1.md`).
 
+- **Para la próxima release (2026-11-26): los dos packs de íconos con
+  Visión** (104 apps): `juguete.pak` y `linea.pak` subidos a `v0.34.1`
+  (la última publicada; sus copias de antes en esa release, que nadie
+  nombraba, reemplazadas) y anotados en `store/packs.json` con
+  `gen_store.py packs --tag v0.34.1`, **a mano sólo esos dos**: el comando
+  quiso mover también `c6.bin` a la imagen que el CI recompiló en la
+  0.34.1, que no es la publicada en `v0.33.0`, y se dejó como estaba. La
+  Tienda los ofrece como actualización con el catálogo de la próxima.
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:
