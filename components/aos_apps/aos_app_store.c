@@ -27,6 +27,7 @@
 #include "aos_store.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
+#include "aos_icon_pack.h"
 #include "aos_icon_ops.h"
 #include "aos_sys_glyphs.h"
 #include "aos_theme.h"
@@ -620,24 +621,31 @@ static lv_obj_t *chip_row(lv_obj_t *page, int32_t h)
 /* The list's icons, only where they can be seen: an icon pack's picture is
  * 46 KB at the list's 96 px, and "Actualizaciones" with 67 apps held almost
  * 4 MB of PSRAM (on the board, 2026-11-25). A row gets its icon when it comes
- * within a screen of the list's window and lets go of it when it is two
- * screens away; the pack keeps up to 1 MB of the let go for coming back. */
+ * within half a screen of the list's window and lets go of it a screen and
+ * a half away, and the pictures let go are not kept (decoding one again is
+ * ~3 ms). With a screen each way and the pack's 1 MB of kept pictures,
+ * "Todo" still held 2.75 MB against 3.3 without any of this. */
 static void icons_near(void)
 {
     if (!S.list || !S.nslot) return;
     lv_area_t win;
     lv_obj_get_coords(S.list, &win);
     int32_t h = lv_area_get_height(&win);
+    bool let_go = false;
     for (int k = 0; k < S.nslot; k++) {
         lv_obj_t *sl = S.slot[k];
         if (!sl) continue;
         lv_area_t a;
         lv_obj_get_coords(sl, &a);
-        bool near = a.y2 >= win.y1 - h && a.y1 <= win.y2 + h;
-        bool far = a.y2 < win.y1 - 2 * h || a.y1 > win.y2 + 2 * h;
+        bool near = a.y2 >= win.y1 - h / 2 && a.y1 <= win.y2 + h / 2;
+        bool far = a.y2 < win.y1 - h * 3 / 2 || a.y1 > win.y2 + h * 3 / 2;
         if (near && !lv_obj_get_child_count(sl)) icon_of(sl, &S.items[S.slot_item[k]], 96);
-        else if (far && lv_obj_get_child_count(sl)) lv_obj_clean(sl);
+        else if (far && lv_obj_get_child_count(sl)) {
+            lv_obj_clean(sl);
+            let_go = true;
+        }
     }
+    if (let_go) aos_icon_pack_let_go();
 }
 
 static void list_scrolled(lv_event_t *e)
