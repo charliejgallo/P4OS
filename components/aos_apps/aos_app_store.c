@@ -105,6 +105,10 @@ AOS_BSS_PSRAM static struct {
     char      entry[200];       /* what was typed as a source's address */
     lv_obj_t *ta;
     bool      started;          /* 'sel' was set to "none" once */
+    /* the list's icon places, an icon drawn only in those near the screen */
+    lv_obj_t *slot[ITEMS_MAX];
+    int       slot_item[ITEMS_MAX];
+    int       nslot;
 } S;
 
 static void build(void);
@@ -613,6 +617,35 @@ static lv_obj_t *chip_row(lv_obj_t *page, int32_t h)
     return chips;
 }
 
+/* The list's icons, only where they can be seen: an icon pack's picture is
+ * 46 KB at the list's 96 px, and "Actualizaciones" with 67 apps held almost
+ * 4 MB of PSRAM (on the board, 2026-11-25). A row gets its icon when it comes
+ * within a screen of the list's window and lets go of it when it is two
+ * screens away; the pack keeps up to 1 MB of the let go for coming back. */
+static void icons_near(void)
+{
+    if (!S.list || !S.nslot) return;
+    lv_area_t win;
+    lv_obj_get_coords(S.list, &win);
+    int32_t h = lv_area_get_height(&win);
+    for (int k = 0; k < S.nslot; k++) {
+        lv_obj_t *sl = S.slot[k];
+        if (!sl) continue;
+        lv_area_t a;
+        lv_obj_get_coords(sl, &a);
+        bool near = a.y2 >= win.y1 - h && a.y1 <= win.y2 + h;
+        bool far = a.y2 < win.y1 - 2 * h || a.y1 > win.y2 + 2 * h;
+        if (near && !lv_obj_get_child_count(sl)) icon_of(sl, &S.items[S.slot_item[k]], 96);
+        else if (far && lv_obj_get_child_count(sl)) lv_obj_clean(sl);
+    }
+}
+
+static void list_scrolled(lv_event_t *e)
+{
+    (void)e;
+    icons_near();
+}
+
 static void row(lv_obj_t *parent, int i)
 {
     const item_t *it = &S.items[i];
@@ -627,7 +660,14 @@ static void row(lv_obj_t *parent, int i)
     lv_obj_add_flag(r, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(r, row_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
 
-    icon_of(r, it, 96);
+    /* the icon's place; the icon when it comes near the screen (icons_near) */
+    lv_obj_t *sl = box(r);
+    lv_obj_set_size(sl, 96, 96);
+    aos_make_decorative(sl);
+    if (S.nslot < ITEMS_MAX) {
+        S.slot[S.nslot] = sl;
+        S.slot_item[S.nslot++] = i;
+    }
     lv_obj_t *t = box(r);
     lv_obj_set_height(t, LV_SIZE_CONTENT);
     lv_obj_set_flex_grow(t, 1);
@@ -765,6 +805,8 @@ static void build_list(lv_obj_t *page)
     }
 
     S.list = box(page);
+    S.nslot = 0;
+    lv_obj_add_event_cb(S.list, list_scrolled, LV_EVENT_SCROLL, NULL);
     lv_obj_set_width(S.list, lv_pct(100));
     lv_obj_set_flex_grow(S.list, 1);
     lv_obj_set_flex_flow(S.list, LV_FLEX_FLOW_COLUMN);
@@ -1496,6 +1538,7 @@ static void build(void)
     last_filter = S.filter;
     lv_obj_clean(S.root);
     S.list = S.banner = S.banner_detail = NULL;
+    S.nslot = 0;
     S.ta = NULL;
     if (S.sel >= S.n) S.sel = -1;
     for (int i = 0; i < G.n; i++) G.s[i].frame = NULL;
@@ -1552,6 +1595,10 @@ static void build(void)
     if (same_view && S.list && scroll) {
         lv_obj_update_layout(S.list);
         lv_obj_scroll_to_y(S.list, scroll, LV_ANIM_OFF);
+    }
+    if (S.list) {
+        lv_obj_update_layout(S.list);
+        icons_near();
     }
 }
 
