@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.34.2 — 2026-11-26
+
+The icon packs with Vision, and a warning about the C6's firmware.
+
+- **Both icon packs (3D toy and Line) have Vision's icon**, now 104 apps
+  each; the Store offers them as an update of the System parts.
+- **Installing the C6's firmware warns about other firmware on the board**
+  (issue #2): P4OS's C6 firmware is esp_hosted 3.0.9, and a host older than
+  esp_hosted 3 cannot talk to it, so bmorcelli's Launcher, Arduino sketches
+  and demos built on 2.x find no Wi-Fi after it. Settings, Update says so
+  next to "Install on the C6", and so does the Store's entry; `docs/C6.md`,
+  "Other firmware on the board", has the table and the way back from P4OS
+  (a 2.x image, which P4OS's 3.x host still talks to).
+
 ## 0.34.1 — 2026-11-25
 
 Memory for the big apps, and Planeo's worlds.
