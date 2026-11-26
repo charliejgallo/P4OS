@@ -1407,6 +1407,13 @@ proyecto).
   (`docs/internal/RELEASE-0.34.0.md`, con el paso a paso de la radio),
   publicada, y `releases/latest` sirve su catálogo.
 
+- **La 0.34.1 salió el 2026-11-25** (tag `v0.34.1` en `9317cf11`), el
+  mismo día: Planeo sin mundos vacíos y con todos los mundos en vuelo
+  libre, lo que aprende la placa de las apps grandes, y la lista de la
+  Tienda con los íconos cerca de la pantalla. Sin packs nuevos; lo nuevo
+  del catálogo, el paquete de Planeo. Los 457 archivos del catálogo, sin
+  un error (`docs/internal/RELEASE-0.34.1.md`).
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:

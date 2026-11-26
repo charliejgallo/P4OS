@@ -33,3 +33,8 @@ As in 0.34.0, with Planeo's package new. The System parts (the radio's firmware,
 
 - A pedido del usuario ("sacá una release 0.34.1 con estos arreglos"), el 2026-11-25.
 - Sin packs nuevos; `store/packs.json` y `CARRIED_PACKS` no cambiaron.
+- `main` en `9317cf11` y su CI, verde; tag `v0.34.1` y su CI (borrador con
+  67 archivos). Los 457 archivos que nombra el catálogo, buscados en su
+  release con su tamaño, sin un error; lo nuevo, el paquete de Planeo; las
+  dos imágenes dicen `v0.34.1`. Notas cargadas y publicada el mismo día;
+  `releases/latest` sirve su catálogo.
