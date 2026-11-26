@@ -1401,6 +1401,20 @@
     "d": "una Z trazada por una malla de nodos, con ondas",
     "e": "el ícono de hoy, ((•)), en 3D"
    }
+  },
+  {
+   "id": "aos.vision",
+   "name": "Visión",
+   "group": "nuevas",
+   "colors": [
+    "#30D158",
+    "#0A6E3A"
+   ],
+   "juguete": {
+    "a": "un ojo entre las cuatro esquinas de un encuadre (su ícono de hoy)",
+    "b": "una webcam USB dentro de un recuadro de detección",
+    "c": "una carita en un recuadro de detección con su etiqueta"
+   }
   }
  ]
 }
