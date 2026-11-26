@@ -1414,7 +1414,10 @@ proyecto).
   del catálogo, el paquete de Planeo. Los 457 archivos del catálogo, sin
   un error (`docs/internal/RELEASE-0.34.1.md`).
 
-- **Para la próxima release (2026-11-26): los dos packs de íconos con
+- **La 0.34.2 salió el 2026-11-26** (tag `v0.34.2` en `ed145ebf`) con
+  ellos y el aviso del issue #2; los 457 archivos del catálogo, sin un
+  error. Lo que se hizo para los packs:
+  **los dos packs de íconos con
   Visión** (104 apps): `juguete.pak` y `linea.pak` subidos a `v0.34.1`
   (la última publicada; sus copias de antes en esa release, que nadie
   nombraba, reemplazadas) y anotados en `store/packs.json` con

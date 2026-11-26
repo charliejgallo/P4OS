@@ -30,3 +30,7 @@ As in 0.34.1. The two icon packs are in [v0.34.1](https://github.com/charliejgal
 
 - A pedido del usuario ("sacá una release 0.34.2 con los packs nuevos"), el 2026-11-26.
 - Los dos packs subidos a `v0.34.1` y anotados en `store/packs.json` (sólo esos dos; `c6.bin` queda en `v0.33.0`).
+- `main` en `ed145ebf` y su CI, verde; tag `v0.34.2` y su CI (borrador con
+  71 archivos). Los 457 archivos que nombra el catálogo, sin un error; los
+  packs de íconos en `v0.34.1` con el SHA nuevo, `c6.bin` en `v0.33.0`; las
+  dos imágenes dicen `v0.34.2`. Publicada el mismo día.
