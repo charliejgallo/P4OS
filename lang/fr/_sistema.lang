@@ -6912,6 +6912,7 @@ Instalar en el C6	Installer sur le C6
 
 #: components/aos_apps/aos_app_settings.c:1801
 El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	Le C6 l'écrit dans son autre emplacement et la vérifie avant de basculer. Pendant ce temps il n'y a pas de Wi-Fi, et à la fin la carte redémarre.
+Ojo si en esta placa usás otro firmware además de P4OS: esta versión es esp_hosted 3, y uno que traiga esp_hosted 2 (el Launcher, un sketch de Arduino, varias demos) no se entiende con ella y se queda sin Wi-Fi. Para volver, se instala desde acá un firmware 2.x del C6.	Attention si cette carte fait tourner un autre firmware que P4OS : cette version est esp_hosted 3, et un firmware avec esp_hosted 2 (le Launcher, un sketch Arduino, plusieurs démos) ne s'entend pas avec elle et reste sans Wi-Fi. Pour revenir en arrière, installez d'ici un firmware 2.x du C6.
 
 #: components/aos_apps/aos_app_settings.c:1829
 escribiendo la otra ranura… %u %%	écriture de l'autre emplacement… %u %%

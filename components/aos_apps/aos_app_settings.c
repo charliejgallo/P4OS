@@ -1839,6 +1839,13 @@ static void build_update_c6(lv_obj_t *p)
     if (u.state != AOS_C6_SENDING && u.state != AOS_C6_DONE)
         action_row(g, _("Instalar en el C6"), AOS_C_ACCENT, c6_install_cb);
     note(p, _("El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia."));
+    /* esp_hosted 3 on the C6 cannot talk to a 2.x host (Espressif's
+     * migration guide): another firmware on this board built on Arduino or
+     * an older IDF component loses its Wi-Fi until the C6 goes back to 2.x,
+     * which P4OS can still install. docs/C6.md, "Other firmware on the
+     * board" (issue #2). */
+    if (atoi(ver + (ver[0] == 'v' || ver[0] == 'V')) >= 3)
+        note(p, _("Ojo si en esta placa usás otro firmware además de P4OS: esta versión es esp_hosted 3, y uno que traiga esp_hosted 2 (el Launcher, un sketch de Arduino, varias demos) no se entiende con ella y se queda sin Wi-Fi. Para volver, se instala desde acá un firmware 2.x del C6."));
 }
 
 /* The firmware the store's official catalogue offers for this board
