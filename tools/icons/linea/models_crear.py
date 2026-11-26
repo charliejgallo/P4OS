@@ -99,3 +99,30 @@ ART = {
     "aos.dibujo": dibujo, "aos.notas": notas, "aos.oficina": oficina, "aos.pixel": pixel, "aos.dj": dj,
     "aos.estudio": estudio, "aos.radio": radio, "aos.tuner": tuner, "aos.video": video, "app.recorder": recorder,
 }
+
+
+
+def _corners(m, e=18, arm=16):
+    out = ""
+    for x0, y0, dx, dy in ((e, e, 1, 1), (120 - e, e, -1, 1), (e, 120 - e, 1, -1), (120 - e, 120 - e, -1, -1)):
+        out += P(f"M{x0},{y0 + dy * arm} V{y0} H{x0 + dx * arm}")
+    return out
+
+
+def vision(m):
+    """An eye between a frame's four corners (the app's own icon, juguete's a)."""
+    eye = P("M28,60 C40,40 80,40 92,60 C80,80 40,80 28,60 Z")
+    lines = _corners(m) + eye
+    if not m.mini:
+        lines += C(60, 60, 11)
+    return lines, C(60, 60, 5 if not m.mini else 8)
+
+
+def vision_b(m):
+    """A round webcam inside a detection box (juguete's b)."""
+    lines = _corners(m, 16, 14) + C(60, 52, 20) + P("M50,72 V82 H70 V72") + L(40, 88, 80, 88)
+    return lines, C(60, 52, 7)
+
+
+ART["aos.vision"] = vision
+PAIRS["aos.vision"] = ("#B6FF6A", "#22C55E")
