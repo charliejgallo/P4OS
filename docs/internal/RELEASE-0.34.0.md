@@ -37,6 +37,7 @@ Then, optional, in Store → **System**:
 - **3D toy icons** and **Line icons**: the new icons (below).
 
 Good to know:
+- **⚠️ If you also run other firmware on this board** (bmorcelli's Launcher, Arduino sketches, Espressif demos built on esp_hosted 2.x): after this step **they find no Wi-Fi**. A host older than esp_hosted 3 cannot talk to a 3.x C6 (Espressif's migration guide), and P4OS's C6 firmware is 3.0.9. P4OS itself is fine with either. The way back, from P4OS, with no cable: put a 2.x C6 image at the card's `/firmware/c6.bin` and Install on the C6 again (you lose the Zigbee radio). Details: [docs/C6.md, "Other firmware on the board"](https://github.com/charliejgallo/P4OS/blob/main/docs/C6.md#other-firmware-on-the-board), and [issue #2](https://github.com/charliejgallo/P4OS/issues/2).
 - **No partition changes, nothing to grow.** The new C6 image (1,495,424 bytes) fits the slots the board leaves the factory with (1.5 MB).
 - **The order matters:** the board's firmware first, then the radio's.
 - **If something went really wrong** (the board never comes back on the network after step 3, which did not happen in our tests): the C6 can be flashed by cable through its own port, J7: [docs/C6.md](https://github.com/charliejgallo/P4OS/blob/v0.34.0/docs/C6.md), "Recovery".
@@ -127,3 +128,7 @@ As before, a `.p4app` for each app. New System parts: the radio's firmware `c6.b
   `v0.28.0`); las cinco partes nuevas con el SHA-256 de lo subido; las dos
   imágenes dicen `v0.34.0`. Las notas de arriba, cargadas en el borrador.
 - Falta: **publicarla, cuando el usuario lo diga.**
+
+- **2026-11-26:** a las notas publicadas se les sumó, a pedido del
+  usuario, el aviso del issue #2 (el Launcher y los firmwares con
+  esp_hosted 2.x se quedan sin Wi-Fi con el C6 en 3.0.9, y cómo volver).
