@@ -51,6 +51,12 @@ typedef bool (*vw_split_fn)(void (*fn)(void *arg, int part), void *arg);
 
 typedef struct {
     uint32_t *lev[VW_LEVELS];
+    /* what making a world needs for a while (3.5 MB): the first world's
+     * taken with the levels, the biggest first (vw_alloc), let go when the
+     * world is made. Asked for only then, the 2 MB of hq did not fit in a
+     * PSRAM left in pieces and the world came out empty with 15.8 MB free
+     * (on the board, 2026-11-25) */
+    void     *gen_hq, *gen_hh, *gen_kh, *gen_pat, *gen_warp, *gen_detail;
     int      biome, hour;
     uint32_t seed;
     float    water;             /* the sea's (or the river's) level, metres; < 0: none */

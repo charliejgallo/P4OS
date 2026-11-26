@@ -923,6 +923,31 @@ void vw_clouds_make(uint32_t seed, float cover)
  * The whole
  * -------------------------------------------------------------------------- */
 
+static void gen_free(vw_world_t *w)
+{
+    void **gen[] = { &w->gen_hq, &w->gen_hh, &w->gen_kh, &w->gen_pat, &w->gen_warp, &w->gen_detail };
+    for (size_t k = 0; k < sizeof gen / sizeof gen[0]; k++) {
+        vu_free(*gen[k]);
+        *gen[k] = NULL;
+    }
+}
+
+/* the making's buffers, the biggest first; false (and none) if one does not fit */
+static bool gen_take(vw_world_t *w)
+{
+    if (!w->gen_hq) w->gen_hq = vu_malloc((size_t)N * N * 2);
+    if (!w->gen_hh) w->gen_hh = vu_malloc((size_t)NH * NH * 4);
+    if (!w->gen_kh) w->gen_kh = vu_malloc((size_t)NH * NH);
+    if (!w->gen_warp) w->gen_warp = vu_malloc(sizeof(float) * WG * WG * 2);
+    if (!w->gen_pat) w->gen_pat = vu_malloc(256 * 256);
+    if (!w->gen_detail) w->gen_detail = vu_malloc(sizeof(float) * 128 * 128);
+    if (w->gen_hq && w->gen_hh && w->gen_kh && w->gen_warp && w->gen_pat && w->gen_detail) return true;
+    gen_free(w);
+    return false;
+}
+
+/* The levels and the first world's buffers, the biggest first (4 MB, 2, 1,
+ * 1, then the small ones), while the PSRAM is still in big pieces. */
 bool vw_alloc(vw_world_t *w)
 {
     for (int l = 0; l < VW_LEVELS; l++) {
@@ -933,6 +958,12 @@ bool vw_alloc(vw_world_t *w)
             vw_free(w);
             return false;
         }
+        if (l == 0 && !w->gen_hq) w->gen_hq = vu_malloc((size_t)N * N * 2);
+        if (l == 1 && !w->gen_hh) w->gen_hh = vu_malloc((size_t)NH * NH * 4);
+    }
+    if (!gen_take(w)) {
+        vw_free(w);
+        return false;
     }
     return true;
 }
@@ -943,6 +974,7 @@ void vw_free(vw_world_t *w)
         vu_free(w->lev[l]);
         w->lev[l] = NULL;
     }
+    gen_free(w);
 }
 
 static void find_start(gen_t *g)
@@ -1003,26 +1035,20 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
     }
     w->water = g.wl;
     perm_make(g.seed);
-    g.hq = (uint16_t *)vu_malloc((size_t)N * N * 2);
-    if (!g.hq) return false;
+    /* the first world's buffers were taken with the levels (vw_alloc), the
+     * next ones' are asked for now, as always */
+    if (!gen_take(w)) return false;
+    g.hq = (uint16_t *)w->gen_hq;
     g.kind = (uint8_t *)w->lev[1];          /* 1 MB: level 1 is made last */
     g.prog0 = 0;
     g.prog1 = 45;
     uint32_t tq0 = vr_now_us();
-    g.hh = (float *)vu_malloc((size_t)NH * NH * 4);
-    g.kh = (uint8_t *)vu_malloc((size_t)NH * NH);
-    g.pat = (int8_t *)vu_malloc(256 * 256);
-    g.warp = (float *)vu_malloc(sizeof(float) * WG * WG * 2);
-    g.detail = (float *)vu_malloc(sizeof(float) * 128 * 128);
-    if (!g.hh || !g.kh || !g.pat || !g.warp || !g.detail) {
-        vu_free(g.warp);
-        vu_free(g.detail);
-        vu_free(g.hh);
-        vu_free(g.kh);
-        vu_free(g.pat);
-        vu_free(g.hq);
-        return false;
-    }
+    g.hh = (float *)w->gen_hh;
+    g.kh = (uint8_t *)w->gen_kh;
+    g.pat = (int8_t *)w->gen_pat;
+    g.warp = (float *)w->gen_warp;
+    g.detail = (float *)w->gen_detail;
+
     /* the patches: two octaves of 32 and 16 texels (8 and 4 of the table) */
     for (int y = 0; y < 256; y++)
         for (int x = 0; x < 256; x++) {
@@ -1083,12 +1109,10 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
         stage_colours(&g, 1);
     }
     uint32_t tq3 = vr_now_us();
-    vu_free(g.hq);
-    vu_free(g.hh);
-    vu_free(g.kh);
-    vu_free(g.pat);
-    vu_free(g.warp);
-    vu_free(g.detail);
+    /* let go, as before: the screen's canvas (1.8 MB) comes into that room
+     * with the first frame, and keeping them made Planeo's peak 12.8 MB
+     * instead of 10.9 (in the simulator) */
+    gen_free(w);
     for (int l = 1; l < VW_LEVELS; l++) make_level(w, l);
     uint32_t tq4 = vr_now_us();
     w->gen_ms[0] = (tq1 - tq0) / 1000;
