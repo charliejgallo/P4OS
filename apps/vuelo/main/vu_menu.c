@@ -265,12 +265,12 @@ static void build_free(app_t *a)
     lv_obj_align(s, LV_ALIGN_TOP_LEFT, 124, 92);
     lv_obj_t *l1 = label(p, _("Mundo"), aos_font_body, 0xFFFFFF);
     lv_obj_align(l1, LV_ALIGN_TOP_LEFT, 40, 160);
-    if (!va_world_open(a, a->free_world)) a->free_world = 0;
+    /* every world, from the start: the free flight is for looking around
+     * (the user's ask, 2026-11-25); the missions still open them one by one */
+    if (a->free_world < 0 || a->free_world >= VW_BIOMES) a->free_world = 0;
     for (int w = 0; w < VW_BIOMES; w++) {
-        bool open = va_world_open(a, w);
         lv_obj_t *b = button(p, _(VN_WORLD_NAME[w]), 212, 74, w == a->free_world ? ACCENT : BTN, free_world_cb, a, w);
         lv_obj_align(b, LV_ALIGN_TOP_LEFT, 40 + w * 226, 206);
-        if (!open) lv_obj_add_state(b, LV_STATE_DISABLED);
     }
     lv_obj_t *l2 = label(p, _("Hora"), aos_font_body, 0xFFFFFF);
     lv_obj_align(l2, LV_ALIGN_TOP_LEFT, 40, 316);
