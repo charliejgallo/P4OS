@@ -195,6 +195,9 @@ bool tl_set_t(tl_obj_t *o, uint16_t name);                  /* a true flag    */
 bool tl_set_bool(tl_obj_t *o, uint16_t name, bool v);
 bool tl_set_o(tl_obj_t *o, uint16_t name, tl_obj_t *child);
 bool tl_set_v(tl_obj_t *o, uint16_t name, tl_vec_t *v);
+/* A field of type !X (the query of invokeWithLayer) given as bytes already
+ * in TL: written as they are. */
+bool tl_set_raw(tl_obj_t *o, uint16_t name, const void *p, uint32_t len);
 static inline void tl_vset_o(tl_vec_t *v, uint32_t i, tl_obj_t *o) { v->e[i].kind = TLK_OBJ; v->e[i].set = 1; v->e[i].u.o = o; }
 static inline void tl_vset_l(tl_vec_t *v, uint32_t i, int64_t x) { v->e[i].kind = TLK_LONG; v->e[i].set = 1; v->e[i].u.l = x; }
 static inline void tl_vset_i(tl_vec_t *v, uint32_t i, int32_t x) { v->e[i].kind = TLK_INT; v->e[i].set = 1; v->e[i].u.i = x; }

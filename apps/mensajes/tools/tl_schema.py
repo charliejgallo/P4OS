@@ -217,6 +217,11 @@ class Reader:
         return body
 
 
+def tb(v):
+    """A field read as a string, as the bytes it was."""
+    return v.encode('utf-8') if isinstance(v, str) else v
+
+
 def write_bytes(b):
     if isinstance(b, str):
         b = b.encode('utf-8')
@@ -351,7 +356,13 @@ class TLCodec:
         if t == 'double':
             return r.double()
         if t == 'string':
-            return r.bytes().decode('utf-8', 'replace')
+            # MTProto's own tl calls binary fields "string" (pq, encrypted_data):
+            # text when it is UTF-8, the bytes when it is not; tb() gives bytes back
+            b = r.bytes()
+            try:
+                return b.decode('utf-8')
+            except UnicodeDecodeError:
+                return b
         if t == 'bytes':
             return r.bytes()
         if t == 'int128':

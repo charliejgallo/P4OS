@@ -16,7 +16,7 @@ CFLAGS += -DMJ_HOST -I$(MAIN) -I. -I$(ROOT)/components/monocypher/include
 
 CORE := $(MAIN)/mj_tl.c $(MAIN)/tl_schema.c $(MAIN)/mj_crypto.c $(MAIN)/mj_port.c $(MAIN)/mj_tinfl.c \
         $(ROOT)/components/monocypher/monocypher.c $(ROOT)/components/monocypher/monocypher-ed25519.c
-MTP  := $(MAIN)/mj_mtp.c
+MTP  := $(MAIN)/mj_mtp.c $(MAIN)/mj_api.c $(MAIN)/mj_store.c
 
 .PHONY: test cli vectors
 

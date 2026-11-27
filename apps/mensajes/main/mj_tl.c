@@ -644,6 +644,16 @@ bool tl_set_v(tl_obj_t *o, uint16_t name, tl_vec_t *v)
     return true;
 }
 
+bool tl_set_raw(tl_obj_t *o, uint16_t name, const void *p, uint32_t len)
+{
+    tl_val_t *s = set_slot(o, name);
+    if (!s) return false;
+    s->set = 2;                 /* 2: raw bytes, see wr_value */
+    s->u.b = (const uint8_t *)p;
+    s->len = len;
+    return true;
+}
+
 static bool wr_fields(mj_buf_t *b, const tl_obj_t *o);
 
 static bool wr_value(mj_buf_t *b, uint16_t type, const tl_val_t *v)
@@ -678,6 +688,10 @@ static bool wr_value(mj_buf_t *b, uint16_t type, const tl_val_t *v)
         return true;
     case TLK_OBJ:
     case TLK_ANY:
+        if (v->set == 2) {
+            mj_buf_put(b, v->u.b, v->len);
+            return true;
+        }
         if (!v->u.o) return false;
         return tl_write(b, v->u.o);
     case TLK_BARE:

@@ -10,7 +10,16 @@
 #include <string.h>
 
 #ifdef MJ_HOST
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pthread.h>
+#include <sys/socket.h>
 #include <time.h>
+#include <unistd.h>
 #else
 #include "aos_hal.h"
 #if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
@@ -31,7 +40,6 @@ static void *s_mem_lock;
 static void count(long d)
 {
 #ifndef MJ_HOST
-    if (!s_mem_lock) s_mem_lock = aos_hal_mutex_create();
     if (s_mem_lock) aos_hal_mutex_lock(s_mem_lock);
 #endif
     s_used += (size_t)d;
@@ -103,6 +111,13 @@ char *mj_strdup(const char *s)
     return d;
 }
 
+void mj_port_init(void)
+{
+#ifndef MJ_HOST
+    if (!s_mem_lock) s_mem_lock = aos_hal_mutex_create();
+#endif
+}
+
 size_t mj_mem_used(void) { return s_used; }
 size_t mj_mem_peak(void) { return s_peak; }
 
@@ -145,7 +160,9 @@ uint32_t mj_now_ms(void)
 int64_t mj_unixtime(void)
 {
 #ifdef MJ_HOST
-    return (int64_t)time(NULL);
+    /* MJ_SKEW: seconds the tests' clock is off, for bad_msg_notification */
+    const char *sk = getenv("MJ_SKEW");
+    return (int64_t)time(NULL) + (sk ? atoi(sk) : 0);
 #else
     if (!aos_hal_time_is_valid()) return 0;
     return (int64_t)time(NULL);
@@ -298,4 +315,228 @@ void mj_sha256_2(const void *a, size_t an, const void *b, size_t bn, uint8_t out
     aos_hal_sha256_update(c, b, bn);
     aos_hal_sha256_end(c, out);
 }
+#endif
+
+/* ---- TCP ---- */
+
+#ifdef MJ_HOST
+int mj_tcp_connect(const char *host, int port, int timeout_ms)
+{
+    char ps[8];
+    snprintf(ps, sizeof ps, "%d", port);
+    struct addrinfo hints = {0}, *ai = NULL;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    if (getaddrinfo(host, ps, &hints, &ai) || !ai) return -3;
+    int fd = socket(ai->ai_family, ai->ai_socktype, 0);
+    if (fd < 0) {
+        freeaddrinfo(ai);
+        return -1;
+    }
+    int r = connect(fd, ai->ai_addr, ai->ai_addrlen);
+    freeaddrinfo(ai);
+    if (r) {
+        close(fd);
+        return -4;
+    }
+    int one = 1;
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof one);
+    (void)timeout_ms;
+    return fd;
+}
+
+int mj_tcp_send(int h, const void *d, int n, int timeout_ms)
+{
+    (void)timeout_ms;
+    const uint8_t *p = (const uint8_t *)d;
+    int left = n;
+    while (left > 0) {
+        ssize_t w = send(h, p, (size_t)left, 0);
+        if (w <= 0) return -6;
+        p += w;
+        left -= (int)w;
+    }
+    return n;
+}
+
+int mj_tcp_recv(int h, void *buf, int max, int timeout_ms)
+{
+    struct pollfd pf = {h, POLLIN, 0};
+    int r = poll(&pf, 1, timeout_ms);
+    if (r == 0) return 0;
+    if (r < 0) return -1;
+    ssize_t n = recv(h, buf, (size_t)max, 0);
+    if (n <= 0) return -6;
+    return (int)n;
+}
+
+void mj_tcp_close(int h)
+{
+    if (h > 0) close(h);
+}
+#else
+int mj_tcp_connect(const char *host, int port, int timeout_ms)
+{
+    return aos_hal_tcp_connect(host, port, timeout_ms);
+}
+
+int mj_tcp_send(int h, const void *d, int n, int timeout_ms)
+{
+    return aos_hal_tcp_send(h, d, n, timeout_ms);
+}
+
+int mj_tcp_recv(int h, void *buf, int max, int timeout_ms)
+{
+    int r = aos_hal_tcp_recv(h, buf, max, timeout_ms);
+    if (r == AOS_TCP_ERR_TIMEOUT) return 0;
+    return r;
+}
+
+void mj_tcp_close(int h)
+{
+    if (h > 0) aos_hal_tcp_close(h);
+}
+#endif
+
+/* ---- locks, threads, preferences ---- */
+
+#ifdef MJ_HOST
+void *mj_mutex_new(void)
+{
+    pthread_mutex_t *m = (pthread_mutex_t *)malloc(sizeof *m);
+    if (m) pthread_mutex_init(m, NULL);
+    return m;
+}
+
+void mj_mutex_lock(void *m)
+{
+    if (m) pthread_mutex_lock((pthread_mutex_t *)m);
+}
+
+void mj_mutex_unlock(void *m)
+{
+    if (m) pthread_mutex_unlock((pthread_mutex_t *)m);
+}
+
+typedef struct {
+    void (*fn)(void *);
+    void *arg;
+} th_t;
+
+static void *th_main(void *p)
+{
+    th_t t = *(th_t *)p;
+    free(p);
+    t.fn(t.arg);
+    return NULL;
+}
+
+bool mj_thread_start(const char *name, void (*fn)(void *), void *arg, uint32_t stack)
+{
+    (void)name;
+    (void)stack;
+    th_t *t = (th_t *)malloc(sizeof *t);
+    if (!t) return false;
+    t->fn = fn;
+    t->arg = arg;
+    pthread_t th;
+    if (pthread_create(&th, NULL, th_main, t)) {
+        free(t);
+        return false;
+    }
+    pthread_detach(th);
+    return true;
+}
+
+void mj_sleep_ms(uint32_t ms)
+{
+    struct timespec ts = {(time_t)(ms / 1000), (long)(ms % 1000) * 1000000L};
+    nanosleep(&ts, NULL);
+}
+
+/* The tests' preferences: "key=value" lines in $MJ_PREFS, read and
+ * written whole each time (a handful of keys). */
+static const char *pref_file(void)
+{
+    const char *f = getenv("MJ_PREFS");
+    return f ? f : "mj_prefs.txt";
+}
+
+static bool pref_find(const char *key, char *out, size_t n)
+{
+    FILE *f = fopen(pref_file(), "r");
+    if (!f) return false;
+    char line[1200];
+    size_t kl = strlen(key);
+    bool found = false;
+    while (fgets(line, sizeof line, f)) {
+        if (!strncmp(line, key, kl) && line[kl] == '=') {
+            char *v = line + kl + 1;
+            v[strcspn(v, "\n")] = 0;
+            snprintf(out, n, "%s", v);
+            found = true;
+        }
+    }
+    fclose(f);
+    return found;
+}
+
+static bool pref_put(const char *key, const char *val)
+{
+    char path[512];
+    snprintf(path, sizeof path, "%s.tmp", pref_file());
+    FILE *in = fopen(pref_file(), "r");
+    FILE *out = fopen(path, "w");
+    if (!out) {
+        if (in) fclose(in);
+        return false;
+    }
+    char line[1200];
+    size_t kl = strlen(key);
+    if (in) {
+        while (fgets(line, sizeof line, in))
+            if (!(!strncmp(line, key, kl) && line[kl] == '=')) fputs(line, out);
+        fclose(in);
+    }
+    if (val) fprintf(out, "%s=%s\n", key, val);
+    fclose(out);
+    return rename(path, pref_file()) == 0;
+}
+
+bool mj_pref_get_str(const char *key, char *out, size_t n) { return pref_find(key, out, n); }
+bool mj_pref_set_str(const char *key, const char *val) { return pref_put(key, val); }
+bool mj_pref_get_i32(const char *key, int32_t *out)
+{
+    char b[24];
+    if (!pref_find(key, b, sizeof b)) return false;
+    *out = (int32_t)strtol(b, NULL, 10);
+    return true;
+}
+bool mj_pref_set_i32(const char *key, int32_t v)
+{
+    char b[24];
+    snprintf(b, sizeof b, "%d", (int)v);
+    return pref_put(key, b);
+}
+void mj_pref_erase(const char *key) { pref_put(key, NULL); }
+#else
+void *mj_mutex_new(void) { return aos_hal_mutex_create(); }
+void mj_mutex_lock(void *m)
+{
+    if (m) aos_hal_mutex_lock(m);
+}
+void mj_mutex_unlock(void *m)
+{
+    if (m) aos_hal_mutex_unlock(m);
+}
+bool mj_thread_start(const char *name, void (*fn)(void *), void *arg, uint32_t stack)
+{
+    return aos_hal_thread_start(name, fn, arg, stack, 3);
+}
+void mj_sleep_ms(uint32_t ms) { aos_hal_sleep_ms(ms); }
+bool mj_pref_get_str(const char *key, char *out, size_t n) { return aos_hal_pref_get_str(key, out, n); }
+bool mj_pref_set_str(const char *key, const char *val) { return aos_hal_pref_set_str(key, val); }
+bool mj_pref_get_i32(const char *key, int32_t *out) { return aos_hal_pref_get_i32(key, out); }
+bool mj_pref_set_i32(const char *key, int32_t v) { return aos_hal_pref_set_i32(key, v); }
+void mj_pref_erase(const char *key) { aos_hal_pref_erase(key); }
 #endif
