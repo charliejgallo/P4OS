@@ -244,9 +244,11 @@ static void rule_line(const aos_bot_rule_t *r, char *out, size_t n)
         snprintf(ie + 2 * i, 3, "%02x", r->ieee[i]);
         snprintf(ae + 2 * i, 3, "%02x", r->act_ieee[i]);
     }
-    snprintf(out, n, "%d\x1f%d\x1f%s\x1f%d\x1f%d\x1f%g\x1f%d\x1f%d\x1f%s\x1f%d\x1f%s\x1f%s\x1f%d\x1f%s",
+    /* the outputs went after the text (2026-11-27): a line from before has
+     * 14 fields and reads them as 0, the first output */
+    snprintf(out, n, "%d\x1f%d\x1f%s\x1f%d\x1f%d\x1f%g\x1f%d\x1f%d\x1f%s\x1f%d\x1f%s\x1f%s\x1f%d\x1f%s\x1f%d\x1f%d",
              r->on, r->trig, ie, r->var, r->op, (double)r->value, r->at_min, r->days, r->filter,
-             r->act, ae, r->ir, r->gap_s, r->text);
+             r->act, ae, r->ir, r->gap_s, r->text, r->out, r->act_out);
 }
 
 static void hex8(const char *s, uint8_t out[8])
@@ -260,10 +262,10 @@ static void hex8(const char *s, uint8_t out[8])
 
 static bool rule_parse(char *line, aos_bot_rule_t *r)
 {
-    char *f[14];
+    char *f[16];
     int n = 0;
     f[n++] = line;
-    for (char *p = line; *p && n < 14; p++)
+    for (char *p = line; *p && n < 16; p++)
         if (*p == '\x1f') { *p = 0; f[n++] = p + 1; }
     if (n < 14) return false;
     memset(r, 0, sizeof *r);
@@ -281,6 +283,10 @@ static bool rule_parse(char *line, aos_bot_rule_t *r)
     scpy(r->ir, sizeof r->ir, f[11]);
     r->gap_s = (uint16_t)atoi(f[12]);
     scpy(r->text, sizeof r->text, f[13]);
+    if (n > 15) {
+        r->out = (uint8_t)atoi(f[14]);
+        r->act_out = (uint8_t)atoi(f[15]);
+    }
     return r->trig < AOS_BOT_T_N && r->act < AOS_BOT_A_N && r->var < AOS_BOT_V_N && r->op < AOS_BOT_OP_N;
 }
 
@@ -579,9 +585,22 @@ static void ieee_hex(const uint8_t ieee[8], char out[17])
     for (int i = 0; i < 8; i++) snprintf(out + 2 * i, 3, "%02x", ieee[7 - i]);
 }
 
+/* the same name the Zigbee app shows: the user's, what the card's Tuya
+ * table says it is, its maker's model, its address */
 static void dev_name(const aos_zigbee_dev_t *d, char *out, size_t n)
 {
+    char iv[24], im[40], idesc[64];
     if (d->name[0]) scpy(out, n, d->name);
+    else if (aos_zigbee_ident(d, iv, sizeof iv, im, sizeof im, idesc, sizeof idesc)) {
+        char both[sizeof iv + sizeof im + 1];
+        memcpy(both, iv, strnlen(iv, sizeof iv - 1));
+        size_t l = strnlen(iv, sizeof iv - 1);
+        both[l++] = ' ';
+        size_t m = strnlen(im, sizeof im - 1);
+        memcpy(both + l, im, m);
+        both[l + m] = 0;
+        scpy(out, n, both);
+    }
     else if (d->model[0]) scpy(out, n, d->model);
     else {
         char h[17];
@@ -618,20 +637,41 @@ static int zb_snapshot(aos_zigbee_dev_t *buf)
     return aos_zigbee_devices(buf, AOS_ZB_DEVICES_MAX);
 }
 
-/* the endpoint of its first output, bit its index in eps_list; 0 none */
-static uint8_t first_out(const aos_zigbee_dev_t *d, int *bit)
+/* Its outputs (a two-relay module has two): the endpoints with On/Off, and
+ * each one's bit in eps_list. How many. */
+static int outs_of(const aos_zigbee_dev_t *d, uint8_t ep[4], int bit[4])
 {
+    int n = 0;
     for (int i = 0; i < d->neps && i < 4; i++)
-        if (d->onoff_eps & (1u << i)) { if (bit) *bit = i; return d->eps_list[i]; }
-    return 0;
+        if (d->onoff_eps & (1u << i)) {
+            if (ep) ep[n] = d->eps_list[i];
+            if (bit) bit[n] = i;
+            n++;
+        }
+    return n;
 }
 
-static bool var_of(const aos_zigbee_dev_t *d, int var, float *v)
+/* the endpoint of output k (the first when k is out of range), 0 none */
+static uint8_t out_ep(const aos_zigbee_dev_t *d, int k, int *bit)
+{
+    uint8_t ep[4];
+    int b[4];
+    int n = outs_of(d, ep, b);
+    if (!n) return 0;
+    if (k < 0 || k >= n) k = 0;
+    if (bit) *bit = b[k];
+    return ep[k];
+}
+
+static uint8_t first_out(const aos_zigbee_dev_t *d, int *bit) { return out_ep(d, 0, bit); }
+
+/* out: which output, for AOS_BOT_V_ON */
+static bool var_of_out(const aos_zigbee_dev_t *d, int var, int out, float *v)
 {
     int bit = 0;
     switch (var) {
     case AOS_BOT_V_ON:
-        if (!first_out(d, &bit) || !(d->onoff_known & (1u << bit))) return false;
+        if (!out_ep(d, out, &bit) || !(d->onoff_known & (1u << bit))) return false;
         *v = (d->onoff >> bit) & 1;
         return true;
     case AOS_BOT_V_ALARM:
@@ -662,6 +702,8 @@ static bool var_of(const aos_zigbee_dev_t *d, int var, float *v)
     return false;
 }
 
+static bool var_of(const aos_zigbee_dev_t *d, int var, float *v) { return var_of_out(d, var, 0, v); }
+
 static void var_text(const aos_zigbee_dev_t *d, int var, float v, char *out, size_t n)
 {
     switch (var) {
@@ -689,8 +731,19 @@ static void dev_line(const aos_zigbee_dev_t *d, char *out, size_t n)
     static const int order[] = { AOS_BOT_V_ON, AOS_BOT_V_ALARM, AOS_BOT_V_OCC, AOS_BOT_V_TEMP,
                                  AOS_BOT_V_HUM, AOS_BOT_V_LEVEL, AOS_BOT_V_BAT };
     bool first = true;
+    int nout = outs_of(d, NULL, NULL);
     for (size_t i = 0; i < sizeof order / sizeof order[0] && o < n; i++) {
         float f;
+        if (order[i] == AOS_BOT_V_ON && nout > 1) {
+            /* each output: "1 prendido, 2 apagado" */
+            for (int k = 0; k < nout && o < n; k++) {
+                if (!var_of_out(d, AOS_BOT_V_ON, k, &f)) continue;
+                var_text(d, AOS_BOT_V_ON, f, v, sizeof v);
+                o += (size_t)snprintf(out + o, n - o, "%s%d %s", first ? ": " : ", ", k + 1, v);
+                first = false;
+            }
+            continue;
+        }
         if (!var_of(d, order[i], &f)) continue;
         var_text(d, order[i], f, v, sizeof v);
         o += (size_t)snprintf(out + o, n - o, "%s%s%s", first ? ": " : ", ",
@@ -752,11 +805,20 @@ static const char *var_word(int v)
     }
 }
 
-static void zb_name_of(const uint8_t ieee[8], char *out, size_t n, aos_zigbee_dev_t *buf)
+/* out: the output to name too, when it has more than one (AOS_BOT_OUT_ALL:
+ * "all of"); < 0 none */
+static void zb_name_of(const uint8_t ieee[8], int which, char *out, size_t n, aos_zigbee_dev_t *buf)
 {
     int nd = zb_snapshot(buf);
     for (int i = 0; i < nd; i++)
-        if (!memcmp(buf[i].ieee, ieee, 8)) { dev_name(&buf[i], out, n); return; }
+        if (!memcmp(buf[i].ieee, ieee, 8)) {
+            dev_name(&buf[i], out, n);
+            int no = outs_of(&buf[i], NULL, NULL);
+            size_t l = strlen(out);
+            if (which == AOS_BOT_OUT_ALL && no > 1) snprintf(out + l, n - l, " %s", _("(todas)"));
+            else if (which >= 0 && no > 1) snprintf(out + l, n - l, " · %d", (which < no ? which : 0) + 1);
+            return;
+        }
     char h[17];
     ieee_hex(ieee, h);
     snprintf(out, n, "0x%s", h + 10);
@@ -769,8 +831,19 @@ void aos_bot_rule_text(const aos_bot_rule_t *r, char *out, size_t n)
     aos_zigbee_dev_t *buf = big_calloc(sizeof(aos_zigbee_dev_t) * AOS_ZB_DEVICES_MAX);
     switch (r->trig) {
     case AOS_BOT_T_ZIGBEE:
-        zb_name_of(r->ieee, dn, sizeof dn, buf);
-        if (r->var == AOS_BOT_V_EVENT || r->op == AOS_BOT_OP_CHANGE)
+        zb_name_of(r->ieee, r->var == AOS_BOT_V_ON ? r->out : -1, dn, sizeof dn, buf);
+        if (r->var == AOS_BOT_V_ON && r->op == AOS_BOT_OP_CHANGE)
+            snprintf(when, sizeof when, _("Cuando %s se prende o se apaga"), dn);
+        else if (r->var == AOS_BOT_V_ON && r->op == AOS_BOT_OP_IS)
+            snprintf(when, sizeof when, r->value != 0 ? _("Cuando %s se prende") : _("Cuando %s se apaga"), dn);
+        else if (r->var == AOS_BOT_V_ALARM && r->op == AOS_BOT_OP_IS)
+            snprintf(when, sizeof when, r->value != 0 ? _("Cuando %s da alarma (se abre, movimiento, agua)")
+                                                      : _("Cuando %s vuelve a normal"), dn);
+        else if (r->var == AOS_BOT_V_OCC && r->op == AOS_BOT_OP_IS)
+            snprintf(when, sizeof when, r->value != 0 ? _("Cuando %s ve a alguien") : _("Cuando %s deja de ver a alguien"), dn);
+        else if (r->var == AOS_BOT_V_EVENT)
+            snprintf(when, sizeof when, _("Cuando %s hace algo (un botón, un control)"), dn);
+        else if (r->op == AOS_BOT_OP_CHANGE)
             snprintf(when, sizeof when, _("Cuando cambia %s de %s"), var_word(r->var), dn);
         else if (r->op == AOS_BOT_OP_ABOVE)
             snprintf(when, sizeof when, _("Cuando %s de %s pasa de %g"), var_word(r->var), dn, (double)r->value);
@@ -803,7 +876,7 @@ void aos_bot_rule_text(const aos_bot_rule_t *r, char *out, size_t n)
     case AOS_BOT_A_MESSAGE: scpy(what, sizeof what, _("mandar un mensaje")); break;
     case AOS_BOT_A_SHOT: scpy(what, sizeof what, _("mandar una captura")); break;
     case AOS_BOT_A_ZB_ON: case AOS_BOT_A_ZB_OFF: case AOS_BOT_A_ZB_TOGGLE:
-        zb_name_of(r->act_ieee, dn, sizeof dn, buf);
+        zb_name_of(r->act_ieee, r->act_out, dn, sizeof dn, buf);
         snprintf(what, sizeof what, r->act == AOS_BOT_A_ZB_ON ? _("prender %s") :
                                     r->act == AOS_BOT_A_ZB_OFF ? _("apagar %s") : _("cambiar %s"), dn);
         break;
@@ -899,16 +972,18 @@ static void zigbee_list(int64_t chat)
         char line[160];
         dev_line(&s_zb_in[i], line, sizeof line);
         o += (size_t)snprintf(s_txt + o, sizeof s_txt - o, "%s\n", line);
-        uint8_t ep = first_out(&s_zb_in[i], NULL);
-        if (ep && nb < 12) {
+        uint8_t eps[4];
+        int no = outs_of(&s_zb_in[i], eps, NULL);
+        for (int q = 0; q < no && nb < 16; q++) {
             char name[40], lab[64], data[40], h[17];
             dev_name(&s_zb_in[i], name, sizeof name);
             ieee_hex(s_zb_in[i].ieee, h);
             kb_row(&k);
-            snprintf(lab, sizeof lab, "💡 %s", name);
-            snprintf(data, sizeof data, "z1:%s:%u", h, ep);
+            if (no > 1) snprintf(lab, sizeof lab, "💡 %s · %d", name, q + 1);
+            else snprintf(lab, sizeof lab, "💡 %s", name);
+            snprintf(data, sizeof data, "z1:%s:%u", h, eps[q]);
             kb_btn(&k, lab, data);
-            snprintf(data, sizeof data, "z0:%s:%u", h, ep);
+            snprintf(data, sizeof data, "z0:%s:%u", h, eps[q]);
             kb_btn(&k, _("Apagar"), data);
             nb++;
         }
@@ -935,11 +1010,29 @@ static void zigbee_switch(int64_t chat, const char *arg, int cmd)
     if (!*arg) { say(chat, cmd ? _("¿Qué prendo? /prender <nombre>") : _("¿Qué apago? /apagar <nombre>"), NULL); return; }
     if (zb_ensure()) { say(chat, _("La red Zigbee no estaba andando: la arranco. Probá de nuevo en un minuto."), NULL); return; }
     int nd = zb_snapshot(s_zb_in);
+    /* "relés 2": the second output of "relés", when no device is called that */
+    int which = -1;
     const aos_zigbee_dev_t *d = zb_find(arg, nd);
+    if (!d) {
+        char name[64];
+        scpy(name, sizeof name, arg);
+        char *sp = strrchr(name, ' ');
+        if (sp && sp[1] >= '1' && sp[1] <= '4' && !sp[2]) {
+            which = sp[1] - '1';
+            *sp = 0;
+            d = zb_find(name, nd);
+            if (d && which >= outs_of(d, NULL, NULL)) d = NULL;
+        }
+    }
     if (!d) { snprintf(s_txt, sizeof s_txt, _("No encuentro \"%s\" entre los que se prenden y apagan."), arg); say(chat, s_txt, NULL); return; }
-    char dn[40];
-    dev_name(d, dn, sizeof dn);
-    bool ok = aos_zigbee_onoff(d->ieee, first_out(d, NULL), cmd);
+    char dn[48];
+    dev_name(d, dn, 40);
+    uint8_t eps[4];
+    int no = outs_of(d, eps, NULL);
+    bool ok = true;
+    for (int q = 0; q < no; q++)
+        if (which < 0 || which == q) ok &= aos_zigbee_onoff(d->ieee, eps[q], cmd);
+    if (which >= 0 && no > 1) snprintf(dn + strlen(dn), sizeof dn - strlen(dn), " · %d", which + 1);
     snprintf(s_txt, sizeof s_txt, ok ? (cmd ? _("Prendo %s.") : _("Apago %s.")) : _("No pude mandarle la orden a %s."), dn);
     logf_("%s", s_txt);
     say(chat, s_txt, NULL);
@@ -1518,8 +1611,11 @@ static void act(const aos_bot_rule_t *r, const char *msg)
         int nd = zb_snapshot(s_zb_out);
         for (int i = 0; i < nd; i++)
             if (!memcmp(s_zb_out[i].ieee, r->act_ieee, 8)) {
-                uint8_t ep = first_out(&s_zb_out[i], NULL);
-                if (ep) aos_zigbee_onoff(r->act_ieee, ep, r->act == AOS_BOT_A_ZB_ON ? 1 : r->act == AOS_BOT_A_ZB_OFF ? 0 : 2);
+                uint8_t eps[4];
+                int no = outs_of(&s_zb_out[i], eps, NULL);
+                for (int q = 0; q < no; q++)
+                    if (r->act_out == AOS_BOT_OUT_ALL || r->act_out == q || (r->act_out >= no && q == 0))
+                        aos_zigbee_onoff(r->act_ieee, eps[q], r->act == AOS_BOT_A_ZB_ON ? 1 : r->act == AOS_BOT_A_ZB_OFF ? 0 : 2);
             }
         break;
     }
@@ -1609,8 +1705,10 @@ static void rules_tick(bool online)
             const aos_zigbee_dev_t *d = NULL;
             for (int k = 0; k < nd && !d; k++) if (!memcmp(s_zb_out[k].ieee, r->ieee, 8)) d = &s_zb_out[k];
             if (!d) continue;
-            char dn[40], vt[40];
-            dev_name(d, dn, sizeof dn);
+            char dn[48], vt[40];
+            dev_name(d, dn, 40);
+            if (r->var == AOS_BOT_V_ON && outs_of(d, NULL, NULL) > 1)
+                snprintf(dn + strlen(dn), sizeof dn - strlen(dn), " · %d", r->out + 1);
             if (r->var == AOS_BOT_V_EVENT) {
                 if (s_rs[i].known && d->event_ms != s_rs[i].event_ms && d->event[0]) fire(i, r, dn, d->event, "", "", "");
                 s_rs[i].event_ms = d->event_ms;
@@ -1618,7 +1716,7 @@ static void rules_tick(bool online)
                 continue;
             }
             float v;
-            if (!var_of(d, r->var, &v)) continue;
+            if (!var_of_out(d, r->var, r->out, &v)) continue;
             bool was = s_rs[i].known;
             float prev = s_rs[i].last;
             bool hit = false;

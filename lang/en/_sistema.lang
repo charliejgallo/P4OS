@@ -11765,3 +11765,30 @@ La red Zigbee no estaba andando: la arranco. Los dispositivos aparecen a medida 
 
 #: components/aos_apps/aos_bot.c
 La red Zigbee no estaba andando: la arranco. Probá de nuevo en un minuto.	The Zigbee network wasn't running: starting it. Try again in a minute.
+
+#: components/aos_apps/aos_bot.c
+(todas)	(all)
+
+#: components/aos_apps/aos_bot.c
+Cuando %s se prende o se apaga	When %s switches on or off
+
+#: components/aos_apps/aos_bot.c
+Cuando %s se prende	When %s switches on
+
+#: components/aos_apps/aos_bot.c
+Cuando %s se apaga	When %s switches off
+
+#: components/aos_apps/aos_bot.c
+Cuando %s da alarma (se abre, movimiento, agua)	When %s raises its alarm (opens, motion, water)
+
+#: components/aos_apps/aos_bot.c
+Cuando %s vuelve a normal	When %s is back to normal
+
+#: components/aos_apps/aos_bot.c
+Cuando %s ve a alguien	When %s sees someone
+
+#: components/aos_apps/aos_bot.c
+Cuando %s deja de ver a alguien	When %s stops seeing anyone
+
+#: components/aos_apps/aos_bot.c
+Cuando %s hace algo (un botón, un control)	When %s does something (a button, a remote)

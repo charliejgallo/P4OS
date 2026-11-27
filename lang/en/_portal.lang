@@ -2814,3 +2814,6 @@ Lo último	Latest
 
 #: components/aos_portal/web/app.js:1344
 {dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}	{device} {value} {time} {board} {app} {title} {text}
+
+#: components/aos_portal/web/app.js
+Todas	All

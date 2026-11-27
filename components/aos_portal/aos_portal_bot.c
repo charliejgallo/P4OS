@@ -7,7 +7,7 @@
  *                          codes a rule can name. Never the token.
  *   POST /api/bot          {on?, token?, cmds?, link?, link_cancel?, forget?}
  *   POST /api/bot/rule     {i (-1 new), on, trig, ieee, var, op, value, at_min,
- *                          days, filter, act, act_ieee, ir, text, gap_s}
+ *                          days, filter, act, act_ieee, ir, text, gap_s, out, act_out}
  *   POST /api/bot/delete   {i}
  *
  * A token typed here travels to the board in the request: over the portal's
@@ -135,6 +135,8 @@ static void api_status(aos_httpd_req_t *r)
         cJSON_AddStringToObject(c, "ir", rl[i].ir);
         cJSON_AddStringToObject(c, "text", rl[i].text);
         cJSON_AddNumberToObject(c, "gap_s", rl[i].gap_s);
+        cJSON_AddNumberToObject(c, "out", rl[i].out);
+        cJSON_AddNumberToObject(c, "act_out", rl[i].act_out);
         aos_bot_rule_text(&rl[i], t, sizeof t);
         cJSON_AddStringToObject(c, "desc", t);
         cJSON_AddItemToArray(a, c);
@@ -156,7 +158,10 @@ static void api_status(aos_httpd_req_t *r)
         else snprintf(name, sizeof name, "0x%02x%02x%02x", zb[i].ieee[2], zb[i].ieee[1], zb[i].ieee[0]);
         cJSON_AddStringToObject(c, "ieee", h);
         cJSON_AddStringToObject(c, "name", name);
-        cJSON_AddBoolToObject(c, "out", zb[i].onoff_eps != 0);
+        int no = 0;
+        for (int k = 0; k < zb[i].neps && k < 4; k++) no += (zb[i].onoff_eps >> k) & 1;
+        cJSON_AddBoolToObject(c, "out", no > 0);
+        cJSON_AddNumberToObject(c, "outs", no);       /* a two-relay module: 2 */
         cJSON_AddItemToArray(a, c);
     }
     free(zb);
@@ -213,6 +218,8 @@ static void api_rule(aos_httpd_req_t *r)
     x.days = (uint8_t)num(b, "days", 0x7F);
     x.act = (uint8_t)num(b, "act", 0);
     x.gap_s = (uint16_t)num(b, "gap_s", 30);
+    x.out = (uint8_t)num(b, "out", 0);
+    x.act_out = (uint8_t)num(b, "act_out", 0);
     char h[24];
     str(b, "ieee", h, sizeof h);
     hex_in(h, x.ieee);

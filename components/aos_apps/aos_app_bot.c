@@ -151,6 +151,19 @@ static void dev_name(const aos_zigbee_dev_t *d, char *out, size_t n)
 
 static bool has_out(const aos_zigbee_dev_t *d) { return d->onoff_eps != 0; }
 
+/* how many outputs the device with that IEEE has (a two-relay module, 2) */
+static int outs_of(const uint8_t ieee[8])
+{
+    int nd = s_zb ? aos_zigbee_devices(s_zb, AOS_ZB_DEVICES_MAX) : 0;
+    for (int i = 0; i < nd; i++)
+        if (!memcmp(s_zb[i].ieee, ieee, 8)) {
+            int n = 0;
+            for (int k = 0; k < s_zb[i].neps && k < 4; k++) n += (s_zb[i].onoff_eps >> k) & 1;
+            return n;
+        }
+    return 0;
+}
+
 /* ------------------------------------------------------------------------ */
 /* Typing                                                                    */
 /* ------------------------------------------------------------------------ */
@@ -435,15 +448,43 @@ static void sheet_close(void)
 static int sel_of(lv_event_t *e) { return (int)lv_dropdown_get_selected(lv_event_get_target(e)); }
 
 static void trig_cb(lv_event_t *e) { U.r.trig = (uint8_t)sel_of(e); sheet_build(); }
-static void dev_cb(lv_event_t *e) { int i = sel_of(e); if (i < U.nzb) memcpy(U.r.ieee, U.zb_ieee[i], 8); }
+static void dev_cb(lv_event_t *e)
+{
+    int i = sel_of(e);
+    if (i < U.nzb) memcpy(U.r.ieee, U.zb_ieee[i], 8);
+    U.r.out = 0;
+    sheet_build();          /* its outputs, if it has several */
+}
 static void var_cb(lv_event_t *e) { U.r.var = (uint8_t)sel_of(e); sheet_build(); }
 static void op_cb(lv_event_t *e) { U.r.op = (uint8_t)sel_of(e); sheet_build(); }
 static void yesno_cb(lv_event_t *e) { U.r.value = sel_of(e) == 0 ? 1 : 0; }
 static void hour_cb(lv_event_t *e) { U.r.at_min = (uint16_t)(sel_of(e) * 60 + U.r.at_min % 60); }
 static void min_cb(lv_event_t *e) { U.r.at_min = (uint16_t)(U.r.at_min / 60 * 60 + sel_of(e) * 5); }
 static void act_cb(lv_event_t *e) { U.r.act = (uint8_t)sel_of(e); sheet_build(); }
-static void adev_cb(lv_event_t *e) { int i = sel_of(e); if (i < U.nout) memcpy(U.r.act_ieee, U.out_ieee[i], 8); }
+static void adev_cb(lv_event_t *e)
+{
+    int i = sel_of(e);
+    if (i < U.nout) memcpy(U.r.act_ieee, U.out_ieee[i], 8);
+    U.r.act_out = 0;
+    sheet_build();
+}
 static void ir_cb(lv_event_t *e) { int i = sel_of(e); if (i < U.nir) snprintf(U.r.ir, sizeof U.r.ir, "%s", U.ir[i].name); }
+static void out_cb(lv_event_t *e) { U.r.out = (uint8_t)sel_of(e); }
+static void act_out_cb(lv_event_t *e)
+{
+    int i = sel_of(e);
+    U.r.act_out = i >= outs_of(U.r.act_ieee) ? AOS_BOT_OUT_ALL : (uint8_t)i;
+}
+
+/* "Salida 1\nSalida 2[\nTodas]" */
+static void out_opts(int n, bool all, char *out, size_t on)
+{
+    size_t o = 0;
+    out[0] = 0;
+    for (int i = 0; i < n && o < on; i++) o += (size_t)snprintf(out + o, on - o, "%s%s %d", i ? "\n" : "", _("Salida"), i + 1);
+    if (all && o < on) snprintf(out + o, on - o, "\n%s", _("Todas"));
+}
+
 static void gap_cb(lv_event_t *e)
 {
     static const uint16_t G[] = { 30, 60, 300, 900, 3600 };
@@ -588,6 +629,11 @@ static void sheet_build(void)
                  _("Abierta, movimiento, agua (alarma)"), _("Presencia"), _("Temperatura (°C)"), _("Humedad (%)"),
                  _("Batería (%)"), _("Nivel (%)"), _("Un evento: un botón, un control"));
         dropdown(c, opts, U.r.var, var_cb);
+        int no = outs_of(U.r.ieee);
+        if (U.r.var == AOS_BOT_V_ON && no > 1) {
+            out_opts(no, false, opts, sizeof opts);
+            dropdown(c, opts, U.r.out < no ? U.r.out : 0, out_cb);
+        }
         if (U.r.var != AOS_BOT_V_EVENT) {
             bool yesno = U.r.var == AOS_BOT_V_ON || U.r.var == AOS_BOT_V_ALARM || U.r.var == AOS_BOT_V_OCC;
             if (yesno && (U.r.op == AOS_BOT_OP_ABOVE || U.r.op == AOS_BOT_OP_BELOW)) U.r.op = AOS_BOT_OP_IS;
@@ -645,6 +691,11 @@ static void sheet_build(void)
             dev_opts(U.out_ieee, U.nout, U.r.act_ieee, opts, sizeof opts, &sel);
             if (sel < 0) { sel = 0; memcpy(U.r.act_ieee, U.out_ieee[0], 8); }
             dropdown(c, opts, sel, adev_cb);
+            int no = outs_of(U.r.act_ieee);
+            if (no > 1) {
+                out_opts(no, true, opts, sizeof opts);
+                dropdown(c, opts, U.r.act_out == AOS_BOT_OUT_ALL || U.r.act_out >= no ? no : U.r.act_out, act_out_cb);
+            }
         }
     } else if (U.r.act == AOS_BOT_A_IR) {
         if (!U.nir) wrap_label(c, _("No hay códigos IR guardados (app Zigbee, emisor IR)."), aos_font_small, AOS_C_ORANGE);

@@ -39,8 +39,8 @@ shows is in the board's language; both names work.
 | `/ayuda` | `/help` | what it can do (only the commands that are on) |
 | `/estado` | `/status` | name, firmware, time, uptime, network, free memory, the app on screen, Zigbee devices, battery |
 | `/captura` | `/screenshot` | the screen as a JPEG (it goes through the card: `<sd>/bot/captura.jpg`) |
-| `/zigbee` | `/zigbee` | the devices with their values, and a pair of buttons for each one with an output |
-| `/prender <name>`, `/apagar <name>` | `/on`, `/off` | a device by its name (exact, then contained) |
+| `/zigbee` | `/zigbee` | the devices with their values, and a pair of buttons for each output (a two-relay module gets two) |
+| `/prender <name> [n]`, `/apagar <name> [n]` | `/on`, `/off` | a device by its name (exact, then contained); with several outputs (a two-relay module), `n` picks one and without it they all switch |
 | `/ir [name]` | `/ir` | the IR codes kept with the Zigbee blaster as buttons, or one sent by name |
 | `/aviso <text>` | `/notice` | a notification on the board's screen, from whoever sent it |
 | `/reglas` | `/rules` | the rules, with buttons to pause or resume each |
@@ -61,6 +61,8 @@ that bangs does not flood the chat):
   WhatsApp's or Home Assistant's to Telegram).
 - **Do:** send a message, send a screenshot, switch a Zigbee device on, off
   or toggle it, send a kept IR code.
+- **A device with several outputs** (a two-relay module): a rule watches one
+  of them, and switches one or all of them.
 - **The message** may carry `{dispositivo} {valor} {hora} {placa} {app}
   {titulo} {texto}` (or `{device} {value} {time} {board} {app} {title}
   {text}`); empty, a usual one ("🔔 Door: open").

@@ -109,7 +109,12 @@ typedef struct {
     /* the message, with {dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}; "" a default one */
     char     text[160];
     uint16_t gap_s;         /* at most once every gap_s seconds (0: 30) */
+    /* a device with several outputs (a two-relay module): which one is
+     * watched (AOS_BOT_V_ON) and which one the action switches; 0 the
+     * first, AOS_BOT_OUT_ALL every one (the action only) */
+    uint8_t  out, act_out;
 } aos_bot_rule_t;
+#define AOS_BOT_OUT_ALL 0xFF
 
 /* Starts the service (from main, once): it waits on its own for the switch,
  * the token and the network. */

@@ -244,7 +244,20 @@ bool aos_zigbee_permit_board(int seconds) { (void)seconds; return false; }
 bool aos_zigbee_permit_strict(int seconds, bool board) { (void)seconds; (void)board; return false; }
 void aos_zigbee_static_kn(bool on) { (void)on; }
 bool aos_zigbee_remove(const uint8_t ieee[8]) { (void)ieee; return false; }
-bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd) { (void)ieee; (void)ep; (void)cmd; return false; }
+/* P4_SIM_ZB_IR's third device, a two-relay module (TS0002, endpoints 1 and
+ * 2): its outputs follow the orders */
+static const uint8_t SIM_RELAY_IEEE[8] = { 0x55, 0x10, 0x3a, 0xfe, 0xff, 0x8d, 0x0e, 0xa4 };
+static uint8_t s_sim_relays;
+static bool sim_ir(void);
+bool aos_zigbee_onoff(const uint8_t ieee[8], uint8_t ep, int cmd)
+{
+    if (!sim_ir() || memcmp(ieee, SIM_RELAY_IEEE, 8) || ep < 1 || ep > 2) return false;
+    uint8_t bit = (uint8_t)(1u << (ep - 1));
+    if (cmd == 2) s_sim_relays ^= bit;
+    else if (cmd) s_sim_relays |= bit;
+    else s_sim_relays &= (uint8_t)~bit;
+    return true;
+}
 bool aos_zigbee_level(const uint8_t ieee[8], uint8_t ep, int level) { (void)ieee; (void)ep; (void)level; return false; }
 bool aos_zigbee_command(const uint8_t ieee[8], uint8_t ep, uint16_t cluster, uint8_t cmd, const void *data, int len,
                         uint16_t read_attr) { (void)ieee; (void)ep; (void)cluster; (void)cmd; (void)data; (void)len; (void)read_attr; return false; }
@@ -254,7 +267,7 @@ bool aos_zigbee_tuya_dp(const uint8_t ieee[8], uint8_t dp, uint8_t type, int32_t
 int aos_zigbee_permit_left(void) { return 0; }
 
 /* ---- P4_SIM_ZB_IR=1: a network formed on channel 26 with a Tuya IR blaster
- * and a Tuya TS0601 temperature sensor (datapoints) in it, for the Zigbee app's card and the Infrarrojo app's sending through
+ * a Tuya TS0601 temperature sensor (datapoints) and a two-relay TS0002 in it, for the Zigbee app's card and the Infrarrojo app's sending through
  * it. Learning gives an NEC code (address 0x04, the command counting up) 3 s
  * after it starts; a sending is done in 0.8 s. Nothing goes anywhere. */
 
@@ -338,7 +351,33 @@ int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
         t->dps[k].ms = aos_hal_uptime_ms();
     }
     t->ndp = (uint8_t)(sizeof DPS / sizeof DPS[0]);
-    return 2;
+    if (max < 3) return 2;
+    aos_zigbee_dev_t *r = &out[2];
+    memset(r, 0, sizeof *r);
+    memcpy(r->ieee, SIM_RELAY_IEEE, 8);
+    r->nwk = 0x51a0;
+    r->ep = 1;
+    r->neps = 2;
+    r->eps_list[0] = 1;
+    r->eps_list[1] = 2;
+    r->step = AOS_ZB_DEV_DONE;
+    r->clusters = AOS_ZB_CL_ONOFF;
+    r->onoff_eps = 0x03;
+    r->onoff_known = 0x03;
+    r->onoff = s_sim_relays;
+    r->cap = 0x8e;
+    r->power = 0x01;
+    r->rssi = -55;
+    r->temp = INT16_MIN;
+    r->hum = 0xFFFF;
+    r->battery = 0xFF;
+    r->occupancy = 0xFF;
+    r->zone_type = 0xFFFF;
+    r->level = 0xFF;
+    r->seen_ms = r->heard_ms = aos_hal_uptime_ms();
+    snprintf(r->manuf, sizeof r->manuf, "_TZ3000_fake2rly");
+    snprintf(r->model, sizeof r->model, "TS0002");
+    return 3;
 }
 
 bool aos_zigbee_set_name(const uint8_t ieee[8], const char *name)

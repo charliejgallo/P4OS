@@ -1321,9 +1321,11 @@ async function pageBot() {
     const parts = [h('h2', { style: 'margin-top:0' }, r.i < 0 ? tr('Nueva regla') : tr('La regla')),
       lab(tr('Cuando'), sel(TRIG, r.trig, e => { r.trig = +e.target.value; re(); }))];
     if (r.trig === 0) {
-      parts.push(z.length ? lab(tr('Dispositivo'), sel(z.map(d => [d.ieee, d.name]), r.ieee, e => { r.ieee = e.target.value; }))
+      parts.push(z.length ? lab(tr('Dispositivo'), sel(z.map(d => [d.ieee, d.name]), r.ieee, e => { r.ieee = e.target.value; r.out = 0; re(); }))
         : h('p', { class: 'note warn' }, tr('No hay dispositivos Zigbee: se suman en la app Zigbee.')));
       parts.push(lab(tr('Qué mira'), sel(VARS, r.var, e => { r.var = +e.target.value; if (r.var <= 2 && (r.op === 1 || r.op === 2)) r.op = 3; re(); })));
+      const zd = z.find(d => d.ieee === r.ieee);
+      if (r.var === 0 && zd && zd.outs > 1) parts.push(sel([...Array(zd.outs).keys()].map(k => [k, tr('Salida') + ' ' + (k + 1)]), r.out || 0, e => { r.out = +e.target.value; }));
       if (r.var !== 7) {
         parts.push(sel(yesno ? [[0, OPS[0]], [3, tr('cuando pasa a…')]] : OPS.map((o, i) => [i, o]), r.op, e => { r.op = +e.target.value; re(); }));
         if (r.op !== 0) parts.push(yesno ? sel([[1, tr('sí (prendido, abierta, hay alguien)')], [0, tr('no')]], r.value ? 1 : 0, e => { r.value = +e.target.value; })
@@ -1337,8 +1339,13 @@ async function pageBot() {
       parts.push(lab(tr('De qué app (vacío: todas)'), h('input', { type: 'text', value: r.filter, maxlength: 38, oninput: e => { r.filter = e.target.value; } })));
     }
     parts.push(lab(tr('Hacer'), sel(ACTS, r.act, e => { r.act = +e.target.value; re(); })));
-    if (r.act >= 2 && r.act <= 4) parts.push(outs.length ? sel(outs.map(d => [d.ieee, d.name]), r.act_ieee, e => { r.act_ieee = e.target.value; })
-      : h('p', { class: 'note warn' }, tr('No hay dispositivos que se prendan y apaguen.')));
+    if (r.act >= 2 && r.act <= 4) {
+      parts.push(outs.length ? sel(outs.map(d => [d.ieee, d.name]), r.act_ieee, e => { r.act_ieee = e.target.value; r.act_out = 0; re(); })
+        : h('p', { class: 'note warn' }, tr('No hay dispositivos que se prendan y apaguen.')));
+      const ad = outs.find(d => d.ieee === r.act_ieee);
+      if (ad && ad.outs > 1) parts.push(sel([...[...Array(ad.outs).keys()].map(k => [k, tr('Salida') + ' ' + (k + 1)]), [255, tr('Todas')]],
+        r.act_out >= ad.outs ? 255 : (r.act_out || 0), e => { r.act_out = +e.target.value; }));
+    }
     else if (r.act === 5) parts.push(st.ir.length ? sel(st.ir.map(n => [n, n]), r.ir, e => { r.ir = e.target.value; }) : h('p', { class: 'note warn' }, tr('No hay códigos IR guardados (app Zigbee, emisor IR).')));
     else parts.push(lab(r.act === 1 ? tr('Con este texto') : tr('El mensaje (vacío: el de siempre)'),
       h('textarea', { rows: 3, maxlength: 159, placeholder: tr('{dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}'), oninput: e => { r.text = e.target.value; } }, r.text)));
@@ -1378,7 +1385,7 @@ async function pageBot() {
         h('button', { class: 'btn', onclick: () => { editing = Object.assign({}, r, { i }); put(rules, editor()); } }, tr('Editar'))))
         : h('p', { class: 'note' }, tr('Una regla manda un mensaje o una captura, prende o apaga algo, cuando pasa algo: una puerta que se abre, una hora, un aviso que llega.')),
       st.rules.length < 16 ? h('button', { class: 'btn pri', style: 'margin-top:10px', onclick: () => {
-        editing = { i: -1, on: true, trig: 0, ieee: '', var: 1, op: 0, value: 1, at_min: 480, days: 127, filter: '', act: 0, act_ieee: '', ir: '', text: '', gap_s: 30 };
+        editing = { i: -1, on: true, trig: 0, ieee: '', var: 1, op: 0, value: 1, at_min: 480, days: 127, filter: '', act: 0, act_ieee: '', ir: '', text: '', gap_s: 30, out: 0, act_out: 0 };
         put(rules, editor()); } }, tr('Nueva regla')) : null);
     log.textContent = st.log.slice().reverse().join('\n') || tr('Todavía nada.');
   }
