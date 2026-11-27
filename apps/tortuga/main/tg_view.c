@@ -352,7 +352,13 @@ void tg_view_draw(const tg_scene_t *s)
     tg_gfx_end(g, V.fb, V.shown, V.full);
     V.full = false;
     if (g->dirty.x1 > g->dirty.x0) {
-        lv_area_t a = { g->dirty.x0, g->dirty.y0, g->dirty.x1 - 1, g->dirty.y1 - 1 };
+        /* lv_obj_invalidate_area() takes the screen's coordinates, and the
+         * board does not start at the corner: without the canvas's place, the
+         * board repainted a strip above the change and left bits of the
+         * turtle behind (seen on the board; the simulator redraws more) */
+        lv_area_t c;
+        lv_obj_get_coords(V.canvas, &c);
+        lv_area_t a = { c.x1 + g->dirty.x0, c.y1 + g->dirty.y0, c.x1 + g->dirty.x1 - 1, c.y1 + g->dirty.y1 - 1 };
         lv_obj_invalidate_area(V.canvas, &a);
     }
 }
