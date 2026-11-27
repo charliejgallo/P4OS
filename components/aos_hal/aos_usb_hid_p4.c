@@ -1047,6 +1047,53 @@ bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out)
     return out->connected;
 }
 
+/* ---- pads that are not on USB (aos_hal.h): they hold their place in
+ * K.pad as connected, so a USB pad plugged in looks for the next free one */
+static bool s_virtual[AOS_GAMEPAD_MAX];
+
+int aos_hal_pad_virtual_open(const char *name)
+{
+    if (!K.mx) K.mx = xSemaphoreCreateMutex();
+    if (!K.mx) return -1;
+    int slot = -1;
+    xSemaphoreTake(K.mx, portMAX_DELAY);
+    for (int i = 0; i < AOS_GAMEPAD_MAX && slot < 0; i++)
+        if (!K.pad[i].connected) slot = i;
+    if (slot >= 0) {
+        memset(&K.pad[slot], 0, sizeof K.pad[slot]);
+        K.pad[slot].connected = true;
+        K.pad[slot].hat = -1;
+        K.pad[slot].axes = 3;
+        K.pad[slot].has_hat = true;
+        K.pad[slot].nbuttons = 12;
+        snprintf(K.pad[slot].name, sizeof K.pad[slot].name, "%s", name && name[0] ? name : "Pad");
+        s_virtual[slot] = true;
+    }
+    xSemaphoreGive(K.mx);
+    return slot;
+}
+
+void aos_hal_pad_virtual_set(int slot, uint32_t buttons, int8_t hat, int16_t x, int16_t y)
+{
+    if (!K.mx || slot < 0 || slot >= AOS_GAMEPAD_MAX || !s_virtual[slot]) return;
+    xSemaphoreTake(K.mx, portMAX_DELAY);
+    K.pad[slot].buttons = buttons;
+    K.pad[slot].hat = hat >= 0 && hat < 8 ? hat : -1;
+    K.pad[slot].axis[0] = x;
+    K.pad[slot].axis[1] = y;
+    K.pad[slot].reports++;
+    xSemaphoreGive(K.mx);
+}
+
+void aos_hal_pad_virtual_close(int slot)
+{
+    if (!K.mx || slot < 0 || slot >= AOS_GAMEPAD_MAX || !s_virtual[slot]) return;
+    xSemaphoreTake(K.mx, portMAX_DELAY);
+    memset(&K.pad[slot], 0, sizeof K.pad[slot]);
+    s_virtual[slot] = false;
+    xSemaphoreGive(K.mx);
+}
+
 uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *p)
 {
     static const uint8_t HAT[8] = { AOS_DPAD_UP, AOS_DPAD_UP | AOS_DPAD_RIGHT, AOS_DPAD_RIGHT,

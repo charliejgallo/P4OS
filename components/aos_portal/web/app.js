@@ -1398,6 +1398,93 @@ async function pageBot() {
   botT = setTimeout(tick, 2000);
 }
 
+/* ---- the phone as a joystick (G24) ----
+ * One more pad for the board's games, through a WebSocket (/api/pad/ws):
+ * the board puts it in its table of pads, so a game reads it as a second
+ * player's USB pad (aos_pad.h). A stick on the left (analog; past half way
+ * it is also the directions), A B L R and Start on the right. Sends
+ * "buttons hat x y" on every change and every half second. */
+function pageMando() {
+  const BIT = { A: 1 << 0, B: 1 << 2, L: 1 << 4, R: 1 << 5, START: 1 << 8 };
+  let ws = null, slot = -1, buttons = 0, sx = 0, sy = 0, sent = '', gone = false, retry = null, beat = null;
+  const dot = h('span', { class: 'mdot' }), who = h('span', {}, tr('Conectando…'));
+  const knob = h('div', { class: 'mknob' }), stick = h('div', { class: 'mstick' }, knob);
+  const btn = (k, label, cls) => h('div', { class: 'mbtn ' + cls, 'data-k': k }, label);
+  const pad = h('div', { class: 'mando' },
+    h('div', { class: 'mtop' }, btn('L', 'L', 'ml'), h('div', { class: 'mmid' }, dot, ' ', who),
+      btn('START', tr('Start'), 'mstart'), h('a', { class: 'mexit', href: '#pantalla' }, '✕'), btn('R', 'R', 'mr')),
+    h('div', { class: 'mrow' }, stick, h('div', { class: 'mab' }, btn('B', 'B', 'mb'), btn('A', 'A', 'ma'))));
+  const send = force => {
+    const m = `${buttons} -1 ${sx} ${sy}`;
+    if (!force && m === sent) return;
+    sent = m;
+    if (ws && ws.readyState === 1) ws.send(m);
+  };
+  function connect() {
+    if (gone) return;
+    const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/api/pad/ws?name=' + encodeURIComponent(tr('Celular'));
+    ws = new WebSocket(url);
+    ws.onopen = () => { dot.classList.add('on'); sent = ''; send(true); };
+    ws.onmessage = e => {
+      try {
+        const j = JSON.parse(e.data);
+        slot = j.slot;
+        who.textContent = slot >= 0 ? tr('Jugador %s', slot + 1) : tr('Ya hay cuatro mandos en la placa');
+      } catch {}
+    };
+    ws.onclose = () => {
+      dot.classList.remove('on');
+      if (gone) return;
+      who.textContent = tr('Sin conexión: reintentando…');
+      retry = setTimeout(connect, 1500);
+    };
+  }
+  /* the stick: a finger of its own, anywhere it started inside */
+  let sid = null;
+  const moveStick = e => {
+    const r = stick.getBoundingClientRect(), R = r.width / 2;
+    let dx = e.clientX - (r.left + R), dy = e.clientY - (r.top + R);
+    const d = Math.hypot(dx, dy);
+    if (d > R) { dx *= R / d; dy *= R / d; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    sx = Math.round(dx / R * 32767);
+    sy = Math.round(dy / R * 32767);
+    send();
+  };
+  stick.addEventListener('pointerdown', e => { sid = e.pointerId; stick.setPointerCapture(sid); moveStick(e); });
+  stick.addEventListener('pointermove', e => { if (e.pointerId === sid) moveStick(e); });
+  const endStick = e => { if (e.pointerId !== sid) return; sid = null; sx = sy = 0; knob.style.transform = ''; send(); };
+  stick.addEventListener('pointerup', endStick);
+  stick.addEventListener('pointercancel', endStick);
+  /* the buttons: each its own fingers */
+  for (const b of pad.querySelectorAll('.mbtn')) {
+    const bit = BIT[b.dataset.k], fingers = new Set();
+    const set = () => {
+      const on = fingers.size > 0;
+      b.classList.toggle('on', on);
+      buttons = on ? buttons | bit : buttons & ~bit;
+      send();
+    };
+    b.addEventListener('pointerdown', e => { fingers.add(e.pointerId); b.setPointerCapture(e.pointerId); if (navigator.vibrate) navigator.vibrate(12); set(); });
+    const up = e => { fingers.delete(e.pointerId); set(); };
+    b.addEventListener('pointerup', up);
+    b.addEventListener('pointercancel', up);
+  }
+  document.body.append(pad);
+  document.documentElement.classList.add('mando-on');
+  connect();
+  beat = setInterval(() => send(true), 500);
+  put(main, h('h1', {}, tr('Mando')), h('p', { class: 'note' }, tr('El celular es un mando más para los juegos de la placa.')));
+  return () => {
+    gone = true;
+    clearTimeout(retry);
+    clearInterval(beat);
+    if (ws) { ws.onclose = null; ws.close(); }
+    pad.remove();
+    document.documentElement.classList.remove('mando-on');
+  };
+}
+
 /* ---- Claude ---- */
 let claudeT;
 async function pageClaude() {
@@ -4067,7 +4154,7 @@ async function pageZigbee() {
   zbT = setTimeout(tick, 1000);
 }
 
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, zigbee: pageZigbee, mqtt: pageMqtt, bot: pageBot, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, zigbee: pageZigbee, mqtt: pageMqtt, bot: pageBot, mando: pageMando, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts

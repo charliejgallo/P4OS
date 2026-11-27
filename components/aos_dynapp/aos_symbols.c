@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh, aos_154
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3739 simbolos.
+ * Total: 3747 simbolos.
  */
 
 #include <stddef.h>
@@ -201,6 +201,8 @@ extern int aos_font_title;
 extern int aos_gesture_attach;
 extern int aos_gesture_detach;
 extern int aos_gesture_multitouch;
+extern int aos_h264_enc_give;
+extern int aos_h264_enc_take;
 extern int aos_ha_area_count;
 extern int aos_ha_area_name;
 extern int aos_ha_at;
@@ -331,6 +333,9 @@ extern int aos_hal_ftm_result;
 extern int aos_hal_ftm_supported;
 extern int aos_hal_h264_close;
 extern int aos_hal_h264_decode;
+extern int aos_hal_h264_enc_close;
+extern int aos_hal_h264_enc_frame;
+extern int aos_hal_h264_enc_open;
 extern int aos_hal_h264_open;
 extern int aos_hal_hang_restarts;
 extern int aos_hal_heap_info;
@@ -524,6 +529,9 @@ extern int aos_hal_ota_running_slot;
 extern int aos_hal_ota_write;
 extern int aos_hal_p256_ecdh;
 extern int aos_hal_p256_keypair;
+extern int aos_hal_pad_virtual_close;
+extern int aos_hal_pad_virtual_open;
+extern int aos_hal_pad_virtual_set;
 extern int aos_hal_panel_frames;
 extern int aos_hal_panel_hw_reset;
 extern int aos_hal_panel_qos_get;
@@ -3943,6 +3951,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_gesture_attach),
     ESP_ELFSYM_EXPORT(aos_gesture_detach),
     ESP_ELFSYM_EXPORT(aos_gesture_multitouch),
+    ESP_ELFSYM_EXPORT(aos_h264_enc_give),
+    ESP_ELFSYM_EXPORT(aos_h264_enc_take),
     ESP_ELFSYM_EXPORT(aos_ha_area_count),
     ESP_ELFSYM_EXPORT(aos_ha_area_name),
     ESP_ELFSYM_EXPORT(aos_ha_at),
@@ -4073,6 +4083,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_ftm_supported),
     ESP_ELFSYM_EXPORT(aos_hal_h264_close),
     ESP_ELFSYM_EXPORT(aos_hal_h264_decode),
+    ESP_ELFSYM_EXPORT(aos_hal_h264_enc_close),
+    ESP_ELFSYM_EXPORT(aos_hal_h264_enc_frame),
+    ESP_ELFSYM_EXPORT(aos_hal_h264_enc_open),
     ESP_ELFSYM_EXPORT(aos_hal_h264_open),
     ESP_ELFSYM_EXPORT(aos_hal_hang_restarts),
     ESP_ELFSYM_EXPORT(aos_hal_heap_info),
@@ -4266,6 +4279,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_ota_write),
     ESP_ELFSYM_EXPORT(aos_hal_p256_ecdh),
     ESP_ELFSYM_EXPORT(aos_hal_p256_keypair),
+    ESP_ELFSYM_EXPORT(aos_hal_pad_virtual_close),
+    ESP_ELFSYM_EXPORT(aos_hal_pad_virtual_open),
+    ESP_ELFSYM_EXPORT(aos_hal_pad_virtual_set),
     ESP_ELFSYM_EXPORT(aos_hal_panel_frames),
     ESP_ELFSYM_EXPORT(aos_hal_panel_hw_reset),
     ESP_ELFSYM_EXPORT(aos_hal_panel_qos_get),

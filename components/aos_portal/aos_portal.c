@@ -48,6 +48,7 @@
  *   POST /api/panel/qos?dma=&cache=[&save=1]  the AXI arbiter's priorities for the panel's refresh (aos_portal_sysmon.c)
  *   GET  /api/macropad ...             the Macro pad's layout, trying a button (aos_portal_macropad.c)
  *   GET  /api/expansion ...  /api/sensors ...  the header, modules.txt, the sensors (aos_portal_modules.c)
+ *   GET  /api/pad/ws[?name=]          WebSocket: the phone as one more pad for the games (#mando)
  *   GET  /api/log?from=                the log ring since a position
  *   GET  /api/log?prev=1&from=         the previous boot's tail (kept across a restart)
  *   /api/ota, /api/coredump            firmware updates and the last panic (aos_portal_system.c)
@@ -1597,6 +1598,40 @@ static void api_log(aos_httpd_req_t *r)
     free(buf);
 }
 
+/* The phone as a joystick (the #mando page): a WebSocket that holds one of
+ * the board's pad places while it is open. The page sends "buttons hat x
+ * y" (decimal: aos_hal_pad_virtual_set's) when anything changes and every
+ * half second besides; the place is let go when the page goes or says
+ * nothing for 3 s. It answers its place once: {"slot": N} (player N+1). */
+static void api_pad_ws(aos_httpd_req_t *r)
+{
+    char name[40] = "";
+    aos_httpd_query(r, "name", name, sizeof name);
+    if (!aos_httpd_ws_accept(r)) { send_err(r, 400, "WebSocket only"); return; }
+    int slot = aos_hal_pad_virtual_open(name[0] ? name : _("Celular"));
+    char msg[64];
+    snprintf(msg, sizeof msg, "{\"slot\": %d}", slot);
+    aos_httpd_ws_send_text(r, msg);
+    if (slot < 0) return;
+    aos_hal_log("portal", "a phone is pad %d", slot + 1);
+    for (;;) {
+        char b[64];
+        int n = aos_httpd_ws_recv(r, b, sizeof b, 3000);
+        if (n <= 0) break;
+        unsigned long buttons = 0;
+        int hat = -1, x = 0, y = 0;
+        if (sscanf(b, "%lu %d %d %d", &buttons, &hat, &x, &y) >= 2) {
+            if (x < -32767) x = -32767;
+            if (x > 32767) x = 32767;
+            if (y < -32767) y = -32767;
+            if (y > 32767) y = 32767;
+            aos_hal_pad_virtual_set(slot, (uint32_t)buttons, (int8_t)hat, (int16_t)x, (int16_t)y);
+        }
+    }
+    aos_hal_pad_virtual_close(slot);
+    aos_hal_log("portal", "pad %d let go", slot + 1);
+}
+
 static void restart_later(void *arg) { aos_hal_reboot(); }
 
 static void api_restart(aos_httpd_req_t *r)
@@ -1754,6 +1789,7 @@ static void handler(aos_httpd_req_t *r)
     else if (aos_portal_macropad(r, m, p)) {}
     else if (aos_portal_modules(r, m, p)) {}
     else if (get && !strcmp(p, "player")) api_player(r);
+    else if (get && !strcmp(p, "pad/ws")) api_pad_ws(r);
     else if (get && !strcmp(p, "log")) api_log(r);
     else if (post && !strcmp(p, "restart")) api_restart(r);
     else send_err(r, 404, _("no existe"));

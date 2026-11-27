@@ -63,6 +63,17 @@ void aos_httpd_send_json(aos_httpd_req_t *r, int status, const char *json);
 bool aos_httpd_begin(aos_httpd_req_t *r, int status, const char *ctype, long len, const char *extra_headers);
 bool aos_httpd_write(aos_httpd_req_t *r, const void *data, size_t len);
 
+/* WebSocket (RFC 6455), the server's side, for a page that talks for a
+ * while (the phone as a joystick, #mando): over HTTPS a request a key
+ * press would pay a handshake each time. accept answers the upgrade (false:
+ * it was not one, nothing sent). recv: one whole message, text or binary,
+ * its length (NUL-terminated, cut at max-1), 0 nothing within timeout_ms,
+ * -1 closed; pings are answered inside. The connection holds one of the
+ * AOS_HTTPD_CONNS places while it is open. */
+bool aos_httpd_ws_accept(aos_httpd_req_t *r);
+int  aos_httpd_ws_recv(aos_httpd_req_t *r, char *buf, int max, int timeout_ms);
+bool aos_httpd_ws_send_text(aos_httpd_req_t *r, const char *text);
+
 #ifdef __cplusplus
 }
 #endif

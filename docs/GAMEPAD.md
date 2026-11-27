@@ -25,6 +25,26 @@ moves a white outline to the nearest button in that direction and A presses
 it. The outline appears with the first press of the pad, so whoever plays
 by touch never sees it. Board games put a cursor on the board the same way.
 
+## The phone as a pad (#mando, since 0.35)
+
+The portal's **Mando** page turns a phone into one more pad: a stick on the
+left (analog; past half way it is also the directions) and A, B, L, R and
+Start on the right, several fingers at once, a short buzz on each press.
+The page talks to the board over a WebSocket (`GET /api/pad/ws`, the first
+the portal has: over HTTPS a request per key press would pay a handshake
+each time) and the board puts it in its table of pads with
+`aos_hal_pad_virtual_open`: a game reads it as a USB pad in the next free
+place, so the second player of Metegol, Hockey or Juegos de mesa can be a
+phone and nothing in the games changed. It says on top which player it is.
+
+- It sends "buttons hat x y" on every change and every half second; the
+  board lets the place go when the page closes or says nothing for 3 s,
+  and the page reconnects by itself.
+- The WebSocket holds one of the portal's eight connections while it is
+  open: two phones, two of them.
+- A USB pad plugged in afterwards takes the next free place; up to four
+  pads in all, phones included.
+
 ## Game by game
 
 | Game | Controls |

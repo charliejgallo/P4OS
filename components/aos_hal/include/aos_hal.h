@@ -2216,6 +2216,16 @@ bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out);    /* index 0..AOS_
 /* up/down/left/right from the hat and the left stick (past half way) */
 enum { AOS_DPAD_UP = 1, AOS_DPAD_DOWN = 2, AOS_DPAD_LEFT = 4, AOS_DPAD_RIGHT = 8 };
 uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad);
+/* A pad that is not on USB (since 0.35: a phone through the portal's #mando
+ * page). It takes a free place in the same table, so the games read it as
+ * one more pad (aos_pad.h, a second player's index) and a USB pad plugged
+ * in later takes the next one. open: its place (0..AOS_GAMEPAD_MAX-1), -1
+ * when they are all taken. set: buttons numbered as a USB pad's (bit 0 =
+ * button 1: A, bit 2 B, bit 4 L, bit 5 R, bit 8 START, aos_pad.h), hat -1
+ * or 0..7, the stick -32767..32767. close frees the place. From any task. */
+int  aos_hal_pad_virtual_open(const char *name);
+void aos_hal_pad_virtual_set(int slot, uint32_t buttons, int8_t hat, int16_t x, int16_t y);
+void aos_hal_pad_virtual_close(int slot);
 
 /* P4OS: USB MIDI devices on the host (aos_usb_midi_p4.c): keyboards, pads,
  * controllers. Messages in a queue (the oldest dropped when nobody reads
@@ -2798,6 +2808,34 @@ typedef struct {
 aos_h264_t *aos_hal_h264_open(void);
 int         aos_hal_h264_decode(aos_h264_t *dec, const uint8_t *nal, int len, aos_h264_pic_t *pic);
 void        aos_hal_h264_close(aos_h264_t *dec);
+
+/* P4OS (since 0.35): the other way, pictures to H.264, for an app that
+ * records or streams (the security recorder, an RTSP camera). The board's
+ * hardware encoder (aos_h264_enc_p4.c; libx264 in the simulator):
+ * constrained baseline, Annex B (each NAL with its start code, the SPS and
+ * PPS before every key frame), so the output goes as it is into an .h264
+ * file, an MP4 muxer or RTP.
+ *
+ *   open    w and h multiples of 16 (up to 1920x1088), fps 1..30, bitrate
+ *           in bit/s, gop the frames from one key frame to the next (0: two
+ *           seconds' worth). NULL when the encoder is taken (the screen
+ *           recording uses it: one at a time) or there is no memory.
+ *   frame   one picture, RGB565 in LVGL's byte order (what aos_hal_jpeg_
+ *           decode and the camera give) of src_w x src_h, rows stride_px
+ *           apart; the PPA scales it to the encoder's size when it differs.
+ *           key asks for a key frame now (a viewer just connected). *out
+ *           points at the coded frame, valid until the next call; its
+ *           length is returned, -1 on an error. *is_key, when given, says
+ *           whether it is one (an IDR, with SPS and PPS).
+ *   close   lets the encoder go.
+ *
+ * From a worker or a thread of the app's, never from LVGL's task: a frame
+ * at 1280x720 takes ~10 ms of hardware and the conversion. */
+typedef struct aos_h264_enc aos_h264_enc_t;
+aos_h264_enc_t *aos_hal_h264_enc_open(int w, int h, int fps, int bitrate, int gop);
+int             aos_hal_h264_enc_frame(aos_h264_enc_t *e, const uint16_t *rgb565, int src_w, int src_h,
+                                       int stride_px, bool key, const uint8_t **out, bool *is_key);
+void            aos_hal_h264_enc_close(aos_h264_enc_t *e);
 
 /* P4OS: a decoded picture to the screen by the PPA (board: aos_video_p4.c).
  * The block (sx, sy, sw, sh) of 'pic' (I420, BT.601 limited range, as

@@ -683,12 +683,66 @@ void aos_hal_sim_pad(bool connected, uint32_t buttons, int16_t ax, int16_t ay, i
     s_pad.reports++;
 }
 
-int aos_hal_hid_gamepad_count(void) { return s_pad.connected ? 1 : 0; }
+/* the simulator's keyboard pad is place 0; the virtual ones (a phone
+ * through the portal) take the others, as on the board */
+static aos_gamepad_t s_vpad[AOS_GAMEPAD_MAX];
+static pthread_mutex_t s_vpad_mx = PTHREAD_MUTEX_INITIALIZER;
+
+int aos_hal_pad_virtual_open(const char *name)
+{
+    int slot = -1;
+    pthread_mutex_lock(&s_vpad_mx);
+    for (int i = 0; i < AOS_GAMEPAD_MAX && slot < 0; i++)
+        if (!(i == 0 && s_pad.connected) && !s_vpad[i].connected) slot = i;
+    if (slot >= 0) {
+        memset(&s_vpad[slot], 0, sizeof s_vpad[slot]);
+        s_vpad[slot].connected = true;
+        s_vpad[slot].hat = -1;
+        s_vpad[slot].axes = 3;
+        s_vpad[slot].has_hat = true;
+        s_vpad[slot].nbuttons = 12;
+        snprintf(s_vpad[slot].name, sizeof s_vpad[slot].name, "%s", name && name[0] ? name : "Pad");
+    }
+    pthread_mutex_unlock(&s_vpad_mx);
+    return slot;
+}
+
+void aos_hal_pad_virtual_set(int slot, uint32_t buttons, int8_t hat, int16_t x, int16_t y)
+{
+    if (slot < 0 || slot >= AOS_GAMEPAD_MAX) return;
+    pthread_mutex_lock(&s_vpad_mx);
+    if (s_vpad[slot].connected) {
+        s_vpad[slot].buttons = buttons;
+        s_vpad[slot].hat = hat >= 0 && hat < 8 ? hat : -1;
+        s_vpad[slot].axis[0] = x;
+        s_vpad[slot].axis[1] = y;
+        s_vpad[slot].reports++;
+    }
+    pthread_mutex_unlock(&s_vpad_mx);
+}
+
+void aos_hal_pad_virtual_close(int slot)
+{
+    if (slot < 0 || slot >= AOS_GAMEPAD_MAX) return;
+    pthread_mutex_lock(&s_vpad_mx);
+    memset(&s_vpad[slot], 0, sizeof s_vpad[slot]);
+    pthread_mutex_unlock(&s_vpad_mx);
+}
+
+int aos_hal_hid_gamepad_count(void)
+{
+    int n = s_pad.connected ? 1 : 0;
+    for (int i = 0; i < AOS_GAMEPAD_MAX; i++) n += s_vpad[i].connected;
+    return n;
+}
 
 bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out)
 {
-    if (index != 0) { memset(out, 0, sizeof *out); return false; }
-    *out = s_pad;
+    if (index < 0 || index >= AOS_GAMEPAD_MAX) { memset(out, 0, sizeof *out); return false; }
+    if (index == 0 && s_pad.connected) { *out = s_pad; return true; }
+    pthread_mutex_lock(&s_vpad_mx);
+    *out = s_vpad[index];
+    pthread_mutex_unlock(&s_vpad_mx);
     return out->connected;
 }
 

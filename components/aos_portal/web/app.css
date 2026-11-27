@@ -306,3 +306,28 @@ button.zbchip:hover { filter: brightness(1.15); }
 /* Zigbee, Emular: the coordinator's requests */
 .zbemu-log { max-height: 360px; overflow-y: auto; font-size: 14px; line-height: 1.5; }
 .zbemu-board { color: var(--accent); }
+
+/* the phone as a joystick (#mando): over everything, landscape or not */
+html.mando-on, html.mando-on body { overflow: hidden; overscroll-behavior: none; }
+.mando { position: fixed; inset: 0; z-index: 1000; background: #0b0b0e; color: #fff; display: flex; flex-direction: column;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.mando .mtop { display: flex; align-items: center; gap: 12px; }
+.mando .mmid { flex: 1; text-align: center; font-size: 15px; color: #aeaeb2; }
+.mando .mdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff453a; }
+.mando .mdot.on { background: #34c759; }
+.mando .mexit { color: #8e8e93; font-size: 22px; text-decoration: none; padding: 6px 10px; }
+.mando .mrow { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.mando .mstick { width: min(42vmin, 220px); height: min(42vmin, 220px); border-radius: 50%; background: #1c1c22;
+  border: 2px solid #2c2c34; position: relative; flex: none; }
+.mando .mknob { position: absolute; left: 30%; top: 30%; width: 40%; height: 40%; border-radius: 50%; background: #3a3a46;
+  box-shadow: 0 4px 14px rgba(0,0,0,.5); }
+.mando .mab { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center; }
+.mando .mbtn { display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700;
+  background: #2c2c34; color: #fff; font-size: 26px; }
+.mando .mbtn.on { filter: brightness(1.7); transform: scale(.95); }
+.mando .ma, .mando .mb { width: min(22vmin, 110px); height: min(22vmin, 110px); }
+.mando .ma { background: #0a84ff; margin-top: -40px; }
+.mando .mb { background: #ff9f0a; margin-top: 40px; }
+.mando .ml, .mando .mr { border-radius: 14px; width: 84px; height: 46px; font-size: 18px; }
+.mando .mstart { border-radius: 23px; width: 90px; height: 40px; font-size: 15px; background: #3a3a46; }

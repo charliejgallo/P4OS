@@ -36,6 +36,9 @@
 #include "esp_h264_enc_single_hw.h"
 #include "esp_h264_enc_single.h"
 
+bool aos_h264_enc_take(void);       /* aos_h264_enc_p4.c */
+void aos_h264_enc_give(void);
+
 #define TAG      "screenrec"
 #define LINE     128
 #define TIMESCALE 1000                  /* sample times in ms */
@@ -308,7 +311,11 @@ static void rec_task(void *arg)
         .res = { .width = (uint16_t)w, .height = (uint16_t)h },
         .rc = { .bitrate = 3 * 1000 * 1000, .qp_min = 22, .qp_max = 38 },
     };
-    if (!yuv || !out || ppa_register_client(&pc, &srm) != ESP_OK) {
+    /* one hardware encoder for the board: an app may hold it (aos_h264_enc_p4.c) */
+    bool taken = aos_h264_enc_take();
+    if (!taken) {
+        ESP_LOGE(TAG, "the H.264 encoder is taken by an app");
+    } else if (!yuv || !out || ppa_register_client(&pc, &srm) != ESP_OK) {
         ESP_LOGE(TAG, "no memory or no PPA");
     } else if (esp_h264_enc_hw_new(&cfg, &enc) != ESP_H264_ERR_OK || esp_h264_enc_open(enc) != ESP_H264_ERR_OK) {
         ESP_LOGE(TAG, "the H.264 encoder did not start (%dx%d)", w, h);
@@ -360,6 +367,7 @@ static void rec_task(void *arg)
                     R.frames ? (unsigned)(enc_us / 1000 / R.frames) : 0, R.done_ok ? "" : " - NOT closed well");
     }
     if (enc) { esp_h264_enc_close(enc); esp_h264_enc_del(enc); }
+    if (taken) aos_h264_enc_give();
     if (srm) ppa_unregister_client(srm);
     heap_caps_free(yuv);
     heap_caps_free(out);

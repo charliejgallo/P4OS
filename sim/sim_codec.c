@@ -28,6 +28,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#include <libavutil/opt.h>
 
 /* ---- H.264 ---------------------------------------------------------------- */
 
@@ -245,3 +246,111 @@ jpeg_error_t jpeg_dec_close(jpeg_dec_handle_t jpeg_dec)
 }
 
 #endif /* SIM_JPEG */
+
+/* ---- H.264 the other way (aos_hal_h264_enc_*): libx264 through libavcodec,
+ * constrained baseline and Annex B as the board's hardware encoder gives
+ * it. One at a time, as on the board. */
+#include <libswscale/swscale.h>
+#include <libavutil/opt.h>
+
+struct aos_h264_enc {
+    AVCodecContext *cx;
+    AVFrame *f;
+    AVPacket *pkt;
+    struct SwsContext *sws;
+    int sw, sh;                     /* the source size sws was made for */
+    uint8_t *out;
+    int out_n;
+    int64_t pts;
+};
+static int s_enc_open;
+
+aos_h264_enc_t *aos_hal_h264_enc_open(int w, int h, int fps, int bitrate, int gop)
+{
+    if (w < 16 || h < 16 || w > 1920 || h > 1088 || (w & 15) || (h & 15) || s_enc_open) return NULL;
+    if (fps < 1) fps = 1;
+    if (fps > 30) fps = 30;
+    if (gop <= 0) gop = fps * 2;
+    const AVCodec *c = avcodec_find_encoder_by_name("libx264");
+    if (!c) c = avcodec_find_encoder(AV_CODEC_ID_H264);
+    if (!c) { printf("[h264enc] no H.264 encoder in this libavcodec\n"); return NULL; }
+    aos_h264_enc_t *e = calloc(1, sizeof *e);
+    if (!e) return NULL;
+    e->cx = avcodec_alloc_context3(c);
+    e->cx->width = w;
+    e->cx->height = h;
+    e->cx->time_base = (AVRational){ 1, fps };
+    e->cx->framerate = (AVRational){ fps, 1 };
+    e->cx->gop_size = gop;
+    e->cx->max_b_frames = 0;
+    e->cx->bit_rate = bitrate;
+    e->cx->pix_fmt = AV_PIX_FMT_YUV420P;
+    /* the profile goes by the "profile" option below (the constant changed name across releases) */
+    av_opt_set(e->cx->priv_data, "preset", "veryfast", 0);
+    av_opt_set(e->cx->priv_data, "tune", "zerolatency", 0);
+    av_opt_set(e->cx->priv_data, "profile", "baseline", 0);
+    e->f = av_frame_alloc();
+    e->pkt = av_packet_alloc();
+    e->f->format = AV_PIX_FMT_YUV420P;
+    e->f->width = w;
+    e->f->height = h;
+    if (avcodec_open2(e->cx, c, NULL) < 0 || av_frame_get_buffer(e->f, 32) < 0) {
+        printf("[h264enc] could not open %dx%d\n", w, h);
+        aos_hal_h264_enc_close(e);
+        return NULL;
+    }
+    s_enc_open = 1;
+    printf("[h264enc] open: %dx%d, %d fps, %d kbit/s, a key frame every %d (%s)\n", w, h, fps, bitrate / 1000, gop, c->name);
+    return e;
+}
+
+int aos_hal_h264_enc_frame(aos_h264_enc_t *e, const uint16_t *rgb565, int src_w, int src_h, int stride_px, bool key,
+                           const uint8_t **out, bool *is_key)
+{
+    if (!e || !e->cx || !rgb565 || src_w <= 0 || src_h <= 0 || !out) return -1;
+    if (stride_px < src_w) stride_px = src_w;
+    if (!e->sws || e->sw != src_w || e->sh != src_h) {
+        sws_freeContext(e->sws);
+        e->sws = sws_getContext(src_w, src_h, AV_PIX_FMT_RGB565LE, e->cx->width, e->cx->height, AV_PIX_FMT_YUV420P,
+                                SWS_BILINEAR, NULL, NULL, NULL);
+        e->sw = src_w;
+        e->sh = src_h;
+    }
+    if (!e->sws || av_frame_make_writable(e->f) < 0) return -1;
+    const uint8_t *src[1] = { (const uint8_t *)rgb565 };
+    int ss[1] = { stride_px * 2 };
+    sws_scale(e->sws, src, ss, 0, src_h, e->f->data, e->f->linesize);
+    e->f->pts = e->pts++;
+    e->f->pict_type = key ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
+#ifdef AV_FRAME_FLAG_KEY
+    if (key) e->f->flags |= AV_FRAME_FLAG_KEY; else e->f->flags &= ~AV_FRAME_FLAG_KEY;
+#endif
+    if (avcodec_send_frame(e->cx, e->f) < 0) return -1;
+    int got = avcodec_receive_packet(e->cx, e->pkt);
+    if (got == AVERROR(EAGAIN)) { *out = e->out; if (is_key) *is_key = false; return 0; }
+    if (got < 0) return -1;
+    if (e->pkt->size > e->out_n) {
+        free(e->out);
+        e->out = malloc((size_t)e->pkt->size);
+        e->out_n = e->out ? e->pkt->size : 0;
+    }
+    if (!e->out) { av_packet_unref(e->pkt); return -1; }
+    memcpy(e->out, e->pkt->data, (size_t)e->pkt->size);
+    int n = e->pkt->size;
+    if (is_key) *is_key = (e->pkt->flags & AV_PKT_FLAG_KEY) != 0;
+    av_packet_unref(e->pkt);
+    *out = e->out;
+    return n;
+}
+
+void aos_hal_h264_enc_close(aos_h264_enc_t *e)
+{
+    if (!e) return;
+    if (e->cx) avcodec_free_context(&e->cx);
+    av_frame_free(&e->f);
+    av_packet_free(&e->pkt);
+    sws_freeContext(e->sws);
+    free(e->out);
+    free(e);
+    s_enc_open = 0;
+}

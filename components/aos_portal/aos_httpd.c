@@ -16,6 +16,8 @@
 #include "mbedtls/error.h"
 #include "mbedtls/version.h"
 #include "mbedtls/oid.h"
+#include "mbedtls/sha1.h"
+#include "mbedtls/base64.h"
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 #include "psa/crypto.h"
 #endif
@@ -390,6 +392,108 @@ bool aos_httpd_begin(aos_httpd_req_t *r, int status, const char *ctype, long len
 bool aos_httpd_write(aos_httpd_req_t *r, const void *data, size_t len)
 {
     return len == 0 || req_send(r, data, len);
+}
+
+/* ---------------------------------------------------------------- WebSocket */
+
+bool aos_httpd_ws_accept(aos_httpd_req_t *r)
+{
+    const char *up = aos_httpd_header(r, "Upgrade");
+    const char *key = aos_httpd_header(r, "Sec-WebSocket-Key");
+    if (r->began || !up || strcasecmp(up, "websocket") || !key || strlen(key) > 64) return false;
+    char cat[128];
+    snprintf(cat, sizeof cat, "%s258EAFA5-E914-47DA-95CA-C5AB0DC85B11", key);
+    unsigned char sha[20], b64[40];
+    size_t bn = 0;
+    if (mbedtls_sha1((const unsigned char *)cat, strlen(cat), sha) != 0 ||
+        mbedtls_base64_encode(b64, sizeof b64, &bn, sha, sizeof sha) != 0) return false;
+    b64[bn] = 0;
+    char h[256];
+    int n = snprintf(h, sizeof h, "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+                                  "Sec-WebSocket-Accept: %s\r\n\r\n", (const char *)b64);
+    r->began = true;
+    r->body_len = r->body_read = 0;     /* nothing to drain at the end */
+    return req_send(r, h, (size_t)n);
+}
+
+/* exactly len bytes, -1 when the other side went or nothing came in time */
+static int ws_read(aos_httpd_req_t *r, uint8_t *b, size_t len, int timeout_ms)
+{
+    size_t got = 0;
+    /* what came along with the head first */
+    while (got < len && r->pre_len) {
+        b[got++] = (uint8_t)*r->pre++;
+        r->pre_len--;
+    }
+    while (got < len) {
+        /* TLS may hold a record already read off the socket: no wait then */
+        if (!r->ssl || (mbedtls_ssl_get_bytes_avail(r->ssl) == 0 && !mbedtls_ssl_check_pending(r->ssl)))
+            if (!wait_fd(r->fd, false, timeout_ms)) return got ? -1 : 0;
+        int n = recv_some(r, b + got, len - got);
+        if (n <= 0) return -1;
+        got += (size_t)n;
+        timeout_ms = IO_TIMEOUT;        /* the rest of a frame comes along */
+    }
+    return (int)got;
+}
+
+static bool ws_send(aos_httpd_req_t *r, int op, const void *data, size_t len)
+{
+    uint8_t h[4];
+    size_t hn = 2;
+    h[0] = (uint8_t)(0x80 | op);
+    if (len < 126) h[1] = (uint8_t)len;
+    else { h[1] = 126; h[2] = (uint8_t)(len >> 8); h[3] = (uint8_t)len; hn = 4; }
+    if (len > 65535) return false;
+    return req_send(r, h, hn) && (len == 0 || req_send(r, data, len));
+}
+
+bool aos_httpd_ws_send_text(aos_httpd_req_t *r, const char *text)
+{
+    return ws_send(r, 1, text, strlen(text));
+}
+
+int aos_httpd_ws_recv(aos_httpd_req_t *r, char *buf, int max, int timeout_ms)
+{
+    int have = 0;
+    for (;;) {
+        uint8_t h[2];
+        int k = ws_read(r, h, 2, timeout_ms);
+        if (k == 0) return 0;
+        if (k < 0) return -1;
+        int op = h[0] & 0x0F;
+        bool fin = h[0] & 0x80, masked = h[1] & 0x80;
+        uint64_t len = h[1] & 0x7F;
+        if (len == 126) {
+            uint8_t e[2];
+            if (ws_read(r, e, 2, IO_TIMEOUT) != 2) return -1;
+            len = (uint64_t)e[0] << 8 | e[1];
+        } else if (len == 127) {
+            uint8_t e[8];
+            if (ws_read(r, e, 8, IO_TIMEOUT) != 8) return -1;
+            len = 0;
+            for (int i = 0; i < 8; i++) len = len << 8 | e[i];
+        }
+        uint8_t mask[4] = { 0 };
+        if (masked && ws_read(r, mask, 4, IO_TIMEOUT) != 4) return -1;
+        if (len > 65536) return -1;     /* not what a page of ours sends */
+        /* the payload: into buf as far as it fits, the rest read and dropped */
+        uint8_t tmp[128];
+        for (uint64_t i = 0; i < len;) {
+            size_t n = len - i > sizeof tmp ? sizeof tmp : (size_t)(len - i);
+            if (ws_read(r, tmp, n, IO_TIMEOUT) != (int)n) return -1;
+            for (size_t j = 0; j < n; j++, i++) {
+                uint8_t c = tmp[j] ^ mask[i & 3];
+                if (op < 8 && have < max - 1) buf[have++] = (char)c;
+                else if (op >= 8 && j < sizeof tmp) tmp[j] = c;
+            }
+            if (op == 9) ws_send(r, 10, tmp, n);        /* a ping: its pong */
+        }
+        if (op == 8) { ws_send(r, 8, NULL, 0); return -1; }
+        if (op >= 8) continue;
+        if (fin) { buf[have] = 0; return have; }
+        timeout_ms = IO_TIMEOUT;        /* the rest of a fragmented message */
+    }
 }
 
 void aos_httpd_send(aos_httpd_req_t *r, int status, const char *ctype, const void *data, size_t len)

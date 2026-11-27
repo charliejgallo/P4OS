@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The phone as a pad** (`docs/GAMEPAD.md`): the portal's new Mando page
+  is a stick and A, B, L, R and Start; the board reads it as one more pad,
+  so a phone can be the second player of the two-player games with no
+  change to them. Over a WebSocket, the portal's first.
+- **H.264 for the apps** (`aos_hal_h264_enc_*`): the board's hardware
+  encoder, for an app that records or streams (the security recorder, an
+  RTSP camera). Libx264 in the simulator. The screen recording and an app
+  take turns with it.
 - **The status bar shows the Zigbee radio and the bot**, next to the apps'
   own glyphs (Datalog logging, a printer printing), through the same
   `aos_ui_status_icon_set`: Zigbee green with the board's network up,

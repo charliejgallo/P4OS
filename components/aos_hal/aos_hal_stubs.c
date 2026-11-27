@@ -1089,6 +1089,15 @@ __attribute__((weak)) bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out
 __attribute__((weak)) uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad)
 { uint8_t v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) int aos_hal_pad_virtual_open(const char *name)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_pad_virtual_set(int slot, uint32_t buttons, int8_t hat, int16_t x, int16_t y)
+{ }
+
+__attribute__((weak)) void aos_hal_pad_virtual_close(int slot)
+{ }
+
 __attribute__((weak)) bool aos_hal_midi_read(aos_midi_msg_t *m)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
@@ -1432,6 +1441,15 @@ __attribute__((weak)) int aos_hal_h264_decode(aos_h264_t *dec, const uint8_t *na
 { int v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) void aos_hal_h264_close(aos_h264_t *dec)
+{ }
+
+__attribute__((weak)) aos_h264_enc_t * aos_hal_h264_enc_open(int w, int h, int fps, int bitrate, int gop)
+{ return NULL; }
+
+__attribute__((weak)) int aos_hal_h264_enc_frame(aos_h264_enc_t *e, const uint16_t *rgb565, int src_w, int src_h, int stride_px, bool key, const uint8_t **out, bool *is_key)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_h264_enc_close(aos_h264_enc_t *e)
 { }
 
 __attribute__((weak)) bool aos_hal_video_i420(const aos_h264_pic_t *pic, int sx, int sy, int sw, int sh, uint16_t *out, size_t out_bytes, int max_w, int max_h, int *out_w, int *out_h)

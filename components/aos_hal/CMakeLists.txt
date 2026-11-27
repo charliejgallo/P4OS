@@ -13,7 +13,7 @@ idf_component_register(
          "aos_audio_p4.c" "aos_audio.c" "aos_radio.c" "aos_aac_esp.c"
          "aos_tls.c" "aos_fetch.c" "aos_crypto.c" "aos_nettools_p4.c"
          "aos_stats.c" "aos_tasks_p4.c"
-         "aos_jpeg_p4.c" "aos_h264.c"
+         "aos_jpeg_p4.c" "aos_h264.c" "aos_h264_enc_p4.c"
          "aos_usb_p4.c" "aos_usb_net_p4.c" "aos_usb_hid_p4.c" "aos_usb_devs_p4.c" "aos_usb_midi_p4.c" "aos_usb_serial_p4.c" "aos_usb_uvc_p4.c" "aos_usb_uac_p4.c" "aos_usb_raw_p4.c" "aos_live.c" "aos_hid_keys.c"
          "aos_retro_p4.c" "aos_lvmem.c" "aos_flashop_p4.c" "aos_worker_p4.c" "aos_ota_p4.c" "aos_coredump_p4.c" "aos_panel_p4.c" "aos_code_p4.c"
          "aos_draw_accel_p4.c" "aos_video_p4.c" "aos_screenrec_p4.c"
