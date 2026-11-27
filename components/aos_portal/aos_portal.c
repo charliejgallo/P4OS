@@ -16,6 +16,8 @@
  *   POST /api/nav?to=home|back|rotate  POST /api/open?id=
  *   GET  /api/apps                     [{id,name,color_a,color_b,aic,text}], for the pages that draw icons
  *   GET  /api/apps/icon?id=            that app's AIC icon blob (aos_icon_ops.h), 404 if it has none
+ *   GET  /api/apps/icon_hd             {"pack": name} of the icon pack in use, 404 with none
+ *   GET  /api/apps/icon_hd?id=&size=   that app's picture in the pack (QOI, its nearest size at or above)
  *   GET  /api/apps/boot                the apps that start with the board, hidden (aos_ui.h)
  *   POST /api/apps/boot?id=&on=0|1     one on or off that list, as the app itself would
  *   GET  /api/player                   what plays, and the pipeline's ring and underruns
@@ -68,6 +70,7 @@
 #include "aos_flasher.h"
 #include "aos_menu.h"
 #include "aos_icon_ops.h"
+#include "aos_icon_pack.h"
 #include "aos_portal_bench.h"
 #include "aos_portal_eth.h"
 #include "aos_portal_radio.h"
@@ -441,6 +444,28 @@ static void api_app_icon(aos_httpd_req_t *r)
     }
     if (!ops || !len) { send_err(r, 404, _("sin ícono AIC")); return; }
     if (aos_httpd_begin(r, 200, "application/octet-stream", (long)len, NULL)) aos_httpd_write(r, ops, len);
+}
+
+/* The icon pack's picture, so the portal shows the icons the screen shows:
+ * the QOI file as the pack keeps it, which the page decodes (a few lines of
+ * JavaScript) instead of the board making a PNG of it. */
+static void api_app_icon_hd(aos_httpd_req_t *r)
+{
+    char id[48], sz[8], pack[AOS_ICON_PACK_NAME_MAX + 1];
+    bool has_id = aos_httpd_query(r, "id", id, sizeof id);
+    int32_t size = aos_httpd_query(r, "size", sz, sizeof sz) ? atoi(sz) : 120;
+    size_t len = 0;
+    uint8_t *q = aos_icon_pack_read_qoi(has_id ? id : NULL, size, &len, pack, sizeof pack);
+    if (!has_id) {
+        if (!pack[0]) { send_err(r, 404, _("no hay un pack de íconos")); return; }
+        cJSON *o = cJSON_CreateObject();
+        cJSON_AddStringToObject(o, "pack", pack);
+        send_cjson(r, 200, o);
+        return;
+    }
+    if (!q) { send_err(r, 404, _("el pack no tiene ese ícono")); return; }
+    if (aos_httpd_begin(r, 200, "image/qoi", (long)len, "Cache-Control: max-age=60\r\n")) aos_httpd_write(r, q, len);
+    free(q);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1727,6 +1752,7 @@ static void handler(aos_httpd_req_t *r)
     else if (post && !strcmp(p, "open")) api_open(r);
     else if (get && !strcmp(p, "apps")) api_apps(r);
     else if (get && !strcmp(p, "apps/icon")) api_app_icon(r);
+    else if (get && !strcmp(p, "apps/icon_hd")) api_app_icon_hd(r);
     else if ((get || post) && !strcmp(p, "apps/boot")) api_apps_boot(r, post);
     else if (!strcmp(p, "wifi")) api_wifi(r);
     else if (get && !strcmp(p, "wifi/scan")) api_wifi_scan(r);

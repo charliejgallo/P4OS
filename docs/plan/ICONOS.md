@@ -141,8 +141,9 @@ anotado; el pack se arma con las elegidas.
 ### Lo que falta
 
 - **El estilo y los dibujos** (las etapas de arriba).
-- **El portal** sigue dibujando el AIC; mostraría el PNG si la placa sirve
-  los íconos del pack (por ejemplo `/api/icon/<id>.png`).
+- ~~**El portal** sigue dibujando el AIC~~: desde la 0.35.0 la página
+  Inicio muestra los del pack (`/api/apps/icon_hd`, el QOI del pack
+  decodificado en el navegador).
 - **Un pack nuevo publicado** suma su nombre a `pack_title()` (con sus
   traducciones) y su parte del sistema.
 - **La release:** en `store/system.json`, una parte por pack (los textos,

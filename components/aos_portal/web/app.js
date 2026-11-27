@@ -2417,26 +2417,88 @@ function inDrawIcon(ctx, app, bytes, S) {
   flush();
 }
 const inIcons = { blobs: new Map(), urls: new Map(), queue: Promise.resolve() };
+/* The icon pack the board uses (Settings, Icons): its pictures, so the
+ * portal shows the icons the screen shows. /api/apps/icon_hd says which
+ * pack there is (404 with none) and serves each picture as the pack keeps
+ * it, a QOI file, decoded here. Without a pack, or for an app the pack
+ * has no picture of, the AIC drawing as before. */
+const inHd = { pack: undefined, probing: false, pics: new Map(), queue: Promise.resolve() };
+function inQoi(b) {
+  if (b.length < 22 || b[0] !== 113 || b[1] !== 111 || b[2] !== 105 || b[3] !== 102) return null;
+  const dv = new DataView(b.buffer, b.byteOffset, b.byteLength), w = dv.getUint32(4), hh = dv.getUint32(8);
+  if (!w || !hh || w > 512 || hh > 512) return null;
+  const px = new Uint8ClampedArray(w * hh * 4), idx = new Uint8Array(256);
+  let r = 0, g = 0, bl = 0, a = 255, p = 14, run = 0;
+  for (let i = 0; i < px.length; i += 4) {
+    if (run > 0) run--;
+    else if (p < b.length - 8) {
+      const b1 = b[p++];
+      if (b1 === 0xFE) { r = b[p++]; g = b[p++]; bl = b[p++]; }
+      else if (b1 === 0xFF) { r = b[p++]; g = b[p++]; bl = b[p++]; a = b[p++]; }
+      else if ((b1 & 0xC0) === 0x00) { const k = (b1 & 63) * 4; r = idx[k]; g = idx[k + 1]; bl = idx[k + 2]; a = idx[k + 3]; }
+      else if ((b1 & 0xC0) === 0x40) { r = (r + ((b1 >> 4) & 3) - 2) & 255; g = (g + ((b1 >> 2) & 3) - 2) & 255; bl = (bl + (b1 & 3) - 2) & 255; }
+      else if ((b1 & 0xC0) === 0x80) { const b2 = b[p++], vg = (b1 & 63) - 32; r = (r + vg - 8 + ((b2 >> 4) & 15)) & 255; g = (g + vg) & 255; bl = (bl + vg - 8 + (b2 & 15)) & 255; }
+      else run = b1 & 63;
+      const k = ((r * 3 + g * 5 + bl * 7 + a * 11) % 64) * 4;
+      idx[k] = r; idx[k + 1] = g; idx[k + 2] = bl; idx[k + 3] = a;
+    }
+    px[i] = r; px[i + 1] = g; px[i + 2] = bl; px[i + 3] = a;
+  }
+  const c = document.createElement('canvas');
+  c.width = w; c.height = hh;
+  c.getContext('2d').putImageData(new ImageData(px, w, hh), 0, 0);
+  return c;
+}
+function inIconsRedraw(id) {
+  for (const k of [...inIcons.urls.keys()]) if (!id || k.startsWith(id + '@')) inIcons.urls.delete(k);
+  document.querySelectorAll('img[data-ic]').forEach(img => {
+    if (!id || img.dataset.ic === id) img.src = inIconUrl(inIcons.apps?.get(img.dataset.ic), img.dataset.ic, +img.dataset.sz);
+  });
+}
 function inIconUrl(app, id, S) {
   const key = id + '@' + S;
   if (inIcons.urls.has(key)) return inIcons.urls.get(key);
   const a = app || { id, name: id, color_a: '3A3A3C', color_b: '1C1C1E' };
+  if (app) (inIcons.apps ||= new Map()).set(id, app);
+  const dpr = Math.min(3, window.devicePixelRatio || 1);
+  if (inHd.pack === undefined && !inHd.probing) {
+    inHd.probing = true;
+    fetch('/api/apps/icon_hd', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null)
+      .then(j => { inHd.pack = j && j.pack || null; if (inHd.pack) inIconsRedraw(); });
+  }
+  if (inHd.pack && !inHd.pics.has(id)) {
+    inHd.pics.set(id, undefined);
+    const want = Math.round(S * dpr);
+    inHd.queue = inHd.queue.then(async () => {
+      try {
+        const r = await fetch(`/api/apps/icon_hd?id=${encodeURIComponent(id)}&size=${want}&p=${encodeURIComponent(inHd.pack)}`);
+        inHd.pics.set(id, r.ok ? inQoi(new Uint8Array(await r.arrayBuffer())) : null);
+      } catch { inHd.pics.set(id, null); }
+      inIconsRedraw(id);
+    });
+  }
   if (a.aic && !inIcons.blobs.has(id)) {
     inIcons.blobs.set(id, undefined);
     inIcons.queue = inIcons.queue.then(async () => {
       try { const r = await fetch('/api/apps/icon?id=' + encodeURIComponent(id)); inIcons.blobs.set(id, r.ok ? new Uint8Array(await r.arrayBuffer()) : null); }
       catch { inIcons.blobs.set(id, null); }
-      for (const k of [...inIcons.urls.keys()]) if (k.startsWith(id + '@')) inIcons.urls.delete(k);
-      document.querySelectorAll('img[data-ic]').forEach(img => { if (img.dataset.ic === id) img.src = inIconUrl(a, id, +img.dataset.sz); });
+      if (!inHd.pics.get(id)) inIconsRedraw(id);
     });
   }
-  const dpr = Math.min(3, window.devicePixelRatio || 1), c = document.createElement('canvas');
+  const c = document.createElement('canvas');
   c.width = c.height = Math.round(S * dpr);
   const ctx = c.getContext('2d');
-  ctx.scale(dpr, dpr);
-  inDrawIcon(ctx, a, inIcons.blobs.get(id), S);
+  const pic = inHd.pics.get(id);
+  if (pic) {
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(pic, 0, 0, c.width, c.height);
+  } else {
+    ctx.scale(dpr, dpr);
+    inDrawIcon(ctx, a, inIcons.blobs.get(id), S);
+  }
   const url = c.toDataURL();
-  if (inIcons.blobs.get(id) !== undefined || !a.aic) inIcons.urls.set(key, url);
+  const settled = pic || (inHd.pack !== undefined && (!inHd.pack || inHd.pics.get(id) === null) && (inIcons.blobs.get(id) !== undefined || !a.aic));
+  if (settled) inIcons.urls.set(key, url);
   return url;
 }
 let inGlyphs = null;

@@ -11,6 +11,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #define MAGIC       "AICP"
 #define VERSION     1
@@ -427,4 +428,90 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
     s_batch_n++;
     s_batch_us += aos_hal_uptime_us() - t0;
     return img;
+}
+
+/* -------------------------------------------------------------------------- */
+/* The portal's reader                                                         */
+/* -------------------------------------------------------------------------- */
+
+/* The httpd task asks for a screenful of pictures in a row: the index of the
+ * last pack it read stays (PSRAM, 16 KB for 330 pictures) until the file
+ * changes, under its own lock; nothing here touches the board's index. */
+static pthread_mutex_t s_web_lock = PTHREAD_MUTEX_INITIALIZER;
+static uint8_t *s_web_idx;              /* malloc: over 1 KB, PSRAM (SPIRAM_MALLOC_ALWAYSINTERNAL) */
+static int      s_web_count;
+static char     s_web_path[192];
+static long     s_web_size, s_web_mtime;
+
+static bool web_index(FILE *f, const char *path, const struct stat *st)
+{
+    if (s_web_idx && !strcmp(path, s_web_path) && s_web_size == (long)st->st_size && s_web_mtime == (long)st->st_mtime)
+        return true;
+    free(s_web_idx);
+    s_web_idx = NULL;
+    uint8_t head[HEAD];
+    if (fread(head, 1, HEAD, f) != HEAD || memcmp(head, MAGIC, 4) || rd16(head + 4) != VERSION) return false;
+    int count = rd16(head + 6);
+    if (count <= 0 || count > MAX_ENTRIES || HEAD + (long)count * ENTRY > (long)st->st_size) return false;
+    uint8_t *idx = malloc((size_t)count * ENTRY);
+    if (!idx || fread(idx, ENTRY, (size_t)count, f) != (size_t)count) {
+        free(idx);
+        return false;
+    }
+    s_web_idx = idx;
+    s_web_count = count;
+    snprintf(s_web_path, sizeof s_web_path, "%s", path);
+    s_web_size = (long)st->st_size;
+    s_web_mtime = (long)st->st_mtime;
+    return true;
+}
+
+uint8_t *aos_icon_pack_read_qoi(const char *id, int32_t size, size_t *len, char *pack, size_t pack_n)
+{
+    if (len) *len = 0;
+    if (pack && pack_n) pack[0] = '\0';
+    /* the board's choice, copied: the LVGL task writes it, and a name torn
+     * by a change at this very moment fails name_ok() and is one 404 */
+    char name[AOS_ICON_PACK_NAME_MAX + 1];
+    snprintf(name, sizeof name, "%s", s_cur);
+    if (!name_ok(name, strlen(name))) return NULL;
+    if (pack && pack_n) snprintf(pack, pack_n, "%s", name);
+    if (!id || !id[0]) return NULL;
+    char path[192];
+    pack_path(path, sizeof path, name);
+    struct stat st;
+    if (stat(path, &st) != 0) return NULL;
+    FILE *f = fopen(path, "rb");
+    if (!f) return NULL;
+    uint8_t *out = NULL;
+    pthread_mutex_lock(&s_web_lock);
+    if (web_index(f, path, &st)) {
+        /* sorted by id, then size, as the board's index is */
+        int lo = 0, hi = s_web_count;
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            if (strncmp((const char *)s_web_idx + (size_t)mid * ENTRY, id, AOS_ICON_PACK_ID_MAX) < 0) lo = mid + 1;
+            else hi = mid;
+        }
+        const uint8_t *best = NULL;
+        for (int i = lo; i < s_web_count; i++) {
+            const uint8_t *e = s_web_idx + (size_t)i * ENTRY;
+            if (strncmp((const char *)e, id, AOS_ICON_PACK_ID_MAX)) break;
+            best = e;
+            if (rd16(e + 36) >= size) break;
+        }
+        uint32_t off = best ? rd32(best + 40) : 0, n = best ? rd32(best + 44) : 0;
+        if (best && n >= 22 && n <= 512 * 1024 && (long)off + (long)n <= (long)st.st_size &&
+            (out = malloc(n)) != NULL) {
+            if (fseek(f, (long)off, SEEK_SET) == 0 && fread(out, 1, n, f) == n && !memcmp(out, "qoif", 4)) {
+                if (len) *len = n;
+            } else {
+                free(out);
+                out = NULL;
+            }
+        }
+    }
+    pthread_mutex_unlock(&s_web_lock);
+    fclose(f);
+    return out;
 }
