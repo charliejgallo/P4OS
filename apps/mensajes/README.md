@@ -130,7 +130,7 @@ tools/fake_telegram.py --port 19443 --control 19450 \
     --client-config <data>/mensajes/servidor.txt --state <scratch>/fake.json
 make -C apps/mensajes/tests OUT=<scratch>/t cli
 MJ_PREFS=<scratch>/p.txt <scratch>/t/mj_cli <data>/mensajes app 12345 00112233445566778899aabbccddeeff \
-    phone +5491155550100 code 12345 password pescado dialogs open c 3001 fetch-photos
+    phone +99966123456 code 12345 password pescado dialogs open c 3001 fetch-photos
 ```
 
 - **Vectors** (`tests/vectors.py` makes `tests/vectors.h`, from the

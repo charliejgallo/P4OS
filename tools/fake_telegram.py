@@ -1395,7 +1395,7 @@ def main():
     ap.add_argument('--lang', default='es', choices=('es', 'en'))
     ap.add_argument('--api-id', type=int, default=12345)
     ap.add_argument('--api-hash', default='00112233445566778899aabbccddeeff')
-    ap.add_argument('--phone', default='+5491155550100')
+    ap.add_argument('--phone', default='+99966123456')
     ap.add_argument('--code', default='12345')
     ap.add_argument('--password', default='pescado')
     ap.add_argument('--no-password', action='store_true')
