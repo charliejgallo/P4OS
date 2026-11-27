@@ -1,0 +1,21 @@
+{
+ "cat": "medios",
+ "about": {
+  "es": "Una grilla de botones grandes que hacen sonar tus sonidos, varios a la vez: aplausos, bocinas, efectos y fondos para un juego, una radio o una fiesta.",
+  "en": "A grid of big buttons that play your sounds, several at once: applause, horns, effects and backgrounds for a game, a radio show or a party."
+ },
+ "desc": {
+  "es": "Doce botones por página, hasta ocho páginas, cada uno con su nombre, su color y su ícono. Tocalos con todos los dedos que quieras: suenan juntos, mezclados en la placa. Cada botón elige cómo se toca: un toque lo hace sonar y otro lo corta, cada toque lo superpone a lo que ya suena, o suena mientras el dedo está apoyado. Puede repetirse en bucle y tiene su propio volumen. Parar todo corta todo de una.\n\nToca WAV y MP3 de la carpeta sonidos de la tarjeta, hasta un minuto de cada uno. La primera vez arma dos páginas con dieciséis sonidos de ejemplo hechos por la propia app: aplausos, bocina, redoble, campana, sirena, lluvia, un ritmo y más. Para sumar los tuyos, grabalos con el micrófono desde la app o subilos desde el portal.\n\nEn Editar tocás un botón para elegirle el sonido, el nombre, el color, el ícono, el modo, el bucle y el volumen, o para moverlo a otro lugar o a otra página. La página Botonera del portal hace lo mismo desde el teléfono, sube y borra sonidos, y además dispara los botones de la placa desde el navegador, con varios dedos.",
+  "en": "Twelve buttons a page, up to eight pages, each with its name, colour and icon. Hit them with as many fingers as you like: they play together, mixed on the board. Each button chooses how it plays: one touch plays it and another stops it, every touch layers it over what is already playing, or it plays while your finger rests on it. It can repeat in a loop and has its own volume. Stop all stops everything at once.\n\nIt plays WAV and MP3 from the card's sonidos folder, up to a minute of each. The first time it sets up two pages with sixteen example sounds made by the app itself: applause, horn, drum roll, bell, siren, rain, a beat and more. To add your own, record them with the microphone in the app or upload them from the portal.\n\nIn Edit you tap a button to pick its sound, name, colour, icon, mode, loop and volume, or to move it to another spot or page. The Soundboard page of the portal does the same from your phone, uploads and deletes sounds, and also plays the board's buttons from the browser, with several fingers."
+ },
+ "user_files": {
+  "es": "Si querés más que los ejemplos: tus sonidos en WAV o MP3 en la carpeta sonidos de la tarjeta (o grabados en la app).",
+  "en": "For more than the examples: your sounds as WAV or MP3 in the card's sonidos folder (or recorded in the app)."
+ },
+ "shots": [
+  "app-botonera.png",
+  "land-botonera.png",
+  "app-botonera-editar.png",
+  "web-botonera.png"
+ ]
+}
