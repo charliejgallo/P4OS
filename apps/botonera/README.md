@@ -94,7 +94,7 @@ channel), unless one of its sheets is open.
 
 All of it in PSRAM: the decoded sounds (64 KB a second), the grid, the UI's
 state, the decoder's buffers and the threads' stacks (mixer 6 KB, loader
-12 KB). Nothing asks for internal RAM.
+16 KB). Nothing asks for internal RAM.
 
 ## Not tried on the board yet
 

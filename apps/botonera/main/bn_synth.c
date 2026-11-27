@@ -107,6 +107,15 @@ static float svf_lp(svf_t *s, float in, float fc, float q)
     return s->lo;
 }
 
+/* where a sound placed at 't' seconds starts in the buffer: never before
+ * its first sample (a hit nudged early at t = 0 wrote in front of the
+ * buffer and broke the heap on the board, 2026-11-27) */
+static int at_index(float t)
+{
+    int i = (int)(t * SR);
+    return i < 0 ? 0 : i;
+}
+
 static float env_ad(float t, float a, float d)
 {
     if (t < 0.0f) return 0.0f;
@@ -118,7 +127,7 @@ static float env_ad(float t, float a, float d)
 static void add_kick(float *o, int n, float at, float g)
 {
     float ph = 0.0f;
-    int i0 = (int)(at * SR);
+    int i0 = at_index(at);
     for (int i = i0; i < n && i < i0 + SR / 2; i++) {
         float t = (float)(i - i0) / SR;
         float f = 48.0f + 110.0f * expf(-t / 0.035f);
@@ -130,7 +139,7 @@ static void add_snare(float *o, int n, float at, float g, float decay)
 {
     float ph = 0.0f;
     svf_t s = { 0 };
-    int i0 = (int)(at * SR);
+    int i0 = at_index(at);
     for (int i = i0; i < n && i < i0 + SR / 2; i++) {
         float t = (float)(i - i0) / SR;
         float tone = osc_sin(&ph, 185.0f) * expf(-t / 0.03f) * 0.5f;
@@ -142,7 +151,7 @@ static void add_snare(float *o, int n, float at, float g, float decay)
 static void add_hat(float *o, int n, float at, float g)
 {
     float prev = 0.0f;
-    int i0 = (int)(at * SR);
+    int i0 = at_index(at);
     for (int i = i0; i < n && i < i0 + SR / 10; i++) {
         float t = (float)(i - i0) / SR;
         float w = noise();
@@ -156,7 +165,7 @@ static void add_click(float *o, int n, float at, float f, float g)
 {
     float ph = 0.0f;
     svf_t s = { 0 };
-    int i0 = (int)(at * SR);
+    int i0 = at_index(at);
     for (int i = i0; i < n && i < i0 + SR / 8; i++) {
         float t = (float)(i - i0) / SR;
         float v = osc_sin(&ph, f) * expf(-t / 0.012f) + svf_bp(&s, noise(), f * 1.5f, 3.0f) * expf(-t / 0.004f);
@@ -185,7 +194,7 @@ static int s_aplausos(float *o, int n)
         if (frand() > dens) continue;
         float fc = 900.0f + frand() * 1600.0f, g = 0.4f + frand() * 0.6f;
         svf_t s = { 0 };
-        int i0 = (int)(at * SR);
+        int i0 = at_index(at);
         for (int i = i0; i < n && i < i0 + SR / 15; i++) {
             float t = (float)(i - i0) / SR;
             o[i] += g * svf_bp(&s, noise(), fc, 1.2f) * env_ad(t, 0.001f, 0.012f);
@@ -220,14 +229,14 @@ static int s_redoble(float *o, int n)
     /* a roll that grows for 1.7 s, then a crash and a kick */
     for (float t = 0.0f; t < 1.72f; t += 0.034f) {
         float g = 0.15f + 0.6f * t / 1.72f;
-        add_snare(o, n, t + noise() * 0.003f, g * (0.8f + 0.2f * frand()), 0.05f);
+        add_snare(o, n, t + frand() * 0.003f, g * (0.8f + 0.2f * frand()), 0.05f);
     }
     add_kick(o, n, 1.76f, 1.2f);
     add_snare(o, n, 1.76f, 0.9f, 0.09f);
     /* the crash: noise through a few metallic bands */
     svf_t b[4] = { { 0 } };
     static const float fb[4] = { 3100.0f, 4700.0f, 6300.0f, 8200.0f };
-    int i0 = (int)(1.76f * SR);
+    int i0 = at_index(1.76f);
     for (int i = i0; i < n; i++) {
         float t = (float)(i - i0) / SR, w = noise(), x = 0.0f;
         for (int k = 0; k < 4; k++) x += svf_bp(&b[k], w, fb[k], 2.0f);
@@ -240,7 +249,7 @@ static void brass_note(float *o, int n, float at, float dur, float f, float g)
 {
     float p1 = 0, p2 = 0;
     svf_t s = { 0 };
-    int i0 = (int)(at * SR), i1 = (int)((at + dur + 0.25f) * SR);
+    int i0 = at_index(at), i1 = (int)((at + dur + 0.25f) * SR);
     for (int i = i0; i < n && i < i1; i++) {
         float t = (float)(i - i0) / SR;
         float a = t < 0.02f ? t / 0.02f : t < dur ? 1.0f - 0.25f * (t - 0.02f) / dur : 0.75f * expf(-(t - dur) / 0.07f);
@@ -280,7 +289,7 @@ static int s_campana(float *o, int n)
 static void ding(float *o, int n, float at, float f, float g, float d)
 {
     float p1 = 0, p2 = 0;
-    int i0 = (int)(at * SR);
+    int i0 = at_index(at);
     for (int i = i0; i < n; i++) {
         float t = (float)(i - i0) / SR;
         o[i] += g * (osc_sin(&p1, f) + 0.3f * osc_sin(&p2, f * 2.0f)) * env_ad(t, 0.002f, d);
@@ -341,7 +350,7 @@ static int s_trombon(float *o, int n)
     for (int k = 0; k < 4; k++) {
         float p1 = 0, p2 = 0, lfo = 0;
         svf_t s = { 0 };
-        int i0 = (int)(at[k] * SR), i1 = (int)((at[k] + dur[k] + 0.08f) * SR);
+        int i0 = at_index(at[k]), i1 = (int)((at[k] + dur[k] + 0.08f) * SR);
         for (int i = i0; i < n && i < i1; i++) {
             float t = (float)(i - i0) / SR;
             float vib = k == 3 ? osc_sin(&lfo, 5.5f) * 5.0f * (t / dur[k]) : 0.0f;
@@ -433,7 +442,7 @@ static int s_latido(float *o, int n)
     for (int k = 0; k < 2; k++) {
         float t0 = 0.8f * (float)k;
         float ph = 0.0f, ph2 = 0.0f;
-        int i0 = (int)(t0 * SR);
+        int i0 = at_index(t0);
         for (int i = i0; i < n && i < i0 + (int)(0.6f * SR); i++) {
             float t = (float)(i - i0) / SR;
             float lub = osc_sin(&ph, 62.0f - 20.0f * t) * env_ad(t, 0.01f, 0.07f);
