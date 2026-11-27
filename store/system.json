@@ -267,8 +267,8 @@
    "en": "A 3D icon for every app, like a toy, instead of the circle with a symbol."
   },
   "desc": {
-   "es": "103 íconos hechos en Blender para las apps del sistema y las de la Tienda, en el inicio, el dock, las carpetas, la Tienda y el portal. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes. Si hay un pack en la tarjeta y no se eligió ninguno, se usa ese.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
-   "en": "103 icons made in Blender for the system's apps and the Store's, on the home screen, the dock, the folders, the Store and the portal. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones. If a pack is on the card and none was chosen, that one is used.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
+   "es": "112 íconos hechos en Blender para las apps del sistema y las de la Tienda, en el inicio, el dock, las carpetas, la Tienda y el portal. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes. Si hay un pack en la tarjeta y no se eligió ninguno, se usa ese.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
+   "en": "112 icons made in Blender for the system's apps and the Store's, on the home screen, the dock, the folders, the Store and the portal. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones. If a pack is on the card and none was chosen, that one is used.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
   },
   "glyph": "AOS_SYM_APPS",
   "colors": [
@@ -293,8 +293,8 @@
    "en": "A two-colour line icon on a dark tile for every app."
   },
   "desc": {
-   "es": "Los mismos 103 íconos, en otro estilo: una línea en dos colores con un brillo suave, sobre una ficha casi negra. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
-   "en": "The same 103 icons in another style: a two-colour line with a soft glow on an almost black tile. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
+   "es": "Los mismos 112 íconos, en otro estilo: una línea en dos colores con un brillo suave, sobre una ficha casi negra. Se elige en Ajustes, Fondo de pantalla, Íconos; \"Los de siempre\" vuelve a los de antes.\n\nMientras un juego está abierto el inicio suelta sus íconos, así que no le quitan memoria.",
+   "en": "The same 112 icons in another style: a two-colour line with a soft glow on an almost black tile. It is chosen in Settings, Wallpaper, Icons; \"The usual ones\" goes back to the old ones.\n\nWhile a game is open the home screen lets go of its icons, so they take no memory from it."
   },
   "glyph": "AOS_SYM_APPS",
   "colors": [
