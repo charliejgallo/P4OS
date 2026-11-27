@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh, aos_154
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3717 simbolos.
+ * Total: 3737 simbolos.
  */
 
 #include <stddef.h>
@@ -61,6 +61,7 @@ extern int aos_aac_open;
 extern int aos_alarm_get;
 extern int aos_alarm_set;
 extern int aos_app_bench_get;
+extern int aos_app_bot_get;
 extern int aos_app_bus_get;
 extern int aos_app_calc_get;
 extern int aos_app_calendar_get;
@@ -113,6 +114,25 @@ extern int aos_banner_create;
 extern int aos_banner_layout;
 extern int aos_banner_tick;
 extern int aos_banner_up;
+extern int aos_bot_boot;
+extern int aos_bot_chat_forget;
+extern int aos_bot_chats;
+extern int aos_bot_cmds;
+extern int aos_bot_enable;
+extern int aos_bot_enabled;
+extern int aos_bot_has_token;
+extern int aos_bot_info;
+extern int aos_bot_link_cancel;
+extern int aos_bot_link_code;
+extern int aos_bot_log;
+extern int aos_bot_rule_delete;
+extern int aos_bot_rule_set;
+extern int aos_bot_rule_text;
+extern int aos_bot_rules;
+extern int aos_bot_send;
+extern int aos_bot_set_cmds;
+extern int aos_bot_set_token;
+extern int aos_bot_version;
 extern int aos_button;
 extern int aos_claude_history;
 extern int aos_claude_login_code;
@@ -3781,6 +3801,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_alarm_get),
     ESP_ELFSYM_EXPORT(aos_alarm_set),
     ESP_ELFSYM_EXPORT(aos_app_bench_get),
+    ESP_ELFSYM_EXPORT(aos_app_bot_get),
     ESP_ELFSYM_EXPORT(aos_app_bus_get),
     ESP_ELFSYM_EXPORT(aos_app_calc_get),
     ESP_ELFSYM_EXPORT(aos_app_calendar_get),
@@ -3833,6 +3854,25 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_banner_layout),
     ESP_ELFSYM_EXPORT(aos_banner_tick),
     ESP_ELFSYM_EXPORT(aos_banner_up),
+    ESP_ELFSYM_EXPORT(aos_bot_boot),
+    ESP_ELFSYM_EXPORT(aos_bot_chat_forget),
+    ESP_ELFSYM_EXPORT(aos_bot_chats),
+    ESP_ELFSYM_EXPORT(aos_bot_cmds),
+    ESP_ELFSYM_EXPORT(aos_bot_enable),
+    ESP_ELFSYM_EXPORT(aos_bot_enabled),
+    ESP_ELFSYM_EXPORT(aos_bot_has_token),
+    ESP_ELFSYM_EXPORT(aos_bot_info),
+    ESP_ELFSYM_EXPORT(aos_bot_link_cancel),
+    ESP_ELFSYM_EXPORT(aos_bot_link_code),
+    ESP_ELFSYM_EXPORT(aos_bot_log),
+    ESP_ELFSYM_EXPORT(aos_bot_rule_delete),
+    ESP_ELFSYM_EXPORT(aos_bot_rule_set),
+    ESP_ELFSYM_EXPORT(aos_bot_rule_text),
+    ESP_ELFSYM_EXPORT(aos_bot_rules),
+    ESP_ELFSYM_EXPORT(aos_bot_send),
+    ESP_ELFSYM_EXPORT(aos_bot_set_cmds),
+    ESP_ELFSYM_EXPORT(aos_bot_set_token),
+    ESP_ELFSYM_EXPORT(aos_bot_version),
     ESP_ELFSYM_EXPORT(aos_button),
     ESP_ELFSYM_EXPORT(aos_claude_history),
     ESP_ELFSYM_EXPORT(aos_claude_login_code),

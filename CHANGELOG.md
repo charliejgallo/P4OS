@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- **The board's Telegram bot** (`docs/BOT.md`): a bot of your own
+  (@BotFather) through which the board answers in a chat — its state, a
+  screenshot, the Zigbee devices with buttons, the IR codes kept with a
+  Zigbee blaster, a notice on its screen — and rules that send a message or
+  a screenshot, or switch a Zigbee device or send an IR code, when a device
+  changes, at an hour, when the board starts or when a notification
+  arrives. Only chats linked with a code the board shows can use it. The
+  Bot app and the portal's Bot page set it up; apps can send through it
+  (`aos_bot_send`). Nothing of it is in memory until it is switched on.
+- **Bluetooth: the apps' GATT client pairs with a PIN** (`docs/BLUETOOTH.md`,
+  "Pairing with a device"), for Meshtastic nodes and other devices that keep
+  their characteristics behind encryption. Six bonds instead of three;
+  Settings' "forget" leaves the devices' keys alone.
+
 ## 0.34.2 — 2026-11-26
 
 The icon packs with Vision, and a warning about the C6's firmware.

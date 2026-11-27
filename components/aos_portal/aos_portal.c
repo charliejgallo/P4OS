@@ -43,6 +43,7 @@
  *   GET  /api/eth, POST /api/eth       Ethernet on a W5500 of the header (aos_portal_eth.c)
  *   GET  /api/claude ...               the Claude plan's usage and its sign-in (aos_portal_claude.c)
  *   GET  /api/mqtt ...                 MQTT: the topics seen, publish, settings (aos_portal_mqtt.c)
+ *   GET  /api/bot ...                  the Telegram bot: settings, chats, rules (aos_portal_bot.c)
  *   GET  /api/sysmon[?hist=0]          the Monitor: CPU, tasks, memory, network, card (aos_portal_sysmon.c)
  *   POST /api/panel/qos?dma=&cache=[&save=1]  the AXI arbiter's priorities for the panel's refresh (aos_portal_sysmon.c)
  *   GET  /api/macropad ...             the Macro pad's layout, trying a button (aos_portal_macropad.c)
@@ -81,6 +82,7 @@
 #include "aos_access.h"
 #include "aos_portal_claude.h"
 #include "aos_portal_mqtt.h"
+#include "aos_portal_bot.h"
 #include "aos_portal_sysmon.h"
 #include "aos_portal_system.h"
 #include "aos_portal_macropad.h"
@@ -1746,6 +1748,7 @@ static void handler(aos_httpd_req_t *r)
     else if (aos_portal_eth(r, m, p)) {}
     else if (aos_portal_claude(r, m, p)) {}
     else if (aos_portal_mqtt(r, m, p)) {}
+    else if (aos_portal_bot(r, m, p)) {}
     else if (aos_portal_sysmon(r, m, p)) {}
     else if (aos_portal_system(r, m, p)) {}
     else if (aos_portal_macropad(r, m, p)) {}

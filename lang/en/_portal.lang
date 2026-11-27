@@ -2580,3 +2580,237 @@ armando la red Zigbee	starting the Zigbee network
 sin usar	idle
 No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Could not start the network: does the C6 have its new firmware? Store, System, The radio's firmware (C6)
 La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	The radio does not answer: the C6 needs its new firmware (3.0.9-154.15). On the board: 1) Store, System, The radio's firmware (C6): get it. 2) Settings, Update, Install on the C6. About 15 s without Wi-Fi, and the board restarts by itself.
+
+#: components/aos_portal/web/app.js:1297
+Falta el token	No token yet
+
+#: components/aos_portal/web/app.js:1298
+En línea	Online
+
+#: components/aos_portal/web/app.js:1298
+Telegram no reconoce el token	Telegram doesn't recognise the token
+
+#: components/aos_portal/web/app.js:1298
+Con problemas	Having trouble
+
+#: components/aos_portal/web/app.js:1299
+/estado: cómo está la placa	/status: how the board is doing
+
+#: components/aos_portal/web/app.js:1299
+/captura: la pantalla	/screenshot: the screen
+
+#: components/aos_portal/web/app.js:1299
+/zigbee, /prender, /apagar	/zigbee, /on, /off
+
+#: components/aos_portal/web/app.js:1300
+/ir: los códigos IR de Zigbee	/ir: the Zigbee IR codes
+
+#: components/aos_portal/web/app.js:1300
+/aviso: un aviso en la pantalla	/notice: a notice on the screen
+
+#: components/aos_portal/web/app.js:1300
+/reglas: verlas y pausarlas	/rules: see and pause them
+
+#: components/aos_portal/web/app.js:1300
+Las apps pueden mandar mensajes	Apps may send messages
+
+#: components/aos_portal/web/app.js:1301
+Cambia un dispositivo Zigbee	A Zigbee device changes
+
+#: components/aos_portal/web/app.js:1301
+Es una hora	It is a certain time
+
+#: components/aos_portal/web/app.js:1301
+Arranca la placa	The board starts
+
+#: components/aos_portal/web/app.js:1301
+Llega un aviso	A notification arrives
+
+#: components/aos_portal/web/app.js:1302
+Prendido o apagado	On or off
+
+#: components/aos_portal/web/app.js:1302
+Abierta, movimiento, agua (alarma)	Open, motion, water (alarm)
+
+#: components/aos_portal/web/app.js:1302
+Presencia	Presence
+
+#: components/aos_portal/web/app.js:1302
+Temperatura (°C)	Temperature (°C)
+
+#: components/aos_portal/web/app.js:1302
+Humedad (%)	Humidity (%)
+
+#: components/aos_portal/web/app.js:1302
+Batería (%)	Battery (%)
+
+#: components/aos_portal/web/app.js:1302
+Nivel (%)	Level (%)
+
+#: components/aos_portal/web/app.js:1302
+Un evento: un botón, un control	An event: a button, a remote
+
+#: components/aos_portal/web/app.js:1303
+cuando cambia	when it changes
+
+#: components/aos_portal/web/app.js:1303
+cuando pasa de…	when it goes above…
+
+#: components/aos_portal/web/app.js:1303
+cuando baja de…	when it goes below…
+
+#: components/aos_portal/web/app.js:1303
+cuando llega a…	when it reaches…
+
+#: components/aos_portal/web/app.js:1304
+Mandar un mensaje	Send a message
+
+#: components/aos_portal/web/app.js:1304
+Mandar una captura	Send a screenshot
+
+#: components/aos_portal/web/app.js:1304
+Prender un dispositivo	Switch a device on
+
+#: components/aos_portal/web/app.js:1304
+Apagar un dispositivo	Switch a device off
+
+#: components/aos_portal/web/app.js:1304
+Cambiar un dispositivo	Toggle a device
+
+#: components/aos_portal/web/app.js:1304
+Mandar un código IR	Send an IR code
+
+#: components/aos_portal/web/app.js:1305
+do	Su
+
+#: components/aos_portal/web/app.js:1305
+lu	Mo
+
+#: components/aos_portal/web/app.js:1305
+ma	Tu
+
+#: components/aos_portal/web/app.js:1305
+mi	We
+
+#: components/aos_portal/web/app.js:1305
+ju	Th
+
+#: components/aos_portal/web/app.js:1305
+vi	Fr
+
+#: components/aos_portal/web/app.js:1305
+sá	Sa
+
+#: components/aos_portal/web/app.js:1306
+30 segundos	30 seconds
+
+#: components/aos_portal/web/app.js:1306
+1 minuto	1 minute
+
+#: components/aos_portal/web/app.js:1306
+5 minutos	5 minutes
+
+#: components/aos_portal/web/app.js:1306
+15 minutos	15 minutes
+
+#: components/aos_portal/web/app.js:1306
+1 hora	1 hour
+
+#: components/aos_portal/web/app.js:1382
+Nueva regla	New rule
+
+#: components/aos_portal/web/app.js:1321
+La regla	The rule
+
+#: components/aos_portal/web/app.js:1322
+Cuando	When
+
+#: components/aos_portal/web/app.js:1324
+Dispositivo	Device
+
+#: components/aos_portal/web/app.js:1325
+No hay dispositivos Zigbee: se suman en la app Zigbee.	No Zigbee devices: add them in the Zigbee app.
+
+#: components/aos_portal/web/app.js:1326
+Qué mira	What it watches
+
+#: components/aos_portal/web/app.js:1328
+cuando pasa a…	when it becomes…
+
+#: components/aos_portal/web/app.js:1329
+sí (prendido, abierta, hay alguien)	yes (on, open, someone there)
+
+#: components/aos_portal/web/app.js:1337
+De qué app (vacío: todas)	From which app (empty: all)
+
+#: components/aos_portal/web/app.js:1339
+Hacer	Do
+
+#: components/aos_portal/web/app.js:1341
+No hay dispositivos que se prendan y apaguen.	No devices that switch on and off.
+
+#: components/aos_portal/web/app.js:1342
+No hay códigos IR guardados (app Zigbee, emisor IR).	No IR codes kept (Zigbee app, IR blaster).
+
+#: components/aos_portal/web/app.js:1343
+Con este texto	With this text
+
+#: components/aos_portal/web/app.js:1343
+El mensaje (vacío: el de siempre)	The message (empty: the usual one)
+
+#: components/aos_portal/web/app.js:1345
+Como mucho, una vez cada	At most once every
+
+#: components/aos_portal/web/app.js:1360
+%s pedidos recibidos · %s mensajes mandados	%s requests received · %s messages sent
+
+#: components/aos_portal/web/app.js:1361
+Token (guardado; pegá otro para cambiarlo)	Token (saved; paste another to change it)
+
+#: components/aos_portal/web/app.js:1361
+Token (lo da @BotFather con /newbot)	Token (@BotFather gives it with /newbot)
+
+#: components/aos_portal/web/app.js:1363
+Guardar el token	Save the token
+
+#: components/aos_portal/web/app.js:1364
+Borrar el token	Erase the token
+
+#: components/aos_portal/web/app.js:1365
+Chats vinculados	Linked chats
+
+#: components/aos_portal/web/app.js:1366
+Olvidar	Forget
+
+#: components/aos_portal/web/app.js:1367
+Nadie todavía. Sólo los chats vinculados pueden hablar con la placa.	Nobody yet. Only linked chats can talk to the board.
+
+#: components/aos_portal/web/app.js:1369
+Mandale al bot: /vincular %s (vale %s min más)	Send the bot: /link %s (valid %s more min)
+
+#: components/aos_portal/web/app.js:1371
+Vincular un chat	Link a chat
+
+#: components/aos_portal/web/app.js:1372
+Comandos	Commands
+
+#: components/aos_portal/web/app.js:1374
+Reglas	Rules
+
+#: components/aos_portal/web/app.js:1379
+Una regla manda un mensaje o una captura, prende o apaga algo, cuando pasa algo: una puerta que se abre, una hora, un aviso que llega.	A rule sends a message or a screenshot, or switches something on or off, when something happens: a door opens, an hour comes, a notification arrives.
+
+#: components/aos_portal/web/app.js:1383
+Todavía nada.	Nothing yet.
+
+#: components/aos_portal/web/app.js:1385
+Bot de Telegram	Telegram bot
+
+#: components/aos_portal/web/app.js:1386
+La placa contesta en un chat de Telegram y avisa lo que pasa: su estado, una captura, los dispositivos Zigbee, los códigos IR. Sólo le hablan los chats vinculados con el código que muestra.	The board answers in a Telegram chat and tells what happens: its state, a screenshot, the Zigbee devices, the IR codes. Only the chats linked with the code it shows can talk to it.
+
+#: components/aos_portal/web/app.js:1387
+Lo último	Latest
+
+#: components/aos_portal/web/app.js:1344
+{dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}	{device} {value} {time} {board} {app} {title} {text}

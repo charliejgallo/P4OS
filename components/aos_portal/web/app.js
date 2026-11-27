@@ -1290,6 +1290,107 @@ async function pageMqtt() {
   mqttT = setTimeout(tick, 1500);
 }
 
+/* ---- The Telegram bot ---- */
+let botT;
+async function pageBot() {
+  let st = null, editing = null;
+  const STATE = { off: [tr('Apagado'), ''], no_token: [tr('Falta el token'), 'warn'], waiting_net: [tr('Sin red'), 'warn'],
+    connecting: [tr('Conectando…'), 'warn'], online: [tr('En línea'), 'ok'], bad_token: [tr('Telegram no reconoce el token'), 'bad'], error: [tr('Con problemas'), 'bad'] };
+  const CMDS = [[1, tr('/estado: cómo está la placa')], [2, tr('/captura: la pantalla')], [4, tr('/zigbee, /prender, /apagar')],
+    [8, tr('/ir: los códigos IR de Zigbee')], [16, tr('/aviso: un aviso en la pantalla')], [32, tr('/reglas: verlas y pausarlas')], [64, tr('Las apps pueden mandar mensajes')]];
+  const TRIG = [tr('Cambia un dispositivo Zigbee'), tr('Es una hora'), tr('Arranca la placa'), tr('Llega un aviso')];
+  const VARS = [tr('Prendido o apagado'), tr('Abierta, movimiento, agua (alarma)'), tr('Presencia'), tr('Temperatura (°C)'), tr('Humedad (%)'), tr('Batería (%)'), tr('Nivel (%)'), tr('Un evento: un botón, un control')];
+  const OPS = [tr('cuando cambia'), tr('cuando pasa de…'), tr('cuando baja de…'), tr('cuando llega a…')];
+  const ACTS = [tr('Mandar un mensaje'), tr('Mandar una captura'), tr('Prender un dispositivo'), tr('Apagar un dispositivo'), tr('Cambiar un dispositivo'), tr('Mandar un código IR')];
+  const DAYS = [tr('do'), tr('lu'), tr('ma'), tr('mi'), tr('ju'), tr('vi'), tr('sá')];
+  const GAPS = [[30, tr('30 segundos')], [60, tr('1 minuto')], [300, tr('5 minutos')], [900, tr('15 minutos')], [3600, tr('1 hora')]];
+  const head = h('div', { class: 'card pad' }), chats = h('div', { class: 'card pad' }), cmds = h('div', { class: 'card pad' });
+  const rules = h('div', { class: 'card pad' }), log = h('pre', { class: 'log', style: 'height:auto;max-height:360px' });
+  const tok = h('input', { type: 'password', placeholder: '123456789:AA…', autocomplete: 'off' });
+  const sel = (opts, v, on) => { const s = h('select', {}, opts.map((o, i) => h('option', { value: Array.isArray(o) ? o[0] : i }, Array.isArray(o) ? o[1] : o))); s.value = v; s.onchange = on; return s; };
+  const lab = (t, el) => [h('label', { class: 'f' }, t), el];
+  const send = b => post('bot', b).then(load).catch(e => toast(e.message, true));
+
+  function editor() {
+    const r = editing, z = st.zigbee, outs = z.filter(d => d.out);
+    if (r.trig === 0 && !r.ieee && z.length) r.ieee = z[0].ieee;
+    if (r.act >= 2 && r.act <= 4 && !r.act_ieee && outs.length) r.act_ieee = outs[0].ieee;
+    if (r.act === 5 && !r.ir && st.ir.length) r.ir = st.ir[0];
+    const re = () => put(rules, editor());
+    const yesno = r.var <= 2;
+    const parts = [h('h2', { style: 'margin-top:0' }, r.i < 0 ? tr('Nueva regla') : tr('La regla')),
+      lab(tr('Cuando'), sel(TRIG, r.trig, e => { r.trig = +e.target.value; re(); }))];
+    if (r.trig === 0) {
+      parts.push(z.length ? lab(tr('Dispositivo'), sel(z.map(d => [d.ieee, d.name]), r.ieee, e => { r.ieee = e.target.value; }))
+        : h('p', { class: 'note warn' }, tr('No hay dispositivos Zigbee: se suman en la app Zigbee.')));
+      parts.push(lab(tr('Qué mira'), sel(VARS, r.var, e => { r.var = +e.target.value; if (r.var <= 2 && (r.op === 1 || r.op === 2)) r.op = 3; re(); })));
+      if (r.var !== 7) {
+        parts.push(sel(yesno ? [[0, OPS[0]], [3, tr('cuando pasa a…')]] : OPS.map((o, i) => [i, o]), r.op, e => { r.op = +e.target.value; re(); }));
+        if (r.op !== 0) parts.push(yesno ? sel([[1, tr('sí (prendido, abierta, hay alguien)')], [0, tr('no')]], r.value ? 1 : 0, e => { r.value = +e.target.value; })
+          : h('input', { type: 'number', step: 'any', value: r.value, oninput: e => { r.value = +e.target.value; } }));
+      }
+    } else if (r.trig === 1) {
+      const t = h('input', { type: 'time', value: String(Math.floor(r.at_min / 60)).padStart(2, '0') + ':' + String(r.at_min % 60).padStart(2, '0'),
+        oninput: e => { const [a, b] = e.target.value.split(':'); r.at_min = (+a) * 60 + (+b); } });
+      parts.push(lab(tr('Hora'), t), h('div', { class: 'btns' }, [1, 2, 3, 4, 5, 6, 0].map(d => h('button', { class: 'btn' + (r.days & (1 << d) ? ' pri' : ''), onclick: () => { r.days ^= 1 << d; re(); } }, DAYS[d]))));
+    } else if (r.trig === 3) {
+      parts.push(lab(tr('De qué app (vacío: todas)'), h('input', { type: 'text', value: r.filter, maxlength: 38, oninput: e => { r.filter = e.target.value; } })));
+    }
+    parts.push(lab(tr('Hacer'), sel(ACTS, r.act, e => { r.act = +e.target.value; re(); })));
+    if (r.act >= 2 && r.act <= 4) parts.push(outs.length ? sel(outs.map(d => [d.ieee, d.name]), r.act_ieee, e => { r.act_ieee = e.target.value; })
+      : h('p', { class: 'note warn' }, tr('No hay dispositivos que se prendan y apaguen.')));
+    else if (r.act === 5) parts.push(st.ir.length ? sel(st.ir.map(n => [n, n]), r.ir, e => { r.ir = e.target.value; }) : h('p', { class: 'note warn' }, tr('No hay códigos IR guardados (app Zigbee, emisor IR).')));
+    else parts.push(lab(r.act === 1 ? tr('Con este texto') : tr('El mensaje (vacío: el de siempre)'),
+      h('textarea', { rows: 3, maxlength: 159, placeholder: tr('{dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}'), oninput: e => { r.text = e.target.value; } }, r.text)));
+    parts.push(lab(tr('Como mucho, una vez cada'), sel(GAPS, GAPS.some(g => g[0] === r.gap_s) ? r.gap_s : 30, e => { r.gap_s = +e.target.value; })));
+    parts.push(h('div', { class: 'btns', style: 'margin-top:14px' },
+      h('button', { class: 'btn pri', onclick: () => post('bot/rule', r).then(() => { editing = null; load(); }).catch(e => toast(e.message, true)) }, tr('Guardar')),
+      h('button', { class: 'btn', onclick: () => { editing = null; load(); } }, tr('Cancelar')),
+      r.i >= 0 ? h('button', { class: 'btn red', onclick: () => post('bot/delete', { i: r.i }).then(() => { editing = null; load(); }) }, tr('Borrar')) : null));
+    return parts;
+  }
+
+  async function load() {
+    try { st = await api('bot'); } catch { return; }
+    const [name, cls] = STATE[st.state] || [st.state, ''];
+    put(head, h('div', { class: 'btns', style: 'justify-content:space-between' },
+        h('div', { class: 'mid' }, h('span', { class: cls }, '● '), name, st.username ? h('span', { class: 'muted' }, '  @' + st.username) : null),
+        h('label', { class: 'muted' }, h('input', { type: 'checkbox', checked: st.on, onchange: e => send({ on: e.target.checked }) }), ' ' + tr('Encendido'))),
+      st.why && st.state !== 'online' ? h('div', { class: 'note' }, st.why) : null,
+      h('div', { class: 'note' }, tr('%s pedidos recibidos · %s mensajes mandados', st.received, st.sent)),
+      lab(st.token ? tr('Token (guardado; pegá otro para cambiarlo)') : tr('Token (lo da @BotFather con /newbot)'), tok),
+      h('div', { class: 'btns', style: 'margin-top:10px' },
+        h('button', { class: 'btn pri', onclick: () => { if (tok.value.trim()) post('bot', { token: tok.value.trim() }).then(() => { tok.value = ''; toast(tr('Guardado')); load(); }).catch(e => toast(e.message, true)); } }, tr('Guardar el token')),
+        st.token ? h('button', { class: 'btn', onclick: () => send({ token: '' }) }, tr('Borrar el token')) : null));
+    put(chats, h('h2', { style: 'margin-top:0' }, tr('Chats vinculados')),
+      st.chats.length ? st.chats.map(c => h('div', { class: 'row' }, h('div', { class: 'grow' }, c.name || '?'), h('button', { class: 'btn', onclick: () => send({ forget: c.id }) }, tr('Olvidar'))))
+        : h('p', { class: 'note' }, tr('Nadie todavía. Sólo los chats vinculados pueden hablar con la placa.')),
+      st.code ? [h('div', { class: 'big', style: 'color:#2AABEE;margin:10px 0' }, String(st.code).replace(/(\d{3})(\d{3})/, '$1 $2')),
+        h('p', {}, tr('Mandale al bot: /vincular %s (vale %s min más)', st.code, Math.ceil(st.code_left / 60))),
+        h('button', { class: 'btn', onclick: () => send({ link_cancel: true }) }, tr('Cancelar'))]
+        : h('button', { class: 'btn pri', onclick: () => send({ link: true }) }, tr('Vincular un chat')));
+    put(cmds, h('h2', { style: 'margin-top:0' }, tr('Comandos')),
+      CMDS.map(([bit, t]) => h('div', {}, h('label', {}, h('input', { type: 'checkbox', checked: !!(st.cmds & bit), onchange: e => send({ cmds: e.target.checked ? st.cmds | bit : st.cmds & ~bit }) }), ' ' + t))));
+    if (!editing) put(rules, h('h2', { style: 'margin-top:0' }, tr('Reglas')),
+      st.rules.length ? st.rules.map((r, i) => h('div', { class: 'row' },
+        h('input', { type: 'checkbox', checked: r.on, onchange: e => post('bot/rule', Object.assign({}, r, { i, on: e.target.checked })).then(load) }),
+        h('div', { class: 'grow' + (r.on ? '' : ' muted') }, r.desc),
+        h('button', { class: 'btn', onclick: () => { editing = Object.assign({}, r, { i }); put(rules, editor()); } }, tr('Editar'))))
+        : h('p', { class: 'note' }, tr('Una regla manda un mensaje o una captura, prende o apaga algo, cuando pasa algo: una puerta que se abre, una hora, un aviso que llega.')),
+      st.rules.length < 16 ? h('button', { class: 'btn pri', style: 'margin-top:10px', onclick: () => {
+        editing = { i: -1, on: true, trig: 0, ieee: '', var: 1, op: 0, value: 1, at_min: 480, days: 127, filter: '', act: 0, act_ieee: '', ir: '', text: '', gap_s: 30 };
+        put(rules, editor()); } }, tr('Nueva regla')) : null);
+    log.textContent = st.log.slice().reverse().join('\n') || tr('Todavía nada.');
+  }
+  put(main, h('h1', {}, tr('Bot de Telegram')),
+    h('p', { class: 'note' }, tr('La placa contesta en un chat de Telegram y avisa lo que pasa: su estado, una captura, los dispositivos Zigbee, los códigos IR. Sólo le hablan los chats vinculados con el código que muestra.')),
+    h('div', { class: 'grid2' }, head, chats), h('div', { class: 'grid2' }, cmds, rules), h('h2', {}, tr('Lo último')), log);
+  clearTimeout(botT);
+  await load();
+  const tick = () => { if (location.hash !== '#bot') return; if (!editing) load(); botT = setTimeout(tick, 2000); };
+  botT = setTimeout(tick, 2000);
+}
+
 /* ---- Claude ---- */
 let claudeT;
 async function pageClaude() {
@@ -3959,7 +4060,7 @@ async function pageZigbee() {
   zbT = setTimeout(tick, 1000);
 }
 
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, zigbee: pageZigbee, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, zigbee: pageZigbee, mqtt: pageMqtt, bot: pageBot, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts

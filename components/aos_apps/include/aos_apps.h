@@ -24,6 +24,7 @@ void aos_app_ha_get(aos_app_t *app);
 void aos_app_bench_get(aos_app_t *app);
 void aos_app_files_get(aos_app_t *app);
 void aos_app_mqtt_get(aos_app_t *app);
+void aos_app_bot_get(aos_app_t *app);
 void aos_app_net_get(aos_app_t *app);
 void aos_app_sysmon_get(aos_app_t *app);       /* also registers "widget sysmon" */
 void aos_app_claude_get(aos_app_t *app);

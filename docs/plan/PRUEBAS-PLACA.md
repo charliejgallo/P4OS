@@ -5,6 +5,22 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
+## El bot de Telegram y el emparejamiento BLE (2026-11-27, sin publicar)
+
+- [ ] El bot contra Telegram de verdad, con un bot del usuario (@BotFather):
+      el token desde el portal, vincular su chat, cada comando, una captura,
+      los botones de un dispositivo Zigbee con salida (el módulo de dos
+      relés), un código IR guardado (`docs/BOT.md`).
+- [ ] Una regla con un sensor real: la puerta que se abre manda un mensaje;
+      una temperatura que pasa de un valor; reenviar los avisos del iPhone.
+- [ ] La RAM interna libre con el bot prendido y apagado (los hilos y sus
+      buferes van a PSRAM; lo único interno son los dos TCB).
+- [ ] El emparejamiento con PIN desde la app Malla (Meshtastic) con la
+      EkoBadge; después, que el iPhone y la computadora sigan emparejándose
+      como antes (la capacidad de E/S pasó a KEYBOARD_DISPLAY: tiene que
+      seguir siendo comparación numérica) y que "Olvidar" en Ajustes no se
+      lleve el vínculo de la EkoBadge.
+
 ## La 0.34.0 publicada (2026-11-25): lo que falta mirar en la placa
 
 - [ ] Actualizar la placa desde Ajustes, Actualización, desde GitHub, a la
