@@ -9,8 +9,8 @@ since 0.34, the Zigbee radio.
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and, since
-0.30, a **Store** that installs more than seventy others on the microSD,
+portrait or landscape. There are twenty-five built-in apps and, since
+0.30, a **Store** that installs more than eighty others on the microSD,
 loaded as shared objects:
 
 - **A store of its own:** the board lists, installs and updates its apps
@@ -18,7 +18,7 @@ loaded as shared objects:
   firmware. Other people's repositories can be added beside the official
   one.
 
-- **Games:** twenty-five, among them Mila (a Sokoban with a black cat in
+- **Games:** thirty-five, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, a 3D pinball
   with six tables, a tower defense over ten worlds, a pipes game with six
   liquids, Doom at 35 fps and Duke Nukem 3D; and an emulator of
@@ -31,7 +31,16 @@ loaded as shared objects:
   graphs, geometry and statistics, a data logger for the header's sensors,
   Lua, and Python (MicroPython).
 - **A web portal** for files, updates, the log and the network sweeps, and a
-  page for every app that wants one, which the app brings from the card.
+  page for every app that wants one, which the app brings from the card;
+  since 0.35 a phone on the portal is also a gamepad.
+- **Messages, since 0.35:** Telegram with your own account (MTProto written
+  in C), mail over IMAP and SMTP, a Meshtastic client, and **a Telegram bot
+  of the board's own** that answers in a chat and sends what its rules say
+  (a door opened, a screenshot at an hour). [docs/BOT.md](docs/BOT.md).
+- **Cameras, since 0.35:** a USB webcam as a security camera that records
+  H.264 when something moves and is an RTSP camera for Frigate, and as a
+  camera that sees (faces, people, objects, hands, QR and barcodes) with
+  Espressif's esp-dl on the board.
 - **Bluetooth with the phone:** the iPhone's notifications on the board, in
   colour emoji, its music, and its calls answered or rejected from the
   board; and the board as a computer's wireless keyboard and mouse.
@@ -307,8 +316,15 @@ The home screen has icon pages, folders, a dock and widgets.
 - **Search** (since 0.24.0): a swipe down from the middle of the home screen
   finds apps, the pages of Settings, notes by their text and the card's
   files, and works out a sum typed in.
+- **The App Library** (since 0.35): the home screen's last page has every
+  app, those taken off the home screen too, in the Store's categories: a
+  card each with three apps big and a cluster of the rest that opens the
+  whole category. Its pictures are made only while it is on screen.
 - **The status bar** shows the Wi-Fi or the board's own network, the card
-  and the USB.
+  and the USB, and the services working in the background: the Zigbee
+  radio in a colour for each mode (its own network, open to join,
+  emulating a device, scanning), the Telegram bot, Datalog logging, a 3D
+  printer printing.
 - **The orientation** is chosen in Settings or the control centre, because
   the board has no accelerometer. Apps that only make sense one way turn the
   screen while they are open.
@@ -342,13 +358,16 @@ anywhere: the screen follows the finger.
   every 3 more; the count survives a restart.
 - **A forgotten code:** in the BOOT button's safe mode the lock screen
   does not ask for it, and Settings can remove it.
-- **Messages:** today the apps' notifications; the phone's over Bluetooth and
-  Home Assistant's will arrive in the same list. With a code, their text can
-  stay hidden until unlocked.
+- **Messages:** the notifications, the apps', the iPhone's over Bluetooth
+  and Home Assistant's, in one list. With a code, their text can stay
+  hidden until unlocked.
+- **Widgets** (since 0.35): up to three capsules under the date, chosen in
+  Settings, Lock screen: the next alarm, the sensors, the Zigbee network
+  and its devices. Each shows only when it has something to say.
 
-| Locked | The code | Settings, Wi-Fi: its own network |
-|---|---|---|
-| <img src="docs/img/app-lock.png" width="230"> | <img src="docs/img/app-pad.png" width="230"> | <img src="docs/img/app-wifi-ap.png" width="230"> |
+| Locked | With widgets | The code | Settings, Wi-Fi: its own network |
+|---|---|---|---|
+| <img src="docs/img/app-lock.png" width="200"> | <img src="docs/img/sys-lock-widgets.jpg" width="200"> | <img src="docs/img/app-pad.png" width="200"> | <img src="docs/img/app-wifi-ap.png" width="200"> |
 
 ### Wallpapers
 
@@ -393,8 +412,9 @@ Every day:
 |---|---|---|---|---|
 | <img src="docs/img/app-calc.png" width="150"> | <img src="docs/img/app-convert.png" width="150"> | <img src="docs/img/app-ha.png" width="150"> | <img src="docs/img/app-claude.png" width="150"> | <img src="docs/img/app-sysmon.png" width="150"> |
 
-- **Files:** the card's explorer, with search, copy, move and folders, and
-  firmware opened straight in the Programmer.
+- **Files:** the card's explorer, with search, copy, move and folders;
+  firmware opens straight in the Programmer, documents in Office and
+  videos in Video.
 - **Photos:** albums, the screenshots among them.
 - **Music:** MP3, gapless, with the covers.
 - **Clock:** world clock, alarms, stopwatch, timer and pomodoro.
@@ -402,6 +422,9 @@ Every day:
 - **Claude:** the usage of your own Claude plan, the numbers Claude Code's
   `/usage` shows. It is unofficial; see [CLAUDE-APP.md](docs/CLAUDE-APP.md).
 - **Monitor:** CPU per core, the tasks, memory, temperature and the network.
+- **Bot** (since 0.35): the board's own Telegram bot, its token, the chats
+  linked with a code, the commands it answers and the rules that make it
+  write or act by itself ([docs/BOT.md](docs/BOT.md)).
 - **Also built in:** MQTT, Conway's Life, and Network, which has its own
   section below.
 
@@ -986,8 +1009,8 @@ translations, updates it while it runs, and removes it.
   or the portal.
 - **The firmware too:** Settings → Update finds the next release, and
   installs it on a tap, on trial like any update.
-- **And what the system reads from the card:** the web portal's
-  translations, the colour emoji and the C6's firmware are under the
+- **And what the system reads from the card:** the languages, the colour
+  emoji, the icon packs, Zigbee's tables and the C6's firmware are under the
   Store's System chip, one Get each.
 - **From a computer:** the portal's Store page does the same.
 
@@ -1123,6 +1146,48 @@ and their art comes in packs.
   over worlds drawn live in 3D by both cores, a heightmap in tiles with
   forests, rivers, buildings and the light of the hour, scaled by the PPA;
   rings, races, deliveries and free flight, about 30 fps on the board.
+
+| Surveillance | Vision | Malla | Mensajes | Correo | Cielo | Scorekeeper | Soundboard |
+|---|---|---|---|---|---|---|---|
+| <img src="docs/img/app-grabador.png" width="125"> | <img src="docs/img/app-vision.png" width="125"> | <img src="docs/img/app-malla.png" width="125"> | <img src="docs/img/app-mensajes.png" width="125"> | <img src="docs/img/app-correo.png" width="125"> | <img src="docs/img/app-cielo.png" width="125"> | <img src="docs/img/app-marcador.jpg" width="125"> | <img src="docs/img/app-botonera.png" width="125"> |
+
+New in 0.35:
+
+- **Surveillance** (Grabador, [apps/grabador/README.md](apps/grabador/README.md)):
+  a USB webcam as a security camera. It records H.264 with the board's
+  hardware encoder when something moves, from a few seconds before, with
+  zones, hours, sensitivity and a space limit; tells the Telegram bot; and
+  is an IP camera over RTSP for Frigate, VLC or Cámaras. Video plays the
+  clips.
+- **Vision** ([apps/vision/README.md](apps/vision/README.md)): a USB webcam
+  that sees, with Espressif's esp-dl on the board: faces, people, the 80
+  kinds of thing of COCO, hands and their gesture, QR and EAN/UPC codes,
+  boxed and named on the live picture.
+- **Malla** ([apps/malla/README.md](apps/malla/README.md), GPL-3.0): a
+  client for Meshtastic nodes over USB, TCP or Bluetooth with the node's
+  PIN: chats by channel and direct, nodes, the map, telemetry, traceroute
+  and the node's settings.
+- **Mensajes** ([apps/mensajes/README.md](apps/mensajes/README.md)): an
+  unofficial client for Telegram with your own account, MTProto 2.0
+  written in C for the P4, no server in the middle; chats, photos,
+  reactions, and its page in the portal.
+- **Correo** ([apps/correo/README.md](apps/correo/README.md)): mail over IMAP
+  and SMTP, several accounts set up by themselves, one inbox, threads,
+  folders, HTML read as text, attachments and its page in the portal.
+- **Cielo** ([apps/cielo/README.md](apps/cielo/README.md)): tonight's sky
+  from where the board is: nine thousand stars, the constellations, the
+  planets, the Moon, the Messier objects and the passes of the satellites
+  you follow.
+- **Scorekeeper** (Marcador, [apps/marcador/README.md](apps/marcador/README.md)):
+  seven ways of keeping the score, each drawn and sounding like the real
+  thing: matches on green baize for truco, beans on a wooden table, a
+  tally counter, a stadium board, a flip card, an abacus, a chalkboard.
+- **Soundboard** (Botonera, [apps/botonera/README.md](apps/botonera/README.md)):
+  big buttons for the card's WAV and MP3, several at once, looping, with
+  their own volume, a sound recorded with the microphone, and a portal
+  page to play them from the phone.
+- **Video** plays H.264 MP4 too, and **Infrarrojo** finds which remote a
+  device takes by trying several of its buttons at once.
 
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware
@@ -1597,6 +1662,14 @@ language); an app's page brings its own with the app.
   downloaded, and the C6's firmware, which was another build, replaced
   by the release's.
 
+- The board's Telegram bot (0.35), against Telegram itself: the token
+  from the portal, a chat linked with its code, its state, a screenshot,
+  the Zigbee devices with buttons (both outputs of a two-relay module
+  switched from the phone), and a rule that wrote to the phone when a door
+  sensor opened. The status bar's glyphs for the bot and Zigbee, a
+  computer paired again after the Bluetooth I/O change, Marcador,
+  Botonera, Tanques' way back to its title and the App Library.
+
 **Waiting for hardware on the bench:**
 
 - Ethernet with a computer on a cable (a USB adapter is on its way): the
@@ -1624,6 +1697,10 @@ language); an app's page brings its own with the app.
 
 **Not done yet:**
 
+- **0.35's new pieces with their hardware:** Surveillance and Vision with a
+  real webcam on the board, the phone as a pad in a two-player game, Malla
+  with a Meshtastic node over Bluetooth (the PIN), Mensajes and Correo with
+  real accounts, the bot's `/ir` and a temperature rule.
 - **The Store:** publishing an app from outside this repository has no
   kit yet, and a download with the Wi-Fi cut in the middle of it was not
   tried (a restart in the middle was).
@@ -1845,7 +1922,7 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, tanques de juguete por turnos en 3D, un juego para aprender a programar con una tortuga, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods, un graficador de lo que llega por serie, el estado de los servicios de la casa), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, Zigbee (la placa como concentrador propio donde se prueba casi cualquier equipo, emisores IR de Tuya, y la placa haciéndose pasar por un equipo en la red de Home Assistant), íconos dibujados en dos estilos, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 25 apps propias y más de 80 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, tanques de juguete por turnos en 3D, un juego para aprender a programar con una tortuga, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods, un graficador de lo que llega por serie, el estado de los servicios de la casa, Telegram con la cuenta propia, correo por IMAP y SMTP, un cliente de Meshtastic, una cámara de seguridad con una webcam USB que graba H.264 y sirve RTSP, una cámara que reconoce caras, personas, objetos y códigos, el cielo de esta noche, un marcador con siete tanteadores y una botonera de sonidos), un bot de Telegram propio de la placa con reglas, una biblioteca de apps por categorías, widgets en la pantalla de bloqueo, el celular como joystick desde el portal, portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, Zigbee (la placa como concentrador propio donde se prueba casi cualquier equipo, emisores IR de Tuya, y la placa haciéndose pasar por un equipo en la red de Home Assistant), íconos dibujados en dos estilos, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera, y Zigbee: siete equipos en la red propia de la placa, un código IR de la tele aprendido y mandado por el emisor, y la placa emulando un equipo en un Zigbee2MQTT con un Sonoff ZBDongle-E |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
