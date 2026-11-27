@@ -540,15 +540,17 @@ static lv_obj_t *make_bubble(lv_obj_t *list, const mv_t *v, int32_t w, bool *wan
     snprintf(foot, sizeof foot, "%s%s%s", v->m.edit_date ? _("editado") : "", v->m.edit_date ? " " : "", t);
     if (v->m.views && s_broadcast) {
         size_t l = strlen(foot);
-        snprintf(foot + l, sizeof foot - l, "  \xF0\x9F\x91\x81 %d", v->m.views);
+        snprintf(foot + l, sizeof foot - l, "  \xF0\x9F\x91\x81\xEF\xB8\x8F %d", v->m.views);
     }
     lv_obj_t *fr = mj_box(b, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(fr, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(fr, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(fr, 6, 0);
     lv_obj_set_style_align(fr, LV_ALIGN_RIGHT_MID, 0);
-    lv_obj_t *fl = mj_label(fr, foot, aos_font_caption, sub);
-    (void)fl;
+    lv_obj_t *fl = lv_label_create(fr);
+    lv_obj_set_style_text_font(fl, aos_font_caption, 0);
+    lv_obj_set_style_text_color(fl, sub, 0);
+    mj_label_safe(fl, foot);
     if (v->m.out) {
         const char *g = v->m.pending ? AOS_SYM_CLOCK_OUTLINE : v->m.failed ? AOS_SYM_ALERT_OUTLINE : AOS_SYM_CHECK;
         lv_obj_t *ck = mj_label(fr, v->read ? AOS_SYM_CHECK AOS_SYM_CHECK : g, &aos_sym_28, sub);
@@ -780,9 +782,34 @@ static void emoji_cb(lv_event_t *e)
 
 typedef struct {
     char path[200];
+    lv_obj_t *cell;             /* while it waits for its thumbnail          */
 } pick_t;
 static pick_t *s_pick;
 static int s_npick;
+static int32_t s_pick_cell;
+
+static void pick_cell_gone(lv_event_t *e)
+{
+    pick_t *p = (pick_t *)lv_event_get_user_data(e);
+    p->cell = NULL;
+}
+
+/* the thumbnails of the photo picker that were not decoded yet */
+static void pick_refresh(void)
+{
+    for (int i = 0; s_pick && i < s_npick; i++) {
+        lv_obj_t *c = s_pick[i].cell;
+        if (!c) continue;
+        const lv_image_dsc_t *d = mj_img_get(s_pick[i].path, s_pick_cell, s_pick_cell, true);
+        if (!d) continue;
+        lv_obj_clean(c);
+        lv_obj_t *img = lv_image_create(c);
+        mj_img_attach(img, d);
+        lv_obj_center(img);
+        lv_obj_remove_flag(img, LV_OBJ_FLAG_CLICKABLE);
+        s_pick[i].cell = NULL;
+    }
+}
 
 static void pick_cb(lv_event_t *e)
 {
@@ -829,6 +856,8 @@ static void attach_cb(lv_event_t *e)
     if (!s_pick) s_pick = (pick_t *)mj_calloc(60 * sizeof *s_pick);
     if (!s_pick) return;
     s_npick = 0;
+    mj_sheet_close();
+    memset(s_pick, 0, 60 * sizeof *s_pick);
     const char *ph = aos_hal_path_photos();
     if (ph) scan_dir(ph, 0);
     lv_obj_t *b = mj_sheet_open(_("Mandar una foto"), U.land ? 660 : 900);
@@ -846,6 +875,7 @@ static void attach_cb(lv_event_t *e)
     lv_obj_set_style_pad_row(grid, 10, 0);
     lv_obj_set_style_pad_column(grid, 10, 0);
     int32_t cell = ((U.land ? 720 : U.W) - 2 * AOS_UI_PAD - 20) / 3;
+    s_pick_cell = cell;
     for (int i = 0; i < s_npick; i++) {
         lv_obj_t *c = mj_box(grid, cell, cell);
         lv_obj_set_style_radius(c, 14, 0);
@@ -866,7 +896,8 @@ static void attach_cb(lv_event_t *e)
             lv_obj_set_width(l, cell - 12);
             lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
             lv_obj_center(l);
-            lv_obj_add_flag(c, LV_OBJ_FLAG_USER_2);
+            s_pick[i].cell = c;
+            lv_obj_add_event_cb(c, pick_cell_gone, LV_EVENT_DELETE, &s_pick[i]);
         }
     }
 }
@@ -998,6 +1029,7 @@ void mj_chat_build(lv_obj_t *pane)
         lv_obj_set_size(U.ta, w - 84 - 72 - 96 - 12, 64);
         lv_obj_align(U.ta, LV_ALIGN_LEFT_MID, 160, 0);
         lv_obj_set_style_text_font(U.ta, aos_font_small, 0);
+        lv_obj_set_style_text_color(U.ta, AOS_C_TEXT, 0);
         lv_obj_set_style_bg_color(U.ta, AOS_C_CARD2, 0);
         lv_obj_set_style_border_width(U.ta, 0, 0);
         lv_obj_set_style_radius(U.ta, 32, 0);
@@ -1047,11 +1079,13 @@ void mj_chat_refresh(bool force)
 {
     (void)force;
     if (!U.chat_list) return;
+    /* at the bottom before the composer or the keyboard moved: it stays there */
+    lv_obj_update_layout(U.chat_list);
+    bool at_bottom = lv_obj_get_scroll_bottom(U.chat_list) < 120;
     layout();
     lv_obj_update_layout(U.chat_list);
     copy_views();
     int32_t w = lv_obj_get_width(U.chat_list);
-    bool at_bottom = lv_obj_get_scroll_bottom(U.chat_list) < 120;
     int32_t old_top_id = U.nrows ? U.rows[0].id : 0;
     lv_obj_t *anchor = NULL;
     int32_t anchor_y = 0;
@@ -1138,7 +1172,10 @@ void mj_chat_refresh(bool force)
  * and the pictures already decoded are set in place. */
 void mj_chat_media(void)
 {
-    if (!U.chat_list) return;
+    if (!U.chat_list) {
+        if (U.sheet) pick_refresh();
+        return;
+    }
     bool any = false;
     for (int i = 0; i < U.nrows; i++) {
         if (!U.rows[i].wants_media || U.rows[i].day) continue;
@@ -1172,6 +1209,7 @@ void mj_chat_media(void)
         any = true;
     }
     if (any) mj_chat_refresh(false);
+    if (U.sheet) pick_refresh();
 }
 
 bool mj_chat_back(void)

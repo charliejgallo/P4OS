@@ -53,6 +53,7 @@ typedef struct mj_req {
     int tries;
     bool acked;
     bool is_ping;
+    bool wrapped;               /* went in invokeWithLayer(initConnection)   */
     mj_rpc_cb_t cb;
     void *ctx;
 } mj_req_t;
@@ -651,6 +652,8 @@ static bool wrap_init(mj_mtp_t *m, const uint8_t *body, size_t n, mj_buf_t *out)
     return ok && !out->oom;
 }
 
+static void complete(mj_mtp_t *m, dc_t *d, mj_req_t **link, mj_rpc_t *res);
+
 /* Everything waiting on a data centre goes out: the requests (one message
  * each, or a container when there are more of them or acks), and the acks. */
 static void flush(mj_mtp_t *m, dc_t *d)
@@ -659,11 +662,25 @@ static void flush(mj_mtp_t *m, dc_t *d)
     uint32_t now = mj_now_ms();
     mj_req_t *todo[16];
     int nt = 0;
+    /* a request that went out four times without an answer (each time the
+     * connection fell) is given up, not sent forever */
+    for (mj_req_t **l = &d->reqs; *l;) {
+        if (!(*l)->msg_id && (*l)->tries >= 4 && !(*l)->is_ping) {
+            mj_log("mtp: dc%d: a request given up after %d tries", d->dc, (*l)->tries);
+            mj_rpc_t res = {0};
+            res.code = -1;
+            res.msg = "CONNECTION_LOST";
+            complete(m, d, l, &res);
+            continue;
+        }
+        l = &(*l)->next;
+    }
     for (mj_req_t *r = d->reqs; r && nt < 16; r = r->next) {
         if (r->msg_id) continue;
         if (r->not_before_ms && (int32_t)(now - r->not_before_ms) < 0) continue;
+        /* until the session is known to the server, pings wait */
+        if (!d->inited && r->is_ping) continue;
         todo[nt++] = r;
-        if (!d->inited) break;          /* the first one goes alone, wrapped */
     }
     bool acks_due = d->nacks && (d->nacks >= 16 || (uint32_t)(now - d->ack_ms) > 800 || nt);
     if (!nt && !acks_due) return;
@@ -688,12 +705,15 @@ static void flush(mj_mtp_t *m, dc_t *d)
     for (int i = 0; i < nt; i++) {
         mj_buf_t *b = &items[ni];
         memset(b, 0, sizeof *b);
-        if (!d->inited) {
+        /* every request goes wrapped until one of them is answered: the
+         * first one may come back with a new salt and go again, and the
+         * server must see the wrapper on what it actually takes */
+        todo[i]->wrapped = !d->inited;
+        if (todo[i]->wrapped) {
             if (!wrap_init(m, todo[i]->body, todo[i]->n, b)) {
                 mj_buf_free(b);
                 continue;
             }
-            d->inited = true;
         } else {
             mj_buf_put(b, todo[i]->body, todo[i]->n);
         }
@@ -788,6 +808,8 @@ static void on_rpc_result(mj_mtp_t *m, dc_t *d, const uint8_t *p, size_t n)
         mj_log("mtp: dc%d: an answer to nothing we asked (%08x)", d->dc, (unsigned)rd32(p + 8));
         return;
     }
+    /* an answer to a wrapped request: the server knows this session now */
+    if (r->wrapped) d->inited = true;
     mj_arena_t a = {0};
     mj_rpc_t res = {0};
     res.arena = &a;

@@ -1203,7 +1203,9 @@ class Conn(socketserver.BaseRequestHandler):
         return found
 
     def f_messages_searchGlobal(self, q):
-        res = self.search(q['q'])[:q['limit']]
+        text = q['q'] if isinstance(q['q'], str) else q['q'].decode('utf-8', 'replace')
+        log(f'dc{self.dc}: searching {q["q"]!r}')
+        res = self.search(text)[:q['limit']]
         return {'_': 'messages.messages', 'messages': res, 'topics': [], 'chats': STORE.all_chats(),
                 'users': STORE.all_users()}
 
@@ -1211,7 +1213,7 @@ class Conn(socketserver.BaseRequestHandler):
         return self.f_messages_searchGlobal(q)
 
     def f_contacts_search(self, q):
-        t = q['q'].lower()
+        t = (q['q'] if isinstance(q['q'], str) else q['q'].decode('utf-8', 'replace')).lower()
         mine = [STORE.peer('user', u['id']) for u in STORE.users.values()
                 if u['id'] != STORE.self_id and t in (u['first_name'] + ' ' + u.get('last_name', '')).lower()]
         mine += [STORE.peer('channel', c['id']) for c in STORE.channels.values() if t in c['title'].lower()]
@@ -1276,6 +1278,8 @@ def push(updates_obj):
     raw = TL.encode(updates_obj)
     with LOCK:
         conns = [c for c in CONNS if c.alive and c.key and c.key.user and c.dc == ARGS.user_dc and c.key.layer_ok]
+        if not conns:
+            log(f'{updates_obj["_"]}: no connection signed in on dc{ARGS.user_dc} that said its layer')
     for c in conns:
         try:
             c.send(None, raw=raw)

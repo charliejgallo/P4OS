@@ -55,6 +55,7 @@ static void field(lv_obj_t *col, lv_obj_t **ta, const char *placeholder, bool pa
     lv_textarea_set_placeholder_text(*ta, placeholder);
     lv_obj_set_width(*ta, lv_pct(100));
     lv_obj_set_style_text_font(*ta, aos_font_body, 0);
+    lv_obj_set_style_text_color(*ta, AOS_C_TEXT, 0);
     lv_obj_set_style_bg_color(*ta, AOS_C_CARD2, 0);
     lv_obj_set_style_border_width(*ta, 0, 0);
     lv_obj_set_style_radius(*ta, 18, 0);

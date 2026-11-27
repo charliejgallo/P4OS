@@ -438,7 +438,11 @@ void mj_kb_hide(void)
     lv_obj_t *k = U.kb;
     U.kb = NULL;
     lv_keyboard_set_textarea(k, NULL);
-    lv_obj_delete(k);
+    /* async: this is often called from the keyboard's own READY event, and
+     * an object deleted inside its own event corrupts LVGL's memory (a
+     * search went out as garbage) */
+    lv_obj_add_flag(k, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_delete_async(k);
     if (U.kb_ta) lv_obj_remove_state(U.kb_ta, LV_STATE_FOCUSED);
     U.kb_ta = NULL;
     if (U.open.type) mj_chat_refresh(true);

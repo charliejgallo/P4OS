@@ -321,9 +321,10 @@ void mj_list_net(void)
 static void search_ready(lv_event_t *e)
 {
     (void)e;
-    const char *q = lv_textarea_get_text(U.search_ta);
+    char q[64];
+    mj_scpy(q, sizeof q, lv_textarea_get_text(U.search_ta));
     mj_kb_hide();
-    if (!*q) return;
+    if (!q[0]) return;
     U.show_found = true;
     mj_api_search(q);
     mj_list_refresh();
@@ -364,6 +365,7 @@ void mj_list_build(lv_obj_t *pane)
     lv_obj_set_size(U.search_ta, w - 2 * AOS_UI_PAD, 64);
     lv_obj_set_pos(U.search_ta, AOS_UI_PAD, 92);
     lv_obj_set_style_text_font(U.search_ta, aos_font_small, 0);
+    lv_obj_set_style_text_color(U.search_ta, AOS_C_TEXT, 0);
     lv_obj_set_style_bg_color(U.search_ta, AOS_C_CARD2, 0);
     lv_obj_set_style_border_width(U.search_ta, 0, 0);
     lv_obj_set_style_radius(U.search_ta, 32, 0);
