@@ -1,0 +1,182 @@
+# amoledos-lang 1   es -> fr
+# web.botonera.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/botonera/web/botonera.js:36
+Cortar	Couper
+
+#: apps/botonera/web/botonera.js:36
+Superponer	Superposer
+
+#: apps/botonera/web/botonera.js:36
+Mantener	Maintien
+
+#: apps/botonera/web/botonera.js:38
+Un toque lo hace sonar y otro lo corta.	Un appui le lance, un autre l'arrête.
+
+#: apps/botonera/web/botonera.js:39
+Cada toque lo hace sonar de nuevo, encima de lo que ya suena.	Chaque appui le relance, par-dessus ce qui sonne déjà.
+
+#: apps/botonera/web/botonera.js:40
+Suena mientras el dedo está apoyado.	Il sonne tant que le doigt reste posé.
+
+#: apps/botonera/web/botonera.js:109
+Efectos	Effets
+
+#: apps/botonera/web/botonera.js:135
+#: apps/botonera/web/botonera.js:416
+Botonera	Boîte à sons
+
+#: apps/botonera/web/botonera.js:148
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/botonera/web/botonera.js:165
+La Botonera no está abierta en la placa: los botones de acá suenan allá cuando está al frente.	La Boîte à sons n'est pas ouverte sur la carte : les boutons d'ici y sonnent quand elle est au premier plan.
+
+#: apps/botonera/web/botonera.js:166
+La Botonera está abierta pero detrás de otra app: traela al frente para que suene.	La Boîte à sons est derrière une autre app : mets-la au premier plan pour qu'elle sonne.
+
+#: apps/botonera/web/botonera.js:167
+La placa está grabando un sonido.	La carte enregistre un son.
+
+#: apps/botonera/web/botonera.js:171
+Lista para sonar	Prête à sonner
+
+#: apps/botonera/web/botonera.js:171
+Sin la app al frente	L'app n'est pas au premier plan
+
+#: apps/botonera/web/botonera.js:173
+#: apps/botonera/web/botonera.js:184
+Abrir en la placa	Ouvrir sur la carte
+
+#: apps/botonera/web/botonera.js:174
+Parar todo	Tout arrêter
+
+#: apps/botonera/web/botonera.js:176
+Listo	OK
+
+#: apps/botonera/web/botonera.js:176
+Editar	Modifier
+
+#: apps/botonera/web/botonera.js:183
+Todavía no hay botonera: abrí la app en la placa una vez y crea los sonidos de ejemplo y la grilla.	Pas encore de boîte à sons : ouvre l'app une fois sur la carte et elle crée les sons d'exemple et la grille.
+
+#: apps/botonera/web/botonera.js:201
+Vacío	Vide
+
+#: apps/botonera/web/botonera.js:223
+Página %d	Page %d
+
+#: apps/botonera/web/botonera.js:224
+Página	Page
+
+#: apps/botonera/web/botonera.js:226
+¿Borrar la página %s? Los sonidos quedan en la tarjeta.	Supprimer la page %s ? Les sons restent sur la carte SD.
+
+#: apps/botonera/web/botonera.js:228
+Borrar página	Supprimer la page
+
+#: apps/botonera/web/botonera.js:230
+Tocá un botón para cambiarlo. Los cambios se guardan solos y la placa los toma enseguida.	Touche un bouton pour le modifier. Les changements s'enregistrent tout seuls et la carte les prend aussitôt.
+
+#: apps/botonera/web/botonera.js:231
+Apoyá el dedo en un botón para que suene en la placa. Varios a la vez también.	Pose le doigt sur un bouton pour qu'il sonne sur la carte. Plusieurs à la fois aussi.
+
+#: apps/botonera/web/botonera.js:269
+(vacío)	(vide)
+
+#: apps/botonera/web/botonera.js:271
+Botón %d	Bouton %d
+
+#: apps/botonera/web/botonera.js:273
+#: apps/botonera/web/botonera.js:293
+Sonido	Son
+
+#: apps/botonera/web/botonera.js:274
+Elegí un sonido de la tarjeta, o subí uno abajo.	Choisis un son de la carte SD, ou envoies-en un ci-dessous.
+
+#: apps/botonera/web/botonera.js:275
+#: apps/botonera/web/botonera.js:316
+Cerrar	Fermer
+
+#: apps/botonera/web/botonera.js:288
+Esa página está llena	Cette page est pleine
+
+#: apps/botonera/web/botonera.js:294
+%s no está en la tarjeta.	%s n'est pas sur la carte SD.
+
+#: apps/botonera/web/botonera.js:295
+Nombre	Nom
+
+#: apps/botonera/web/botonera.js:297
+Color	Couleur
+
+#: apps/botonera/web/botonera.js:299
+Ícono	Icône
+
+#: apps/botonera/web/botonera.js:301
+Al tocarlo	Au toucher
+
+#: apps/botonera/web/botonera.js:306
+Repetir en bucle	Répéter en boucle
+
+#: apps/botonera/web/botonera.js:307
+Volumen	Volume
+
+#: apps/botonera/web/botonera.js:310
+#: apps/botonera/web/botonera.js:311
+Mover	Déplacer
+
+#: apps/botonera/web/botonera.js:313
+A otra página...	Vers une autre page...
+
+#: apps/botonera/web/botonera.js:315
+Vaciar	Vider
+
+#: apps/botonera/web/botonera.js:328
+No hay botones libres en esta página	Aucun bouton libre sur cette page
+
+#: apps/botonera/web/botonera.js:331
+Puesto en el botón %d	Placé sur le bouton %d
+
+#: apps/botonera/web/botonera.js:335
+No hay sonidos en la carpeta sonidos de la tarjeta.	Aucun son dans le dossier sonidos de la carte SD.
+
+#: apps/botonera/web/botonera.js:341
+en: %s	sur : %s
+
+#: apps/botonera/web/botonera.js:343
+A un botón	Vers un bouton
+
+#: apps/botonera/web/botonera.js:344
+Bajar	Télécharger
+
+#: apps/botonera/web/botonera.js:346
+%s lo usan %d botones. ¿Borrarlo igual?	%s sert à %d boutons. L'effacer quand même ?
+
+#: apps/botonera/web/botonera.js:346
+¿Borrar %s? No se puede deshacer.	Effacer %s ? Impossible d'annuler.
+
+#: apps/botonera/web/botonera.js:348
+Borrado	Effacé
+
+#: apps/botonera/web/botonera.js:349
+Borrar	Effacer
+
+#: apps/botonera/web/botonera.js:358
+%s no es WAV ni MP3	%s n'est ni WAV ni MP3
+
+#: apps/botonera/web/botonera.js:363
+Subido: %s	Envoyé : %s
+
+#: apps/botonera/web/botonera.js:372
+Subir sonidos	Envoyer des sons
+
+#: apps/botonera/web/botonera.js:374
+WAV o MP3, cortos: la placa usa hasta un minuto de cada uno. También se graban desde la app, con el micrófono.	WAV ou MP3, courts : la carte utilise jusqu'à une minute de chacun. On peut aussi les enregistrer dans l'app, avec le micro.
+
+#: apps/botonera/web/botonera.js:416
+Sonidos	Sons

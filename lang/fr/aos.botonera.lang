@@ -1,0 +1,212 @@
+# amoledos-lang 1   es -> fr
+# aos.botonera.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/botonera/main/bn_edit.c:28
+Cortar	Couper
+
+#: apps/botonera/main/bn_edit.c:28
+Superponer	Superposer
+
+#: apps/botonera/main/bn_edit.c:28
+Mantener	Maintien
+
+#: apps/botonera/main/bn_edit.c:30
+Un toque lo hace sonar y otro lo corta.	Un appui le lance, un autre l'arrête.
+
+#: apps/botonera/main/bn_edit.c:31
+Cada toque lo hace sonar de nuevo, encima de lo que ya suena.	Chaque appui le relance, par-dessus ce qui sonne déjà.
+
+#: apps/botonera/main/bn_edit.c:32
+Suena mientras el dedo está apoyado.	Il sonne tant que le doigt reste posé.
+
+#: apps/botonera/main/bn_edit.c:91
+#: apps/botonera/main/bn_ui.c:449
+Listo	OK
+
+#: apps/botonera/main/bn_edit.c:225
+Ninguno	Aucun
+
+#: apps/botonera/main/bn_edit.c:228
+Sin nombre	Sans nom
+
+#: apps/botonera/main/bn_edit.c:249
+¿Vaciar? Tocá de nuevo	Vider ? Touche encore
+
+#: apps/botonera/main/bn_edit.c:249
+#: apps/botonera/main/bn_edit.c:488
+Vaciar	Vider
+
+#: apps/botonera/main/bn_edit.c:321
+Nombre del botón	Nom du bouton
+
+#: apps/botonera/main/bn_edit.c:369
+Botón %d	Bouton %d
+
+#: apps/botonera/main/bn_edit.c:393
+Probar	Essayer
+
+#: apps/botonera/main/bn_edit.c:396
+Sonido	Son
+
+#: apps/botonera/main/bn_edit.c:399
+Elegir	Choisir
+
+#: apps/botonera/main/bn_edit.c:403
+Nombre	Nom
+
+#: apps/botonera/main/bn_edit.c:409
+Color	Couleur
+
+#: apps/botonera/main/bn_edit.c:425
+Ícono	Icône
+
+#: apps/botonera/main/bn_edit.c:446
+Al tocarlo	Au toucher
+
+#: apps/botonera/main/bn_edit.c:457
+Repetir en bucle	Répéter en boucle
+
+#: apps/botonera/main/bn_edit.c:463
+Volumen	Volume
+
+#: apps/botonera/main/bn_edit.c:487
+Mover	Déplacer
+
+#: apps/botonera/main/bn_edit.c:548
+No hay sonidos en %s. Grabá uno o subilos desde el portal.	Aucun son dans %s. Enregistres-en un ou envoie-les depuis le portail.
+
+#: apps/botonera/main/bn_edit.c:598
+Elegir un sonido	Choisir un son
+
+#: apps/botonera/main/bn_edit.c:599
+Grabar uno nuevo	En enregistrer un
+
+#: apps/botonera/main/bn_edit.c:646
+Guardado como %s	Enregistré sous %s
+
+#: apps/botonera/main/bn_edit.c:649
+No quedó nada grabado	Rien n'a été enregistré
+
+#: apps/botonera/main/bn_edit.c:670
+No se pudo abrir el micrófono	Impossible d'ouvrir le microphone
+
+#: apps/botonera/main/bn_edit.c:677
+Grabando... (hasta %d segundos)	Enregistrement... (%d s max)
+
+#: apps/botonera/main/bn_edit.c:704
+#: apps/botonera/main/bn_edit.c:743
+Tocá el botón rojo para grabar	Touche le bouton rouge pour enregistrer
+
+#: apps/botonera/main/bn_edit.c:711
+Grabar un sonido	Enregistrer un son
+
+#: apps/botonera/main/bn_edit.c:753
+Usar este	Utiliser
+
+#: apps/botonera/main/bn_edit.c:754
+Escuchar	Écouter
+
+#: apps/botonera/main/bn_edit.c:755
+Grabar otro	Enregistrer un autre
+
+#: apps/botonera/main/bn_grid.c:145
+#: apps/botonera/main/bn_grid.c:220
+Efectos	Effets
+
+#: apps/botonera/main/bn_grid.c:146
+Ambiente	Ambiance
+
+#: apps/botonera/main/bn_synth.c:31
+Aplausos	Ovation
+
+#: apps/botonera/main/bn_synth.c:32
+Bocina	Klaxon
+
+#: apps/botonera/main/bn_synth.c:33
+Redoble	Roulement
+
+#: apps/botonera/main/bn_synth.c:34
+Tadá	Tadam
+
+#: apps/botonera/main/bn_synth.c:35
+Campana	Cloche
+
+#: apps/botonera/main/bn_synth.c:36
+Correcto	Correct
+
+#: apps/botonera/main/bn_synth.c:37
+Error	Erreur
+
+#: apps/botonera/main/bn_synth.c:38
+Láser	Laser
+
+#: apps/botonera/main/bn_synth.c:39
+Boing	Boing
+
+#: apps/botonera/main/bn_synth.c:40
+Trombón triste	Trombone triste
+
+#: apps/botonera/main/bn_synth.c:41
+Sirena	Sirène
+
+#: apps/botonera/main/bn_synth.c:42
+Tic tac	Tic-tac
+
+#: apps/botonera/main/bn_synth.c:44
+Ritmo	Rythme
+
+#: apps/botonera/main/bn_synth.c:45
+Lluvia	Pluie
+
+#: apps/botonera/main/bn_synth.c:46
+Viento	Vent
+
+#: apps/botonera/main/bn_synth.c:47
+Latido	Battement
+
+#: apps/botonera/main/bn_ui.c:234
+No se pudo abrir el parlante	Impossible d'ouvrir le haut-parleur
+
+#: apps/botonera/main/bn_ui.c:242
+Suenan los primeros %d segundos	Seules les %d premières secondes sonnent
+
+#: apps/botonera/main/bn_ui.c:250
+No se pudo leer %s	Impossible de lire %s
+
+#: apps/botonera/main/bn_ui.c:362
+Vacío	Vide
+
+#: apps/botonera/main/bn_ui.c:434
+Página %d de %d	Page %d sur %d
+
+#: apps/botonera/main/bn_ui.c:449
+#: apps/botonera/main/bn_ui.c:861
+Editar	Modifier
+
+#: apps/botonera/main/bn_ui.c:466
+Preparando los sonidos de ejemplo...	Préparation des sons d'exemple...
+
+#: apps/botonera/main/bn_ui.c:467
+Tocá dónde ponerlo (también en otra página)	Touche où le placer (aussi sur une autre page)
+
+#: apps/botonera/main/bn_ui.c:468
+Tocá un botón, o el nombre de la página, para cambiarlo	Touche un bouton, ou le nom de la page, pour le modifier
+
+#: apps/botonera/main/bn_ui.c:516
+No se pudo guardar la botonera	Impossible d'enregistrer la boîte à sons
+
+#: apps/botonera/main/bn_ui.c:581
+Nombre de la página	Nom de la page
+
+#: apps/botonera/main/bn_ui.c:591
+Página %d	Page %d
+
+#: apps/botonera/main/bn_ui.c:604
+Tocá de nuevo para borrar la página (los sonidos quedan en la tarjeta)	Touche encore pour supprimer la page (les sons restent sur la carte SD)
+
+#: apps/botonera/main/bn_ui.c:941
+Parar todo	Tout arrêter

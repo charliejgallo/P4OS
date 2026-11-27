@@ -117,6 +117,7 @@ Bus).
 | Atasco | Traffic Jam | Trânsito |
 | Bastión | Bastion | Bastião |
 | Bolsa | Stocks | Bolsa |
+| Botonera | (Soundboard) | Painel de sons |
 | Burbujas | Bubbles | Bolhas |
 | Buscaminas | Minesweeper | Campo minado |
 | Cámaras | Cameras | Câmeras |

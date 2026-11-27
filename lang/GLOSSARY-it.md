@@ -112,6 +112,7 @@ Bus).
 | Atasco | Traffic Jam | Ingorgo |
 | Bastión | Bastion | Bastione |
 | Bolsa | Stocks | Borsa |
+| Botonera | (Soundboard) | Pulsantiera |
 | Burbujas | Bubbles | Bolle |
 | Buscaminas | Minesweeper | Campo minato |
 | Cámaras | Cameras | Telecamere |

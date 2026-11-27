@@ -115,6 +115,7 @@ Bus).
 | Atasco | Traffic Jam | Bouchon |
 | Bastión | Bastion | Bastion |
 | Bolsa | Stocks | Bourse |
+| Botonera | (Soundboard) | Boîte à sons |
 | Burbujas | Bubbles | Bulles |
 | Buscaminas | Minesweeper | Démineur |
 | Cámaras | Cameras | Caméras |
