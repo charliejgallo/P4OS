@@ -265,3 +265,63 @@ MODELS = {
     "aos.cielo": {"a": cielo_a, "b": cielo_b, "c": cielo_c},
     "aos.bot": {"a": bot_a, "b": bot_b, "c": bot_c},
 }
+
+
+# -- Grabador (a webcam as a security camera that records on motion) -------
+
+GR_TOP, GR_BOT = "#7C8CA3", "#1E293B"
+
+
+def _rec_dot(x, y, z, r):
+    return [ball((x, y, z), r, glow("#FF3B30", 2.5)),
+            ball((x - r * 0.3, y + r * 0.3, z + r * 0.8), r * 0.3, glow("#FFFFFF", 0.8), scale=(1, 1, 0.4))]
+
+
+def grabador_a(mini):
+    """A dark security camera on its arm, a big red recording light on it
+    (white is Cámaras' camera; this one is black and records)."""
+    tile(GR_TOP, GR_BOT)
+    body = glossy("#2C2F36")
+    parts = [rbox((0.04, 0.08, 0.18), (0.6, 0.28, 0.24), 0.1, body),
+             cyl((-0.27, 0.08, 0.18), 0.12, 0.06, plastic("#16161A"), rot=(0, R90, 0), bevel=0.02),
+             cyl((-0.3, 0.08, 0.18), 0.08, 0.04, glass("#6FA8FF"), rot=(0, R90, 0)),
+             rbox((0.18, -0.14, 0.08), (0.08, 0.2, 0.08), 0.03, body),
+             rbox((0.2, -0.28, 0.04), (0.26, 0.12, 0.06), 0.04, body)]
+    parts += _rec_dot(0.12, 0.1, 0.33, 0.08 if not mini else 0.1)
+    group(parts, loc=(0.02, 0.02, 0.0), rot=(-28, 0, -24), scale=1.05 if mini else 1.0)
+
+
+def grabador_b(mini):
+    """A round webcam watching, a red REC badge beside it."""
+    tile(GR_TOP, GR_BOT)
+    dark = plastic("#2C2F36", 0.35)
+    parts = [ball((-0.06, 0.06, 0.16), 0.2, glossy("#F4F5F8"), scale=(1.15, 1, 0.8)),
+             cyl((-0.06, 0.06, 0.28), 0.12, 0.04, dark, bevel=0.015, verts=64),
+             cyl((-0.06, 0.06, 0.3), 0.08, 0.02, glass("#6FA8FF"), verts=64),
+             rbox((-0.06, -0.2, 0.08), (0.06, 0.12, 0.06), 0.02, dark),
+             rbox((-0.06, -0.27, 0.05), (0.3, 0.06, 0.06), 0.03, dark),
+             rbox((0.24, 0.3, 0.1), (0.26, 0.13, 0.06), 0.06, glossy("#FFFFFF"))]
+    parts += _rec_dot(0.17, 0.3, 0.15, 0.035 if not mini else 0.05)
+    if not mini:
+        parts.append(rbox((0.28, 0.3, 0.135), (0.1, 0.035, 0.01), 0.015, plastic("#2C2F36")))
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+def grabador_c(mini):
+    """A screen showing someone walking by, boxed by the motion detector,
+    and the red dot: recording."""
+    tile(GR_TOP, GR_BOT)
+    parts = [rbox((0, 0.02, 0.05), (0.78, 0.6, 0.1), 0.06, plastic("#2C2F36", 0.35)),
+             rbox((0, 0.02, 0.1), (0.68, 0.5, 0.02), 0.04, glossy("#1C2A44"))]
+    person = [ball((0.02, 0.11, 0.13), 0.065, glossy("#E9EEF5"), scale=(1, 1, 0.5)),
+              rbox((0.02, -0.05, 0.12), (0.16, 0.2, 0.03), 0.07, glossy("#E9EEF5"))]
+    w = 0.02 if not mini else 0.03
+    box = [rbox((0.02, 0.18, 0.12), (0.24, w, 0.01), 0.008, glow("#5CFF9A", 1.5)),
+           rbox((0.02, -0.14, 0.12), (0.24, w, 0.01), 0.008, glow("#5CFF9A", 1.5)),
+           rbox((-0.1, 0.02, 0.12), (w, 0.34, 0.01), 0.008, glow("#5CFF9A", 1.5)),
+           rbox((0.14, 0.02, 0.12), (w, 0.34, 0.01), 0.008, glow("#5CFF9A", 1.5))]
+    parts += person + box + _rec_dot(-0.25, 0.18, 0.13, 0.04 if not mini else 0.06)
+    group(parts, loc=(0, 0, 0.06), rot=(-16, 10, 0), scale=1.0)
+
+
+MODELS["aos.grabador"] = {"a": grabador_a, "b": grabador_b, "c": grabador_c}

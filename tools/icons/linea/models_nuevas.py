@@ -108,3 +108,24 @@ VARIANTS = {
 # apps in elegidos.json).
 ART = {"aos.malla": malla_a, "aos.mensajes": mensajes_a, "aos.correo": correo_a, "aos.cielo": cielo_a,
        "aos.bot": bot_b}
+
+
+def grabador_a(m):
+    """The security camera on its arm, the recording dot."""
+    body = '<g transform="rotate(-20 56 50)">' + R(22, 36, 64, 30, 10) + "</g>"
+    lines = body + C(30, 58, 8, KO) + P("M74,66 L80,86 M64,92 L96,92")
+    return lines, C(94, 26, 8 if not m.mini else 10)
+
+
+def grabador_b(m):
+    """A screen, a figure boxed by the motion detector, the recording dot."""
+    lines = R(14, 22, 92, 70, 10) + L(60, 92, 60, 102) + L(42, 104, 78, 104)
+    lines += P("M50,40 H74 V78 H50 Z") if not m.mini else P("M48,38 H76 V80 H48 Z")
+    fills = C(62, 50, 5) + R(56, 58, 12, 16, 4) + C(28, 36, 6 if not m.mini else 8)
+    return lines, fills
+
+
+VARIANTS["aos.grabador"] = {"a": grabador_a, "b": grabador_b}
+PAIRS["aos.grabador"] = ("#C8D6E8", "#FF3B30")
+
+ART["aos.grabador"] = grabador_a

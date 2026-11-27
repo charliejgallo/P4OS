@@ -1485,6 +1485,20 @@
     "b": "un robot con un globo de diálogo",
     "c": "un robot con un engranaje"
    }
+  },
+  {
+   "id": "aos.grabador",
+   "name": "Grabador",
+   "group": "nuevas",
+   "colors": [
+    "#64748B",
+    "#1E293B"
+   ],
+   "juguete": {
+    "a": "la cámara de vigilancia con la luz roja de grabando",
+    "b": "una webcam con un cartel rojo de REC",
+    "c": "una pantalla con alguien detectado y el punto rojo"
+   }
   }
  ]
 }
