@@ -1,0 +1,377 @@
+# amoledos-lang 1   es -> it
+# web.vision.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vision/web/vision.js:19
+Caras	Volti
+
+#: apps/vision/web/vision.js:19
+Personas	Persone
+
+#: apps/vision/web/vision.js:19
+Objetos	Oggetti
+
+#: apps/vision/web/vision.js:19
+Manos	Mani
+
+#: apps/vision/web/vision.js:19
+Códigos	Codici
+
+#: apps/vision/web/vision.js:20
+cara	volto
+
+#: apps/vision/web/vision.js:20
+caras	volti
+
+#: apps/vision/web/vision.js:20
+#: apps/vision/web/vision.js:24
+persona	persona
+
+#: apps/vision/web/vision.js:20
+personas	persone
+
+#: apps/vision/web/vision.js:20
+objeto	oggetto
+
+#: apps/vision/web/vision.js:20
+objetos	oggetti
+
+#: apps/vision/web/vision.js:21
+#: apps/vision/web/vision.js:37
+#: apps/vision/web/vision.js:37
+#: apps/vision/web/vision.js:59
+mano	mano
+
+#: apps/vision/web/vision.js:21
+manos	mani
+
+#: apps/vision/web/vision.js:21
+código	codice
+
+#: apps/vision/web/vision.js:21
+códigos	codici
+
+#: apps/vision/web/vision.js:24
+bicicleta	bicicletta
+
+#: apps/vision/web/vision.js:24
+auto	auto
+
+#: apps/vision/web/vision.js:24
+moto	moto
+
+#: apps/vision/web/vision.js:24
+avión	aereo
+
+#: apps/vision/web/vision.js:24
+colectivo	autobus
+
+#: apps/vision/web/vision.js:24
+tren	treno
+
+#: apps/vision/web/vision.js:25
+camión	camion
+
+#: apps/vision/web/vision.js:25
+barco	barca
+
+#: apps/vision/web/vision.js:25
+semáforo	semaforo
+
+#: apps/vision/web/vision.js:25
+hidrante	idrante
+
+#: apps/vision/web/vision.js:25
+cartel de pare	cartello stop
+
+#: apps/vision/web/vision.js:25
+parquímetro	parchimetro
+
+#: apps/vision/web/vision.js:25
+banco	panca
+
+#: apps/vision/web/vision.js:26
+pájaro	uccello
+
+#: apps/vision/web/vision.js:26
+gato	gatto
+
+#: apps/vision/web/vision.js:26
+perro	cane
+
+#: apps/vision/web/vision.js:26
+caballo	cavallo
+
+#: apps/vision/web/vision.js:26
+oveja	pecora
+
+#: apps/vision/web/vision.js:26
+vaca	mucca
+
+#: apps/vision/web/vision.js:26
+elefante	elefante
+
+#: apps/vision/web/vision.js:26
+oso	orso
+
+#: apps/vision/web/vision.js:27
+cebra	zebra
+
+#: apps/vision/web/vision.js:27
+jirafa	giraffa
+
+#: apps/vision/web/vision.js:27
+mochila	zaino
+
+#: apps/vision/web/vision.js:27
+paraguas	ombrello
+
+#: apps/vision/web/vision.js:27
+cartera	borsetta
+
+#: apps/vision/web/vision.js:27
+corbata	cravatta
+
+#: apps/vision/web/vision.js:27
+valija	valigia
+
+#: apps/vision/web/vision.js:28
+frisbee	frisbee
+
+#: apps/vision/web/vision.js:28
+esquís	sci
+
+#: apps/vision/web/vision.js:28
+tabla de snow	snowboard
+
+#: apps/vision/web/vision.js:28
+pelota	palla
+
+#: apps/vision/web/vision.js:28
+barrilete	aquilone
+
+#: apps/vision/web/vision.js:28
+bate	mazza da baseball
+
+#: apps/vision/web/vision.js:29
+guante de béisbol	guanto da baseball
+
+#: apps/vision/web/vision.js:29
+patineta	skateboard
+
+#: apps/vision/web/vision.js:29
+tabla de surf	tavola da surf
+
+#: apps/vision/web/vision.js:29
+raqueta	racchetta
+
+#: apps/vision/web/vision.js:29
+botella	bottiglia
+
+#: apps/vision/web/vision.js:29
+copa de vino	calice
+
+#: apps/vision/web/vision.js:30
+taza	tazza
+
+#: apps/vision/web/vision.js:30
+tenedor	forchetta
+
+#: apps/vision/web/vision.js:30
+cuchillo	coltello
+
+#: apps/vision/web/vision.js:30
+cuchara	cucchiaio
+
+#: apps/vision/web/vision.js:30
+bol	ciotola
+
+#: apps/vision/web/vision.js:30
+banana	banana
+
+#: apps/vision/web/vision.js:30
+manzana	mela
+
+#: apps/vision/web/vision.js:31
+sándwich	panino
+
+#: apps/vision/web/vision.js:31
+naranja	arancia
+
+#: apps/vision/web/vision.js:31
+brócoli	broccoli
+
+#: apps/vision/web/vision.js:31
+zanahoria	carota
+
+#: apps/vision/web/vision.js:31
+pancho	hot dog
+
+#: apps/vision/web/vision.js:31
+pizza	pizza
+
+#: apps/vision/web/vision.js:31
+dona	donut
+
+#: apps/vision/web/vision.js:32
+torta	torta
+
+#: apps/vision/web/vision.js:32
+silla	sedia
+
+#: apps/vision/web/vision.js:32
+sillón	divano
+
+#: apps/vision/web/vision.js:32
+planta	pianta
+
+#: apps/vision/web/vision.js:32
+cama	letto
+
+#: apps/vision/web/vision.js:32
+mesa	tavolo
+
+#: apps/vision/web/vision.js:32
+inodoro	WC
+
+#: apps/vision/web/vision.js:32
+televisor	TV
+
+#: apps/vision/web/vision.js:33
+notebook	portatile
+
+#: apps/vision/web/vision.js:33
+mouse	mouse
+
+#: apps/vision/web/vision.js:33
+control remoto	telecomando
+
+#: apps/vision/web/vision.js:33
+teclado	tastiera
+
+#: apps/vision/web/vision.js:33
+celular	telefono
+
+#: apps/vision/web/vision.js:33
+microondas	microonde
+
+#: apps/vision/web/vision.js:33
+horno	forno
+
+#: apps/vision/web/vision.js:34
+tostadora	tostapane
+
+#: apps/vision/web/vision.js:34
+pileta de cocina	lavello
+
+#: apps/vision/web/vision.js:34
+heladera	frigorifero
+
+#: apps/vision/web/vision.js:34
+libro	libro
+
+#: apps/vision/web/vision.js:34
+reloj	orologio
+
+#: apps/vision/web/vision.js:34
+florero	vaso
+
+#: apps/vision/web/vision.js:34
+tijera	forbici
+
+#: apps/vision/web/vision.js:35
+osito de peluche	orsacchiotto
+
+#: apps/vision/web/vision.js:35
+secador de pelo	asciugacapelli
+
+#: apps/vision/web/vision.js:35
+cepillo de dientes	spazzolino
+
+#: apps/vision/web/vision.js:36
+uno	uno
+
+#: apps/vision/web/vision.js:36
+dos	due
+
+#: apps/vision/web/vision.js:36
+tres	tre
+
+#: apps/vision/web/vision.js:36
+cuatro	quattro
+
+#: apps/vision/web/vision.js:36
+cinco	cinque
+
+#: apps/vision/web/vision.js:36
+pulgar arriba	pollice su
+
+#: apps/vision/web/vision.js:36
+ok	ok
+
+#: apps/vision/web/vision.js:37
+llamame	chiamami
+
+#: apps/vision/web/vision.js:37
+pulgar abajo	pollice giù
+
+#: apps/vision/web/vision.js:40
+No hay cámara ni fotos de prueba en la placa.	Nessuna telecamera né foto di prova sulla scheda.
+
+#: apps/vision/web/vision.js:40
+Esperando la imagen de la cámara…	Attendo l'immagine della telecamera…
+
+#: apps/vision/web/vision.js:41
+Cargando el modelo…	Caricamento modello…
+
+#: apps/vision/web/vision.js:41
+Falta el paquete de modelos de este modo: bajalo desde la Tienda.	Manca il pacchetto modelli della modalità: scaricalo dallo Store.
+
+#: apps/vision/web/vision.js:42
+Falta el motor de visión: instalá la app de nuevo.	Manca il motore di visione: reinstalla l'app.
+
+#: apps/vision/web/vision.js:42
+El modelo no cargó.	Il modello non si è caricato.
+
+#: apps/vision/web/vision.js:76
+Conectando…	Connessione…
+
+#: apps/vision/web/vision.js:81
+Fotos de prueba	Foto di prova
+
+#: apps/vision/web/vision.js:86
+Umbral	Soglia
+
+#: apps/vision/web/vision.js:88
+#: apps/vision/web/vision.js:135
+En la imagen ahora	Nell'immagine ora
+
+#: apps/vision/web/vision.js:89
+Abrir Visión en la placa	Apri Visione sulla scheda
+
+#: apps/vision/web/vision.js:95
+Sacar una foto	Scatta una foto
+
+#: apps/vision/web/vision.js:102
+La placa manda la imagen y lo que encuentra mientras esta página está abierta. Las fotos quedan en la carpeta de Fotos de la tarjeta, con los recuadros.	La scheda invia l'immagine e ciò che trova finché questa pagina è aperta. Le foto finiscono nella cartella Foto della microSD, con i riquadri.
+
+#: apps/vision/web/vision.js:135
+Leídos hace poco	Letti di recente
+
+#: apps/vision/web/vision.js:155
+Copiado	Copiato
+
+#: apps/vision/web/vision.js:155
+No se pudo copiar	Impossibile copiare
+
+#: apps/vision/web/vision.js:155
+Copiar	Copia
+
+#: apps/vision/web/vision.js:168
+Nada por ahora.	Niente per ora.
+
+#: apps/vision/web/vision.js:175
+Visión no está abierta en la placa.	Visione non è aperta sulla scheda.
