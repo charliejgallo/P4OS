@@ -3195,7 +3195,7 @@ No se pudo abrir el Programador	Impossible d'ouvrir le Programmateur
 
 #: components/aos_apps/aos_app_files.c:3273
 Oficina lo abre: está en la Tienda	Bureau l'ouvre : voir la Boutique
-Video lo reproduce: está en la Tienda	Vidéo le lit : voir la Boutique
+Video lo reproduce: está en la Tienda	Vidéo le lit : voir la Boutique
 No se pudo abrir Video	Impossible d'ouvrir Vidéo
 Reproducir en Video	Lire dans Vidéo
 
@@ -7078,7 +7078,7 @@ Línea	Ligne
 Los de siempre	Ceux de toujours
 
 #: components/aos_apps/aos_app_settings.c:1269
-Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.	Les icônes dessinées d'un pack ; les apps qui n'y sont pas s'affichent comme d'habitude.
+Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.	Les icônes dessinées d'un pack ; les apps qui n'y sont pas s'affichent comme d'habitude.
 
 #: components/aos_apps/aos_app_settings.c:1270
 Los packs de íconos se bajan de la Tienda, en Sistema.	Les packs d'icônes se téléchargent depuis la Boutique, dans Système.
@@ -7266,7 +7266,7 @@ Instalar en el C6	Installer sur le C6
 El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	Le C6 l'écrit dans son autre emplacement et la vérifie avant de basculer. Pendant ce temps il n'y a pas de Wi-Fi, et à la fin la carte redémarre.
 
 #: components/aos_apps/aos_app_settings.c:1848
-Ojo si en esta placa usás otro firmware además de P4OS: esta versión es esp_hosted 3, y uno que traiga esp_hosted 2 (el Launcher, un sketch de Arduino, varias demos) no se entiende con ella y se queda sin Wi-Fi. Para volver, se instala desde acá un firmware 2.x del C6.	Attention si cette carte fait tourner un autre firmware que P4OS : cette version est esp_hosted 3, et un firmware avec esp_hosted 2 (le Launcher, un sketch Arduino, plusieurs démos) ne s'entend pas avec elle et reste sans Wi-Fi. Pour revenir en arrière, installez d'ici un firmware 2.x du C6.
+Ojo si en esta placa usás otro firmware además de P4OS: esta versión es esp_hosted 3, y uno que traiga esp_hosted 2 (el Launcher, un sketch de Arduino, varias demos) no se entiende con ella y se queda sin Wi-Fi. Para volver, se instala desde acá un firmware 2.x del C6.	Attention si cette carte fait tourner un autre firmware que P4OS : cette version est esp_hosted 3, et un firmware avec esp_hosted 2 (le Launcher, un sketch Arduino, plusieurs démos) ne s'entend pas avec elle et reste sans Wi-Fi. Pour revenir en arrière, installez d'ici un firmware 2.x du C6.
 
 #: components/aos_apps/aos_app_settings.c:1876
 escribiendo la otra ranura… %u %%	écriture de l'autre emplacement… %u %%
@@ -8351,7 +8351,7 @@ Quedó apartada: hizo caer la placa	Mise à l'écart : elle a planté la carte
 %d actualizaciones, hasta %s	%d mises à jour, jusqu'à %s
 
 #: components/aos_apps/aos_app_store.c:767
-%d necesitan un P4OS más nuevo: actualizá el sistema primero.	%d ont besoin d'un P4OS plus récent : mettez d'abord le système à jour.
+%d necesitan un P4OS más nuevo: actualizá el sistema primero.	%d ont besoin d'un P4OS plus récent : mettez d'abord le système à jour.
 
 #: components/aos_apps/aos_app_store.c:772
 Actualizar todas	Tout mettre à jour
@@ -8976,7 +8976,7 @@ El C6 no tomó el pedido	Le C6 n'a pas pris la demande
 A fondo (2 s por canal)	En profondeur (2 s par canal)
 
 #: components/aos_apps/aos_app_zigbee.c:303
-La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	La barre est l'énergie sur le canal ; le nombre, les paquets entendus pendant l'écoute. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets. Pour un nouveau réseau, choisissez-en un sans paquets et loin du Wi-Fi : Zigbee utilise souvent 11, 15, 20 ou 25.
+La barra es la energía que hay en el canal; el número, los paquetes que se oyeron mientras se escuchaba. Una red Zigbee o Thread se ve como un canal con paquetes. Para una red nueva conviene uno sin paquetes y lejos del Wi-Fi: Zigbee suele usar el 11, 15, 20 o 25.	La barre est l'énergie sur le canal ; le nombre, les paquets entendus pendant l'écoute. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets. Pour un nouveau réseau, choisissez-en un sans paquets et loin du Wi-Fi : Zigbee utilise souvent 11, 15, 20 ou 25.
 
 #: components/aos_apps/aos_app_zigbee.c:358
 #: components/aos_apps/aos_app_zigbee.c:1451
@@ -8993,7 +8993,7 @@ Olvidarlos	Les oublier
 Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.	Ce qui a été entendu pendant l'écoute, le plus récent en haut. L'adresse longue d'une courte apparaît quand le réseau l'envoie.
 
 #: components/aos_apps/aos_app_zigbee.c:431
-Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écoutez un canal avec du trafic.
+Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écoutez un canal avec du trafic.
 
 #: components/aos_apps/aos_app_zigbee.c:440
 coordinador	coordinateur
@@ -9005,7 +9005,7 @@ coordinador	coordinateur
 canal	canal
 
 #: components/aos_apps/aos_app_zigbee.c:474
-No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossible de créer le réseau : le C6 a-t-il son nouveau firmware ? Boutique, Système, Firmware de la radio (C6)
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossible de créer le réseau : le C6 a-t-il son nouveau firmware ? Boutique, Système, Firmware de la radio (C6)
 
 #: components/aos_apps/aos_app_zigbee.c:489
 #: components/aos_apps/aos_app_zigbee.c:512
@@ -9054,7 +9054,7 @@ sin movimiento	aucun mouvement
 
 #: components/aos_apps/aos_app_zigbee.c:583
 #: components/aos_154/aos_zigbee_devices.c:793
-¡agua!	eau !
+¡agua!	eau !
 
 #: components/aos_apps/aos_app_zigbee.c:583
 #: components/aos_apps/aos_bot.c:714
@@ -9133,10 +9133,10 @@ Nombre del equipo	Nom de l'appareil
 Nombre del código	Nom du code
 
 #: components/aos_apps/aos_app_zigbee.c:753
-Por ejemplo: Sensor de la cocina	Par exemple : Capteur de la cuisine
+Por ejemplo: Sensor de la cocina	Par exemple : Capteur de la cuisine
 
 #: components/aos_apps/aos_app_zigbee.c:753
-Por ejemplo: Tele, volumen +	Par exemple : Télé, volume +
+Por ejemplo: Tele, volumen +	Par exemple : Télé, volume +
 
 #: components/aos_apps/aos_app_zigbee.c:782
 Código borrado	Code supprimé
@@ -9145,7 +9145,7 @@ Código borrado	Code supprimé
 Mantenelo apretado otra vez para borrarlo	Maintenez-le à nouveau pour le supprimer
 
 #: components/aos_apps/aos_app_zigbee.c:894
-La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	La carte émule un appareil sur un autre réseau (onglet Émuler). Son propre réseau et ses appareils sont conservés : ils reviennent avec Retour à Mon réseau, qui redémarre la carte.
+La placa está emulando un equipo en otra red (pestaña Emular). La red propia y sus equipos quedan guardados: vuelven con Volver a Mi red, que reinicia la placa.	La carte émule un appareil sur un autre réseau (onglet Émuler). Son propre réseau et ses appareils sont conservés : ils reviennent avec Retour à Mon réseau, qui redémarre la carte.
 
 #: components/aos_apps/aos_app_zigbee.c:905
 Armando la red...	Création du réseau...
@@ -9157,22 +9157,22 @@ Armar la red	Créer le réseau
 Abierta para sumar	Ouvert pour ajouter
 
 #: components/aos_apps/aos_app_zigbee.c:908
-Abierta: %d s	Ouvert : %d s
+Abierta: %d s	Ouvert : %d s
 
 #: components/aos_apps/aos_app_zigbee.c:909
 Sumar equipos	Ajouter des appareils
 
 #: components/aos_apps/aos_app_zigbee.c:918
-La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
 
 #: components/aos_apps/aos_app_zigbee.c:922
-La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Le réseau reste ouvert tant que vous êtes ici, jusqu'à Fermer. Réinitialisez les appareils un par un : l'écran indique quand chacun rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
+La red queda abierta mientras estés acá, hasta Cerrar. Reseteá los equipos de a uno: la pantalla avisa cuando entra cada uno y qué es. Si es a pila, tocale el botón cada tanto mientras se configura.	Le réseau reste ouvert tant que vous êtes ici, jusqu'à Fermer. Réinitialisez les appareils un par un : l'écran indique quand chacun rejoint et ce qu'il est. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
 
 #: components/aos_apps/aos_app_zigbee.c:926
-Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0. Tocá el nombre de un equipo para ponerle uno tuyo.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut mettre du temps à donner des nouvelles (appuyez sur son bouton pour le réveiller). Touchez une sortie pour l'allumer ou l'éteindre. Si un appareil continue de clignoter sans finir de rejoindre, essayez Ajouter Zigbee 3.0. Touchez le nom d'un appareil pour lui en donner un à vous.
+Red en el canal %u. %d equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias (tocale el botón para despertarlo). Una salida se prende o se apaga tocándola. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0. Tocá el nombre de un equipo para ponerle uno tuyo.	Réseau sur le canal %u. %d appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut mettre du temps à donner des nouvelles (appuyez sur son bouton pour le réveiller). Touchez une sortie pour l'allumer ou l'éteindre. Si un appareil continue de clignoter sans finir de rejoindre, essayez Ajouter Zigbee 3.0. Touchez le nom d'un appareil pour lui en donner un à vous.
 
 #: components/aos_apps/aos_app_zigbee.c:964
-¿Seguro?	Sûr ?
+¿Seguro?	Sûr ?
 
 #: components/aos_apps/aos_app_zigbee.c:964
 Sacar	Retirer
@@ -9202,7 +9202,7 @@ configurándolo	configuration
 nadie	personne
 
 #: components/aos_apps/aos_app_zigbee.c:1012
-salida %d: %s	sortie %d : %s
+salida %d: %s	sortie %d : %s
 
 #: components/aos_apps/aos_app_zigbee.c:1012
 #: components/aos_154/aos_zigbee_devices.c:892
@@ -9232,7 +9232,7 @@ Parar	Stop
 Bajar	Descendre
 
 #: components/aos_apps/aos_app_zigbee.c:1113
-Ventilador: otro modo	Ventilateur : mode suivant
+Ventilador: otro modo	Ventilateur : mode suivant
 
 #: components/aos_apps/aos_app_zigbee.c:1121
 Esperando el control remoto... (tocá para cancelar)	En attente de la télécommande... (touchez pour annuler)
@@ -9253,28 +9253,28 @@ enviando...	envoi...
 no tomó el código	il n'a pas pris le code
 
 #: components/aos_apps/aos_app_zigbee.c:1136
-Guardados (tocá para mandar, mantené para borrar):	Enregistrés (touchez pour envoyer, maintenez pour supprimer) :
+Guardados (tocá para mandar, mantené para borrar):	Enregistrés (touchez pour envoyer, maintenez pour supprimer) :
 
 #: components/aos_apps/aos_app_zigbee.c:1205
 Reiniciando para emular...	Redémarrage pour émuler...
 
 #: components/aos_apps/aos_app_zigbee.c:1209
-Volviendo a la red propia: la placa se reinicia	Retour au réseau propre : la carte redémarre
+Volviendo a la red propia: la placa se reinicia	Retour au réseau propre : la carte redémarre
 
 #: components/aos_apps/aos_app_zigbee.c:1303
 Luz y sensor de temperatura	Lumière et capteur de température
 
 #: components/aos_apps/aos_app_zigbee.c:1304
-Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1 : une lumière qui s'allume et s'éteint (0x0100). Endpoint 2 : température, humidité et batterie (0x0302). Fabricant P4OS, modèle P4OS-EMU-LT.
+Endpoint 1: una luz que se prende y se apaga (0x0100). Endpoint 2: temperatura, humedad y batería (0x0302). Fabricante P4OS, modelo P4OS-EMU-LT.	Endpoint 1 : une lumière qui s'allume et s'éteint (0x0100). Endpoint 2 : température, humidité et batterie (0x0302). Fabricant P4OS, modèle P4OS-EMU-LT.
 
 #: components/aos_apps/aos_app_zigbee.c:1306
-La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La carte rejoint un autre réseau Zigbee, celui de Home Assistant par exemple, en se faisant passer pour cet appareil, pour voir si le coordinateur le lit et le pilote, et ce qu'il demande. Elle entre comme routeur, sur secteur : un appareil sur pile ne peut pas être émulé. Avant, dans Home Assistant : Ajouter un appareil (ZHA) ou Permettre de rejoindre (Zigbee2MQTT).
+La placa se suma a otra red Zigbee, la de Home Assistant por ejemplo, haciéndose pasar por este equipo, para ver si el coordinador lo lee y lo maneja, y qué le pide. Entra como router, con corriente: un equipo a pila no se puede emular. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La carte rejoint un autre réseau Zigbee, celui de Home Assistant par exemple, en se faisant passer pour cet appareil, pour voir si le coordinateur le lit et le pilote, et ce qu'il demande. Elle entre comme routeur, sur secteur : un appareil sur pile ne peut pas être émulé. Avant, dans Home Assistant : Ajouter un appareil (ZHA) ou Permettre de rejoindre (Zigbee2MQTT).
 
 #: components/aos_apps/aos_app_zigbee.c:1310
-Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Un réseau de la dernière fois est conservé : la carte y retourne sans qu'on l'ouvre.
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Un réseau de la dernière fois est conservé : la carte y retourne sans qu'on l'ouvre.
 
 #: components/aos_apps/aos_app_zigbee.c:1314
-Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	Pour émuler, la carte quitte son réseau un moment : elle redémarre comme appareil. Vos appareils sont conservés et reviennent avec Retour à Mon réseau.
+Para emular, la placa deja su red un rato: se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red.	Pour émuler, la carte quitte son réseau un moment : elle redémarre comme appareil. Vos appareils sont conservés et reviennent avec Retour à Mon réseau.
 
 #: components/aos_apps/aos_app_zigbee.c:1316
 Reiniciar y emular	Redémarrer et émuler
@@ -9308,19 +9308,19 @@ Con su propia clave de enlace (Zigbee 3.0).	Avec sa propre clé de lien (Zigbee 
 Sin clave propia todavía (sólo la de la red).	Pas encore de clé propre (seulement celle du réseau).
 
 #: components/aos_apps/aos_app_zigbee.c:1339
-Home Assistant pide que se identifique: %u s	Home Assistant demande de s'identifier : %u s
+Home Assistant pide que se identifique: %u s	Home Assistant demande de s'identifier : %u s
 
 #: components/aos_apps/aos_app_zigbee.c:1342
-Luz: prendida	Lumière : allumée
+Luz: prendida	Lumière : allumée
 
 #: components/aos_apps/aos_app_zigbee.c:1342
-Luz: apagada	Lumière : éteinte
+Luz: apagada	Lumière : éteinte
 
 #: components/aos_apps/aos_app_zigbee.c:1345
-La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	Home Assistant allume et éteint la lumière ; la toucher ici aussi, et Home Assistant devrait s'en apercevoir.
+La luz la prende y la apaga Home Assistant; tocarla acá también, y Home Assistant tendría que enterarse.	Home Assistant allume et éteint la lumière ; la toucher ici aussi, et Home Assistant devrait s'en apercevoir.
 
 #: components/aos_apps/aos_app_zigbee.c:1350
-Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	Une nouvelle valeur part selon les rapports configurés par le coordinateur (en bas, dans ce qu'il a demandé) : un petit changement peut attendre. Signaler maintenant les envoie tout de suite.
+Un valor nuevo sale según los reportes que configuró el coordinador (abajo, en lo que pidió): un cambio chico puede esperar. Reportar ahora los manda ya.	Une nouvelle valeur part selon les rapports configurés par le coordinateur (en bas, dans ce qu'il a demandé) : un petit changement peut attendre. Signaler maintenant les envoie tout de suite.
 
 #: components/aos_apps/aos_app_zigbee.c:1353
 Reportar ahora	Signaler maintenant
@@ -9332,19 +9332,19 @@ Salir de la red	Quitter le réseau
 Lo que pidió el coordinador	Ce que le coordinateur a demandé
 
 #: components/aos_apps/aos_app_zigbee.c:1407
-La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio ne répond pas : le C6 a besoin de son nouveau firmware (3.0.9-154.15). 1) Boutique, Système, Firmware de la radio (C6) : le télécharger. 2) Réglages, Mise à jour, Installer sur le C6. Environ 15 s sans Wi-Fi, puis la carte redémarre seule.
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio ne répond pas : le C6 a besoin de son nouveau firmware (3.0.9-154.15). 1) Boutique, Système, Firmware de la radio (C6) : le télécharger. 2) Réglages, Mise à jour, Installer sur le C6. Environ 15 s sans Wi-Fi, puis la carte redémarre seule.
 
 #: components/aos_apps/aos_app_zigbee.c:1410
 El C6 se cayó con la radio prendida y la dejó apagada para no perder el Wi-Fi. Tocá Escanear o Escuchar para probar otra vez.	Le C6 a planté avec la radio allumée et l'a laissée éteinte pour ne pas perdre le Wi-Fi. Touchez Scanner ou Écouter pour réessayer.
 
 #: components/aos_apps/aos_app_zigbee.c:1417
-La radio: emulando un equipo	La radio : émule un appareil
+La radio: emulando un equipo	La radio : émule un appareil
 
 #: components/aos_apps/aos_app_zigbee.c:1418
-La radio: la red Zigbee, canal %u	La radio : le réseau Zigbee, canal %u
+La radio: la red Zigbee, canal %u	La radio : le réseau Zigbee, canal %u
 
 #: components/aos_apps/aos_app_zigbee.c:1419
-La radio: armando la red Zigbee	La radio : création du réseau Zigbee
+La radio: armando la red Zigbee	La radio : création du réseau Zigbee
 
 #: components/aos_apps/aos_app_zigbee.c:1420
 Escaneando, canal %u	Analyse, canal %u
@@ -9359,10 +9359,10 @@ La radio, sin usar	La radio, inutilisée
 Escaneando...	Analyse...
 
 #: components/aos_apps/aos_app_zigbee.c:1446
-Hay tráfico en el canal %d: en Escuchar se ve qué es.	Il y a du trafic sur le canal %d : Écouter montre ce que c'est.
+Hay tráfico en el canal %d: en Escuchar se ve qué es.	Il y a du trafic sur le canal %d : Écouter montre ce que c'est.
 
 #: components/aos_apps/aos_app_zigbee.c:1448
-No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Aucun paquet entendu. Essayez en profondeur : les réseaux calmes émettent peu.
+No se oyó ningún paquete. Probá a fondo: las redes tranquilas mandan poco.	Aucun paquet entendu. Essayez en profondeur : les réseaux calmes émettent peu.
 
 #: components/aos_apps/aos_app_zigbee.c:1453
 %u paquetes	%u paquets
@@ -12388,10 +12388,10 @@ cierra la sesión (también Ctrl-D)	ferme la session (aussi Ctrl-D)
 «help» muestra los comandos; Ctrl-D o «exit» para salir.\n	« help » montre les commandes ; Ctrl-D ou « exit » pour sortir.\n
 
 #: components/aos_154/aos_zigbee_devices.c:367
-Zigbee: 0x%04x no contestó (dormido): tocale el botón	Zigbee : 0x%04x n'a pas répondu (en veille) : appuyez sur son bouton
+Zigbee: 0x%04x no contestó (dormido): tocale el botón	Zigbee : 0x%04x n'a pas répondu (en veille) : appuyez sur son bouton
 
 #: components/aos_154/aos_zigbee_devices.c:749
-Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee : un appareil a rejoint (0x%04x), on lui demande ce qu'il est
+Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee : un appareil a rejoint (0x%04x), on lui demande ce qu'il est
 
 #: components/aos_154/aos_zigbee_devices.c:867
 #: components/aos_154/aos_zigbee_devices.c:945
@@ -12417,7 +12417,7 @@ botón	bouton
 soltado	relâché
 
 #: components/aos_154/aos_zigbee_devices.c:892
-Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s
+Zigbee: %s, salida %u %s	Zigbee : %s, sortie %u %s
 
 #: components/aos_154/aos_zigbee_devices.c:942
 alternar	basculer
@@ -12452,19 +12452,19 @@ parar	arrêter
 mover	déplacer
 
 #: components/aos_154/aos_zigbee_devices.c:1441
-Zigbee: 0x%04x salió de la red	Zigbee : 0x%04x a quitté le réseau
+Zigbee: 0x%04x salió de la red	Zigbee : 0x%04x a quitté le réseau
 
 #: components/aos_154/aos_zigbee_devices.c:1449
-Zigbee: se pueden sumar equipos por %u s	Zigbee : des appareils peuvent rejoindre pendant %u s
+Zigbee: se pueden sumar equipos por %u s	Zigbee : des appareils peuvent rejoindre pendant %u s
 
 #: components/aos_154/aos_zigbee_devices.c:1450
-Zigbee: ya no se pueden sumar equipos	Zigbee : plus aucun appareil ne peut rejoindre
+Zigbee: ya no se pueden sumar equipos	Zigbee : plus aucun appareil ne peut rejoindre
 
 #: components/aos_154/aos_zigbee_devices.c:1534
-Zigbee: 0x%04x, sacado de la red	Zigbee : 0x%04x, retiré du réseau
+Zigbee: 0x%04x, sacado de la red	Zigbee : 0x%04x, retiré du réseau
 
 #: components/aos_154/aos_zigbee_emu.c:191
-la luz, tocada en la placa: %s	la lumière, touchée sur la carte : %s
+la luz, tocada en la placa: %s	la lumière, touchée sur la carte : %s
 
 #: components/aos_154/aos_zigbee_emu.c:219
 mandó todos los valores al coordinador	a envoyé toutes les valeurs au coordinateur
@@ -12476,7 +12476,7 @@ leyó %s (ep %u):%s	a lu %s (ep %u) :%s
 escribió en %s (ep %u)	a écrit dans %s (ep %u)
 
 #: components/aos_154/aos_zigbee_emu.c:304
-configuró reportes de %s 0x%04x: cada %u s a %u s	a configuré les rapports de %s 0x%04x : toutes les %u s à %u s
+configuró reportes de %s 0x%04x: cada %u s a %u s	a configuré les rapports de %s 0x%04x : toutes les %u s à %u s
 
 #: components/aos_154/aos_zigbee_emu.c:311
 leyó la configuración de reportes de %s	a lu la configuration des rapports de %s
@@ -12509,7 +12509,7 @@ pidió la dirección corta	a demandé l'adresse courte
 pidió la dirección larga	a demandé l'adresse longue
 
 #: components/aos_154/aos_zigbee_emu.c:338
-pidió el descriptor del nodo	a demandé le descripteur du nœud
+pidió el descriptor del nodo	a demandé le descripteur du noeud
 
 #: components/aos_154/aos_zigbee_emu.c:339
 pidió el descriptor de energía	a demandé le descripteur d'alimentation
@@ -12548,7 +12548,7 @@ la luz quedó %s	la lumière est maintenant %s
 no encontró una red abierta en 3 minutos	aucun réseau ouvert trouvé en 3 minutes
 
 #: components/aos_154/aos_zigbee_emu.c:418
-adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	dedans : canal %u, PAN 0x%04x, la carte est 0x%04x
+adentro: canal %u, PAN 0x%04x, la placa es 0x%04x	dedans : canal %u, PAN 0x%04x, la carte est 0x%04x
 
 #: components/aos_154/aos_zigbee_emu.c:450
 #: components/aos_154/aos_zigbee_emu.c:513
@@ -12558,7 +12558,7 @@ buscando una red abierta para sumarse	cherche un réseau ouvert à rejoindre
 de vuelta en la red de antes	de retour dans le réseau d'avant
 
 #: components/aos_154/aos_zigbee_emu.c:458
-la red de antes no está: buscando una abierta	le réseau d'avant n'est plus là : recherche d'un réseau ouvert
+la red de antes no está: buscando una abierta	le réseau d'avant n'est plus là : recherche d'un réseau ouvert
 
 #: components/aos_154/aos_zigbee_emu.c:468
 el coordinador le dio su propia clave de enlace (Zigbee 3.0)	le coordinateur lui a donné sa propre clé de lien (Zigbee 3.0)
@@ -13020,12 +13020,12 @@ mañana %d:%02d	demain %d:%02d
 Próxima alarma	Prochaine alarme
 Hasta tres widgets a la vez	Trois widgets au plus à la fois
 WIDGETS	WIDGETS
-Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Sous la date, jusqu'à trois. Chacun n'apparaît que s'il a quelque chose à montrer : une alarme réglée, un capteur branché, le réseau Zigbee en marche.
-Zigbee: emulando	Zigbee : émulation
-Zigbee: buscando una red	Zigbee : recherche d'un réseau
-Zigbee: abierta para unir	Zigbee : ouvert aux appareils
-Zigbee: 1 equipo	Zigbee : 1 appareil
-Zigbee: %d equipos	Zigbee : %d appareils
-Zigbee: no arrancó	Zigbee : n'a pas démarré
+Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Sous la date, jusqu'à trois. Chacun n'apparaît que s'il a quelque chose à montrer : une alarme réglée, un capteur branché, le réseau Zigbee en marche.
+Zigbee: emulando	Zigbee : émulation
+Zigbee: buscando una red	Zigbee : recherche d'un réseau
+Zigbee: abierta para unir	Zigbee : ouvert aux appareils
+Zigbee: 1 equipo	Zigbee : 1 appareil
+Zigbee: %d equipos	Zigbee : %d appareils
+Zigbee: no arrancó	Zigbee : n'a pas démarré
 no hay un pack de íconos	aucun pack d'icônes
 el pack no tiene ese ícono	le pack n'a pas cette icône

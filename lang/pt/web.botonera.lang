@@ -1,0 +1,182 @@
+# amoledos-lang 1   es -> pt
+# web.botonera.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/botonera/web/botonera.js:36
+Cortar	Cortar
+
+#: apps/botonera/web/botonera.js:36
+Superponer	Sobrepor
+
+#: apps/botonera/web/botonera.js:36
+Mantener	Segurar
+
+#: apps/botonera/web/botonera.js:38
+Un toque lo hace sonar y otro lo corta.	Um toque toca o som e outro o corta.
+
+#: apps/botonera/web/botonera.js:39
+Cada toque lo hace sonar de nuevo, encima de lo que ya suena.	Cada toque toca de novo, por cima do que já está tocando.
+
+#: apps/botonera/web/botonera.js:40
+Suena mientras el dedo está apoyado.	Toca enquanto o dedo está apoiado.
+
+#: apps/botonera/web/botonera.js:109
+Efectos	Efeitos
+
+#: apps/botonera/web/botonera.js:135
+#: apps/botonera/web/botonera.js:416
+Botonera	Painel de sons
+
+#: apps/botonera/web/botonera.js:148
+Abierta en la placa	Aberto na placa
+
+#: apps/botonera/web/botonera.js:165
+La Botonera no está abierta en la placa: los botones de acá suenan allá cuando está al frente.	O Painel de sons não está aberto na placa: os botões daqui tocam lá quando ele está na frente.
+
+#: apps/botonera/web/botonera.js:166
+La Botonera está abierta pero detrás de otra app: traela al frente para que suene.	O Painel de sons está aberto, mas atrás de outro app: traga-o para a frente para tocar.
+
+#: apps/botonera/web/botonera.js:167
+La placa está grabando un sonido.	A placa está gravando um som.
+
+#: apps/botonera/web/botonera.js:171
+Lista para sonar	Pronto para tocar
+
+#: apps/botonera/web/botonera.js:171
+Sin la app al frente	O app não está na frente
+
+#: apps/botonera/web/botonera.js:173
+#: apps/botonera/web/botonera.js:184
+Abrir en la placa	Abrir na placa
+
+#: apps/botonera/web/botonera.js:174
+Parar todo	Parar tudo
+
+#: apps/botonera/web/botonera.js:176
+Listo	OK
+
+#: apps/botonera/web/botonera.js:176
+Editar	Editar
+
+#: apps/botonera/web/botonera.js:183
+Todavía no hay botonera: abrí la app en la placa una vez y crea los sonidos de ejemplo y la grilla.	Ainda não há painel de sons: abra o app na placa uma vez e ele cria os sons de exemplo e a grade.
+
+#: apps/botonera/web/botonera.js:201
+Vacío	Vazio
+
+#: apps/botonera/web/botonera.js:223
+Página %d	Página %d
+
+#: apps/botonera/web/botonera.js:224
+Página	Página
+
+#: apps/botonera/web/botonera.js:226
+¿Borrar la página %s? Los sonidos quedan en la tarjeta.	Apagar a página %s? Os sons ficam no cartão.
+
+#: apps/botonera/web/botonera.js:228
+Borrar página	Apagar página
+
+#: apps/botonera/web/botonera.js:230
+Tocá un botón para cambiarlo. Los cambios se guardan solos y la placa los toma enseguida.	Toque em um botão para mudá-lo. As mudanças são salvas sozinhas e a placa as aplica na hora.
+
+#: apps/botonera/web/botonera.js:231
+Apoyá el dedo en un botón para que suene en la placa. Varios a la vez también.	Apoie o dedo em um botão para que ele toque na placa. Vários ao mesmo tempo também.
+
+#: apps/botonera/web/botonera.js:269
+(vacío)	(vazio)
+
+#: apps/botonera/web/botonera.js:271
+Botón %d	Botão %d
+
+#: apps/botonera/web/botonera.js:273
+#: apps/botonera/web/botonera.js:293
+Sonido	Som
+
+#: apps/botonera/web/botonera.js:274
+Elegí un sonido de la tarjeta, o subí uno abajo.	Escolha um som do cartão, ou envie um abaixo.
+
+#: apps/botonera/web/botonera.js:275
+#: apps/botonera/web/botonera.js:316
+Cerrar	Fechar
+
+#: apps/botonera/web/botonera.js:288
+Esa página está llena	Essa página está cheia
+
+#: apps/botonera/web/botonera.js:294
+%s no está en la tarjeta.	%s não está no cartão.
+
+#: apps/botonera/web/botonera.js:295
+Nombre	Nome
+
+#: apps/botonera/web/botonera.js:297
+Color	Cor
+
+#: apps/botonera/web/botonera.js:299
+Ícono	Ícone
+
+#: apps/botonera/web/botonera.js:301
+Al tocarlo	Ao tocar
+
+#: apps/botonera/web/botonera.js:306
+Repetir en bucle	Repetir em loop
+
+#: apps/botonera/web/botonera.js:307
+Volumen	Volume
+
+#: apps/botonera/web/botonera.js:310
+#: apps/botonera/web/botonera.js:311
+Mover	Mover
+
+#: apps/botonera/web/botonera.js:313
+A otra página...	Para outra página...
+
+#: apps/botonera/web/botonera.js:315
+Vaciar	Limpar
+
+#: apps/botonera/web/botonera.js:328
+No hay botones libres en esta página	Não há botões livres nesta página
+
+#: apps/botonera/web/botonera.js:331
+Puesto en el botón %d	Posto no botão %d
+
+#: apps/botonera/web/botonera.js:335
+No hay sonidos en la carpeta sonidos de la tarjeta.	Não há sons na pasta sonidos do cartão.
+
+#: apps/botonera/web/botonera.js:341
+en: %s	em: %s
+
+#: apps/botonera/web/botonera.js:343
+A un botón	Para um botão
+
+#: apps/botonera/web/botonera.js:344
+Bajar	Baixar
+
+#: apps/botonera/web/botonera.js:346
+%s lo usan %d botones. ¿Borrarlo igual?	%s é usado por %d botões. Apagar mesmo assim?
+
+#: apps/botonera/web/botonera.js:346
+¿Borrar %s? No se puede deshacer.	Apagar %s? Não é possível desfazer.
+
+#: apps/botonera/web/botonera.js:348
+Borrado	Apagado
+
+#: apps/botonera/web/botonera.js:349
+Borrar	Apagar
+
+#: apps/botonera/web/botonera.js:358
+%s no es WAV ni MP3	%s não é WAV nem MP3
+
+#: apps/botonera/web/botonera.js:363
+Subido: %s	Enviado: %s
+
+#: apps/botonera/web/botonera.js:372
+Subir sonidos	Enviar sons
+
+#: apps/botonera/web/botonera.js:374
+WAV o MP3, cortos: la placa usa hasta un minuto de cada uno. También se graban desde la app, con el micrófono.	WAV ou MP3, curtos: a placa usa até um minuto de cada um. Também podem ser gravados no app, com o microfone.
+
+#: apps/botonera/web/botonera.js:416
+Sonidos	Sons

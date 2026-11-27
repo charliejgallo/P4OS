@@ -13022,10 +13022,10 @@ Hasta tres widgets a la vez	Al massimo tre widget alla volta
 WIDGETS	WIDGET
 Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Sotto la data, fino a tre. Ognuno compare solo quando ha qualcosa da mostrare: una sveglia impostata, un sensore collegato, la rete Zigbee attiva.
 Zigbee: emulando	Zigbee: emulazione
-Zigbee: buscando una red	Zigbee: cerca una rete
+Zigbee: buscando una red	Zigbee: ricerca rete
 Zigbee: abierta para unir	Zigbee: aperta per associare
 Zigbee: 1 equipo	Zigbee: 1 dispositivo
 Zigbee: %d equipos	Zigbee: %d dispositivi
-Zigbee: no arrancó	Zigbee: non è partito
+Zigbee: no arrancó	Zigbee: avvio non riuscito
 no hay un pack de íconos	nessun pacchetto di icone
 el pack no tiene ese ícono	il pacchetto non ha questa icona
