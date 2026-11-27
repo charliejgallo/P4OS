@@ -66,7 +66,7 @@ if(NOT DEFINED P4OS_SIM_APPS)
         arkanos topos cjump g2043 claudito camaras pixel neon blackjack truco lua video doom chatarra
         visor3d mapas monsterhop turbo mila golf notas eeprom dibujo pwm infrarrojo can vnc rf datalog
         impresoras cartero ssh sudoku solitario bolsa vuelos mesa metegol hockey traductor oficina estudio
-        tanques tortuga plotter estado asteroides sumar vitral dj vuelo grabador)
+        tanques tortuga plotter estado asteroides sumar vitral dj vuelo grabador vision)
 endif()
 set(AOS_DYNAPP_SRC "")
 foreach(a ${P4OS_SIM_APPS})
