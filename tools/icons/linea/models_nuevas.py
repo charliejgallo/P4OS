@@ -129,3 +129,47 @@ VARIANTS["aos.grabador"] = {"a": grabador_a, "b": grabador_b}
 PAIRS["aos.grabador"] = ("#C8D6E8", "#FF3B30")
 
 ART["aos.grabador"] = grabador_a
+
+
+def botonera_a(m):
+    """A grid of big buttons, one pressed."""
+    n = 3 if not m.mini else 2
+    k = 84 / n
+    lines, fills = "", ""
+    for r in range(n):
+        for c in range(n):
+            x, y = 18 + c * k + k / 2, 18 + r * k + k / 2
+            if (r, c) == ((1, 1) if not m.mini else (0, 1)):
+                fills += C(x, y, k * 0.36)
+            else:
+                lines += C(x, y, k * 0.32)
+    return lines, fills
+
+
+def botonera_b(m):
+    """One big button, sound coming out of it."""
+    lines = C(48, 68, 26) + waves(48, 68, 2 if not m.mini else 1, 36, 13, 10, 80)
+    return lines, C(48, 68, 13)
+
+
+def marcador_a(m):
+    """Truco's matches: a square of four and the fifth across."""
+    lines = L(28, 30, 28, 90) + L(92, 30, 92, 90) + L(34, 24, 86, 24) + L(34, 96, 86, 96) + L(30, 92, 90, 28)
+    heads = C(28, 30, 5) + C(92, 90, 5) + C(86, 24, 5) + C(34, 96, 5) + C(90, 28, 5)
+    return lines, heads if not m.mini else ""
+
+
+def marcador_b(m):
+    """A stadium scoreboard, two to one."""
+    T = lambda x, y, s, t: (f'<text x="{x}" y="{y}" font-family="Helvetica" font-weight="bold" font-size="{s}" '
+                            f'text-anchor="middle">{t}</text>')
+    lines = R(14, 26, 92, 62, 10) + L(60, 88, 60, 104) + L(60, 34, 60, 80)
+    return lines, T(37, 72, 34, "2") + T(83, 72, 34, "1")
+
+
+VARIANTS["aos.botonera"] = {"a": botonera_a, "b": botonera_b}
+VARIANTS["aos.marcador"] = {"a": marcador_a, "b": marcador_b}
+PAIRS["aos.botonera"] = ("#C8B6FF", "#7A5CFF")
+PAIRS["aos.marcador"] = ("#B6FF6A", "#22A85A")
+ART["aos.botonera"] = botonera_b
+ART["aos.marcador"] = marcador_b

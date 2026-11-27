@@ -325,3 +325,105 @@ def grabador_c(mini):
 
 
 MODELS["aos.grabador"] = {"a": grabador_a, "b": grabador_b, "c": grabador_c}
+
+
+# -- Botonera (big buttons that fire sounds) -------------------------------
+
+BT_TOP, BT_BOT = "#7E7CFF", "#2A1F7A"
+
+
+def _arcade(x, y, z, r, c, lit=False):
+    return [cyl((x, y, z), r * 1.15, 0.05, plastic("#1C1C24", 0.4), bevel=0.015, verts=48),
+            ball((x, y, z + 0.03), r, glow(c, 1.2) if lit else glossy(c), scale=(1, 1, 0.55))]
+
+
+def botonera_a(mini):
+    """A grid of big round arcade buttons, one of them lit."""
+    tile(BT_TOP, BT_BOT)
+    parts = [rbox((0, 0, 0.04), (0.78, 0.78, 0.08), 0.1, plastic("#2C2F36", 0.4))]
+    cols = ("#FF3B30", "#FFD60A", "#34C759", "#5EE7FF", "#FF9F0A", "#BF5AF2", "#FF6BC2", "#2D7BF0", "#FFFFFF")
+    n = 3 if not mini else 2
+    k = 0.24 if not mini else 0.34
+    for r in range(n):
+        for c in range(n):
+            i = r * n + c
+            parts += _arcade((c - (n - 1) / 2) * k, ((n - 1) / 2 - r) * k, 0.09, 0.085 if not mini else 0.12,
+                             cols[i], lit=(i == (4 if not mini else 1)))
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+def botonera_b(mini):
+    """One big red button, sound coming out of it."""
+    tile(BT_TOP, BT_BOT)
+    parts = _arcade(-0.06, -0.06, 0.08, 0.24, "#FF3B30")
+    parts += waves(-0.06, -0.06, glossy("#FFFFFF"), 2 if not mini else 1, 0.33, 0.09, 0.045, 10, 80, z=0.06)
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+def botonera_c(mini):
+    """Four pads, a music note over them."""
+    tile(BT_TOP, BT_BOT)
+    parts = []
+    for i, c in enumerate(("#FF6BC2", "#5EE7FF", "#FFD60A", "#34C759")):
+        x, y = (-0.17 if i % 2 == 0 else 0.17), (-0.02 if i < 2 else -0.3)
+        parts.append(rbox((x, y, 0.06), (0.28, 0.24, 0.1), 0.06, glow(c, 0.9) if i == 1 else glossy(c)))
+    w = glossy("#FFFFFF")
+    parts += [ball((-0.08, 0.24, 0.12), 0.07, w, scale=(1.25, 0.95, 0.8)), ball((0.18, 0.28, 0.12), 0.07, w, scale=(1.25, 0.95, 0.8)),
+              rbox((-0.0, 0.33, 0.12), (0.03, 0.18, 0.04), 0.012, w), rbox((0.26, 0.37, 0.12), (0.03, 0.18, 0.04), 0.012, w),
+              rbox((0.13, 0.44, 0.12), (0.3, 0.05, 0.04), 0.02, w)]
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+# -- Marcador (scorekeepers) -----------------------------------------------
+
+MK_TOP, MK_BOT = "#3E9E5E", "#12361F"
+
+
+def _match(x, y, rz, s=1.0):
+    parts = [rbox((0, 0, 0), (0.035 * s, 0.34 * s, 0.03), 0.012, plastic("#F2D9A8", 0.5)),
+             ball((0, 0.17 * s, 0.0), 0.03 * s, glossy("#D9261C"), scale=(1, 1.3, 0.9))]
+    return group(parts, loc=(x, y, 0.03), rot=(0, 0, rz), name="match")
+
+
+def marcador_a(mini):
+    """Truco's matches on the green cloth: a square of four and the fifth across."""
+    tile("#3A9A52", "#14502A", stripes=0)
+    s = 1.3 if not mini else 1.6
+    h = 0.17 * s
+    parts = [_match(-h, 0, 0, s), _match(h, 0, 180, s), _match(0, h, 90, s), _match(0, -h, -90, s),
+             _match(0, 0, 45, s * 1.35)]
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+def marcador_b(mini):
+    """A mechanical tally counter: the steel body, its digits, the button."""
+    tile(MK_TOP, MK_BOT)
+    steel = metal("#D7DBE2", 0.22)
+    parts = [cyl((0, -0.06, 0.1), 0.28, 0.16, steel, bevel=0.05, verts=96),
+             rbox((0, -0.04, 0.19), (0.34, 0.12, 0.03), 0.02, glossy("#1C1C1E")),
+             rbox((0, 0.28, 0.14), (0.14, 0.12, 0.12), 0.04, steel),
+             cyl((0, 0.36, 0.16), 0.08, 0.06, steel, rot=(math.radians(90), 0, 0), bevel=0.02)]
+    if not mini:
+        parts.append(text("0042", plastic("#FFFFFF", 0.4), size=0.09, depth=0.01, bevel=0.002, c=(0, -0.045, 0.205)))
+        parts.append(slab([circle(0, 0, 0.1), circle(0, 0, 0.075)], 0.03, 0.01, steel, z=0.0))
+        parts[-1].location = (-0.22, -0.3, 0.06)
+    else:
+        parts.append(rbox((0, -0.04, 0.21), (0.24, 0.05, 0.01), 0.01, plastic("#FFFFFF")))
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+def marcador_c(mini):
+    """A stadium scoreboard: two scores in orange lights."""
+    tile(MK_TOP, MK_BOT)
+    parts = [rbox((0, 0.04, 0.08), (0.8, 0.54, 0.12), 0.06, plastic("#1C1C24", 0.4)),
+             rbox((0, -0.34, 0.06), (0.08, 0.2, 0.08), 0.03, metal("#8E939C"))]
+    for x, d in ((-0.19, "2"), (0.19, "1")):
+        parts.append(rbox((x, 0.02, 0.15), (0.28, 0.36, 0.02), 0.03, glossy("#0E0E12")))
+        parts.append(text(d, glow("#FF9F0A", 2.0), size=0.3 if not mini else 0.36, depth=0.02, bevel=0.004, c=(x, 0.0, 0.16)))
+    if not mini:
+        parts.append(rbox((0, 0.26, 0.15), (0.3, 0.05, 0.01), 0.01, glow("#FFFFFF", 0.6)))
+    group(parts, loc=(0, 0, 0.04), rot=(-16, 10, 0), scale=1.0)
+
+
+MODELS["aos.botonera"] = {"a": botonera_a, "b": botonera_b, "c": botonera_c}
+MODELS["aos.marcador"] = {"a": marcador_a, "b": marcador_b, "c": marcador_c}

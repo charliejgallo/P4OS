@@ -1499,6 +1499,34 @@
     "b": "una webcam con un cartel rojo de REC",
     "c": "una pantalla con alguien detectado y el punto rojo"
    }
+  },
+  {
+   "id": "aos.botonera",
+   "name": "Botonera",
+   "group": "nuevas",
+   "colors": [
+    "#5E5CE6",
+    "#2A1F7A"
+   ],
+   "juguete": {
+    "a": "una grilla de botones de arcade, uno encendido",
+    "b": "un botón rojo grande que suena",
+    "c": "cuatro pads y una nota"
+   }
+  },
+  {
+   "id": "aos.marcador",
+   "name": "Marcador",
+   "group": "nuevas",
+   "colors": [
+    "#2F7D4A",
+    "#12361F"
+   ],
+   "juguete": {
+    "a": "los fósforos del truco sobre el paño",
+    "b": "un cuentaganado mecánico",
+    "c": "un tablero de estadio"
+   }
   }
  ]
 }
