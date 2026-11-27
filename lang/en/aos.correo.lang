@@ -1,0 +1,627 @@
+# amoledos-lang 1   es -> en
+# aos.correo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:214
+Mensaje reenviado	Forwarded message
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:214
+#: apps/correo/main/cr_ui_compose.c:578
+De	From
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:215
+#: apps/correo/main/cr_ui_compose.c:596
+Asunto	Subject
+
+#: apps/correo/main/cr_mime.c:683
+#: apps/correo/main/cr_ui_compose.c:215
+Fecha	Date
+
+#: apps/correo/main/cr_mime.c:753
+El mensaje es muy grande: se bajó sólo el principio.	The message is very big: only its beginning was downloaded.
+
+#: apps/correo/main/cr_store.c:39
+Gmail no deja entrar con tu contraseña de siempre: pide una contraseña de aplicación. Activá la verificación en dos pasos en tu cuenta de Google, buscá \"Contraseñas de aplicaciones\" en Seguridad, creá una para Correo y escribila acá (son 16 letras; los espacios no importan).	Gmail does not let you in with your usual password: it asks for an app password. Turn on 2-Step Verification in your Google account, look for \"App passwords\" under Security, create one for Correo and type it here (16 letters; spaces do not matter).
+
+#: apps/correo/main/cr_store.c:44
+Outlook pide una contraseña de aplicación: con la verificación en dos pasos activada, creala en account.microsoft.com, en Seguridad. Microsoft está pasando sus cuentas a OAuth2, que Correo todavía no tiene: si la contraseña de aplicación no anda, la cuenta no se puede usar por ahora. Para mandar usa el puerto 587 con STARTTLS.	Outlook asks for an app password: with two-step verification on, create one at account.microsoft.com, under Security. Microsoft is moving its accounts to OAuth2, which Correo does not have yet: if the app password does not work, the account cannot be used for now. Sending uses port 587 with STARTTLS.
+
+#: apps/correo/main/cr_store.c:50
+iCloud pide una contraseña de app: entrá a account.apple.com, Inicio de sesión y seguridad, Contraseñas de apps, y creá una para Correo. El usuario del correo entrante es lo que va antes de la @. Para mandar usa el puerto 587 con STARTTLS.	iCloud asks for an app-specific password: go to account.apple.com, Sign-In and Security, App-Specific Passwords, and create one for Correo. The incoming mail user is what comes before the @. Sending uses port 587 with STARTTLS.
+
+#: apps/correo/main/cr_store.c:55
+Fastmail pide una contraseña de app: Configuración, Privacidad y seguridad, Contraseñas de apps; elegí acceso por IMAP y SMTP.	Fastmail asks for an app password: Settings, Privacy & Security, App passwords; choose IMAP and SMTP access.
+
+#: apps/correo/main/cr_store.c:59
+Yahoo pide una contraseña de aplicación: Información de la cuenta, Seguridad de la cuenta, Generar contraseña de aplicación.	Yahoo asks for an app password: Account info, Account security, Generate app password.
+
+#: apps/correo/main/cr_store.c:61
+Otro	Other
+
+#: apps/correo/main/cr_store.c:62
+Con un servidor propio o de tu proveedor, los datos te los da quien te da el correo. Correo prueba imap.<dominio> y smtp.<dominio> con SSL/TLS; si no son esos, cambialos abajo.	With your own server or your provider's, whoever gives you the mail gives you the details. Correo tries imap.<domain> and smtp.<domain> with SSL/TLS; if those are not right, change them below.
+
+#: apps/correo/main/cr_ui.c:425
+#: apps/correo/main/cr_ui_acct.c:493
+#: apps/correo/main/cr_ui_compose.c:569
+#: apps/correo/main/cr_ui_compose.c:720
+Cancelar	Cancel
+
+#: apps/correo/main/cr_ui.c:447
+La placa no abre enlaces: escanealo con el teléfono para abrirlo ahí.	The board does not open links: scan it with your phone to open it there.
+
+#: apps/correo/main/cr_ui.c:449
+#: apps/correo/main/cr_ui_msg.c:766
+Cerrar	Close
+
+#: apps/correo/main/cr_ui.c:457
+No se pudo llegar al servidor	Could not reach the server
+
+#: apps/correo/main/cr_ui.c:458
+La conexión segura falló (certificado o cifrado)	The secure connection failed (certificate or encryption)
+
+#: apps/correo/main/cr_ui.c:459
+La placa todavía no tiene hora: sin hora no se puede verificar el certificado	The board has no time yet: without it the certificate cannot be checked
+
+#: apps/correo/main/cr_ui.c:460
+El servidor no aceptó el usuario o la contraseña	The server did not accept the user or the password
+
+#: apps/correo/main/cr_ui.c:461
+El servidor contestó algo inesperado	The server answered something unexpected
+
+#: apps/correo/main/cr_ui.c:463
+Este firmware todavía no cifra con STARTTLS (puertos 143 y 587). Usá SSL/TLS (993 y 465) si el servidor lo tiene, o esperá la próxima versión.	This firmware cannot encrypt with STARTTLS yet (ports 143 and 587). Use SSL/TLS (993 and 465) if the server has it, or wait for the next version.
+
+#: apps/correo/main/cr_ui.c:465
+#: apps/correo/main/cr_ui.c:473
+#: apps/correo/main/cr_ui_acct.c:291
+Falta la contraseña	The password is missing
+
+#: apps/correo/main/cr_ui.c:474
+Conectando...	Connecting...
+
+#: apps/correo/main/cr_ui.c:475
+Al día	Up to date
+
+#: apps/correo/main/cr_ui.c:476
+Al día, esperando correo	Up to date, waiting for mail
+
+#: apps/correo/main/cr_ui.c:479
+Sin conexión	Not connected
+
+#: apps/correo/main/cr_ui.c:479
+Sin red	No network
+
+#: apps/correo/main/cr_ui.c:498
+Entrada	Inbox
+
+#: apps/correo/main/cr_ui.c:499
+Enviados	Sent
+
+#: apps/correo/main/cr_ui.c:500
+Borradores	Drafts
+
+#: apps/correo/main/cr_ui.c:501
+Archivo	Archive
+
+#: apps/correo/main/cr_ui.c:502
+Papelera	Trash
+
+#: apps/correo/main/cr_ui.c:503
+No deseado	Junk
+
+#: apps/correo/main/cr_ui.c:504
+Todos los mensajes	All mail
+
+#: apps/correo/main/cr_ui.c:505
+Destacados	Starred
+
+#: apps/correo/main/cr_ui.c:669
+La cuenta no tiene carpeta de archivo	The account has no archive folder
+
+#: apps/correo/main/cr_ui.c:673
+Archivado	Archived
+
+#: apps/correo/main/cr_ui.c:689
+Borrado	Deleted
+
+#: apps/correo/main/cr_ui.c:702
+Movido	Moved
+
+#: apps/correo/main/cr_ui.c:723
+Mover a	Move to
+
+#: apps/correo/main/cr_ui.c:741
+#: apps/correo/main/cr_ui.c:841
+#: apps/correo/main/cr_ui_acct.c:510
+Correo	Mail
+
+#: apps/correo/main/cr_ui.c:743
+Tu correo en la placa: varias cuentas, la bandeja de todas juntas, conversaciones y avisos cuando llega algo. Funciona con Gmail, Outlook, iCloud, Fastmail o cualquier servidor IMAP y SMTP.	Your mail on the board: several accounts, all their inboxes together, conversations and a notice when something arrives. It works with Gmail, Outlook, iCloud, Fastmail or any IMAP and SMTP server.
+
+#: apps/correo/main/cr_ui.c:748
+#: apps/correo/main/cr_ui_acct.c:160
+Agregar una cuenta	Add an account
+
+#: apps/correo/main/cr_ui.c:789
+Probando de nuevo...	Trying again...
+
+#: apps/correo/main/cr_ui.c:853
+#: apps/correo/main/cr_ui.c:1315
+Todas las entradas	All inboxes
+
+#: apps/correo/main/cr_ui.c:878
+Todavía sin carpetas: conectando...	No folders yet: connecting...
+
+#: apps/correo/main/cr_ui.c:942
+#: apps/correo/main/cr_ui_msg.c:805
+Para:	To:
+
+#: apps/correo/main/cr_ui.c:944
+#: apps/correo/main/cr_ui_msg.c:823
+(sin asunto)	(no subject)
+
+#: apps/correo/main/cr_ui.c:1101
+#: apps/correo/main/cr_ui_msg.c:717
+Marcar como no leído	Mark as unread
+
+#: apps/correo/main/cr_ui.c:1101
+Marcar como leído	Mark as read
+
+#: apps/correo/main/cr_ui.c:1102
+#: apps/correo/main/cr_ui_msg.c:718
+Quitar la estrella	Remove the star
+
+#: apps/correo/main/cr_ui.c:1102
+#: apps/correo/main/cr_ui_msg.c:718
+Destacar	Star
+
+#: apps/correo/main/cr_ui.c:1103
+#: apps/correo/main/cr_ui_msg.c:859
+Archivar	Archive
+
+#: apps/correo/main/cr_ui.c:1104
+#: apps/correo/main/cr_ui_msg.c:719
+Mover a...	Move to...
+
+#: apps/correo/main/cr_ui.c:1106
+#: apps/correo/main/cr_ui_msg.c:860
+Borrar	Delete
+
+#: apps/correo/main/cr_ui.c:1209
+#: apps/correo/main/cr_ui.c:1228
+Trayendo...	Fetching...
+
+#: apps/correo/main/cr_ui.c:1223
+Nada que coincida	Nothing matches
+
+#: apps/correo/main/cr_ui.c:1223
+No hay mensajes	No messages
+
+#: apps/correo/main/cr_ui.c:1228
+Traer más viejos	Fetch older ones
+
+#: apps/correo/main/cr_ui.c:1267
+Actualizando...	Updating...
+
+#: apps/correo/main/cr_ui.c:1287
+Para buscar en el servidor, abrí una carpeta de una cuenta	To search the server, open a folder of one account
+
+#: apps/correo/main/cr_ui.c:1299
+Buscando en el servidor...	Searching the server...
+
+#: apps/correo/main/cr_ui.c:1332
+#: apps/correo/main/cr_ui_msg.c:764
+Lista	List
+
+#: apps/correo/main/cr_ui.c:1332
+#: apps/correo/main/cr_ui_acct.c:133
+#: apps/correo/main/cr_ui_msg.c:765
+Buzones	Mailboxes
+
+#: apps/correo/main/cr_ui.c:1357
+Buscar	Search
+
+#: apps/correo/main/cr_ui.c:1371
+%d en el servidor	%d on the server
+
+#: apps/correo/main/cr_ui.c:1482
+No se pudo buscar	Could not search
+
+#: apps/correo/main/cr_ui.c:1502
+No se pudo	It could not be done
+
+#: apps/correo/main/cr_ui.c:1644
+%d correos nuevos	%d new messages
+
+#: apps/correo/main/cr_ui_acct.c:111
+Lo más que guarda en la tarjeta	The most it keeps on the card
+
+#: apps/correo/main/cr_ui_acct.c:119
+Caché vaciada	Cache emptied
+
+#: apps/correo/main/cr_ui_acct.c:126
+Se borran los mensajes guardados en la tarjeta (no los del servidor): se vuelven a bajar al abrirlos.	The messages kept on the card are deleted (not the server's): they are downloaded again when opened.
+
+#: apps/correo/main/cr_ui_acct.c:127
+#: apps/correo/main/cr_ui_acct.c:184
+Vaciar	Empty
+
+#: apps/correo/main/cr_ui_acct.c:133
+Ajustes	Settings
+
+#: apps/correo/main/cr_ui_acct.c:137
+Cuentas	Accounts
+
+#: apps/correo/main/cr_ui_acct.c:162
+Opciones	Options
+
+#: apps/correo/main/cr_ui_acct.c:165
+Agrupar por conversación	Group by conversation
+
+#: apps/correo/main/cr_ui_acct.c:166
+Avisar del correo nuevo con la app en segundo plano	Tell me about new mail with the app in the background
+
+#: apps/correo/main/cr_ui_acct.c:167
+Correo se queda conectado esperando (IDLE) y avisa apenas llega algo.	Mail stays connected and waiting (IDLE) and tells you as soon as something arrives.
+
+#: apps/correo/main/cr_ui_acct.c:169
+Abrir Correo al prender la placa	Open Mail when the board starts
+
+#: apps/correo/main/cr_ui_acct.c:171
+En la tarjeta	On the card
+
+#: apps/correo/main/cr_ui_acct.c:178
+Mensajes guardados: %s de %s	Messages kept: %s of %s
+
+#: apps/correo/main/cr_ui_acct.c:183
+Cambiar el tope	Change the limit
+
+#: apps/correo/main/cr_ui_acct.c:185
+Los adjuntos que guardás van a la carpeta Correo de la tarjeta.	The attachments you save go to the card's Correo folder.
+
+#: apps/correo/main/cr_ui_acct.c:283
+La dirección de correo no está bien escrita	The address is not written right
+
+#: apps/correo/main/cr_ui_acct.c:287
+Faltan los servidores	The servers are missing
+
+#: apps/correo/main/cr_ui_acct.c:380
+Las dos conexiones andan: cuenta guardada	Both connections work: account saved
+
+#: apps/correo/main/cr_ui_acct.c:422
+Se borra la cuenta de la placa, con lo que guardó en la tarjeta. En el servidor no se toca nada.	The account is removed from the board, with what it kept on the card. Nothing is touched on the server.
+
+#: apps/correo/main/cr_ui_acct.c:423
+#: apps/correo/main/cr_ui_acct.c:563
+Borrar la cuenta	Remove the account
+
+#: apps/correo/main/cr_ui_acct.c:442
+Servidor	Server
+
+#: apps/correo/main/cr_ui_acct.c:450
+Puerto	Port
+
+#: apps/correo/main/cr_ui_acct.c:454
+Seguridad	Security
+
+#: apps/correo/main/cr_ui_acct.c:465
+Usuario	User
+
+#: apps/correo/main/cr_ui_acct.c:469
+Sin cifrar, la contraseña viaja a la vista: sólo para un servidor de tu red.	Unencrypted, the password travels in the clear: only for a server on your network.
+
+#: apps/correo/main/cr_ui_acct.c:493
+Cuenta nueva	New account
+
+#: apps/correo/main/cr_ui_acct.c:501
+Proveedor	Provider
+
+#: apps/correo/main/cr_ui_acct.c:509
+Tu nombre (el que ven los demás)	Your name (the one others see)
+
+#: apps/correo/main/cr_ui_acct.c:513
+Contraseña de aplicación	App password
+
+#: apps/correo/main/cr_ui_acct.c:513
+Contraseña	Password
+
+#: apps/correo/main/cr_ui_acct.c:515
+(la que está guardada)	(the saved one)
+
+#: apps/correo/main/cr_ui_acct.c:525
+Probando la conexión...	Trying the connection...
+
+#: apps/correo/main/cr_ui_acct.c:528
+Guardar igual	Save anyway
+
+#: apps/correo/main/cr_ui_acct.c:531
+Probando...	Trying...
+
+#: apps/correo/main/cr_ui_acct.c:531
+Probar y guardar	Try and save
+
+#: apps/correo/main/cr_ui_acct.c:533
+Servidores	Servers
+
+#: apps/correo/main/cr_ui_acct.c:535
+Entrante (IMAP)	Incoming (IMAP)
+
+#: apps/correo/main/cr_ui_acct.c:537
+Saliente (SMTP)	Outgoing (SMTP)
+
+#: apps/correo/main/cr_ui_acct.c:539
+En la placa	On the board
+
+#: apps/correo/main/cr_ui_acct.c:541
+Nombre de la cuenta	Account name
+
+#: apps/correo/main/cr_ui_acct.c:541
+Personal, Trabajo...	Personal, Work...
+
+#: apps/correo/main/cr_ui_acct.c:542
+Color	Colour
+
+#: apps/correo/main/cr_ui_acct.c:558
+Firma	Signature
+
+#: apps/correo/main/cr_ui_acct.c:558
+Se agrega al final de lo que escribís	Added at the end of what you write
+
+#: apps/correo/main/cr_ui_acct.c:560
+Guardar lo enviado en la carpeta Enviados	Keep what is sent in the Sent folder
+
+#: apps/correo/main/cr_ui_acct.c:561
+Gmail lo guarda solo: con Gmail, apagado.	Gmail keeps it by itself: with Gmail, off.
+
+#: apps/correo/main/cr_ui_compose.c:93
+Primero agregá una cuenta	Add an account first
+
+#: apps/correo/main/cr_ui_compose.c:220
+escribió	wrote
+
+#: apps/correo/main/cr_ui_compose.c:324
+Hay una dirección que no está bien escrita	An address is not written right
+
+#: apps/correo/main/cr_ui_compose.c:328
+Falta a quién mandarlo	Who to send it to is missing
+
+#: apps/correo/main/cr_ui_compose.c:345
+#: apps/correo/main/cr_ui_compose.c:412
+#: apps/correo/main/cr_ui_compose.c:572
+Enviando...	Sending...
+
+#: apps/correo/main/cr_ui_compose.c:366
+Borrador guardado	Draft saved
+
+#: apps/correo/main/cr_ui_compose.c:369
+No se pudo guardar el borrador	Could not save the draft
+
+#: apps/correo/main/cr_ui_compose.c:377
+#: apps/correo/main/cr_ui_compose.c:391
+No se pudo enviar	Could not send
+
+#: apps/correo/main/cr_ui_compose.c:384
+Enviado	Sent
+
+#: apps/correo/main/cr_ui_compose.c:420
+Guardar como borrador	Save as a draft
+
+#: apps/correo/main/cr_ui_compose.c:422
+Descartar	Discard
+
+#: apps/correo/main/cr_ui_compose.c:424
+¿Qué hacemos con lo que escribiste?	What shall we do with what you wrote?
+
+#: apps/correo/main/cr_ui_compose.c:537
+No entran más adjuntos	No more attachments fit
+
+#: apps/correo/main/cr_ui_compose.c:544
+Es demasiado para un correo (20 MB en total)	Too much for one message (20 MB in all)
+
+#: apps/correo/main/cr_ui_compose.c:569
+Respuesta	Reply
+
+#: apps/correo/main/cr_ui_compose.c:570
+#: apps/correo/main/cr_ui_msg.c:858
+Reenviar	Forward
+
+#: apps/correo/main/cr_ui_compose.c:570
+Mensaje nuevo	New message
+
+#: apps/correo/main/cr_ui_compose.c:572
+Enviar	Send
+
+#: apps/correo/main/cr_ui_compose.c:584
+Para	To
+
+#: apps/correo/main/cr_ui_compose.c:584
+nombre o dirección	name or address
+
+#: apps/correo/main/cr_ui_compose.c:587
+Cc	Cc 
+
+#: apps/correo/main/cr_ui_compose.c:589
+Cco (no lo ven los demás)	Bcc (the others do not see it)
+
+#: apps/correo/main/cr_ui_compose.c:593
+Cc y Cco	Cc and Bcc
+
+#: apps/correo/main/cr_ui_compose.c:611
+Adjuntar	Attach
+
+#: apps/correo/main/cr_ui_compose.c:612
+Escribí acá	Write here
+
+#: apps/correo/main/cr_ui_compose.c:642
+#: apps/correo/main/cr_ui_msg.c:484
+#: apps/correo/main/cr_ui_msg.c:701
+No hay tarjeta	There is no card
+
+#: apps/correo/main/cr_ui_compose.c:720
+La tarjeta	The card
+
+#: apps/correo/main/cr_ui_compose.c:736
+Subir	Up
+
+#: apps/correo/main/cr_ui_compose.c:739
+La carpeta está vacía	The folder is empty
+
+#: apps/correo/main/cr_ui_msg.c:138
+#: apps/correo/main/cr_ui_msg.c:666
+Enlace	Link
+
+#: apps/correo/main/cr_ui_msg.c:278
+No se pudo mostrar la imagen	Could not show the picture
+
+#: apps/correo/main/cr_ui_msg.c:278
+#: apps/correo/main/cr_ui_msg.c:542
+Cargando la imagen...	Loading the picture...
+
+#: apps/correo/main/cr_ui_msg.c:413
+Ver el resto del mensaje	Show the rest of the message
+
+#: apps/correo/main/cr_ui_msg.c:470
+Guardado en	Saved in
+
+#: apps/correo/main/cr_ui_msg.c:473
+Oficina no está instalada	Oficina is not installed
+
+#: apps/correo/main/cr_ui_msg.c:501
+Bajando el adjunto...	Downloading the attachment...
+
+#: apps/correo/main/cr_ui_msg.c:509
+#: apps/correo/main/cr_ui_msg.c:705
+No se pudo guardar en la tarjeta	Could not save to the card
+
+#: apps/correo/main/cr_ui_msg.c:520
+No se pudo bajar el adjunto	Could not download the attachment
+
+#: apps/correo/main/cr_ui_msg.c:569
+Ver	View
+
+#: apps/correo/main/cr_ui_msg.c:570
+Abrir con Oficina	Open with Oficina
+
+#: apps/correo/main/cr_ui_msg.c:571
+Guardar en la tarjeta	Save to the card
+
+#: apps/correo/main/cr_ui_msg.c:593
+Adjuntos	Attachments
+
+#: apps/correo/main/cr_ui_msg.c:614
+ - se baja al guardarlo	 - downloaded when saved
+
+#: apps/correo/main/cr_ui_msg.c:692
+Enlaces del mensaje	The message's links
+
+#: apps/correo/main/cr_ui_msg.c:693
+El mensaje no tiene enlaces	The message has no links
+
+#: apps/correo/main/cr_ui_msg.c:720
+Ver los enlaces	Show the links
+
+#: apps/correo/main/cr_ui_msg.c:721
+Guardar el mensaje en la tarjeta	Save the message to the card
+
+#: apps/correo/main/cr_ui_msg.c:775
+No se pudo abrir el mensaje	Could not open the message
+
+#: apps/correo/main/cr_ui_msg.c:777
+Probar de nuevo	Try again
+
+#: apps/correo/main/cr_ui_msg.c:779
+Abriendo...	Opening...
+
+#: apps/correo/main/cr_ui_msg.c:805
+Cc:	Cc: 
+
+#: apps/correo/main/cr_ui_msg.c:833
+Seguir escribiendo	Go on writing
+
+#: apps/correo/main/cr_ui_msg.c:838
+Las imágenes de internet no se bajan: avisan a quien las manda que abriste el correo.	Pictures from the internet are not downloaded: they tell the sender you opened the mail.
+
+#: apps/correo/main/cr_ui_msg.c:844
+El mensaje pesa %s: se bajó el principio, y los adjuntos se bajan al guardarlos.	The message weighs %s: its beginning was downloaded, and the attachments are downloaded when saved.
+
+#: apps/correo/main/cr_ui_msg.c:847
+El mensaje es muy largo: se muestra el principio.	The message is very long: its beginning is shown.
+
+#: apps/correo/main/cr_ui_msg.c:856
+Responder	Reply
+
+#: apps/correo/main/cr_ui_msg.c:857
+A todos	Reply all
+
+#: apps/correo/main/cr_ui_msg.c:861
+Más	More
+
+#: apps/correo/main/cr_util.c:782
+ene	Jan
+
+#: apps/correo/main/cr_util.c:782
+feb	Feb
+
+#: apps/correo/main/cr_util.c:782
+mar	Mar
+
+#: apps/correo/main/cr_util.c:782
+abr	Apr
+
+#: apps/correo/main/cr_util.c:782
+may	May
+
+#: apps/correo/main/cr_util.c:782
+jun	Jun
+
+#: apps/correo/main/cr_util.c:783
+jul	Jul
+
+#: apps/correo/main/cr_util.c:783
+ago	Aug
+
+#: apps/correo/main/cr_util.c:783
+sep	Sep
+
+#: apps/correo/main/cr_util.c:783
+oct	Oct
+
+#: apps/correo/main/cr_util.c:783
+nov	Nov
+
+#: apps/correo/main/cr_util.c:783
+dic	Dec
+
+#: apps/correo/main/cr_util.c:784
+dom	Sun
+
+#: apps/correo/main/cr_util.c:784
+lun	Mon
+
+#: apps/correo/main/cr_util.c:784
+mar (día)	Tue
+
+#: apps/correo/main/cr_util.c:784
+mié	Wed
+
+#: apps/correo/main/cr_util.c:785
+jue	Thu
+
+#: apps/correo/main/cr_util.c:785
+vie	Fri
+
+#: apps/correo/main/cr_util.c:785
+sáb	Sat
+
+#: apps/correo/main/cr_util.c:812
+ayer	yesterday
+
+#: apps/correo/main/cr_ui_acct.c
+Dirección de correo	Email address
