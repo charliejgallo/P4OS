@@ -1,0 +1,17 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Un cliente no oficial para Telegram, con tu propia cuenta: tus chats, grupos y canales en la placa, con fotos, reacciones y avisos de mensajes nuevos, y también desde el celular por el portal.",
+  "en": "An unofficial client for Telegram, with your own account: your chats, groups and channels on the board, with photos, reactions and new message notifications, and from your phone through the portal too."
+ },
+ "desc": {
+  "es": "La lista de chats con sus fotos, el último mensaje, los no leídos y los fijados; al tocar uno, la conversación en burbujas. Se escribe con el teclado de la pantalla o uno USB o Bluetooth, con emojis, y cada mensaje se responde, se reenvía, se copia, se edita, se borra o recibe una reacción. Las fotos se ven en grande; las mandás desde las de la tarjeta. Los documentos y las notas de voz se bajan a la tarjeta, y los stickers se ven por su miniatura o su emoji.\n\nSe entra con tu número, el código que llega a la app de Telegram o por SMS y, si la tenés, la contraseña en dos pasos. Antes hace falta un api_id y un api_hash propios, que se sacan gratis en el sitio de Telegram para desarrolladores y se escriben en la placa o en la página Mensajes del portal, que además deja leer y contestar desde el celular.\n\nCon la app en segundo plano llegan los avisos de mensajes nuevos y el número de no leídos en el ícono, y puede arrancar con la placa. Habla el protocolo de Telegram directamente, sin servidores en el medio. No es una app de Telegram ni está hecha por ellos.",
+  "en": "The chat list with photos, the last message, unread counts and pins; tap one for the conversation in bubbles. Write with the on-screen keyboard or a USB or Bluetooth one, with emoji, and reply to, forward, copy, edit, delete or react to any message. Photos open big, and you send them from the card's. Documents and voice messages download to the card, and stickers show as their thumbnail or emoji.\n\nSign in with your number, the code that comes to the Telegram app or by SMS and, if you have one, the two-step password. First it needs an api_id and an api_hash of your own, free from Telegram's developer site, typed on the board or on the Messages page of the portal, which also lets you read and answer from your phone.\n\nWith the app in the background, new messages arrive as notifications and the unread count shows on the icon, and it can start with the board. It speaks Telegram's protocol directly, with no server in between. It is not a Telegram app nor made by them."
+ },
+ "shots": [
+  "app-mensajes.png",
+  "app-mensajes-chat.png",
+  "land-mensajes.png",
+  "web-mensajes.png"
+ ]
+}
