@@ -1,0 +1,175 @@
+# amoledos-lang 1   es -> pt
+# web.grabador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/grabador/web/grabador.js:13
+Apagado	Desligado
+
+#: apps/grabador/web/grabador.js:13
+Sin cámara	Sem câmera
+
+#: apps/grabador/web/grabador.js:13
+Arrancando la cámara…	Iniciando a câmera…
+
+#: apps/grabador/web/grabador.js:13
+#: apps/grabador/web/grabador.js:82
+Vigilando	Vigiando
+
+#: apps/grabador/web/grabador.js:13
+Grabando	Gravando
+
+#: apps/grabador/web/grabador.js:13
+Con problemas	Com problemas
+
+#: apps/grabador/web/grabador.js:32
+La app no está abierta	O app não está aberto
+
+#: apps/grabador/web/grabador.js:37
+#: apps/grabador/web/grabador.js:124
+Grabador	Vigilância
+
+#: apps/grabador/web/grabador.js:65
+Tamaño	Tamanho
+
+#: apps/grabador/web/grabador.js:66
+Cuadros por segundo	Quadros por segundo
+
+#: apps/grabador/web/grabador.js:67
+Calidad	Qualidade
+
+#: apps/grabador/web/grabador.js:67
+Baja (0,8 Mbit/s)	Baixa (0,8 Mbit/s)
+
+#: apps/grabador/web/grabador.js:67
+Media (1,5 Mbit/s)	Média (1,5 Mbit/s)
+
+#: apps/grabador/web/grabador.js:67
+Alta (3 Mbit/s)	Alta (3 Mbit/s)
+
+#: apps/grabador/web/grabador.js:67
+Muy alta (5 Mbit/s)	Muito alta (5 Mbit/s)
+
+#: apps/grabador/web/grabador.js:68
+Sensibilidad al movimiento	Sensibilidade ao movimento
+
+#: apps/grabador/web/grabador.js:68
+Baja	Baixa
+
+#: apps/grabador/web/grabador.js:68
+Media	Média
+
+#: apps/grabador/web/grabador.js:68
+Alta	Alta
+
+#: apps/grabador/web/grabador.js:69
+Grabar desde antes del movimiento	Gravar desde antes do movimento
+
+#: apps/grabador/web/grabador.js:69
+Nada	Nada
+
+#: apps/grabador/web/grabador.js:69
+2 segundos	2 segundos
+
+#: apps/grabador/web/grabador.js:69
+3 segundos	3 segundos
+
+#: apps/grabador/web/grabador.js:69
+#: apps/grabador/web/grabador.js:70
+5 segundos	5 segundos
+
+#: apps/grabador/web/grabador.js:70
+Seguir grabando después	Continuar gravando depois
+
+#: apps/grabador/web/grabador.js:70
+10 segundos	10 segundos
+
+#: apps/grabador/web/grabador.js:70
+20 segundos	20 segundos
+
+#: apps/grabador/web/grabador.js:70
+30 segundos	30 segundos
+
+#: apps/grabador/web/grabador.js:70
+#: apps/grabador/web/grabador.js:71
+1 minuto	1 minuto
+
+#: apps/grabador/web/grabador.js:71
+Cortar las grabaciones cada	Dividir as gravações a cada
+
+#: apps/grabador/web/grabador.js:71
+5 minutos	5 minutos
+
+#: apps/grabador/web/grabador.js:71
+10 minutos	10 minutos
+
+#: apps/grabador/web/grabador.js:72
+Espacio para grabaciones	Espaço para gravações
+
+#: apps/grabador/web/grabador.js:73
+Sólo a ciertas horas	Só em certos horários
+
+#: apps/grabador/web/grabador.js:74
+de	das
+
+#: apps/grabador/web/grabador.js:74
+a	às
+
+#: apps/grabador/web/grabador.js:75
+Avisar por el bot de Telegram	Avisar pelo bot do Telegram
+
+#: apps/grabador/web/grabador.js:76
+Cámara IP por RTSP (Frigate, VLC, Cámaras)	Câmera IP por RTSP (Frigate, VLC, Câmeras)
+
+#: apps/grabador/web/grabador.js:81
+Grabando a mano	Gravando manualmente
+
+#: apps/grabador/web/grabador.js:81
+Grabando: hay movimiento	Gravando: há movimento
+
+#: apps/grabador/web/grabador.js:82
+Mirando (desarmado)	Olhando (desarmado)
+
+#: apps/grabador/web/grabador.js:84
+cuadros/s	quadros/s
+
+#: apps/grabador/web/grabador.js:85
+%s mirando por RTSP	%s assistindo por RTSP
+
+#: apps/grabador/web/grabador.js:91
+Desarmar	Desarmar
+
+#: apps/grabador/web/grabador.js:91
+Armar	Armar
+
+#: apps/grabador/web/grabador.js:93
+Detener	Parar
+
+#: apps/grabador/web/grabador.js:93
+Grabar ahora	Gravar agora
+
+#: apps/grabador/web/grabador.js:105
+Bajar	Baixar
+
+#: apps/grabador/web/grabador.js:106
+¿Borrar esta grabación?	Apagar esta gravação?
+
+#: apps/grabador/web/grabador.js:106
+Borrar	Apagar
+
+#: apps/grabador/web/grabador.js:107
+Todavía no hay grabaciones. Armá la cámara: graba cuando algo se mueve.	Ainda não há gravações. Arme a câmera: ela grava quando algo se mexe.
+
+#: apps/grabador/web/grabador.js:119
+La app no está abierta en la placa.	O app não está aberto na placa.
+
+#: apps/grabador/web/grabador.js:119
+Abrirla	Abrir
+
+#: apps/grabador/web/grabador.js:125
+Grabaciones	Gravações
+
+#: apps/grabador/web/grabador.js:125
+Ajustes	Ajustes

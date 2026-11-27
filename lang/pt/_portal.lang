@@ -11,11 +11,11 @@ Pantalla	Tela
 
 #: components/aos_portal/web/app.js:44
 #: components/aos_portal/web/app.js:193
-#: components/aos_portal/web/app.js:2839
+#: components/aos_portal/web/app.js:2926
 Inicio	Início
 
 #: components/aos_portal/web/app.js:44
-#: components/aos_portal/web/app.js:3474
+#: components/aos_portal/web/app.js:3561
 Tienda	Loja
 
 #: components/aos_portal/web/app.js:44
@@ -25,7 +25,7 @@ Wi-Fi	Wi-Fi
 #: components/aos_portal/web/app.js:44
 #: components/aos_portal/web/app.js:208
 #: components/aos_portal/web/app.js:227
-#: components/aos_portal/web/app.js:1992
+#: components/aos_portal/web/app.js:2079
 Red	Rede
 
 #: components/aos_portal/web/app.js:44
@@ -44,11 +44,11 @@ Banco	Bancada
 Zigbee	Zigbee
 
 #: components/aos_portal/web/app.js:45
-#: components/aos_portal/web/app.js:1653
+#: components/aos_portal/web/app.js:1740
 Macro pad	Macro pad
 
 #: components/aos_portal/web/app.js:45
-#: components/aos_portal/web/app.js:1948
+#: components/aos_portal/web/app.js:2035
 Expansión	Expansão
 
 #: components/aos_portal/web/app.js:45
@@ -61,7 +61,7 @@ Archivos	Arquivos
 Ajustes	Ajustes
 
 #: components/aos_portal/web/app.js:45
-#: components/aos_portal/web/app.js:3619
+#: components/aos_portal/web/app.js:3706
 Respaldo	Backup
 
 #: components/aos_portal/web/app.js:45
@@ -73,7 +73,7 @@ Registro	Registro
 
 #: components/aos_portal/web/app.js:100
 #: components/aos_portal/web/app.js:208
-#: components/aos_portal/web/app.js:3133
+#: components/aos_portal/web/app.js:3220
 sin red	sem rede
 
 #: components/aos_portal/web/app.js:105
@@ -137,9 +137,9 @@ Portapapeles	Área de transferência
 La placa	A placa
 
 #: components/aos_portal/web/app.js:207
-#: components/aos_portal/web/app.js:1564
-#: components/aos_portal/web/app.js:1634
-#: components/aos_portal/web/app.js:2776
+#: components/aos_portal/web/app.js:1651
+#: components/aos_portal/web/app.js:1721
+#: components/aos_portal/web/app.js:2863
 Nombre	Nome
 
 #: components/aos_portal/web/app.js:207
@@ -207,7 +207,7 @@ Apagado	Desligado
 Estado	Estado
 
 #: components/aos_portal/web/app.js:228
-#: components/aos_portal/web/app.js:3194
+#: components/aos_portal/web/app.js:3281
 Señal	Sinal
 
 #: components/aos_portal/web/app.js:229
@@ -220,7 +220,7 @@ Red olvidada	Rede esquecida
 Olvidar esta red	Esquecer esta rede
 
 #: components/aos_portal/web/app.js:233
-#: components/aos_portal/web/app.js:4160
+#: components/aos_portal/web/app.js:4247
 contraseña	senha
 
 #: components/aos_portal/web/app.js:235
@@ -237,7 +237,7 @@ Contraseña	Senha
 Red abierta.	Rede aberta.
 
 #: components/aos_portal/web/app.js:240
-#: components/aos_portal/web/app.js:3925
+#: components/aos_portal/web/app.js:4012
 Unirse	Entrar
 
 #: components/aos_portal/web/app.js:241
@@ -284,7 +284,7 @@ Puerta de enlace	Gateway
 
 #: components/aos_portal/web/app.js:269
 #: components/aos_portal/web/app.js:1273
-#: components/aos_portal/web/app.js:1835
+#: components/aos_portal/web/app.js:1922
 Puerto	Porta
 
 #: components/aos_portal/web/app.js:274
@@ -382,7 +382,7 @@ Guardado %s	Salvo %s
 #: components/aos_portal/web/app.js:365
 #: components/aos_portal/web/app.js:1277
 #: components/aos_portal/web/app.js:1354
-#: components/aos_portal/web/app.js:1486
+#: components/aos_portal/web/app.js:1573
 Guardar	Salvar
 
 #: components/aos_portal/web/app.js:384
@@ -408,7 +408,7 @@ Nuevo nombre	Novo nome
 Editar	Editar
 
 #: components/aos_portal/web/app.js:408
-#: components/aos_portal/web/app.js:3544
+#: components/aos_portal/web/app.js:3631
 Bajar	Baixar
 
 #: components/aos_portal/web/app.js:409
@@ -477,7 +477,7 @@ Seguir	Seguir
 Filtrar…	Filtrar…
 
 #: components/aos_portal/web/app.js:463
-#: components/aos_portal/web/app.js:3115
+#: components/aos_portal/web/app.js:3202
 nada	nada
 
 #: components/aos_portal/web/app.js:464
@@ -861,7 +861,7 @@ Volumen	Volume
 Fondo de pantalla	Papel de parede
 
 #: components/aos_portal/web/app.js:803
-#: components/aos_portal/web/app.js:3194
+#: components/aos_portal/web/app.js:3281
 Seguridad	Segurança
 
 #: components/aos_portal/web/app.js:804
@@ -877,12 +877,12 @@ Instalada una vez como confiable en la Mac (Acceso a Llaveros, "Confiar siempre"
 Sistema	Sistema
 
 #: components/aos_portal/web/app.js:808
-#: components/aos_portal/web/app.js:3589
+#: components/aos_portal/web/app.js:3676
 ¿Reiniciar la placa?	Reiniciar a placa?
 
 #: components/aos_portal/web/app.js:808
 #: components/aos_portal/web/app.js:936
-#: components/aos_portal/web/app.js:3589
+#: components/aos_portal/web/app.js:3676
 Reiniciando…	Reiniciando…
 
 #: components/aos_portal/web/app.js:808
@@ -909,7 +909,7 @@ Ver el arranque actual	Ver o boot atual
 Ver el arranque anterior	Ver o boot anterior
 
 #: components/aos_portal/web/app.js:849
-#: components/aos_portal/web/app.js:3104
+#: components/aos_portal/web/app.js:3191
 Descargar	Baixar
 
 #: components/aos_portal/web/app.js:856
@@ -934,8 +934,8 @@ En vivo. El anillo guarda los últimos 256 KB.	Ao vivo. O anel guarda os último
 No hay registro del arranque anterior: la placa se desenchufó, o arrancó un firmware distinto (el anillo cambia de lugar con cada compilación).	Não há registro do boot anterior: a placa foi desligada da tomada, ou iniciou um firmware diferente (o anel muda de lugar a cada compilação).
 
 #: components/aos_portal/web/app.js:912
-#: components/aos_portal/web/app.js:3475
-#: components/aos_portal/web/app.js:3620
+#: components/aos_portal/web/app.js:3562
+#: components/aos_portal/web/app.js:3707
 No se pudo leer: %s	Não foi possível ler: %s
 
 #: components/aos_portal/web/app.js:916
@@ -970,34 +970,34 @@ Confirmado: %s es el firmware ahora.	Confirmado: %s é o firmware agora.
 La placa no contestó en un minuto y medio: mirala.	A placa não respondeu em um minuto e meio: dê uma olhada nela.
 
 #: components/aos_portal/web/app.js:951
-#: components/aos_portal/web/app.js:3294
+#: components/aos_portal/web/app.js:3381
 No se pudo bajar: revisá la red.	Não foi possível baixar: verifique a rede.
 
 #: components/aos_portal/web/app.js:951
-#: components/aos_portal/web/app.js:3294
+#: components/aos_portal/web/app.js:3381
 No está en el servidor.	Não está no servidor.
 
 #: components/aos_portal/web/app.js:951
-#: components/aos_portal/web/app.js:3294
+#: components/aos_portal/web/app.js:3381
 La placa todavía no tiene la hora de la red.	A placa ainda não tem a hora da rede.
 
 #: components/aos_portal/web/app.js:952
-#: components/aos_portal/web/app.js:3295
+#: components/aos_portal/web/app.js:3382
 No se pudo verificar el servidor.	Não foi possível verificar o servidor.
 
 #: components/aos_portal/web/app.js:952
-#: components/aos_portal/web/app.js:3295
+#: components/aos_portal/web/app.js:3382
 No se pudo escribir en la tarjeta: ¿está llena?	Não foi possível gravar no cartão: está cheio?
 
 #: components/aos_portal/web/app.js:953
 La imagen no es la publicada: no se escribió nada.	A imagem não é a publicada: nada foi gravado.
 
 #: components/aos_portal/web/app.js:953
-#: components/aos_portal/web/app.js:3299
+#: components/aos_portal/web/app.js:3386
 No se pudo escribir la otra ranura.	Não foi possível gravar o outro slot.
 
 #: components/aos_portal/web/app.js:954
-#: components/aos_portal/web/app.js:3300
+#: components/aos_portal/web/app.js:3387
 Ya es la versión que corre.	Já é a versão que está rodando.
 
 #: components/aos_portal/web/app.js:954
@@ -1013,8 +1013,8 @@ Bajando %s: %s de %s…	Baixando %s: %s de %s…
 %s está en la otra ranura. Arranca a prueba al reiniciar.	%s está no outro slot. Inicia em teste ao reiniciar.
 
 #: components/aos_portal/web/app.js:965
-#: components/aos_portal/web/app.js:3300
-#: components/aos_portal/web/app.js:3490
+#: components/aos_portal/web/app.js:3387
+#: components/aos_portal/web/app.js:3577
 Algo salió mal.	Algo deu errado.
 
 #: components/aos_portal/web/app.js:968
@@ -1033,8 +1033,8 @@ el catálogo no ofrece firmware para esta placa (%s)	o catálogo não oferece fi
 La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.	A placa o baixa da última release publicada, verifica-o inteiro contra o tamanho e o SHA-256 do catálogo antes de gravar qualquer coisa, e o deixa no outro slot. Não reinicia sozinha.
 
 #: components/aos_portal/web/app.js:972
-#: components/aos_portal/web/app.js:1706
-#: components/aos_portal/web/app.js:3389
+#: components/aos_portal/web/app.js:1793
+#: components/aos_portal/web/app.js:3476
 Buscar de nuevo	Buscar de novo
 
 #: components/aos_portal/web/app.js:973
@@ -1139,7 +1139,7 @@ Pidiendo la captura…	Pedindo a captura de tela…
 Captura del osciloscopio	Captura de tela do osciloscópio
 
 #: components/aos_portal/web/app.js:1111
-#: components/aos_portal/web/app.js:1993
+#: components/aos_portal/web/app.js:2080
 Tiempo	Tempo
 
 #: components/aos_portal/web/app.js:1115
@@ -1230,16 +1230,16 @@ Generador	Gerador
 El UNI-T UTG932E habla USBTMC por USB y espera un hub USB con alimentación: el puerto OTG de la placa no da 5 V.	O UNI-T UTG932E fala USBTMC por USB e precisa de um hub USB com alimentação: a porta OTG da placa não dá 5 V.
 
 #: components/aos_portal/web/app.js:1189
-#: components/aos_portal/web/app.js:3847
-#: components/aos_portal/web/app.js:3856
+#: components/aos_portal/web/app.js:3934
+#: components/aos_portal/web/app.js:3943
 recién	agora mesmo
 
 #: components/aos_portal/web/app.js:1189
-#: components/aos_portal/web/app.js:3673
+#: components/aos_portal/web/app.js:3760
 hace %s s	há %s s
 
 #: components/aos_portal/web/app.js:1189
-#: components/aos_portal/web/app.js:3673
+#: components/aos_portal/web/app.js:3760
 hace %s min	há %s min
 
 #: components/aos_portal/web/app.js:1189
@@ -1254,8 +1254,8 @@ Rechazado	Recusado
 
 #: components/aos_portal/web/app.js:1201
 #: components/aos_portal/web/app.js:1370
-#: components/aos_portal/web/app.js:1648
-#: components/aos_portal/web/app.js:3812
+#: components/aos_portal/web/app.js:1735
+#: components/aos_portal/web/app.js:3899
 Guardado	Salvo
 
 #: components/aos_portal/web/app.js:1210
@@ -1292,7 +1292,7 @@ mín %s	mín %s
 Elegí un tópico de la lista.	Escolha um tópico da lista.
 
 #: components/aos_portal/web/app.js:1248
-#: components/aos_portal/web/app.js:1619
+#: components/aos_portal/web/app.js:1706
 Retenido	Retido
 
 #: components/aos_portal/web/app.js:1249
@@ -1303,7 +1303,7 @@ valor	valor
 
 #: components/aos_portal/web/app.js:1252
 #: components/aos_portal/web/app.js:1280
-#: components/aos_portal/web/app.js:1616
+#: components/aos_portal/web/app.js:1703
 Mensaje	Mensagem
 
 #: components/aos_portal/web/app.js:1252
@@ -1357,7 +1357,7 @@ Encendido	Ligado
 Publicar	Publicar
 
 #: components/aos_portal/web/app.js:1280
-#: components/aos_portal/web/app.js:1616
+#: components/aos_portal/web/app.js:1703
 Tópico	Tópico
 
 #: components/aos_portal/web/app.js:1281
@@ -1533,8 +1533,8 @@ cuando pasa a…	quando passa a…
 sí (prendido, abierta, hay alguien)	sim (ligado, aberta, há alguém)
 
 #: components/aos_portal/web/app.js:1331
-#: components/aos_portal/web/app.js:3173
-#: components/aos_portal/web/app.js:3767
+#: components/aos_portal/web/app.js:3260
+#: components/aos_portal/web/app.js:3854
 no	não
 
 #: components/aos_portal/web/app.js:1339
@@ -1615,1864 +1615,1885 @@ La placa contesta en un chat de Telegram y avisa lo que pasa: su estado, una cap
 #: components/aos_portal/web/app.js:1394
 Lo último	Recentes
 
-#: components/aos_portal/web/app.js:1410
-se renueva en %s	renova em %s
+#: components/aos_portal/web/app.js:1415
+Start	Start
 
-#: components/aos_portal/web/app.js:1417
-Sesión iniciada	Sessão iniciada
+#: components/aos_portal/web/app.js:1425
+Celular	Celular
 
-#: components/aos_portal/web/app.js:1417
-La sesión venció	A sessão expirou
+#: components/aos_portal/web/app.js:1432
+Jugador %s	Jogador %s
 
-#: components/aos_portal/web/app.js:1417
-Sin sesión	Sem sessão
-
-#: components/aos_portal/web/app.js:1418
-recién leído	lido agora
-
-#: components/aos_portal/web/app.js:1418
-leído hace %s	lido há %s
-
-#: components/aos_portal/web/app.js:1419
-¿Cerrar la sesión de Claude en la placa?	Encerrar a sessão do Claude na placa?
-
-#: components/aos_portal/web/app.js:1419
-#: components/aos_portal/web/app.js:4197
-Cerrar sesión	Sair
-
-#: components/aos_portal/web/app.js:1421
-5 horas	5 horas
-
-#: components/aos_portal/web/app.js:1421
-Semana	Semana
-
-#: components/aos_portal/web/app.js:1422
-Semana, Opus	Semana, Opus
-
-#: components/aos_portal/web/app.js:1423
-Semana, Sonnet	Semana, Sonnet
-
-#: components/aos_portal/web/app.js:1424
-Uso extra	Uso extra
-
-#: components/aos_portal/web/app.js:1428
-Pegá acá el código (código#estado)	Cole o código aqui (código#estado)
-
-#: components/aos_portal/web/app.js:1431
-2. En la página de Claude iniciá sesión y autorizá. Te va a mostrar un código: copialo y pegalo acá.	2. Na página do Claude, entre e autorize. Ela vai mostrar um código: copie e cole aqui.
-
-#: components/aos_portal/web/app.js:1434
-Verificando…	Verificando…
-
-#: components/aos_portal/web/app.js:1436
-Confirmar	Confirmar
-
-#: components/aos_portal/web/app.js:1437
-Iniciar sesión	Entrar
+#: components/aos_portal/web/app.js:1432
+Ya hay cuatro mandos en la placa	Já há quatro controles na placa
 
 #: components/aos_portal/web/app.js:1438
-La placa tiene su propio inicio de sesión con tu cuenta de Claude: no usa ni toca el de Claude Code en ninguna computadora, y los números son los de la cuenta. Los toma del mismo lugar que el /usage de Claude Code, que no es una API pública de Anthropic: puede cambiar sin aviso.	A placa tem seu próprio login com sua conta do Claude: não usa nem mexe no do Claude Code em nenhum computador, e os números são os da conta. Ela os pega do mesmo lugar que o /usage do Claude Code, que não é uma API pública da Anthropic: pode mudar sem aviso.
+Sin conexión: reintentando…	Sem conexão: tentando de novo…
 
-#: components/aos_portal/web/app.js:1439
-1. Abrí la página de inicio de sesión de Claude.	1. Abra a página de login do Claude.
+#: components/aos_portal/web/app.js:1477
+Mando	Controle
 
-#: components/aos_portal/web/app.js:1443
-Si no se abrió una pestaña nueva:	Se não abriu uma aba nova:
+#: components/aos_portal/web/app.js:1477
+El celular es un mando más para los juegos de la placa.	O celular é mais um controle para os jogos da placa.
 
-#: components/aos_portal/web/app.js:1443
-abrí la página de Claude acá	abra a página do Claude aqui
+#: components/aos_portal/web/app.js:1497
+se renueva en %s	renova em %s
 
-#: components/aos_portal/web/app.js:1447
-Iniciar sesión con Claude	Entrar com o Claude
+#: components/aos_portal/web/app.js:1504
+Sesión iniciada	Sessão iniciada
 
-#: components/aos_portal/web/app.js:1460
-Atajo de teclado	Atalho de teclado
+#: components/aos_portal/web/app.js:1504
+La sesión venció	A sessão expirou
 
-#: components/aos_portal/web/app.js:1460
-Escribir un texto	Digitar um texto
+#: components/aos_portal/web/app.js:1504
+Sin sesión	Sem sessão
 
-#: components/aos_portal/web/app.js:1460
-Secuencia	Sequência
+#: components/aos_portal/web/app.js:1505
+recién leído	lido agora
 
-#: components/aos_portal/web/app.js:1460
-Publicar MQTT	Publicar MQTT
+#: components/aos_portal/web/app.js:1505
+leído hace %s	lido há %s
 
-#: components/aos_portal/web/app.js:1460
-Abrir una app	Abrir um app
+#: components/aos_portal/web/app.js:1506
+¿Cerrar la sesión de Claude en la placa?	Encerrar a sessão do Claude na placa?
 
-#: components/aos_portal/web/app.js:1467
-%s pasos	%s passos
-
-#: components/aos_portal/web/app.js:1487
-#: components/aos_portal/web/app.js:1713
-#: components/aos_portal/web/app.js:2381
-Descartar cambios	Descartar alterações
-
-#: components/aos_portal/web/app.js:1488
-#: components/aos_portal/web/app.js:2799
-Guardar cambios	Salvar alterações
-
-#: components/aos_portal/web/app.js:1507
-La computadora tiene el teclado y el mouse	O computador está com o teclado e o mouse
-
-#: components/aos_portal/web/app.js:1507
-El USB se está preparando…	O USB está se preparando…
+#: components/aos_portal/web/app.js:1506
+#: components/aos_portal/web/app.js:4284
+Cerrar sesión	Sair
 
 #: components/aos_portal/web/app.js:1508
-Esperando a la computadora: conectá el puerto OTG	Esperando o computador: conecte a porta OTG
+5 horas	5 horas
 
 #: components/aos_portal/web/app.js:1508
-USB apagado: se prende al abrir el Macro pad o al tocar un atajo	USB desligado: liga ao abrir o Macro pad ou ao tocar um atalho
+Semana	Semana
+
+#: components/aos_portal/web/app.js:1509
+Semana, Opus	Semana, Opus
 
 #: components/aos_portal/web/app.js:1510
-en la tarjeta: macropad.json	no cartão: macropad.json
-
-#: components/aos_portal/web/app.js:1510
-sin tarjeta: sólo en memoria	sem cartão: só na memória
+Semana, Sonnet	Semana, Sonnet
 
 #: components/aos_portal/web/app.js:1511
-Último envío:	Último envio:
+Uso extra	Uso extra
 
-#: components/aos_portal/web/app.js:1516
-#: components/aos_portal/web/app.js:2419
-Guardado: la placa ya lo muestra	Salvo: a placa já mostra
+#: components/aos_portal/web/app.js:1515
+Pegá acá el código (código#estado)	Cole o código aqui (código#estado)
+
+#: components/aos_portal/web/app.js:1518
+2. En la página de Claude iniciá sesión y autorizá. Te va a mostrar un código: copialo y pegalo acá.	2. Na página do Claude, entre e autorize. Ela vai mostrar um código: copie e cole aqui.
+
+#: components/aos_portal/web/app.js:1521
+Verificando…	Verificando…
+
+#: components/aos_portal/web/app.js:1523
+Confirmar	Confirmar
+
+#: components/aos_portal/web/app.js:1524
+Iniciar sesión	Entrar
+
+#: components/aos_portal/web/app.js:1525
+La placa tiene su propio inicio de sesión con tu cuenta de Claude: no usa ni toca el de Claude Code en ninguna computadora, y los números son los de la cuenta. Los toma del mismo lugar que el /usage de Claude Code, que no es una API pública de Anthropic: puede cambiar sin aviso.	A placa tem seu próprio login com sua conta do Claude: não usa nem mexe no do Claude Code em nenhum computador, e os números são os da conta. Ela os pega do mesmo lugar que o /usage do Claude Code, que não é uma API pública da Anthropic: pode mudar sem aviso.
 
 #: components/aos_portal/web/app.js:1526
-#: components/aos_portal/web/app.js:1536
-(sin nombre)	(sem nome)
+1. Abrí la página de inicio de sesión de Claude.	1. Abra a página de login do Claude.
 
-#: components/aos_portal/web/app.js:1527
-#: components/aos_portal/web/app.js:2626
-#: components/aos_portal/web/app.js:2659
-#: components/aos_portal/web/app.js:2721
-Página %s	Página %s
+#: components/aos_portal/web/app.js:1530
+Si no se abrió una pestaña nueva:	Se não abriu uma aba nova:
 
-#: components/aos_portal/web/app.js:1527
-#: components/aos_portal/web/app.js:2842
-+ Página	+ Página
+#: components/aos_portal/web/app.js:1530
+abrí la página de Claude acá	abra a página do Claude aqui
 
-#: components/aos_portal/web/app.js:1556
-Esta página se llena sola con las escenas y luces de Home Assistant la primera vez que la placa conecte con HA. Si agregás botones a mano, deja de hacerlo.	Esta página se preenche sozinha com as cenas e luzes do Home Assistant na primeira vez que a placa se conectar ao HA. Se você adicionar botões à mão, ela deixa de fazer isso.
+#: components/aos_portal/web/app.js:1534
+Iniciar sesión con Claude	Entrar com o Claude
 
-#: components/aos_portal/web/app.js:1563
-Página	Página
+#: components/aos_portal/web/app.js:1547
+Atajo de teclado	Atalho de teclado
 
-#: components/aos_portal/web/app.js:1566
-← Mover	← Mover
+#: components/aos_portal/web/app.js:1547
+Escribir un texto	Digitar um texto
 
-#: components/aos_portal/web/app.js:1567
-Mover →	Mover →
+#: components/aos_portal/web/app.js:1547
+Secuencia	Sequência
 
-#: components/aos_portal/web/app.js:1568
-¿Borrar la página «%s» con sus botones?	Apagar a página "%s" com seus botões?
+#: components/aos_portal/web/app.js:1547
+Publicar MQTT	Publicar MQTT
 
-#: components/aos_portal/web/app.js:1568
-Borrar página	Apagar página
+#: components/aos_portal/web/app.js:1547
+Abrir una app	Abrir um app
 
-#: components/aos_portal/web/app.js:1570
-Tocá un botón para editarlo, o un lugar vacío para crear uno. Arrastrá los botones para cambiarlos de lugar.	Clique em um botão para editá-lo, ou em um lugar vazio para criar um. Arraste os botões para mudá-los de lugar.
+#: components/aos_portal/web/app.js:1554
+%s pasos	%s passos
 
 #: components/aos_portal/web/app.js:1574
-Buscar un ícono…	Buscar um ícone…
+#: components/aos_portal/web/app.js:1800
+#: components/aos_portal/web/app.js:2468
+Descartar cambios	Descartar alterações
 
-#: components/aos_portal/web/app.js:1588
-Modificadores cmd, ctrl, alt, shift con + y una tecla. Medios: play, next, prev, mute, volup, voldown.	Modificadores cmd, ctrl, alt, shift com + e uma tecla. Mídia: play, next, prev, mute, volup, voldown.
+#: components/aos_portal/web/app.js:1575
+#: components/aos_portal/web/app.js:2886
+Guardar cambios	Salvar alterações
 
-#: components/aos_portal/web/app.js:1589
-La placa conoce esa tecla.	A placa conhece essa tecla.
+#: components/aos_portal/web/app.js:1594
+La computadora tiene el teclado y el mouse	O computador está com o teclado e o mouse
 
-#: components/aos_portal/web/app.js:1589
-La placa no conoce esa tecla.	A placa não conhece essa tecla.
-
-#: components/aos_portal/web/app.js:1592
-Combinación	Combinação
-
-#: components/aos_portal/web/app.js:1595
-#: components/aos_portal/web/app.js:2848
-Texto	Texto
+#: components/aos_portal/web/app.js:1594
+El USB se está preparando…	O USB está se preparando…
 
 #: components/aos_portal/web/app.js:1595
-Se escribe como un teclado de EE. UU.: los acentos y la ñ no llegan.	É digitado como num teclado dos EUA: os acentos e o ñ não chegam.
+Esperando a la computadora: conectá el puerto OTG	Esperando o computador: conecte a porta OTG
+
+#: components/aos_portal/web/app.js:1595
+USB apagado: se prende al abrir el Macro pad o al tocar un atajo	USB desligado: liga ao abrir o Macro pad ou ao tocar um atalho
 
 #: components/aos_portal/web/app.js:1597
-Pasos	Passos
+en la tarjeta: macropad.json	no cartão: macropad.json
+
+#: components/aos_portal/web/app.js:1597
+sin tarjeta: sólo en memoria	sem cartão: só na memória
 
 #: components/aos_portal/web/app.js:1598
-Una orden por línea:	Um comando por linha:
+Último envío:	Último envio:
 
-#: components/aos_portal/web/app.js:1598
-STRING texto	STRING texto
-
-#: components/aos_portal/web/app.js:1599
-HA entidad	HA entidade
-
-#: components/aos_portal/web/app.js:1599
-o	ou
-
-#: components/aos_portal/web/app.js:1599
-HA dominio.servicio entidad {json}	HA domínio.serviço entidade {json}
-
-#: components/aos_portal/web/app.js:1600
-MQTT tópico mensaje	MQTT tópico mensagem
-
-#: components/aos_portal/web/app.js:1600
-Las líneas con # son comentarios.	As linhas com # são comentários.
-
-#: components/aos_portal/web/app.js:1604
-Entidad	Entidade
-
-#: components/aos_portal/web/app.js:1610
-Home Assistant no está conectado: la lista de entidades aparece cuando la placa lo tenga.	O Home Assistant não está conectado: a lista de entidades aparece quando a placa o tiver.
-
-#: components/aos_portal/web/app.js:1612
-Servicio	Serviço
-
-#: components/aos_portal/web/app.js:1612
-vacío: lo de siempre (prender/apagar, abrir, ejecutar)	vazio: o de sempre (ligar/desligar, abrir, executar)
+#: components/aos_portal/web/app.js:1603
+#: components/aos_portal/web/app.js:2506
+Guardado: la placa ya lo muestra	Salvo: a placa já mostra
 
 #: components/aos_portal/web/app.js:1613
-Datos del servicio (JSON, opcional)	Dados do serviço (JSON, opcional)
+#: components/aos_portal/web/app.js:1623
+(sin nombre)	(sem nome)
 
 #: components/aos_portal/web/app.js:1614
-El botón muestra el estado de la entidad: una luz prendida se ve llena de color; un sensor, su valor.	O botão mostra o estado da entidade: uma luz acesa aparece cheia de cor; um sensor, seu valor.
+#: components/aos_portal/web/app.js:2713
+#: components/aos_portal/web/app.js:2746
+#: components/aos_portal/web/app.js:2808
+Página %s	Página %s
 
-#: components/aos_portal/web/app.js:1617
-Tópico de estado (opcional)	Tópico de estado (opcional)
+#: components/aos_portal/web/app.js:1614
+#: components/aos_portal/web/app.js:2929
++ Página	+ Página
 
-#: components/aos_portal/web/app.js:1617
-Si lo tiene, el botón se prende y apaga con lo que llegue ahí (ON/OFF, 1/0, {"state":"ON"}).	Se tiver, o botão liga e desliga com o que chegar ali (ON/OFF, 1/0, {"state":"ON"}).
+#: components/aos_portal/web/app.js:1643
+Esta página se llena sola con las escenas y luces de Home Assistant la primera vez que la placa conecte con HA. Si agregás botones a mano, deja de hacerlo.	Esta página se preenche sozinha com as cenas e luzes do Home Assistant na primeira vez que a placa se conectar ao HA. Se você adicionar botões à mão, ela deixa de fazer isso.
 
-#: components/aos_portal/web/app.js:1623
-Elegí una app…	Escolha um app…
+#: components/aos_portal/web/app.js:1650
+Página	Página
 
-#: components/aos_portal/web/app.js:1626
-Botón %s	Botão %s
+#: components/aos_portal/web/app.js:1653
+← Mover	← Mover
 
-#: components/aos_portal/web/app.js:1631
-Probar en la placa	Testar na placa
+#: components/aos_portal/web/app.js:1654
+Mover →	Mover →
 
-#: components/aos_portal/web/app.js:1632
-La página está llena	A página está cheia
+#: components/aos_portal/web/app.js:1655
+¿Borrar la página «%s» con sus botones?	Apagar a página "%s" com seus botões?
 
-#: components/aos_portal/web/app.js:1632
-Duplicar	Duplicar
-
-#: components/aos_portal/web/app.js:1634
-Copiar	Copiar
-
-#: components/aos_portal/web/app.js:1635
-Acción	Ação
-
-#: components/aos_portal/web/app.js:1636
-Color	Cor
-
-#: components/aos_portal/web/app.js:1637
-Ícono	Ícone
+#: components/aos_portal/web/app.js:1655
+Borrar página	Apagar página
 
 #: components/aos_portal/web/app.js:1657
-¿Volver a la botonera de fábrica? Se pierde la actual.	Voltar aos botões de fábrica? Os atuais se perdem.
-
-#: components/aos_portal/web/app.js:1657
-De fábrica	De fábrica
-
-#: components/aos_portal/web/app.js:1658
-En la placa: 3×5 parada, 5×3 acostada, en este mismo orden. Arrastrá para mover; el cambio llega a la placa al guardar.	Na placa: 3×5 em pé, 5×3 deitada, nesta mesma ordem. Arraste para mover; a mudança chega à placa ao salvar.
+Tocá un botón para editarlo, o un lugar vacío para crear uno. Arrastrá los botones para cambiarlos de lugar.	Clique em um botão para editá-lo, ou em um lugar vazio para criar um. Arraste os botões para mudá-los de lugar.
 
 #: components/aos_portal/web/app.js:1661
-#: components/aos_portal/web/app.js:2855
-Hay cambios sin guardar	Há alterações não salvas
+Buscar un ícono…	Buscar um ícone…
 
 #: components/aos_portal/web/app.js:1675
-libre	livre
+Modificadores cmd, ctrl, alt, shift con + y una tecla. Medios: play, next, prev, mute, volup, voldown.	Modificadores cmd, ctrl, alt, shift com + e uma tecla. Mídia: play, next, prev, mute, volup, voldown.
 
 #: components/aos_portal/web/app.js:1676
-en un puerto	numa porta
+La placa conoce esa tecla.	A placa conhece essa tecla.
 
 #: components/aos_portal/web/app.js:1676
-tomado	ocupado
+La placa no conoce esa tecla.	A placa não conhece essa tecla.
 
-#: components/aos_portal/web/app.js:1676
-de la placa	da placa
+#: components/aos_portal/web/app.js:1679
+Combinación	Combinação
 
-#: components/aos_portal/web/app.js:1677
-con cuidado	com cuidado
+#: components/aos_portal/web/app.js:1682
+#: components/aos_portal/web/app.js:2935
+Texto	Texto
 
-#: components/aos_portal/web/app.js:1677
-reservado	reservado
+#: components/aos_portal/web/app.js:1682
+Se escribe como un teclado de EE. UU.: los acentos y la ñ no llegan.	É digitado como num teclado dos EUA: os acentos e o ñ não chegam.
 
-#: components/aos_portal/web/app.js:1706
-Buscando sensores…	Buscando sensores…
+#: components/aos_portal/web/app.js:1684
+Pasos	Passos
 
-#: components/aos_portal/web/app.js:1716
-Agregar al texto	Adicionar ao texto
+#: components/aos_portal/web/app.js:1685
+Una orden por línea:	Um comando por linha:
 
-#: components/aos_portal/web/app.js:1734
-Se puede guardar, pero:	Dá para salvar, mas:
+#: components/aos_portal/web/app.js:1685
+STRING texto	STRING texto
 
-#: components/aos_portal/web/app.js:1735
-Bien: %s puertos y %s módulos	Tudo certo: %s portas e %s módulos
+#: components/aos_portal/web/app.js:1686
+HA entidad	HA entidade
 
-#: components/aos_portal/web/app.js:1743
-No se guardó	Não foi salvo
+#: components/aos_portal/web/app.js:1686
+o	ou
+
+#: components/aos_portal/web/app.js:1686
+HA dominio.servicio entidad {json}	HA domínio.serviço entidade {json}
+
+#: components/aos_portal/web/app.js:1687
+MQTT tópico mensaje	MQTT tópico mensagem
+
+#: components/aos_portal/web/app.js:1687
+Las líneas con # son comentarios.	As linhas com # são comentários.
+
+#: components/aos_portal/web/app.js:1691
+Entidad	Entidade
+
+#: components/aos_portal/web/app.js:1697
+Home Assistant no está conectado: la lista de entidades aparece cuando la placa lo tenga.	O Home Assistant não está conectado: a lista de entidades aparece quando a placa o tiver.
+
+#: components/aos_portal/web/app.js:1699
+Servicio	Serviço
+
+#: components/aos_portal/web/app.js:1699
+vacío: lo de siempre (prender/apagar, abrir, ejecutar)	vazio: o de sempre (ligar/desligar, abrir, executar)
+
+#: components/aos_portal/web/app.js:1700
+Datos del servicio (JSON, opcional)	Dados do serviço (JSON, opcional)
+
+#: components/aos_portal/web/app.js:1701
+El botón muestra el estado de la entidad: una luz prendida se ve llena de color; un sensor, su valor.	O botão mostra o estado da entidade: uma luz acesa aparece cheia de cor; um sensor, seu valor.
+
+#: components/aos_portal/web/app.js:1704
+Tópico de estado (opcional)	Tópico de estado (opcional)
+
+#: components/aos_portal/web/app.js:1704
+Si lo tiene, el botón se prende y apaga con lo que llegue ahí (ON/OFF, 1/0, {"state":"ON"}).	Se tiver, o botão liga e desliga com o que chegar ali (ON/OFF, 1/0, {"state":"ON"}).
+
+#: components/aos_portal/web/app.js:1710
+Elegí una app…	Escolha um app…
+
+#: components/aos_portal/web/app.js:1713
+Botón %s	Botão %s
+
+#: components/aos_portal/web/app.js:1718
+Probar en la placa	Testar na placa
+
+#: components/aos_portal/web/app.js:1719
+La página está llena	A página está cheia
+
+#: components/aos_portal/web/app.js:1719
+Duplicar	Duplicar
+
+#: components/aos_portal/web/app.js:1721
+Copiar	Copiar
+
+#: components/aos_portal/web/app.js:1722
+Acción	Ação
+
+#: components/aos_portal/web/app.js:1723
+Color	Cor
+
+#: components/aos_portal/web/app.js:1724
+Ícono	Ícone
 
 #: components/aos_portal/web/app.js:1744
+¿Volver a la botonera de fábrica? Se pierde la actual.	Voltar aos botões de fábrica? Os atuais se perdem.
+
+#: components/aos_portal/web/app.js:1744
+De fábrica	De fábrica
+
+#: components/aos_portal/web/app.js:1745
+En la placa: 3×5 parada, 5×3 acostada, en este mismo orden. Arrastrá para mover; el cambio llega a la placa al guardar.	Na placa: 3×5 em pé, 5×3 deitada, nesta mesma ordem. Arraste para mover; a mudança chega à placa ao salvar.
+
+#: components/aos_portal/web/app.js:1748
+#: components/aos_portal/web/app.js:2942
+Hay cambios sin guardar	Há alterações não salvas
+
+#: components/aos_portal/web/app.js:1762
+libre	livre
+
+#: components/aos_portal/web/app.js:1763
+en un puerto	numa porta
+
+#: components/aos_portal/web/app.js:1763
+tomado	ocupado
+
+#: components/aos_portal/web/app.js:1763
+de la placa	da placa
+
+#: components/aos_portal/web/app.js:1764
+con cuidado	com cuidado
+
+#: components/aos_portal/web/app.js:1764
+reservado	reservado
+
+#: components/aos_portal/web/app.js:1793
+Buscando sensores…	Buscando sensores…
+
+#: components/aos_portal/web/app.js:1803
+Agregar al texto	Adicionar ao texto
+
+#: components/aos_portal/web/app.js:1821
+Se puede guardar, pero:	Dá para salvar, mas:
+
+#: components/aos_portal/web/app.js:1822
+Bien: %s puertos y %s módulos	Tudo certo: %s portas e %s módulos
+
+#: components/aos_portal/web/app.js:1830
+No se guardó	Não foi salvo
+
+#: components/aos_portal/web/app.js:1831
 Guardado: %s puertos, %s módulos	Salvo: %s portas, %s módulos
 
-#: components/aos_portal/web/app.js:1781
+#: components/aos_portal/web/app.js:1868
 GPIO%d (puerto nuevo)	GPIO%d (porta nova)
 
-#: components/aos_portal/web/app.js:1784
+#: components/aos_portal/web/app.js:1871
 segundo pin GPIO%d	segundo pino GPIO%d
 
-#: components/aos_portal/web/app.js:1786
+#: components/aos_portal/web/app.js:1873
 CS del puerto	CS da porta
 
-#: components/aos_portal/web/app.js:1798
+#: components/aos_portal/web/app.js:1885
 No hay puertos UART.	Não há portas UART.
 
-#: components/aos_portal/web/app.js:1798
+#: components/aos_portal/web/app.js:1885
 No hay puertos SPI.	Não há portas SPI.
 
-#: components/aos_portal/web/app.js:1798
+#: components/aos_portal/web/app.js:1885
 No queda ningún pin libre en el conector.	Não resta nenhum pino livre no header.
 
-#: components/aos_portal/web/app.js:1798
+#: components/aos_portal/web/app.js:1885
 No hay puertos I2C.	Não há portas I2C.
 
-#: components/aos_portal/web/app.js:1802
+#: components/aos_portal/web/app.js:1889
 El segundo pin tiene que ser otro.	O segundo pino tem que ser outro.
 
-#: components/aos_portal/web/app.js:1832
+#: components/aos_portal/web/app.js:1919
 no es un GPIO	não é um GPIO
 
-#: components/aos_portal/web/app.js:1833
-#: components/aos_portal/web/app.js:3168
+#: components/aos_portal/web/app.js:1920
+#: components/aos_portal/web/app.js:3255
 Qué es	O que é
 
-#: components/aos_portal/web/app.js:1834
+#: components/aos_portal/web/app.js:1921
 Lo tiene	Usado por
 
-#: components/aos_portal/web/app.js:1834
+#: components/aos_portal/web/app.js:1921
 nadie, ahora	ninguém, agora
 
-#: components/aos_portal/web/app.js:1835
+#: components/aos_portal/web/app.js:1922
 ninguno en modules.txt	nenhum em modules.txt
 
-#: components/aos_portal/web/app.js:1836
+#: components/aos_portal/web/app.js:1923
 Módulos	Módulos
 
-#: components/aos_portal/web/app.js:1836
-#: components/aos_portal/web/app.js:3174
+#: components/aos_portal/web/app.js:1923
+#: components/aos_portal/web/app.js:3261
 ninguno	nenhum
 
-#: components/aos_portal/web/app.js:1865
+#: components/aos_portal/web/app.js:1952
 Ahora lo usa: %s	Em uso por: %s
 
-#: components/aos_portal/web/app.js:1868
+#: components/aos_portal/web/app.js:1955
 Sin módulos declarados en este puerto.	Sem módulos declarados nesta porta.
 
-#: components/aos_portal/web/app.js:1869
+#: components/aos_portal/web/app.js:1956
 Detectados ahora: %s	Detectados agora: %s
 
-#: components/aos_portal/web/app.js:1876
+#: components/aos_portal/web/app.js:1963
 Tocá un pin para ver qué es, quién lo tiene y a qué puerto pertenece.	Clique em um pino para ver o que é, quem o usa e a que porta pertence.
 
-#: components/aos_portal/web/app.js:1879
+#: components/aos_portal/web/app.js:1966
 No hay tarjeta: no se puede guardar.	Sem cartão: não dá para salvar.
 
-#: components/aos_portal/web/app.js:1879
+#: components/aos_portal/web/app.js:1966
 modules.txt, en la raíz de la tarjeta. Se aplica al guardar.	modules.txt, na raiz do cartão. Vale ao salvar.
 
-#: components/aos_portal/web/app.js:1880
+#: components/aos_portal/web/app.js:1967
 No hay modules.txt en la tarjeta: esto es el perfil por defecto. Al guardar se crea el archivo.	Não há modules.txt no cartão: este é o perfil padrão. Ao salvar, o arquivo é criado.
 
-#: components/aos_portal/web/app.js:1903
+#: components/aos_portal/web/app.js:1990
 mín %s · máx %s · últimos %s	mín %s · máx %s · últimos %s
 
-#: components/aos_portal/web/app.js:1919
+#: components/aos_portal/web/app.js:2006
 los pines los tiene %s	pinos em uso por %s
 
-#: components/aos_portal/web/app.js:1919
+#: components/aos_portal/web/app.js:2006
 no se pudo abrir	não foi possível abrir
 
-#: components/aos_portal/web/app.js:1920
+#: components/aos_portal/web/app.js:2007
 %s sensores	%s sensores
 
-#: components/aos_portal/web/app.js:1920
+#: components/aos_portal/web/app.js:2007
 buscó hace %s s	buscou há %s s
 
-#: components/aos_portal/web/app.js:1923
+#: components/aos_portal/web/app.js:2010
 detectado	detectado
 
-#: components/aos_portal/web/app.js:1927
+#: components/aos_portal/web/app.js:2014
 %s lecturas · %s errores	%s leituras · %s erros
 
-#: components/aos_portal/web/app.js:1927
+#: components/aos_portal/web/app.js:2014
 Esperando la primera lectura	Esperando a primeira leitura
 
-#: components/aos_portal/web/app.js:1928
+#: components/aos_portal/web/app.js:2015
 No hay sensores. Conectá uno a i2c.ext: SDA al GPIO21 (pin 15), SCL al GPIO22 (pin 17), 3V3 (pin 18) y GND (pin 19). Los BME280, SHT3x/4x, AHT20, INA219/226 y ADS1115 se reconocen solos.	Não há sensores. Conecte um a i2c.ext: SDA ao GPIO21 (pino 15), SCL ao GPIO22 (pino 17), 3V3 (pino 18) e GND (pino 19). Os BME280, SHT3x/4x, AHT20, INA219/226 e ADS1115 são reconhecidos sozinhos.
 
-#: components/aos_portal/web/app.js:1929
+#: components/aos_portal/web/app.js:2016
 Parece que hay	Parece que há
 
-#: components/aos_portal/web/app.js:1930
+#: components/aos_portal/web/app.js:2017
 ¿Es un %s?	É um %s?
 
-#: components/aos_portal/web/app.js:1930
+#: components/aos_portal/web/app.js:2017
 Puede ser: %s	Pode ser: %s
 
-#: components/aos_portal/web/app.js:1930
+#: components/aos_portal/web/app.js:2017
 no dice qué es	não diz o que é
 
-#: components/aos_portal/web/app.js:1933
+#: components/aos_portal/web/app.js:2020
 Agregar	Adicionar
 
-#: components/aos_portal/web/app.js:1934
+#: components/aos_portal/web/app.js:2021
 Estos chips no tienen cómo decir qué son sin que alguien les escriba: agregalos a modules.txt si son lo que parecen.	Estes chips não têm como dizer o que são sem que alguém escreva neles: adicione-os ao modules.txt se forem o que parecem.
 
-#: components/aos_portal/web/app.js:1938
+#: components/aos_portal/web/app.js:2025
 Sin lecturas todavía	Sem leituras ainda
 
-#: components/aos_portal/web/app.js:1952
-#: components/aos_portal/web/app.js:1987
+#: components/aos_portal/web/app.js:2039
+#: components/aos_portal/web/app.js:2074
 Sensores	Sensores
 
-#: components/aos_portal/web/app.js:1956
+#: components/aos_portal/web/app.js:2043
 Puertos y módulos	Portas e módulos
 
-#: components/aos_portal/web/app.js:1959
+#: components/aos_portal/web/app.js:2046
 Agregar módulo	Adicionar módulo
 
-#: components/aos_portal/web/app.js:1961
+#: components/aos_portal/web/app.js:2048
 Sintaxis: port <nombre> <pines> y module <nombre> <puerto> [addr= chip= shunt= gain= cs=]. Los sensores que se reconocen solos no hace falta declararlos; declarados, se leen aunque no se identifiquen (docs/MODULES.md).	Sintaxe: port <nome> <pinos> e module <nome> <porta> [addr= chip= shunt= gain= cs=]. Os sensores reconhecidos sozinhos não precisam ser declarados; declarados, são lidos mesmo que não se identifiquem (docs/MODULES.md).
 
-#: components/aos_portal/web/app.js:1987
+#: components/aos_portal/web/app.js:2074
 Reloj	Relógio
 
-#: components/aos_portal/web/app.js:1987
+#: components/aos_portal/web/app.js:2074
 Monitor	Monitor
 
-#: components/aos_portal/web/app.js:1987
+#: components/aos_portal/web/app.js:2074
 Clima	Clima
 
-#: components/aos_portal/web/app.js:1991
+#: components/aos_portal/web/app.js:2078
 Degradé vertical	Degradê vertical
 
-#: components/aos_portal/web/app.js:1991
+#: components/aos_portal/web/app.js:2078
 Degradé diagonal	Degradê diagonal
 
-#: components/aos_portal/web/app.js:1991
+#: components/aos_portal/web/app.js:2078
 Radial	Radial
 
-#: components/aos_portal/web/app.js:1991
+#: components/aos_portal/web/app.js:2078
 Liso	Liso
 
-#: components/aos_portal/web/app.js:1992
+#: components/aos_portal/web/app.js:2079
 General	Geral
 
-#: components/aos_portal/web/app.js:1992
+#: components/aos_portal/web/app.js:2079
 Juegos	Jogos
 
-#: components/aos_portal/web/app.js:1992
+#: components/aos_portal/web/app.js:2079
 Multimedia	Mídia
 
-#: components/aos_portal/web/app.js:1992
+#: components/aos_portal/web/app.js:2079
 Herramientas	Ferramentas
 
-#: components/aos_portal/web/app.js:1993
+#: components/aos_portal/web/app.js:2080
 Casa	Casa
 
-#: components/aos_portal/web/app.js:1993
+#: components/aos_portal/web/app.js:2080
 Salud	Saúde
 
-#: components/aos_portal/web/app.js:1993
+#: components/aos_portal/web/app.js:2080
 Varios	Outros
 
-#: components/aos_portal/web/app.js:2001
+#: components/aos_portal/web/app.js:2088
 línea %s: %s	linha %s: %s
 
-#: components/aos_portal/web/app.js:2002
+#: components/aos_portal/web/app.js:2089
 el archivo pasa de 24 KB	o arquivo passa de 24 KB
 
-#: components/aos_portal/web/app.js:2008
+#: components/aos_portal/web/app.js:2095
 línea demasiado larga	linha longa demais
 
-#: components/aos_portal/web/app.js:2020
+#: components/aos_portal/web/app.js:2107
 %s sin id de app	%s sem id de app
 
-#: components/aos_portal/web/app.js:2021
+#: components/aos_portal/web/app.js:2108
 id de app demasiado largo	id de app longo demais
 
-#: components/aos_portal/web/app.js:2022
-#: components/aos_portal/web/app.js:2031
-#: components/aos_portal/web/app.js:2043
+#: components/aos_portal/web/app.js:2109
+#: components/aos_portal/web/app.js:2118
+#: components/aos_portal/web/app.js:2130
 demasiadas líneas	linhas demais
 
-#: components/aos_portal/web/app.js:2026
+#: components/aos_portal/web/app.js:2113
 dock adentro de una carpeta o del dock	dock dentro de uma pasta ou do dock
 
-#: components/aos_portal/web/app.js:2027
+#: components/aos_portal/web/app.js:2114
 dos secciones dock	duas seções dock
 
-#: components/aos_portal/web/app.js:2030
+#: components/aos_portal/web/app.js:2117
 page o widget adentro de una carpeta o del dock	page ou widget dentro de uma pasta ou do dock
 
-#: components/aos_portal/web/app.js:2036
+#: components/aos_portal/web/app.js:2123
 el widget necesita un tipo y un tamaño como 2x2	o widget precisa de um tipo e um tamanho como 2x2
 
-#: components/aos_portal/web/app.js:2037
+#: components/aos_portal/web/app.js:2124
 tipo de widget demasiado largo	tipo de widget longo demais
 
-#: components/aos_portal/web/app.js:2041
+#: components/aos_portal/web/app.js:2128
 una carpeta adentro de otra o del dock	uma pasta dentro de outra ou do dock
 
-#: components/aos_portal/web/app.js:2042
+#: components/aos_portal/web/app.js:2129
 más de 32 carpetas	mais de 32 pastas
 
-#: components/aos_portal/web/app.js:2046
+#: components/aos_portal/web/app.js:2133
 la carpeta necesita id, dos colores, relleno, glifo, color del glifo y nombre	a pasta precisa de id, duas cores, preenchimento, glifo, cor do glifo e nome
 
-#: components/aos_portal/web/app.js:2047
+#: components/aos_portal/web/app.js:2134
 id de carpeta demasiado largo	id de pasta longo demais
 
-#: components/aos_portal/web/app.js:2048
+#: components/aos_portal/web/app.js:2135
 los colores son seis dígitos hexadecimales	as cores são seis dígitos hexadecimais
 
-#: components/aos_portal/web/app.js:2049
+#: components/aos_portal/web/app.js:2136
 el relleno es s, v, d o r	o preenchimento é s, v, d ou r
 
-#: components/aos_portal/web/app.js:2050
+#: components/aos_portal/web/app.js:2137
 el color del glifo es w o b	a cor do glifo é w ou b
 
-#: components/aos_portal/web/app.js:2051
+#: components/aos_portal/web/app.js:2138
 dos carpetas con el mismo id	duas pastas com o mesmo id
 
-#: components/aos_portal/web/app.js:2056
+#: components/aos_portal/web/app.js:2143
 end sin carpeta ni dock	end sem pasta nem dock
 
-#: components/aos_portal/web/app.js:2058
+#: components/aos_portal/web/app.js:2145
 línea desconocida (app, folder, dock, page, widget, end, hide)	linha desconhecida (app, folder, dock, page, widget, end, hide)
 
-#: components/aos_portal/web/app.js:2061
+#: components/aos_portal/web/app.js:2148
 la última carpeta o el dock no tiene end	a última pasta ou o dock não tem end
 
-#: components/aos_portal/web/app.js:2200
+#: components/aos_portal/web/app.js:2287
 El dock tiene %s apps: la placa muestra 4 parada y 6 acostada.	O dock tem %s apps: a placa mostra 4 em pé e 6 deitada.
 
-#: components/aos_portal/web/app.js:2201
+#: components/aos_portal/web/app.js:2288
 El dock tiene %s apps: parada la placa muestra las 4 primeras.	O dock tem %s apps: em pé, a placa mostra os 4 primeiros.
 
-#: components/aos_portal/web/app.js:2203
+#: components/aos_portal/web/app.js:2290
 Hay %s carpetas: la placa lee 32 como mucho.	Há %s pastas: a placa lê 32 no máximo.
 
-#: components/aos_portal/web/app.js:2205
+#: components/aos_portal/web/app.js:2292
 La carpeta «%s»	A pasta "%s"
 
-#: components/aos_portal/web/app.js:2206
+#: components/aos_portal/web/app.js:2293
 %s: el id va sin espacios y con hasta 15 caracteres.	%s: o id vai sem espaços e com até 15 caracteres.
 
-#: components/aos_portal/web/app.js:2207
+#: components/aos_portal/web/app.js:2294
 %s: hay dos carpetas con el id %s.	%s: há duas pastas com o id %s.
 
-#: components/aos_portal/web/app.js:2209
+#: components/aos_portal/web/app.js:2296
 %s no tiene nombre.	%s não tem nome.
 
-#: components/aos_portal/web/app.js:2210
+#: components/aos_portal/web/app.js:2297
 %s: el nombre pasa de 39 bytes.	%s: o nome passa de 39 bytes.
 
-#: components/aos_portal/web/app.js:2211
+#: components/aos_portal/web/app.js:2298
 %s: los colores son seis dígitos hexadecimales.	%s: as cores são seis dígitos hexadecimais.
 
-#: components/aos_portal/web/app.js:2212
+#: components/aos_portal/web/app.js:2299
 %s: el glifo no es válido.	%s: o glifo não é válido.
 
-#: components/aos_portal/web/app.js:2214
+#: components/aos_portal/web/app.js:2301
 %s tiene ninguna app: al editar el inicio en la placa, desaparece.	%s não tem nenhum app: ao editar o início na placa, ela desaparece.
 
-#: components/aos_portal/web/app.js:2214
+#: components/aos_portal/web/app.js:2301
 %s tiene una sola app: al editar el inicio en la placa, se deshace.	%s tem um só app: ao editar o início na placa, ela se desfaz.
 
-#: components/aos_portal/web/app.js:2217
+#: components/aos_portal/web/app.js:2304
 El widget «%s»: el tipo va sin espacios y con hasta 15 caracteres.	O widget "%s": o tipo vai sem espaços e com até 15 caracteres.
 
-#: components/aos_portal/web/app.js:2218
+#: components/aos_portal/web/app.js:2305
 El widget «%s»: el tamaño va de 1x1 a 8x8.	O widget "%s": o tamanho vai de 1x1 a 8x8.
 
-#: components/aos_portal/web/app.js:2219
+#: components/aos_portal/web/app.js:2306
 El widget «%s»: el dato pasa de 255 bytes.	O widget "%s": o dado passa de 255 bytes.
 
-#: components/aos_portal/web/app.js:2222
+#: components/aos_portal/web/app.js:2309
 Hay %s páginas: la placa muestra 16 como mucho.	Há %s páginas: a placa mostra 16 no máximo.
 
-#: components/aos_portal/web/app.js:2223
+#: components/aos_portal/web/app.js:2310
 Las páginas vacías no se guardan.	As páginas vazias não são salvas.
 
-#: components/aos_portal/web/app.js:2225
+#: components/aos_portal/web/app.js:2312
 El archivo no pasaría la lectura de la placa: %s.	O arquivo não passaria na leitura da placa: %s.
 
-#: components/aos_portal/web/app.js:2393
+#: components/aos_portal/web/app.js:2480
 no se pudo leer menu.txt	não foi possível ler menu.txt
 
-#: components/aos_portal/web/app.js:2410
+#: components/aos_portal/web/app.js:2497
 menu.txt cambió en la placa desde que lo cargaste (¿lo editaste en la pantalla?). ¿Guardar igual y reemplazarlo?	menu.txt mudou na placa desde que você o carregou (você o editou na tela?). Salvar mesmo assim e substituí-lo?
 
-#: components/aos_portal/web/app.js:2414
+#: components/aos_portal/web/app.js:2501
 la placa guardó otra cosa	a placa salvou outra coisa
 
-#: components/aos_portal/web/app.js:2419
+#: components/aos_portal/web/app.js:2506
 Guardado, pero al releerlo no queda igual	Salvo, mas ao reler não fica igual
 
-#: components/aos_portal/web/app.js:2424
+#: components/aos_portal/web/app.js:2511
 La tarjeta no tiene menu.txt todavía: la placa usa el orden de siempre	O cartão ainda não tem menu.txt: a placa usa a ordem de sempre
 
-#: components/aos_portal/web/app.js:2435
+#: components/aos_portal/web/app.js:2522
 así se va a guardar	é assim que vai ser salvo
 
-#: components/aos_portal/web/app.js:2441
+#: components/aos_portal/web/app.js:2528
 Aplicar	Aplicar
 
-#: components/aos_portal/web/app.js:2475
+#: components/aos_portal/web/app.js:2562
 Ahí sólo van apps	Ali só vão apps
 
-#: components/aos_portal/web/app.js:2476
+#: components/aos_portal/web/app.js:2563
 El dock admite 4 apps	O dock aceita 4 apps
 
-#: components/aos_portal/web/app.js:2477
-#: components/aos_portal/web/app.js:2816
+#: components/aos_portal/web/app.js:2564
+#: components/aos_portal/web/app.js:2903
 La placa lee 32 carpetas como mucho	A placa lê 32 pastas no máximo
 
-#: components/aos_portal/web/app.js:2510
-#: components/aos_portal/web/app.js:2741
-#: components/aos_portal/web/app.js:2775
+#: components/aos_portal/web/app.js:2597
+#: components/aos_portal/web/app.js:2828
+#: components/aos_portal/web/app.js:2862
 Carpeta	Pasta
 
-#: components/aos_portal/web/app.js:2581
+#: components/aos_portal/web/app.js:2668
 Carpeta %s · %s apps	Pasta %s · %s apps
 
-#: components/aos_portal/web/app.js:2621
+#: components/aos_portal/web/app.js:2708
 Página vacía: arrastrá algo acá. Vacía no se guarda.	Página vazia: arraste algo para cá. Vazia não é salva.
 
-#: components/aos_portal/web/app.js:2626
+#: components/aos_portal/web/app.js:2713
 apps nombradas en menu.txt que no están instaladas	apps citados no menu.txt que não estão instalados
 
-#: components/aos_portal/web/app.js:2626
+#: components/aos_portal/web/app.js:2713
 +%s sin instalar	+%s não instalados
 
-#: components/aos_portal/web/app.js:2627
+#: components/aos_portal/web/app.js:2714
 la placa no la muestra	a placa não o mostra
 
-#: components/aos_portal/web/app.js:2628
+#: components/aos_portal/web/app.js:2715
 Mover a la izquierda	Mover à esquerda
 
-#: components/aos_portal/web/app.js:2629
+#: components/aos_portal/web/app.js:2716
 Mover a la derecha	Mover à direita
 
-#: components/aos_portal/web/app.js:2630
+#: components/aos_portal/web/app.js:2717
 Quitar la página	Remover a página
 
-#: components/aos_portal/web/app.js:2631
+#: components/aos_portal/web/app.js:2718
 ¿Quitar la página %s? Lo que tiene pasa a la página %s.	Remover a página %s? O que tem nela passa para a página %s.
 
-#: components/aos_portal/web/app.js:2643
+#: components/aos_portal/web/app.js:2730
 El dock está vacío: arrastrá apps acá (hasta 4).	O dock está vazio: arraste apps para cá (até 4).
 
-#: components/aos_portal/web/app.js:2649
-#: components/aos_portal/web/app.js:2711
+#: components/aos_portal/web/app.js:2736
+#: components/aos_portal/web/app.js:2798
 Mostrar	Mostrar
 
-#: components/aos_portal/web/app.js:2652
+#: components/aos_portal/web/app.js:2739
 Ninguna. Arrastrá una app acá para sacarla del inicio sin desinstalarla.	Nenhum. Arraste um app para cá para tirá-lo do início sem desinstalá-lo.
 
-#: components/aos_portal/web/app.js:2653
+#: components/aos_portal/web/app.js:2740
 %s más ocultas que no están instaladas (se conservan).	%s ocultos a mais que não estão instalados (são mantidos).
 
-#: components/aos_portal/web/app.js:2660
-#: components/aos_portal/web/app.js:2721
+#: components/aos_portal/web/app.js:2747
+#: components/aos_portal/web/app.js:2808
 Página nueva	Página nova
 
-#: components/aos_portal/web/app.js:2661
+#: components/aos_portal/web/app.js:2748
 Carpeta %s	Pasta %s
 
-#: components/aos_portal/web/app.js:2662
-#: components/aos_portal/web/app.js:2854
+#: components/aos_portal/web/app.js:2749
+#: components/aos_portal/web/app.js:2941
 Ocultas	Ocultos
 
-#: components/aos_portal/web/app.js:2697
+#: components/aos_portal/web/app.js:2784
 Cómo se usa	Como usar
 
-#: components/aos_portal/web/app.js:2698
+#: components/aos_portal/web/app.js:2785
 Arrastrá los íconos para cambiarlos de lugar, entre páginas y al dock. Soltá una app sobre otra para armar una carpeta, o en el centro de una carpeta para meterla. Tocá cualquier cosa para editarla. Nada llega a la placa hasta que tocás Guardar.	Arraste os ícones para mudá-los de lugar, entre páginas e para o dock. Solte um app sobre outro para criar uma pasta, ou no centro de uma pasta para colocá-lo nela. Clique em qualquer coisa para editá-la. Nada chega à placa até você clicar em Salvar.
 
-#: components/aos_portal/web/app.js:2701
+#: components/aos_portal/web/app.js:2788
 ◀ Antes	◀ Antes
 
-#: components/aos_portal/web/app.js:2701
+#: components/aos_portal/web/app.js:2788
 Después ▶	Depois ▶
 
-#: components/aos_portal/web/app.js:2705
+#: components/aos_portal/web/app.js:2792
 En el dock	No dock
 
-#: components/aos_portal/web/app.js:2705
+#: components/aos_portal/web/app.js:2792
 Oculta	Oculto
 
-#: components/aos_portal/web/app.js:2705
+#: components/aos_portal/web/app.js:2792
 En la página %s	Na página %s
 
-#: components/aos_portal/web/app.js:2705
+#: components/aos_portal/web/app.js:2792
 En la carpeta «%s», página %s	Na pasta "%s", página %s
 
-#: components/aos_portal/web/app.js:2707
-#: components/aos_portal/web/app.js:2720
+#: components/aos_portal/web/app.js:2794
+#: components/aos_portal/web/app.js:2807
 Mover a…	Mover para…
 
-#: components/aos_portal/web/app.js:2712
+#: components/aos_portal/web/app.js:2799
 Ocultar	Ocultar
 
-#: components/aos_portal/web/app.js:2713
+#: components/aos_portal/web/app.js:2800
 Sacar de la carpeta	Tirar da pasta
 
-#: components/aos_portal/web/app.js:2715
+#: components/aos_portal/web/app.js:2802
 Oculta sigue instalada: se abre desde el portal o desde otra app, y no aparece en el inicio.	Oculto continua instalado: abre pelo portal ou por outro app, e não aparece no início.
 
-#: components/aos_portal/web/app.js:2726
+#: components/aos_portal/web/app.js:2813
 Tipo	Tipo
 
-#: components/aos_portal/web/app.js:2727
+#: components/aos_portal/web/app.js:2814
 Tamaño	Tamanho
 
-#: components/aos_portal/web/app.js:2727
+#: components/aos_portal/web/app.js:2814
 %s celdas	%s células
 
-#: components/aos_portal/web/app.js:2728
+#: components/aos_portal/web/app.js:2815
 Dato (opcional)	Dado (opcional)
 
-#: components/aos_portal/web/app.js:2728
+#: components/aos_portal/web/app.js:2815
 lo que el widget lea	o que o widget ler
 
-#: components/aos_portal/web/app.js:2729
+#: components/aos_portal/web/app.js:2816
 Vacío: el widget elige solo (CO2, temperatura, humedad...). Si no, sensor:valor separados por comas, con el nombre del sensor como lo muestra Módulos. También se eligen en la placa: en el modo edición, tocá el widget.	Vazio: o widget escolhe sozinho (CO2, temperatura, umidade...). Se não, sensor:valor separados por vírgulas, com o nome do sensor como Módulos o mostra. Também se escolhem na placa: no modo de edição, toque no widget.
 
-#: components/aos_portal/web/app.js:2730
+#: components/aos_portal/web/app.js:2817
 Vacío: los favoritos de la app (la estrella). Si no, las entidades de Home Assistant separadas por comas: controles que se tocan y sensores con su valor. 4 en un 4×2, 8 en un 4×4. También se eligen en la placa: en el modo edición, tocá el widget.	Vazio: os favoritos do app (a estrela). Se não, as entidades do Home Assistant separadas por vírgulas: controles para tocar e sensores com seu valor. 4 num 4×2, 8 num 4×4. Também se escolhem na placa: no modo de edição, toque no widget.
 
-#: components/aos_portal/web/app.js:2731
+#: components/aos_portal/web/app.js:2818
 Hasta 255 bytes. La mayoría de los widgets no lo usan.	Até 255 bytes. A maioria dos widgets não o usa.
 
-#: components/aos_portal/web/app.js:2733
+#: components/aos_portal/web/app.js:2820
 Quitar widget	Remover widget
 
-#: components/aos_portal/web/app.js:2750
+#: components/aos_portal/web/app.js:2837
 Buscar un glifo…	Buscar um glifo…
 
-#: components/aos_portal/web/app.js:2758
+#: components/aos_portal/web/app.js:2845
 Ninguno se llama así.	Nenhum se chama assim.
 
-#: components/aos_portal/web/app.js:2758
+#: components/aos_portal/web/app.js:2845
 Cargando los glifos…	Carregando os glifos…
 
-#: components/aos_portal/web/app.js:2768
+#: components/aos_portal/web/app.js:2855
 pág. %s	pág. %s
 
-#: components/aos_portal/web/app.js:2777
+#: components/aos_portal/web/app.js:2864
 %s sin instalar, se conservan	%s não instalados, mantidos
 
-#: components/aos_portal/web/app.js:2778
+#: components/aos_portal/web/app.js:2865
 Arrastrá para ordenarlas o para sacarlas a una página, o marcá cuáles van:	Arraste para ordená-los ou para tirá-los para uma página, ou marque quais entram:
 
-#: components/aos_portal/web/app.js:2779
+#: components/aos_portal/web/app.js:2866
 Color y glifo	Cor e glifo
 
-#: components/aos_portal/web/app.js:2782
+#: components/aos_portal/web/app.js:2869
 Glifo blanco	Glifo branco
 
-#: components/aos_portal/web/app.js:2782
+#: components/aos_portal/web/app.js:2869
 Glifo negro	Glifo preto
 
-#: components/aos_portal/web/app.js:2783
+#: components/aos_portal/web/app.js:2870
 En P4OS la carpeta se ve esmerilada, como en el iPhone, y el glifo aparece mientras está vacía. Los colores quedan guardados en menu.txt.	No P4OS a pasta parece fosca, como no iPhone, e o glifo aparece enquanto ela está vazia. As cores ficam salvas no menu.txt.
 
-#: components/aos_portal/web/app.js:2787
+#: components/aos_portal/web/app.js:2874
 ¿Borrar la carpeta «%s»? Sus apps vuelven a la página, donde estaba la carpeta.	Apagar a pasta "%s"? Seus apps voltam para a página, onde estava a pasta.
 
-#: components/aos_portal/web/app.js:2791
+#: components/aos_portal/web/app.js:2878
 Borrar carpeta	Apagar pasta
 
-#: components/aos_portal/web/app.js:2802
+#: components/aos_portal/web/app.js:2889
 La tarjeta no tiene menu.txt: la placa muestra el orden de siempre.	O cartão não tem menu.txt: a placa mostra a ordem de sempre.
 
-#: components/aos_portal/web/app.js:2802
+#: components/aos_portal/web/app.js:2889
 menu.txt en la tarjeta	menu.txt no cartão
 
-#: components/aos_portal/web/app.js:2803
+#: components/aos_portal/web/app.js:2890
 %s apps instaladas · %s carpetas · %s páginas · %s ocultas · %s bytes	%s apps instalados · %s pastas · %s páginas · %s ocultos · %s bytes
 
-#: components/aos_portal/web/app.js:2804
+#: components/aos_portal/web/app.js:2891
 cambios sin guardar	alterações não salvas
 
-#: components/aos_portal/web/app.js:2804
+#: components/aos_portal/web/app.js:2891
 igual que en la placa	igual ao da placa
 
-#: components/aos_portal/web/app.js:2805
+#: components/aos_portal/web/app.js:2892
 La placa ignora el menu.txt de la tarjeta (%s) y muestra el orden de siempre. Descargá el respaldo si lo querés; Guardar lo reemplaza.	A placa ignora o menu.txt do cartão (%s) e mostra a ordem de sempre. Baixe o backup se quiser; Salvar o substitui.
 
-#: components/aos_portal/web/app.js:2831
+#: components/aos_portal/web/app.js:2918
 Ya hay una página vacía al final	Já há uma página vazia no final
 
-#: components/aos_portal/web/app.js:2843
+#: components/aos_portal/web/app.js:2930
 + Carpeta	+ Pasta
 
-#: components/aos_portal/web/app.js:2846
+#: components/aos_portal/web/app.js:2933
 Hay cambios sin guardar. ¿Recargar desde la placa y perderlos?	Há alterações não salvas. Recarregar da placa e perdê-las?
 
-#: components/aos_portal/web/app.js:2846
+#: components/aos_portal/web/app.js:2933
 Recargar	Recarregar
 
-#: components/aos_portal/web/app.js:2847
+#: components/aos_portal/web/app.js:2934
 Descargar menu.txt	Baixar menu.txt
 
-#: components/aos_portal/web/app.js:2852
+#: components/aos_portal/web/app.js:2939
 Páginas	Páginas
 
-#: components/aos_portal/web/app.js:2853
+#: components/aos_portal/web/app.js:2940
 Parada, la placa muestra 4 × 6 íconos por página en este orden; acostada reparte el mismo orden en 7 × 3. Lo que no entra en una página pasa a la siguiente.	Em pé, a placa mostra 4 × 6 ícones por página nesta ordem; deitada, distribui a mesma ordem em 7 × 3. O que não cabe numa página passa para a seguinte.
 
-#: components/aos_portal/web/app.js:2872
+#: components/aos_portal/web/app.js:2959
 se cortó la conexión con la placa	a conexão com a placa caiu
 
-#: components/aos_portal/web/app.js:2888
-#: components/aos_portal/web/app.js:2893
+#: components/aos_portal/web/app.js:2975
+#: components/aos_portal/web/app.js:2980
 no se pudo leer %s	não foi possível ler %s
 
-#: components/aos_portal/web/app.js:2893
+#: components/aos_portal/web/app.js:2980
 no existe %s	%s não existe
 
-#: components/aos_portal/web/app.js:2919
+#: components/aos_portal/web/app.js:3006
 Impresora	Impressora
 
-#: components/aos_portal/web/app.js:2921
-#: components/aos_portal/web/app.js:3168
+#: components/aos_portal/web/app.js:3008
+#: components/aos_portal/web/app.js:3255
 Puertos	Portas
 
-#: components/aos_portal/web/app.js:2921
+#: components/aos_portal/web/app.js:3008
 Nombres y redes Wi-Fi	Nomes e redes Wi-Fi
 
-#: components/aos_portal/web/app.js:2957
+#: components/aos_portal/web/app.js:3044
 MAC aleatoria	MAC aleatório
 
-#: components/aos_portal/web/app.js:3031
+#: components/aos_portal/web/app.js:3118
 Canales %s GHz	Canais %s GHz
 
-#: components/aos_portal/web/app.js:3042
+#: components/aos_portal/web/app.js:3129
 oculta	oculta
 
-#: components/aos_portal/web/app.js:3042
-#: components/aos_portal/web/app.js:3151
-#: components/aos_portal/web/app.js:3152
+#: components/aos_portal/web/app.js:3129
+#: components/aos_portal/web/app.js:3238
+#: components/aos_portal/web/app.js:3239
 canal %s	canal %s
 
-#: components/aos_portal/web/app.js:3044
-#: components/aos_portal/web/app.js:3047
-#: components/aos_portal/web/app.js:3151
-#: components/aos_portal/web/app.js:3152
+#: components/aos_portal/web/app.js:3131
+#: components/aos_portal/web/app.js:3134
+#: components/aos_portal/web/app.js:3238
+#: components/aos_portal/web/app.js:3239
 (oculta)	(oculta)
 
-#: components/aos_portal/web/app.js:3077
+#: components/aos_portal/web/app.js:3164
 Barrer la red	Varrer a rede
 
-#: components/aos_portal/web/app.js:3078
-#: components/aos_portal/web/app.js:3781
-#: components/aos_portal/web/app.js:4009
+#: components/aos_portal/web/app.js:3165
+#: components/aos_portal/web/app.js:3868
+#: components/aos_portal/web/app.js:4096
 Parar	Parar
 
-#: components/aos_portal/web/app.js:3082
+#: components/aos_portal/web/app.js:3169
 Completo: también los que no contestan el ping	Completo: também os que não respondem ao ping
 
-#: components/aos_portal/web/app.js:3083
+#: components/aos_portal/web/app.js:3170
 Red abierta en la placa	Rede aberta na placa
 
-#: components/aos_portal/web/app.js:3083
+#: components/aos_portal/web/app.js:3170
 Abrir Red en la placa	Abrir Rede na placa
 
-#: components/aos_portal/web/app.js:3096
+#: components/aos_portal/web/app.js:3183
 Todavía no hay relevamientos guardados. Cada barrido de la red queda en la tarjeta: hacé uno con el botón de arriba o desde la pestaña Hosts de la app Red.	Ainda não há levantamentos salvos. Cada varredura da rede fica no cartão: faça uma com o botão acima ou na aba Hosts do app Rede.
 
-#: components/aos_portal/web/app.js:3105
+#: components/aos_portal/web/app.js:3192
 CSV de equipos	CSV de aparelhos
 
-#: components/aos_portal/web/app.js:3106
+#: components/aos_portal/web/app.js:3193
 CSV de redes	CSV de redes
 
-#: components/aos_portal/web/app.js:3108
+#: components/aos_portal/web/app.js:3195
 Comparar con	Comparar com
 
-#: components/aos_portal/web/app.js:3130
+#: components/aos_portal/web/app.js:3217
 redes Wi-Fi	redes Wi-Fi
 
-#: components/aos_portal/web/app.js:3130
+#: components/aos_portal/web/app.js:3217
 equipos	aparelhos
 
-#: components/aos_portal/web/app.js:3130
+#: components/aos_portal/web/app.js:3217
 puertos abiertos	portas abertas
 
-#: components/aos_portal/web/app.js:3130
+#: components/aos_portal/web/app.js:3217
 con nombre	com nome
 
-#: components/aos_portal/web/app.js:3133
-#: components/aos_portal/web/app.js:3491
+#: components/aos_portal/web/app.js:3220
+#: components/aos_portal/web/app.js:3578
 sin fecha	sem data
 
-#: components/aos_portal/web/app.js:3133
+#: components/aos_portal/web/app.js:3220
 desde %s (%s)	desde %s (%s)
 
-#: components/aos_portal/web/app.js:3134
+#: components/aos_portal/web/app.js:3221
 barrido completo	varredura completa
 
-#: components/aos_portal/web/app.js:3136
+#: components/aos_portal/web/app.js:3223
 cortado a mitad	cortada no meio
 
-#: components/aos_portal/web/app.js:3137
+#: components/aos_portal/web/app.js:3224
 incompleto	incompleta
 
-#: components/aos_portal/web/app.js:3146
+#: components/aos_portal/web/app.js:3233
 equipo nuevo	aparelho novo
 
-#: components/aos_portal/web/app.js:3147
+#: components/aos_portal/web/app.js:3234
 ya no está	sumiu
 
-#: components/aos_portal/web/app.js:3148
+#: components/aos_portal/web/app.js:3235
 antes en %s	antes em %s
 
-#: components/aos_portal/web/app.js:3150
+#: components/aos_portal/web/app.js:3237
 abrió %s	abriu %s
 
-#: components/aos_portal/web/app.js:3150
+#: components/aos_portal/web/app.js:3237
 cerró %s	fechou %s
 
-#: components/aos_portal/web/app.js:3151
+#: components/aos_portal/web/app.js:3238
 red nueva	rede nova
 
-#: components/aos_portal/web/app.js:3152
+#: components/aos_portal/web/app.js:3239
 red que no se ve	rede que não se vê mais
 
-#: components/aos_portal/web/app.js:3154
+#: components/aos_portal/web/app.js:3241
 Cambios desde el %s	Mudanças desde %s
 
-#: components/aos_portal/web/app.js:3155
+#: components/aos_portal/web/app.js:3242
 Nada cambió: los mismos equipos, puertos y redes.	Nada mudou: os mesmos aparelhos, portas e redes.
 
-#: components/aos_portal/web/app.js:3167
-#: components/aos_portal/web/app.js:4022
+#: components/aos_portal/web/app.js:3254
+#: components/aos_portal/web/app.js:4109
 Equipos	Aparelhos
 
-#: components/aos_portal/web/app.js:3170
+#: components/aos_portal/web/app.js:3257
 esta placa	esta placa
 
-#: components/aos_portal/web/app.js:3173
-#: components/aos_portal/web/app.js:3767
+#: components/aos_portal/web/app.js:3260
+#: components/aos_portal/web/app.js:3854
 sí	sim
 
-#: components/aos_portal/web/app.js:3173
+#: components/aos_portal/web/app.js:3260
 sólo ARP	só ARP
 
-#: components/aos_portal/web/app.js:3177
+#: components/aos_portal/web/app.js:3264
 «Sólo ARP» es un equipo que no contestó el ping ni ningún puerto, pero sí quién tiene esa dirección: existe igual, con el firewall puesto (celulares, Windows). Una MAC aleatoria es la dirección privada de un teléfono: no tiene fabricante y puede cambiar. Los puertos web abren el equipo en otra pestaña.	"Só ARP" é um aparelho que não respondeu ao ping nem a nenhuma porta, mas sim a quem tem esse endereço: existe mesmo assim, com o firewall ativado (celulares, Windows). Um MAC aleatório é o endereço privado de um telefone: não tem fabricante e pode mudar. As portas web abrem o aparelho em outra aba.
 
-#: components/aos_portal/web/app.js:3178
+#: components/aos_portal/web/app.js:3265
 Para ver el fabricante de todas las MAC, poné la lista de la IEEE (oui.txt) en /redes de la tarjeta.	Para ver o fabricante de todos os MAC, coloque a lista do IEEE (oui.txt) em /redes do cartão.
 
-#: components/aos_portal/web/app.js:3187
+#: components/aos_portal/web/app.js:3274
 De los canales que no se pisan (1, 6 y 11), el menos cargado por los vecinos es el %s.	Dos canais que não se sobrepõem (1, 6 e 11), o menos usado pelos vizinhos é o %s.
 
-#: components/aos_portal/web/app.js:3188
+#: components/aos_portal/web/app.js:3275
 De los canales que no se pisan (1, 6 y 11), el menos cargado por los vecinos es el %s, y es el que usa %s.	Dos canais que não se sobrepõem (1, 6 e 11), o menos usado pelos vizinhos é o %s, e é o que %s usa.
 
-#: components/aos_portal/web/app.js:3189
+#: components/aos_portal/web/app.js:3276
 De los canales que no se pisan (1, 6 y 11), el menos cargado por los vecinos es el %s; %s está en el %s.	Dos canais que não se sobrepõem (1, 6 e 11), o menos usado pelos vizinhos é o %s; %s está no %s.
 
-#: components/aos_portal/web/app.js:3190
+#: components/aos_portal/web/app.js:3277
 Redes Wi-Fi	Redes Wi-Fi
 
-#: components/aos_portal/web/app.js:3194
+#: components/aos_portal/web/app.js:3281
 Canal	Canal
 
-#: components/aos_portal/web/app.js:3194
+#: components/aos_portal/web/app.js:3281
 Ancho	Largura
 
-#: components/aos_portal/web/app.js:3199
+#: components/aos_portal/web/app.js:3286
 abierta	aberta
 
-#: components/aos_portal/web/app.js:3204
+#: components/aos_portal/web/app.js:3291
 Este relevamiento no encontró nada.	Este levantamento não encontrou nada.
 
-#: components/aos_portal/web/app.js:3217
+#: components/aos_portal/web/app.js:3304
 ¿Borrar el relevamiento %s?	Apagar o levantamento de %s?
 
-#: components/aos_portal/web/app.js:3218
+#: components/aos_portal/web/app.js:3305
 Borrado	Apagado
 
-#: components/aos_portal/web/app.js:3233
+#: components/aos_portal/web/app.js:3320
 El barrido falló	A varredura falhou
 
-#: components/aos_portal/web/app.js:3234
+#: components/aos_portal/web/app.js:3321
 Último barrido: 1 equipo en %s s	Última varredura: 1 aparelho em %s s
 
-#: components/aos_portal/web/app.js:3234
+#: components/aos_portal/web/app.js:3321
 Último barrido: %s equipos en %s s	Última varredura: %s aparelhos em %s s
 
-#: components/aos_portal/web/app.js:3234
+#: components/aos_portal/web/app.js:3321
 Guardado.	Salvo.
 
-#: components/aos_portal/web/app.js:3235
+#: components/aos_portal/web/app.js:3322
 Barre la red de la placa (su /24): quién contesta, qué puertos tiene abiertos y cómo se llama; al final mira las redes Wi-Fi de alrededor y lo guarda en la tarjeta.	Varre a rede da placa (sua /24): quem responde, que portas tem abertas e como se chama; no final olha as redes Wi-Fi ao redor e salva tudo no cartão.
 
-#: components/aos_portal/web/app.js:3236
+#: components/aos_portal/web/app.js:3323
 %s encontrados: %s	%s encontrados: %s
 
-#: components/aos_portal/web/app.js:3247
+#: components/aos_portal/web/app.js:3334
 Barrido guardado	Varredura salva
 
-#: components/aos_portal/web/app.js:3257
+#: components/aos_portal/web/app.js:3344
 Relevamientos guardados	Levantamentos salvos
 
-#: components/aos_portal/web/app.js:3292
+#: components/aos_portal/web/app.js:3379
 Arte en packs	Arte em packs
 
-#: components/aos_portal/web/app.js:3292
+#: components/aos_portal/web/app.js:3379
 Acostada	Deitada
 
-#: components/aos_portal/web/app.js:3292
+#: components/aos_portal/web/app.js:3379
 De pie	Em pé
 
-#: components/aos_portal/web/app.js:3293
+#: components/aos_portal/web/app.js:3380
 Sonido	Som
 
-#: components/aos_portal/web/app.js:3293
+#: components/aos_portal/web/app.js:3380
 Usa la red	Usa a rede
 
-#: components/aos_portal/web/app.js:3293
+#: components/aos_portal/web/app.js:3380
 Página en el portal	Página no portal
 
-#: components/aos_portal/web/app.js:3296
+#: components/aos_portal/web/app.js:3383
 El paquete no es el publicado, o está dañado.	O pacote não é o publicado, ou está danificado.
 
-#: components/aos_portal/web/app.js:3296
+#: components/aos_portal/web/app.js:3383
 El paquete quiere escribir donde no le corresponde.	O pacote quer escrever onde não deve.
 
-#: components/aos_portal/web/app.js:3297
+#: components/aos_portal/web/app.js:3384
 Necesita un P4OS más nuevo.	Precisa de um P4OS mais novo.
 
-#: components/aos_portal/web/app.js:3297
+#: components/aos_portal/web/app.js:3384
 El catálogo no se puede leer.	Não é possível ler o catálogo.
 
-#: components/aos_portal/web/app.js:3297
+#: components/aos_portal/web/app.js:3384
 Esa fuente no se puede usar.	Não é possível usar essa fonte.
 
-#: components/aos_portal/web/app.js:3298
-#: components/aos_portal/web/app.js:3486
+#: components/aos_portal/web/app.js:3385
+#: components/aos_portal/web/app.js:3573
 No alcanzó la memoria.	Memória insuficiente.
 
-#: components/aos_portal/web/app.js:3298
+#: components/aos_portal/web/app.js:3385
 No está en el catálogo.	Não está no catálogo.
 
-#: components/aos_portal/web/app.js:3298
+#: components/aos_portal/web/app.js:3385
 Esa app es de la Tienda: se instala y se quita desde ahí.	Esse app é da Loja: é instalado e removido por lá.
 
-#: components/aos_portal/web/app.js:3299
+#: components/aos_portal/web/app.js:3386
 No la instaló la Tienda.	Não foi instalado pela Loja.
 
-#: components/aos_portal/web/app.js:3301
+#: components/aos_portal/web/app.js:3388
 Instalada	Instalado
 
-#: components/aos_portal/web/app.js:3301
+#: components/aos_portal/web/app.js:3388
 Hay una versión nueva	Há uma versão nova
 
-#: components/aos_portal/web/app.js:3301
+#: components/aos_portal/web/app.js:3388
 Copiada a mano	Copiado à mão
 
-#: components/aos_portal/web/app.js:3302
+#: components/aos_portal/web/app.js:3389
 Apartada: hizo caer la placa al cargarse	Deixado de lado: fez a placa travar ao carregar
 
-#: components/aos_portal/web/app.js:3311
+#: components/aos_portal/web/app.js:3398
 Actualizar	Atualizar
 
-#: components/aos_portal/web/app.js:3311
+#: components/aos_portal/web/app.js:3398
 Instalar	Instalar
 
-#: components/aos_portal/web/app.js:3311
+#: components/aos_portal/web/app.js:3398
 Reinstalar	Reinstalar
 
-#: components/aos_portal/web/app.js:3314
+#: components/aos_portal/web/app.js:3401
 Copiada a mano a la tarjeta: la Tienda no la maneja.	Copiado à mão para o cartão: a Loja não o gerencia.
 
-#: components/aos_portal/web/app.js:3315
+#: components/aos_portal/web/app.js:3402
 Instalada de %s, que ya no está entre las fuentes.	Instalado de %s, que não está mais entre as fontes.
 
-#: components/aos_portal/web/app.js:3315
+#: components/aos_portal/web/app.js:3402
 Instalada desde un paquete (.p4app): no está en ningún catálogo.	Instalado de um pacote (.p4app): não está em nenhum catálogo.
 
-#: components/aos_portal/web/app.js:3321
+#: components/aos_portal/web/app.js:3408
 de terceros	de terceiros
 
-#: components/aos_portal/web/app.js:3322
+#: components/aos_portal/web/app.js:3409
 Paquete suelto	Pacote avulso
 
-#: components/aos_portal/web/app.js:3325
+#: components/aos_portal/web/app.js:3412
 Leer más	Ler mais
 
-#: components/aos_portal/web/app.js:3327
+#: components/aos_portal/web/app.js:3414
 de packs	de packs
 
-#: components/aos_portal/web/app.js:3328
+#: components/aos_portal/web/app.js:3415
 necesita P4OS %s	precisa do P4OS %s
 
-#: components/aos_portal/web/app.js:3337
+#: components/aos_portal/web/app.js:3424
 %s extras	%s extras
 
-#: components/aos_portal/web/app.js:3342
+#: components/aos_portal/web/app.js:3429
 ¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.	Remover %s da placa? O que o app salvou fica no cartão.
 
-#: components/aos_portal/web/app.js:3342
+#: components/aos_portal/web/app.js:3429
 Quitar	Remover
 
-#: components/aos_portal/web/app.js:3343
-#: components/aos_portal/web/app.js:3795
+#: components/aos_portal/web/app.js:3430
+#: components/aos_portal/web/app.js:3882
 Abrir	Abrir
 
-#: components/aos_portal/web/app.js:3350
+#: components/aos_portal/web/app.js:3437
 %s actualizaciones en cola	%s atualizações na fila
 
-#: components/aos_portal/web/app.js:3365
-#: components/aos_portal/web/app.js:3461
+#: components/aos_portal/web/app.js:3452
+#: components/aos_portal/web/app.js:3548
 En curso: %s %s (%s)	Em curso: %s %s (%s)
 
-#: components/aos_portal/web/app.js:3366
+#: components/aos_portal/web/app.js:3453
 Lo último: %s	Último: %s
 
-#: components/aos_portal/web/app.js:3367
+#: components/aos_portal/web/app.js:3454
 Cancelado.	Cancelado.
 
-#: components/aos_portal/web/app.js:3382
+#: components/aos_portal/web/app.js:3469
 Fuente agregada	Fonte adicionada
 
-#: components/aos_portal/web/app.js:3382
-#: components/aos_portal/web/app.js:3383
+#: components/aos_portal/web/app.js:3469
+#: components/aos_portal/web/app.js:3470
 Fuente	Fonte
 
-#: components/aos_portal/web/app.js:3382
+#: components/aos_portal/web/app.js:3469
 apps: %s	apps: %s
 
-#: components/aos_portal/web/app.js:3383
+#: components/aos_portal/web/app.js:3470
 todavía sin catálogo	ainda sem catálogo
 
-#: components/aos_portal/web/app.js:3385
-#: components/aos_portal/web/app.js:3415
+#: components/aos_portal/web/app.js:3472
+#: components/aos_portal/web/app.js:3502
 Actualizaciones	Atualizações
 
-#: components/aos_portal/web/app.js:3387
+#: components/aos_portal/web/app.js:3474
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Até %s: um pacote que o cartão já tem não é baixado de novo
 
-#: components/aos_portal/web/app.js:3388
+#: components/aos_portal/web/app.js:3475
 Actualizar todas (%s)	Atualizar todos (%s)
 
-#: components/aos_portal/web/app.js:3390
+#: components/aos_portal/web/app.js:3477
 Un recibo para las que son las del catálogo: no cambia ninguna app	Um recibo para os que são os do catálogo: não muda nenhum app
 
-#: components/aos_portal/web/app.js:3391
+#: components/aos_portal/web/app.js:3478
 Que la Tienda maneje las %s copiadas a mano	Que a Loja gerencie os %s copiados à mão
 
-#: components/aos_portal/web/app.js:3392
+#: components/aos_portal/web/app.js:3479
 Las que no son iguales a las del catálogo: baja la de la Tienda para cada una. Lo que guardaron y sus packs quedan.	Os que não são iguais aos do catálogo: baixa o da Loja para cada um. O que salvaram e seus packs ficam.
 
-#: components/aos_portal/web/app.js:3393
+#: components/aos_portal/web/app.js:3480
 ¿Reemplazar las %s apps copiadas a mano por las de la Tienda?	Substituir os %s apps copiados à mão pelos da Loja?
 
-#: components/aos_portal/web/app.js:3393
+#: components/aos_portal/web/app.js:3480
 Reemplazarlas por las de la Tienda	Substituí-los pelos da Loja
 
-#: components/aos_portal/web/app.js:3394
+#: components/aos_portal/web/app.js:3481
 Un paquete que no está en ningún catálogo	Um pacote que não está em nenhum catálogo
 
-#: components/aos_portal/web/app.js:3394
+#: components/aos_portal/web/app.js:3481
 Instalar un .p4app…	Instalar um .p4app…
 
-#: components/aos_portal/web/app.js:3397
+#: components/aos_portal/web/app.js:3484
 Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer una, para aceptarla en su pantalla:	As fontes de apps são adicionadas só na placa. Daqui dá para propor uma, para aceitá-la na tela dela:
 
-#: components/aos_portal/web/app.js:3398
+#: components/aos_portal/web/app.js:3485
 Propuesta, esperando en la placa (Tienda, Fuentes): %s	Proposta, esperando na placa (Loja, Fontes): %s
 
-#: components/aos_portal/web/app.js:3400
+#: components/aos_portal/web/app.js:3487
 Propuesta: ahora aceptala en la placa (Tienda, Fuentes)	Proposta: agora aceite-a na placa (Loja, Fontes)
 
-#: components/aos_portal/web/app.js:3400
+#: components/aos_portal/web/app.js:3487
 Proponer	Propor
 
-#: components/aos_portal/web/app.js:3409
+#: components/aos_portal/web/app.js:3496
 Cualquier origen	Qualquer origem
 
-#: components/aos_portal/web/app.js:3411
+#: components/aos_portal/web/app.js:3498
 Paquetes sueltos	Pacotes avulsos
 
-#: components/aos_portal/web/app.js:3412
+#: components/aos_portal/web/app.js:3499
 Copiadas a mano	Copiados à mão
 
-#: components/aos_portal/web/app.js:3414
+#: components/aos_portal/web/app.js:3501
 Todo	Tudo
 
-#: components/aos_portal/web/app.js:3414
+#: components/aos_portal/web/app.js:3501
 Instaladas	Instalados
 
-#: components/aos_portal/web/app.js:3416
+#: components/aos_portal/web/app.js:3503
 Nuevas	Novos
 
-#: components/aos_portal/web/app.js:3418
+#: components/aos_portal/web/app.js:3505
 Buscar	Buscar
 
-#: components/aos_portal/web/app.js:3436
+#: components/aos_portal/web/app.js:3523
 Nada por acá	Nada por aqui
 
-#: components/aos_portal/web/app.js:3436
+#: components/aos_portal/web/app.js:3523
 Todavía no hay catálogo: "Buscar de nuevo" lo trae.	Ainda não há catálogo: "Buscar de novo" o traz.
 
-#: components/aos_portal/web/app.js:3484
+#: components/aos_portal/web/app.js:3571
 No hay tarjeta, o no se pudo escribir en ella.	Não há cartão, ou não foi possível gravar nele.
 
-#: components/aos_portal/web/app.js:3484
+#: components/aos_portal/web/app.js:3571
 Ese respaldo no está en la tarjeta.	Esse backup não está no cartão.
 
-#: components/aos_portal/web/app.js:3485
+#: components/aos_portal/web/app.js:3572
 El archivo no es un respaldo, o está dañado.	O arquivo não é um backup, ou está danificado.
 
-#: components/aos_portal/web/app.js:3485
+#: components/aos_portal/web/app.js:3572
 Está cifrado, y esa no es su frase.	Está cifrado, e essa não é a frase dele.
 
-#: components/aos_portal/web/app.js:3486
+#: components/aos_portal/web/app.js:3573
 Lo hizo un P4OS más nuevo que este: actualizá primero.	Foi feito por um P4OS mais novo que este: atualize primeiro.
 
-#: components/aos_portal/web/app.js:3487
+#: components/aos_portal/web/app.js:3574
 Ya hay uno en curso.	Já há um em curso.
 
-#: components/aos_portal/web/app.js:3487
+#: components/aos_portal/web/app.js:3574
 No hay pendrive, o no se pudo escribir en él.	Não há pendrive, ou não foi possível gravar nele.
 
-#: components/aos_portal/web/app.js:3488
+#: components/aos_portal/web/app.js:3575
 Falta elegir el servidor, aceptar su clave o la frase de las copias automáticas: en la placa, Ajustes, Respaldo.	Falta escolher o servidor, aceitar sua chave ou a frase das cópias automáticas: na placa, Ajustes, Backup.
 
-#: components/aos_portal/web/app.js:3489
+#: components/aos_portal/web/app.js:3576
 El servidor no contesta, o dijo que no.	O servidor não responde, ou disse que não.
 
-#: components/aos_portal/web/app.js:3489
+#: components/aos_portal/web/app.js:3576
 El servidor muestra otra clave que la aceptada: no se mandó nada.	O servidor mostra uma chave diferente da aceita: nada foi enviado.
 
-#: components/aos_portal/web/app.js:3490
+#: components/aos_portal/web/app.js:3577
 El servidor no deja entrar la clave de la placa: ¿está en su authorized_keys?	O servidor não deixa entrar a chave da placa: ela está no authorized_keys dele?
 
-#: components/aos_portal/web/app.js:3496
+#: components/aos_portal/web/app.js:3583
 sin elegir	não escolhido
 
-#: components/aos_portal/web/app.js:3498
+#: components/aos_portal/web/app.js:3585
 Servidor propio (SFTP)	Servidor próprio (SFTP)
 
-#: components/aos_portal/web/app.js:3501
+#: components/aos_portal/web/app.js:3588
 clave aceptada	chave aceita
 
-#: components/aos_portal/web/app.js:3501
+#: components/aos_portal/web/app.js:3588
 falta aceptar su clave en la placa	falta aceitar a chave dele na placa
 
-#: components/aos_portal/web/app.js:3502
+#: components/aos_portal/web/app.js:3589
 una copia por semana	uma cópia por semana
 
-#: components/aos_portal/web/app.js:3502
+#: components/aos_portal/web/app.js:3589
 sólo a mano	só à mão
 
-#: components/aos_portal/web/app.js:3505
+#: components/aos_portal/web/app.js:3592
 La última prueba vio %s	O último teste viu %s
 
-#: components/aos_portal/web/app.js:3505
+#: components/aos_portal/web/app.js:3592
 y todavía no deja entrar a la placa	e ainda não deixa a placa entrar
 
-#: components/aos_portal/web/app.js:3506
+#: components/aos_portal/web/app.js:3593
 Última copia: %s	Última cópia: %s
 
-#: components/aos_portal/web/app.js:3508
+#: components/aos_portal/web/app.js:3595
 Falta elegir una frase para las copias automáticas, en la placa (Ajustes, Respaldo, «Cifrarlas con una frase…»): hasta entonces no sube nada.	Falta escolher uma frase para as cópias automáticas, na placa (Ajustes, Backup, "Cifrá-las com uma frase…"): até lá nada é enviado.
 
-#: components/aos_portal/web/app.js:3509
+#: components/aos_portal/web/app.js:3596
 A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos. El servidor, aceptar su clave y la copia semanal se eligen en la placa: Ajustes, Respaldo. La placa entra con su clave, sin contraseña: esta línea va en el ~/.ssh/authorized_keys del usuario del servidor.	Para um NAS ou um computador com SSH vão os backups cifrados, e só eles. O servidor, aceitar sua chave e a cópia semanal são escolhidos na placa: Ajustes, Backup. A placa entra com sua chave, sem senha: esta linha vai no ~/.ssh/authorized_keys do usuário do servidor.
 
-#: components/aos_portal/web/app.js:3512
+#: components/aos_portal/web/app.js:3599
 Copiada	Copiado
 
-#: components/aos_portal/web/app.js:3512
+#: components/aos_portal/web/app.js:3599
 No se pudo copiar: seleccioná la línea	Não foi possível copiar: selecione a linha
 
-#: components/aos_portal/web/app.js:3512
+#: components/aos_portal/web/app.js:3599
 Copiar la clave de la placa	Copiar a chave da placa
 
-#: components/aos_portal/web/app.js:3513
+#: components/aos_portal/web/app.js:3600
 Probar la conexión	Testar a conexão
 
-#: components/aos_portal/web/app.js:3514
+#: components/aos_portal/web/app.js:3601
 Subir ahora	Enviar agora
 
-#: components/aos_portal/web/app.js:3523
+#: components/aos_portal/web/app.js:3610
 Este respaldo está cifrado. Su frase:	Este backup está cifrado. A frase dele:
 
-#: components/aos_portal/web/app.js:3526
+#: components/aos_portal/web/app.js:3613
 ¿Restaurar el respaldo del %s? Escribe sus %s ajustes sobre los de ahora; lo que hay se guarda antes en un respaldo propio.	Restaurar o backup de %s? Ele grava seus %s ajustes sobre os atuais; o que existe é salvo antes num backup próprio.
 
-#: components/aos_portal/web/app.js:3535
+#: components/aos_portal/web/app.js:3622
 cifrado	cifrado
 
-#: components/aos_portal/web/app.js:3535
+#: components/aos_portal/web/app.js:3622
 sin credenciales	sem credenciais
 
-#: components/aos_portal/web/app.js:3536
+#: components/aos_portal/web/app.js:3623
 de antes de restaurar	de antes de restaurar
 
-#: components/aos_portal/web/app.js:3537
+#: components/aos_portal/web/app.js:3624
 del día	do dia
 
-#: components/aos_portal/web/app.js:3538
+#: components/aos_portal/web/app.js:3625
 de antes de actualizar	de antes de atualizar
 
-#: components/aos_portal/web/app.js:3540
+#: components/aos_portal/web/app.js:3627
 %s ajustes · %s apps en su lista · %s · P4OS %s	%s ajustes · %s apps na lista · %s · P4OS %s
 
-#: components/aos_portal/web/app.js:3541
+#: components/aos_portal/web/app.js:3628
 No lleva %s ajustes que parecen credenciales.	Não leva %s ajustes que parecem credenciais.
 
-#: components/aos_portal/web/app.js:3545
+#: components/aos_portal/web/app.js:3632
 Restaurar	Restaurar
 
-#: components/aos_portal/web/app.js:3546
+#: components/aos_portal/web/app.js:3633
 ¿Borrar este respaldo de la tarjeta?	Apagar este backup do cartão?
 
-#: components/aos_portal/web/app.js:3550
+#: components/aos_portal/web/app.js:3637
 Frase para cifrarlo (opcional)	Frase para cifrá-lo (opcional)
 
-#: components/aos_portal/web/app.js:3554
+#: components/aos_portal/web/app.js:3641
 El archivo tiene que llamarse algo.p4bak, sin espacios	O arquivo tem que se chamar algo.p4bak, sem espaços
 
-#: components/aos_portal/web/app.js:3558
+#: components/aos_portal/web/app.js:3645
 Subido: ahora se puede restaurar	Enviado: agora pode ser restaurado
 
-#: components/aos_portal/web/app.js:3565
+#: components/aos_portal/web/app.js:3652
 Conectando con el servidor…	Conectando ao servidor…
 
-#: components/aos_portal/web/app.js:3566
+#: components/aos_portal/web/app.js:3653
 Copiando: %s archivos, %s…	Copiando: %s arquivos, %s…
 
-#: components/aos_portal/web/app.js:3567
+#: components/aos_portal/web/app.js:3654
 Restaurando…	Restaurando…
 
-#: components/aos_portal/web/app.js:3567
+#: components/aos_portal/web/app.js:3654
 Respaldando…	Fazendo backup…
 
-#: components/aos_portal/web/app.js:3570
+#: components/aos_portal/web/app.js:3657
 Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.	Restaurado: %s ajustes gravados. A maioria só vale depois de reiniciar.
 
-#: components/aos_portal/web/app.js:3571
+#: components/aos_portal/web/app.js:3658
 Copiados: %s archivos, %s.	Copiados: %s arquivos, %s.
 
-#: components/aos_portal/web/app.js:3572
+#: components/aos_portal/web/app.js:3659
 El servidor: %s	O servidor: %s
 
-#: components/aos_portal/web/app.js:3573
+#: components/aos_portal/web/app.js:3660
 Hecho: %s	Feito: %s
 
-#: components/aos_portal/web/app.js:3576
+#: components/aos_portal/web/app.js:3663
 Un respaldo guarda en un archivo de la tarjeta los ajustes de la placa y de sus apps, la lista de apps que instaló la Tienda y el orden del inicio. Las apps no se copian: la Tienda las vuelve a bajar de esa lista.	Um backup salva num arquivo do cartão os ajustes da placa e dos seus apps, a lista de apps que a Loja instalou e a ordem do início. Os apps não são copiados: a Loja os baixa de novo a partir dessa lista.
 
-#: components/aos_portal/web/app.js:3577
+#: components/aos_portal/web/app.js:3664
 Sin frase, el archivo se puede leer y no lleva lo que parece una credencial (contraseñas, tokens, claves). Con una frase lleva todo, cifrado: sin ella no hay forma de abrirlo.	Sem frase, o arquivo pode ser lido e não leva o que parece uma credencial (senhas, tokens, chaves). Com uma frase leva tudo, cifrado: sem ela não há como abri-lo.
 
-#: components/aos_portal/web/app.js:3578
+#: components/aos_portal/web/app.js:3665
 Las copias automáticas están apagadas (Ajustes, Respaldo, en la placa).	As cópias automáticas estão desligadas (Ajustes, Backup, na placa).
 
-#: components/aos_portal/web/app.js:3579
+#: components/aos_portal/web/app.js:3666
 La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: cifradas con la frase que se eligió en la placa. Quedan las cinco últimas.	A placa salva sozinha uma cópia por dia se algo mudou, e outra antes de instalar um firmware: cifradas com a frase escolhida na placa. Ficam as cinco últimas.
 
-#: components/aos_portal/web/app.js:3580
+#: components/aos_portal/web/app.js:3667
 La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: sin credenciales, hasta que se les elija una frase en Ajustes, Respaldo. Quedan las cinco últimas.	A placa salva sozinha uma cópia por dia se algo mudou, e outra antes de instalar um firmware: sem credenciais, até que se escolha uma frase para elas em Ajustes, Backup. Ficam as cinco últimas.
 
-#: components/aos_portal/web/app.js:3581
+#: components/aos_portal/web/app.js:3668
 No hay tarjeta: no hay dónde guardarlo.	Não há cartão: não há onde salvá-lo.
 
-#: components/aos_portal/web/app.js:3583
+#: components/aos_portal/web/app.js:3670
 Respaldar ahora	Backup agora
 
-#: components/aos_portal/web/app.js:3584
+#: components/aos_portal/web/app.js:3671
 Traer un respaldo…	Trazer um backup…
 
-#: components/aos_portal/web/app.js:3585
+#: components/aos_portal/web/app.js:3672
 Los respaldos y las carpetas elegidas en la placa, a p4os-backup en el pendrive.	Os backups e as pastas escolhidas na placa, para p4os-backup no pendrive.
 
-#: components/aos_portal/web/app.js:3586
+#: components/aos_portal/web/app.js:3673
 Copiar al pendrive	Copiar para o pendrive
 
-#: components/aos_portal/web/app.js:3589
+#: components/aos_portal/web/app.js:3676
 Reiniciar la placa	Reiniciar a placa
 
-#: components/aos_portal/web/app.js:3591
+#: components/aos_portal/web/app.js:3678
 Ese respaldo lista %s apps que no están en la tarjeta: %s	Esse backup lista %s apps que não estão no cartão: %s
 
-#: components/aos_portal/web/app.js:3594
+#: components/aos_portal/web/app.js:3681
 Pedidas a la Tienda: %s	Pedidos à Loja: %s
 
-#: components/aos_portal/web/app.js:3595
+#: components/aos_portal/web/app.js:3682
 Pedirle a la Tienda que las instale	Pedir à Loja que os instale
 
-#: components/aos_portal/web/app.js:3596
+#: components/aos_portal/web/app.js:3683
 En la tarjeta	No cartão
 
-#: components/aos_portal/web/app.js:3597
+#: components/aos_portal/web/app.js:3684
 Todavía no hay ninguno.	Ainda não há nenhum.
 
-#: components/aos_portal/web/app.js:3633
+#: components/aos_portal/web/app.js:3720
 trama corta	quadro curto
 
-#: components/aos_portal/web/app.js:3640
+#: components/aos_portal/web/app.js:3727
 Acuse	Confirmação
 
-#: components/aos_portal/web/app.js:3642
+#: components/aos_portal/web/app.js:3729
 Comando	Comando
 
-#: components/aos_portal/web/app.js:3643
+#: components/aos_portal/web/app.js:3730
 trama de tipo %s	quadro do tipo %s
 
-#: components/aos_portal/web/app.js:3644
+#: components/aos_portal/web/app.js:3731
 Datos	Dados
 
-#: components/aos_portal/web/app.js:3645
+#: components/aos_portal/web/app.js:3732
 cifrada en la capa MAC	cifrado na camada MAC
 
-#: components/aos_portal/web/app.js:3648
+#: components/aos_portal/web/app.js:3735
 comando de red	comando de rede
 
-#: components/aos_portal/web/app.js:3648
+#: components/aos_portal/web/app.js:3735
 datos	dados
 
-#: components/aos_portal/web/app.js:3649
+#: components/aos_portal/web/app.js:3736
 cifrada	cifrado
 
-#: components/aos_portal/web/app.js:3664
+#: components/aos_portal/web/app.js:3751
 contacto	contato
 
-#: components/aos_portal/web/app.js:3664
+#: components/aos_portal/web/app.js:3751
 abierto	aberto
 
-#: components/aos_portal/web/app.js:3664
+#: components/aos_portal/web/app.js:3751
 cerrado	fechado
 
-#: components/aos_portal/web/app.js:3664
-#: components/aos_portal/web/app.js:3664
+#: components/aos_portal/web/app.js:3751
+#: components/aos_portal/web/app.js:3751
 movimiento	movimento
 
-#: components/aos_portal/web/app.js:3664
+#: components/aos_portal/web/app.js:3751
 sin movimiento	sem movimento
 
-#: components/aos_portal/web/app.js:3665
+#: components/aos_portal/web/app.js:3752
 agua	água
 
-#: components/aos_portal/web/app.js:3665
+#: components/aos_portal/web/app.js:3752
 ¡agua!	água!
 
-#: components/aos_portal/web/app.js:3665
+#: components/aos_portal/web/app.js:3752
 seco	seco
 
-#: components/aos_portal/web/app.js:3665
+#: components/aos_portal/web/app.js:3752
 humo	fumaça
 
-#: components/aos_portal/web/app.js:3665
-#: components/aos_portal/web/app.js:3665
-#: components/aos_portal/web/app.js:3745
-#: components/aos_portal/web/app.js:3745
+#: components/aos_portal/web/app.js:3752
+#: components/aos_portal/web/app.js:3752
+#: components/aos_portal/web/app.js:3832
+#: components/aos_portal/web/app.js:3832
 alarma	alarme
 
-#: components/aos_portal/web/app.js:3665
-#: components/aos_portal/web/app.js:3665
-#: components/aos_portal/web/app.js:3745
+#: components/aos_portal/web/app.js:3752
+#: components/aos_portal/web/app.js:3752
+#: components/aos_portal/web/app.js:3832
 normal	normal
 
-#: components/aos_portal/web/app.js:3665
+#: components/aos_portal/web/app.js:3752
 gas	gás
 
-#: components/aos_portal/web/app.js:3666
-#: components/aos_portal/web/app.js:3759
-#: components/aos_portal/web/app.js:3760
-#: components/aos_portal/web/app.js:3939
+#: components/aos_portal/web/app.js:3753
+#: components/aos_portal/web/app.js:3846
+#: components/aos_portal/web/app.js:3847
+#: components/aos_portal/web/app.js:4026
 batería	bateria
 
-#: components/aos_portal/web/app.js:3666
+#: components/aos_portal/web/app.js:3753
 encendido	liga/desliga
 
-#: components/aos_portal/web/app.js:3666
+#: components/aos_portal/web/app.js:3753
 nivel	nível
 
-#: components/aos_portal/web/app.js:3666
+#: components/aos_portal/web/app.js:3753
 color	cor
 
-#: components/aos_portal/web/app.js:3666
-#: components/aos_portal/web/app.js:3938
+#: components/aos_portal/web/app.js:3753
+#: components/aos_portal/web/app.js:4025
 temperatura	temperatura
 
-#: components/aos_portal/web/app.js:3667
+#: components/aos_portal/web/app.js:3754
 presión	pressão
 
-#: components/aos_portal/web/app.js:3667
-#: components/aos_portal/web/app.js:3938
+#: components/aos_portal/web/app.js:3754
+#: components/aos_portal/web/app.js:4025
 humedad	umidade
 
-#: components/aos_portal/web/app.js:3667
+#: components/aos_portal/web/app.js:3754
 presencia	presença
 
-#: components/aos_portal/web/app.js:3667
+#: components/aos_portal/web/app.js:3754
 luz	luz
 
-#: components/aos_portal/web/app.js:3667
+#: components/aos_portal/web/app.js:3754
 medidor	medidor
 
-#: components/aos_portal/web/app.js:3668
+#: components/aos_portal/web/app.js:3755
 eléctrico	elétrico
 
-#: components/aos_portal/web/app.js:3710
+#: components/aos_portal/web/app.js:3797
 La red no tomó el pedido	A rede não aceitou o pedido
 
-#: components/aos_portal/web/app.js:3719
-#: components/aos_portal/web/app.js:3880
+#: components/aos_portal/web/app.js:3806
+#: components/aos_portal/web/app.js:3967
 No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Não foi possível montar a rede: o C6 tem o firmware novo? Loja, Sistema, Firmware do rádio (C6)
 
-#: components/aos_portal/web/app.js:3730
-#: components/aos_portal/web/app.js:3851
-#: components/aos_portal/web/app.js:3852
+#: components/aos_portal/web/app.js:3817
+#: components/aos_portal/web/app.js:3938
+#: components/aos_portal/web/app.js:3939
 Nombre del equipo	Nome do dispositivo
 
-#: components/aos_portal/web/app.js:3733
+#: components/aos_portal/web/app.js:3820
 ¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Remover %s da rede? Para adicioná-lo de novo, é preciso resetá-lo.
 
-#: components/aos_portal/web/app.js:3735
+#: components/aos_portal/web/app.js:3822
 router	roteador
 
-#: components/aos_portal/web/app.js:3735
+#: components/aos_portal/web/app.js:3822
 a red eléctrica	na tomada
 
-#: components/aos_portal/web/app.js:3735
+#: components/aos_portal/web/app.js:3822
 a pila	a pilha
 
-#: components/aos_portal/web/app.js:3736
+#: components/aos_portal/web/app.js:3823
 sin noticias desde que arrancó la placa	sem notícias desde que a placa ligou
 
-#: components/aos_portal/web/app.js:3737
+#: components/aos_portal/web/app.js:3824
 se fue	saiu
 
-#: components/aos_portal/web/app.js:3737
+#: components/aos_portal/web/app.js:3824
 no contestó	não respondeu
 
-#: components/aos_portal/web/app.js:3737
+#: components/aos_portal/web/app.js:3824
 configurándolo	configurando
 
-#: components/aos_portal/web/app.js:3748
+#: components/aos_portal/web/app.js:3835
 hay alguien	tem alguém
 
-#: components/aos_portal/web/app.js:3748
+#: components/aos_portal/web/app.js:3835
 nadie	ninguém
 
-#: components/aos_portal/web/app.js:3753
+#: components/aos_portal/web/app.js:3840
 salida %d: %s	saída %d: %s
 
-#: components/aos_portal/web/app.js:3753
+#: components/aos_portal/web/app.js:3840
 prendida	ligada
 
-#: components/aos_portal/web/app.js:3753
+#: components/aos_portal/web/app.js:3840
 apagada	desligado
 
-#: components/aos_portal/web/app.js:3776
+#: components/aos_portal/web/app.js:3863
 enviando...	enviando...
 
-#: components/aos_portal/web/app.js:3777
+#: components/aos_portal/web/app.js:3864
 no tomó el código	não aceitou o código
 
-#: components/aos_portal/web/app.js:3781
+#: components/aos_portal/web/app.js:3868
 Arriba	Subir
 
-#: components/aos_portal/web/app.js:3781
+#: components/aos_portal/web/app.js:3868
 Abajo	Descer
 
-#: components/aos_portal/web/app.js:3794
+#: components/aos_portal/web/app.js:3881
 Cerrar con llave	Trancar
 
-#: components/aos_portal/web/app.js:3799
+#: components/aos_portal/web/app.js:3886
 Ventilador: otro modo	Ventilador: próximo modo
 
-#: components/aos_portal/web/app.js:3805
+#: components/aos_portal/web/app.js:3892
 Esperando el control remoto... (tocá para cancelar)	Esperando o controle remoto... (toque para cancelar)
 
-#: components/aos_portal/web/app.js:3805
+#: components/aos_portal/web/app.js:3892
 Aprender un código	Aprender um código
 
-#: components/aos_portal/web/app.js:3809
+#: components/aos_portal/web/app.js:3896
 Enviar el último aprendido	Enviar o último aprendido
 
-#: components/aos_portal/web/app.js:3810
+#: components/aos_portal/web/app.js:3897
 Guardarlo...	Salvar...
 
-#: components/aos_portal/web/app.js:3811
+#: components/aos_portal/web/app.js:3898
 Nombre del código	Nome do código
 
-#: components/aos_portal/web/app.js:3817
+#: components/aos_portal/web/app.js:3904
 Guardados: tocá uno para mandarlo.	Salvos: toque em um para enviá-lo.
 
-#: components/aos_portal/web/app.js:3820
+#: components/aos_portal/web/app.js:3907
 ¿Borrar el código %s?	Apagar o código %s?
 
-#: components/aos_portal/web/app.js:3820
+#: components/aos_portal/web/app.js:3907
 Código borrado	Código apagado
 
-#: components/aos_portal/web/app.js:3834
+#: components/aos_portal/web/app.js:3921
 brillo	brilho
 
-#: components/aos_portal/web/app.js:3836
+#: components/aos_portal/web/app.js:3923
 posición	posição
 
-#: components/aos_portal/web/app.js:3838
+#: components/aos_portal/web/app.js:3925
 tono	tom
 
-#: components/aos_portal/web/app.js:3844
+#: components/aos_portal/web/app.js:3931
 Lo que mandó, crudo (%s)	O que enviou, cru (%s)
 
-#: components/aos_portal/web/app.js:3846
+#: components/aos_portal/web/app.js:3933
 comando	comando
 
-#: components/aos_portal/web/app.js:3847
-#: components/aos_portal/web/app.js:3856
+#: components/aos_portal/web/app.js:3934
+#: components/aos_portal/web/app.js:3943
 antes	antes
 
-#: components/aos_portal/web/app.js:3853
+#: components/aos_portal/web/app.js:3940
 Sacar	Remover
 
-#: components/aos_portal/web/app.js:3873
+#: components/aos_portal/web/app.js:3960
 Mi red	Minha rede
 
-#: components/aos_portal/web/app.js:3875
+#: components/aos_portal/web/app.js:3962
 Armando la red...	Criando a rede...
 
-#: components/aos_portal/web/app.js:3875
+#: components/aos_portal/web/app.js:3962
 Armar la red	Criar a rede
 
-#: components/aos_portal/web/app.js:3876
+#: components/aos_portal/web/app.js:3963
 Sumar equipos	Adicionar dispositivos
 
-#: components/aos_portal/web/app.js:3877
+#: components/aos_portal/web/app.js:3964
 Sumar Zigbee 3.0	Adicionar Zigbee 3.0
 
-#: components/aos_portal/web/app.js:3878
+#: components/aos_portal/web/app.js:3965
 Abierta: %d s	Aberta: %d s
 
-#: components/aos_portal/web/app.js:3879
+#: components/aos_portal/web/app.js:3966
 Cerrar	Fechar
 
-#: components/aos_portal/web/app.js:3881
+#: components/aos_portal/web/app.js:3968
 La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	A placa cria sua própria rede Zigbee, com o C6 como rádio, e os dispositivos entram nela: assim dá para testar qualquer um. Um dispositivo fica em uma rede só: para adicioná-lo aqui, resete-o (em geral, segurando o botão até piscar).
 
-#: components/aos_portal/web/app.js:3882
+#: components/aos_portal/web/app.js:3969
 Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Aberta para adicionar: resete os dispositivos um de cada vez; cada um aparece aqui quando entra. Se for a pilha, toque no botão de vez em quando enquanto ele é configurado.
 
-#: components/aos_portal/web/app.js:3883
+#: components/aos_portal/web/app.js:3970
 Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Rede no canal %s, %s dispositivos. Os valores chegam quando o dispositivo os envia: um a pilha pode demorar a dar notícias. Se um dispositivo continua piscando e não termina de entrar, tente Adicionar Zigbee 3.0.
 
-#: components/aos_portal/web/app.js:3884
+#: components/aos_portal/web/app.js:3971
 Todavía no se sumó ningún equipo.	Nenhum dispositivo entrou ainda.
 
-#: components/aos_portal/web/app.js:3902
+#: components/aos_portal/web/app.js:3989
 No se pudo	Não foi possível
 
-#: components/aos_portal/web/app.js:3918
+#: components/aos_portal/web/app.js:4005
 Emular un equipo	Emular um dispositivo
 
-#: components/aos_portal/web/app.js:3920
+#: components/aos_portal/web/app.js:4007
 La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	A placa entra em outra rede Zigbee (a do Home Assistant) fingindo ser um dispositivo: uma luz no endpoint 1 e um sensor de temperatura, umidade e bateria no 2 (fabricante P4OS, modelo P4OS-EMU-LT). Assim se vê se o coordenador o lê, o controla e o que pede. Antes, no Home Assistant: Adicionar dispositivo (ZHA) ou Permitir entrar (Zigbee2MQTT).
 
-#: components/aos_portal/web/app.js:3921
+#: components/aos_portal/web/app.js:4008
 Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Há uma rede guardada da vez anterior: a placa volta a ela sem que a abram.
 
-#: components/aos_portal/web/app.js:3924
+#: components/aos_portal/web/app.js:4011
 La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	A placa reinicia como dispositivo. Seus dispositivos ficam guardados e voltam com Voltar a Minha rede. Continuar?
 
-#: components/aos_portal/web/app.js:3924
+#: components/aos_portal/web/app.js:4011
 Reiniciando para emular...	Reiniciando para emular...
 
-#: components/aos_portal/web/app.js:3924
+#: components/aos_portal/web/app.js:4011
 Reiniciar y emular	Reiniciar e emular
 
-#: components/aos_portal/web/app.js:3927
+#: components/aos_portal/web/app.js:4014
 Buscando una red abierta... (intento %s de 36)	Procurando uma rede aberta... (tentativa %s de 36)
 
-#: components/aos_portal/web/app.js:3928
+#: components/aos_portal/web/app.js:4015
 Fuera de la red	Fora da rede
 
-#: components/aos_portal/web/app.js:3928
+#: components/aos_portal/web/app.js:4015
 No encontró una red abierta en 3 minutos	Não encontrou uma rede aberta em 3 minutos
 
-#: components/aos_portal/web/app.js:3930
+#: components/aos_portal/web/app.js:4017
 Buscar otra vez	Procurar de novo
 
-#: components/aos_portal/web/app.js:3931
-#: components/aos_portal/web/app.js:3943
+#: components/aos_portal/web/app.js:4018
+#: components/aos_portal/web/app.js:4030
 Volviendo a la red propia: la placa se reinicia	Voltando à rede própria: a placa reinicia
 
-#: components/aos_portal/web/app.js:3931
-#: components/aos_portal/web/app.js:3943
+#: components/aos_portal/web/app.js:4018
+#: components/aos_portal/web/app.js:4030
 Volver a Mi red	Voltar a Minha rede
 
-#: components/aos_portal/web/app.js:3933
+#: components/aos_portal/web/app.js:4020
 En la red 0x%s, canal %s, como 0x%s	Na rede 0x%s, canal %s, como 0x%s
 
-#: components/aos_portal/web/app.js:3934
+#: components/aos_portal/web/app.js:4021
 con su propia clave de enlace	com sua própria chave de enlace
 
-#: components/aos_portal/web/app.js:3934
+#: components/aos_portal/web/app.js:4021
 sin clave propia todavía	ainda sem chave própria
 
-#: components/aos_portal/web/app.js:3935
+#: components/aos_portal/web/app.js:4022
 Home Assistant pide que se identifique: %s s	O Home Assistant pede que se identifique: %s s
 
-#: components/aos_portal/web/app.js:3937
+#: components/aos_portal/web/app.js:4024
 Luz: prendida	Luz: acesa
 
-#: components/aos_portal/web/app.js:3937
+#: components/aos_portal/web/app.js:4024
 Luz: apagada	Luz: apagada
 
-#: components/aos_portal/web/app.js:3942
+#: components/aos_portal/web/app.js:4029
 Reportar ahora	Reportar agora
 
-#: components/aos_portal/web/app.js:3945
+#: components/aos_portal/web/app.js:4032
 ¿Seguro? Tocá otra vez	Certeza? Toque de novo
 
-#: components/aos_portal/web/app.js:3945
+#: components/aos_portal/web/app.js:4032
 Salir de la red	Sair da rede
 
-#: components/aos_portal/web/app.js:3949
+#: components/aos_portal/web/app.js:4036
 Lo que pidió el coordinador	O que o coordenador pediu
 
-#: components/aos_portal/web/app.js:3964
+#: components/aos_portal/web/app.js:4051
 Canal %s	Canal %s
 
-#: components/aos_portal/web/app.js:3997
+#: components/aos_portal/web/app.js:4084
 emulando un equipo en otra red, canal %s	emulando um dispositivo em outra rede, canal %s
 
-#: components/aos_portal/web/app.js:3997
+#: components/aos_portal/web/app.js:4084
 emulando un equipo: buscando una red	emulando um dispositivo: procurando uma rede
 
-#: components/aos_portal/web/app.js:3998
+#: components/aos_portal/web/app.js:4085
 la red Zigbee de la placa, canal %s	a rede Zigbee da placa, canal %s
 
-#: components/aos_portal/web/app.js:3999
+#: components/aos_portal/web/app.js:4086
 armando la red Zigbee	montando a rede Zigbee
 
-#: components/aos_portal/web/app.js:4000
+#: components/aos_portal/web/app.js:4087
 el C6 no contesta	o C6 não responde
 
-#: components/aos_portal/web/app.js:4001
+#: components/aos_portal/web/app.js:4088
 escaneando, canal %s	escaneando, canal %s
 
-#: components/aos_portal/web/app.js:4002
+#: components/aos_portal/web/app.js:4089
 escuchando el canal %s	escutando o canal %s
 
-#: components/aos_portal/web/app.js:4002
+#: components/aos_portal/web/app.js:4089
 sin usar	sem uso
 
-#: components/aos_portal/web/app.js:4004
+#: components/aos_portal/web/app.js:4091
 Radio	Rádio
 
-#: components/aos_portal/web/app.js:4005
+#: components/aos_portal/web/app.js:4092
 Firmware del C6	Firmware do C6
 
-#: components/aos_portal/web/app.js:4006
+#: components/aos_portal/web/app.js:4093
 La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	O rádio não responde: o C6 precisa do firmware novo (3.0.9-154.15). Na placa: 1) Loja, Sistema, Firmware do rádio (C6): baixar. 2) Ajustes, Atualização, Instalar no C6. Uns 15 s sem Wi-Fi e a placa reinicia sozinha.
 
-#: components/aos_portal/web/app.js:4007
+#: components/aos_portal/web/app.js:4094
 El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	O C6 caiu com o rádio ligado e o deixou desligado; escanear ou escutar tenta de novo.
 
-#: components/aos_portal/web/app.js:4009
-#: components/aos_portal/web/app.js:4055
+#: components/aos_portal/web/app.js:4096
+#: components/aos_portal/web/app.js:4142
 Escuchar	Escutar
 
-#: components/aos_portal/web/app.js:4011
+#: components/aos_portal/web/app.js:4098
 %s paquetes	%s pacotes
 
-#: components/aos_portal/web/app.js:4011
+#: components/aos_portal/web/app.js:4098
 %s perdidos en el C6	%s perdidos no C6
 
-#: components/aos_portal/web/app.js:4012
+#: components/aos_portal/web/app.js:4099
 guardando %s en %s	salvando %s em %s
 
-#: components/aos_portal/web/app.js:4023
+#: components/aos_portal/web/app.js:4110
 coordinador	coordenador
 
-#: components/aos_portal/web/app.js:4025
+#: components/aos_portal/web/app.js:4112
 %s paquetes · %s dBm · hace %s s	%s pacotes · %s dBm · há %s s
 
-#: components/aos_portal/web/app.js:4026
+#: components/aos_portal/web/app.js:4113
 Todavía nadie: escuchá un canal con tráfico.	Ninguém ainda: escute um canal com tráfego.
 
-#: components/aos_portal/web/app.js:4027
+#: components/aos_portal/web/app.js:4114
 Olvidarlos	Esquecê-los
 
-#: components/aos_portal/web/app.js:4032
+#: components/aos_portal/web/app.js:4119
 Capturas en la tarjeta	Capturas no cartão
 
-#: components/aos_portal/web/app.js:4034
+#: components/aos_portal/web/app.js:4121
 Ninguna todavía.	Nenhuma ainda.
 
-#: components/aos_portal/web/app.js:4035
+#: components/aos_portal/web/app.js:4122
 Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Abrem no Wireshark: cada pacote traz seu canal, RSSI e LQI.
 
-#: components/aos_portal/web/app.js:4050
+#: components/aos_portal/web/app.js:4137
 Canales	Canais
 
-#: components/aos_portal/web/app.js:4052
+#: components/aos_portal/web/app.js:4139
 Escanear	Escanear
 
-#: components/aos_portal/web/app.js:4053
+#: components/aos_portal/web/app.js:4140
 A fondo (2 s por canal)	A fundo (2 s por canal)
 
-#: components/aos_portal/web/app.js:4054
+#: components/aos_portal/web/app.js:4141
 La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	A barra é a energia do canal; o número, os pacotes ouvidos. Uma rede Zigbee ou Thread aparece como um canal com pacotes.
 
-#: components/aos_portal/web/app.js:4056
+#: components/aos_portal/web/app.js:4143
 Guardar para Wireshark	Salvar para o Wireshark
 
-#: components/aos_portal/web/app.js:4057
+#: components/aos_portal/web/app.js:4144
 Zigbee y Thread	Zigbee e Thread
 
-#: components/aos_portal/web/app.js:4108
+#: components/aos_portal/web/app.js:4195
 registerPage: id y render	registerPage: id e render
 
-#: components/aos_portal/web/app.js:4109
+#: components/aos_portal/web/app.js:4196
 registerPage: "%s" es del portal	registerPage: "%s" é do portal
 
-#: components/aos_portal/web/app.js:4112
+#: components/aos_portal/web/app.js:4199
 La página falló: %s	A página falhou: %s
 
-#: components/aos_portal/web/app.js:4132
+#: components/aos_portal/web/app.js:4219
 No cargó: %s	Não carregou: %s
 
-#: components/aos_portal/web/app.js:4134
+#: components/aos_portal/web/app.js:4221
 /web/%s no cargó: %s	/web/%s não carregou: %s
 
-#: components/aos_portal/web/app.js:4176
+#: components/aos_portal/web/app.js:4263
 Esta red pide la contraseña del portal.	Esta rede pede a senha do portal.
 
-#: components/aos_portal/web/app.js:4180
+#: components/aos_portal/web/app.js:4267
 Entrar	Entrar
 
-#: components/aos_portal/web/app.js:4181
+#: components/aos_portal/web/app.js:4268
 Se pone, se cambia o se quita en la placa: Ajustes, Portal web.	É definida, alterada ou removida na placa: Ajustes, Portal web.
 
-#: components/aos_portal/web/app.js:4182
+#: components/aos_portal/web/app.js:4269
 La autoridad HTTPS de la placa	A autoridade HTTPS da placa
 
-#: components/aos_portal/web/app.js:4182
+#: components/aos_portal/web/app.js:4269
 , para que el navegador confíe en ella.	, para que o navegador confie nela.

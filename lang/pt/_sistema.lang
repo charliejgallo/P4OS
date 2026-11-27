@@ -7873,6 +7873,7 @@ QUÉ SE MUESTRA	O QUE MOSTRA
 
 #: components/aos_apps/aos_app_settings.c:2733
 #: components/aos_apps/_pending/aos_app_settings.c:1649
+#: apps/mensajes  (nombre de app)
 Mensajes	Mensagens
 
 #: components/aos_apps/aos_app_settings.c:2735
@@ -10008,7 +10009,7 @@ La secuencia no tiene pasos que entienda	A sequência não tem passos que eu ent
 
 #: components/aos_apps/aos_modbus.c:42
 #: components/aos_dynapp/aos_dynapp.c:1203
-#: components/aos_portal/aos_portal.c:344
+#: components/aos_portal/aos_portal.c:345
 #: components/aos_portal/aos_portal_live.c:75
 sin memoria	sem memória
 
@@ -10510,6 +10511,7 @@ Buzon de voz	Correio de voz
 Agenda	Agenda
 
 #: components/aos_apps/_pending/aos_app_settings.c:1651
+#: apps/correo  (nombre de app)
 Correo	E-mail
 
 #: components/aos_apps/_pending/aos_app_settings.c:1652
@@ -11777,129 +11779,132 @@ el C6 rechazó la imagen	o C6 rejeitou a imagem
 #: components/aos_hal/aos_net_p4.c:668
 el C6 no activó la imagen	o C6 não ativou a imagem
 
-#: components/aos_portal/aos_portal.c:362
+#: components/aos_portal/aos_portal.c:363
 la placa está ocupada	a placa está ocupada
 
-#: components/aos_portal/aos_portal.c:386
-#: components/aos_portal/aos_portal.c:1060
+#: components/aos_portal/aos_portal.c:387
+#: components/aos_portal/aos_portal.c:1061
 #: components/aos_portal/aos_portal_system.c:471
 no se pudo guardar	não foi possível salvar
 
-#: components/aos_portal/aos_portal.c:434
+#: components/aos_portal/aos_portal.c:435
 falta id	falta id
 
-#: components/aos_portal/aos_portal.c:441
+#: components/aos_portal/aos_portal.c:442
 sin ícono AIC	sem ícone AIC
 
-#: components/aos_portal/aos_portal.c:458
+#: components/aos_portal/aos_portal.c:459
 red o contraseña inválidas (WPA2: de 8 a 63 caracteres)	rede ou senha inválidas (WPA2: de 8 a 63 caracteres)
 
-#: components/aos_portal/aos_portal.c:518
+#: components/aos_portal/aos_portal.c:519
 \"mode\": console o keys; \"host\": true o false; \"pins\": 21/23, 25/27 o both; \"layout\": latam o us	\"mode\": console ou keys; \"host\": true ou false; \"pins\": 21/23, 25/27 ou both; \"layout\": latam ou us
 
-#: components/aos_portal/aos_portal.c:528
+#: components/aos_portal/aos_portal.c:529
 el USB está cambiando de modo	o USB está mudando de modo
 
-#: components/aos_portal/aos_portal.c:687
+#: components/aos_portal/aos_portal.c:688
 falta \"on\", \"keyboard\", \"music\" o \"forget\"	falta \"on\", \"keyboard\", \"music\" ou \"forget\"
 
-#: components/aos_portal/aos_portal.c:754
+#: components/aos_portal/aos_portal.c:755
 no hay una imagen del C6 en /firmware/c6.bin	não há uma imagem do C6 em /firmware/c6.bin
 
-#: components/aos_portal/aos_portal.c:756
+#: components/aos_portal/aos_portal.c:757
 no se pudo empezar (¿ya hay una en curso?)	não foi possível começar (já há uma em curso?)
 
-#: components/aos_portal/aos_portal.c:764
+#: components/aos_portal/aos_portal.c:765
 la búsqueda falló	a busca falhou
 
-#: components/aos_portal/aos_portal.c:796
+#: components/aos_portal/aos_portal.c:797
 la dirección empieza con http://	o endereço começa com http://
 
-#: components/aos_portal/aos_portal.c:869
+#: components/aos_portal/aos_portal.c:870
 sin tarjeta o ruta inválida	sem cartão ou caminho inválido
 
-#: components/aos_portal/aos_portal.c:873
-#: components/aos_portal/aos_portal.c:953
-#: components/aos_portal/aos_portal.c:1759
+#: components/aos_portal/aos_portal.c:874
+#: components/aos_portal/aos_portal.c:954
+#: components/aos_portal/aos_portal.c:1795
 #: components/aos_portal/aos_portal_backup.c:199
 no existe	não existe
 
-#: components/aos_portal/aos_portal.c:950
-#: components/aos_portal/aos_portal.c:1017
-#: components/aos_portal/aos_portal.c:1037
-#: components/aos_portal/aos_portal.c:1087
+#: components/aos_portal/aos_portal.c:951
+#: components/aos_portal/aos_portal.c:1018
+#: components/aos_portal/aos_portal.c:1038
+#: components/aos_portal/aos_portal.c:1088
 ruta inválida	caminho inválido
 
-#: components/aos_portal/aos_portal.c:1002
+#: components/aos_portal/aos_portal.c:1003
 no se pudo leer	não foi possível ler
 
-#: components/aos_portal/aos_portal.c:1006
+#: components/aos_portal/aos_portal.c:1007
 menu.txt inválido: %s	menu.txt inválido: %s
 
-#: components/aos_portal/aos_portal.c:1020
+#: components/aos_portal/aos_portal.c:1021
 no se pudo abrir	não foi possível abrir
 
-#: components/aos_portal/aos_portal.c:1038
+#: components/aos_portal/aos_portal.c:1039
 #: components/aos_portal/aos_portal_system.c:172
 falta Content-Length	falta Content-Length
 
-#: components/aos_portal/aos_portal.c:1040
+#: components/aos_portal/aos_portal.c:1041
 no entra en la tarjeta	não cabe no cartão
 
-#: components/aos_portal/aos_portal.c:1044
+#: components/aos_portal/aos_portal.c:1045
 no se pudo crear (¿existe la carpeta?)	não foi possível criar (a pasta existe?)
 
-#: components/aos_portal/aos_portal.c:1055
+#: components/aos_portal/aos_portal.c:1056
 se cortó la subida	o upload foi interrompido
 
-#: components/aos_portal/aos_portal.c:1256
+#: components/aos_portal/aos_portal.c:1257
 ya hay una grabación en curso	já há uma gravação em curso
 
-#: components/aos_portal/aos_portal.c:1256
+#: components/aos_portal/aos_portal.c:1257
 #: components/aos_portal/aos_portal_bench.c:260
 no se pudo empezar	não foi possível começar
 
-#: components/aos_portal/aos_portal.c:1261
+#: components/aos_portal/aos_portal.c:1262
 falta path	falta path
 
-#: components/aos_portal/aos_portal.c:1292
-#: components/aos_portal/aos_portal.c:1320
+#: components/aos_portal/aos_portal.c:1293
+#: components/aos_portal/aos_portal.c:1321
 ya hay un trabajo en curso	já há um trabalho em curso
 
-#: components/aos_portal/aos_portal.c:1303
+#: components/aos_portal/aos_portal.c:1304
 no hay una consola abierta	não há um console aberto
 
-#: components/aos_portal/aos_portal.c:1451
+#: components/aos_portal/aos_portal.c:1452
 la velocidad va de 50 a 5000000 baudios	a velocidade vai de 50 a 5000000 baud
 
-#: components/aos_portal/aos_portal.c:1454
+#: components/aos_portal/aos_portal.c:1455
 el formato es como 8N1 o 7E1	o formato é como 8N1 ou 7E1
 
-#: components/aos_portal/aos_portal.c:1457
+#: components/aos_portal/aos_portal.c:1458
 no se pudo abrir el puerto (¿lo tiene otra app?)	não foi possível abrir a porta (outro app a usa?)
 
-#: components/aos_portal/aos_portal.c:1467
+#: components/aos_portal/aos_portal.c:1468
 el canal no está conectado	o canal não está conectado
 
-#: components/aos_portal/aos_portal.c:1470
+#: components/aos_portal/aos_portal.c:1471
 hace falta el canal conectado y la tarjeta	é preciso o canal conectado e o cartão
 
-#: components/aos_portal/aos_portal.c:1477
+#: components/aos_portal/aos_portal.c:1478
 texto vacío	texto vazio
 
-#: components/aos_portal/aos_portal.c:1479
+#: components/aos_portal/aos_portal.c:1480
 ya hay 8 avisos	já há 8 avisos
 
-#: components/aos_portal/aos_portal.c:1533
+#: components/aos_portal/aos_portal.c:1534
 el nombre va con a-z, 0-9 y guiones	o nome usa a-z, 0-9 e hifens
 
-#: components/aos_portal/aos_portal.c:1704
+#: components/aos_portal/aos_portal.c:1611
+Celular	Celular
+
+#: components/aos_portal/aos_portal.c:1739
 falta \"on\"	falta \"on\"
 
-#: components/aos_portal/aos_portal.c:1705
+#: components/aos_portal/aos_portal.c:1740
 la radio está ocupada	o rádio está ocupado
 
-#: components/aos_portal/aos_portal.c:1714
+#: components/aos_portal/aos_portal.c:1749
 no hay enlace que congelar	não há link para congelar
 
 #: components/aos_portal/aos_portal_access.c:184
@@ -12818,6 +12823,9 @@ CAS	CAS
 #: apps/chatarra  (nombre de app)
 Chatarra	Chatarra
 
+#: apps/cielo  (nombre de app)
+Cielo	Céu
+
 #: apps/cjump  (nombre de app)
 Claude Jump	Claude Jump
 
@@ -12875,6 +12883,9 @@ Gemas	Gemas
 #: apps/golf  (nombre de app)
 Golf	Golf
 
+#: apps/grabador  (nombre de app)
+Grabador	Vigilância
+
 #: apps/hockey  (nombre de app)
 Hockey de mesa	Air hockey
 
@@ -12889,6 +12900,9 @@ tap	tap
 
 #: apps/luces  (nombre de app)
 Luces	Luzes
+
+#: apps/malla  (nombre de app)
+Malla	Malha
 
 #: apps/mesa  (nombre de app)
 Juegos de mesa	Jogos de mesa
@@ -12988,9 +13002,3 @@ Planeo	Planeio
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Voos
-
-#: apps/malla  (nombre de app)
-Malla	Malha
-
-#: apps/cielo  (nombre de app)
-Cielo	Céu

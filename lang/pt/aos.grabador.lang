@@ -1,0 +1,204 @@
+# amoledos-lang 1   es -> pt
+# aos.grabador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/grabador/main/gr_engine.c:299
+Webcam USB	Webcam USB
+
+#: apps/grabador/main/gr_engine.c:312
+Se desenchufó la cámara	A câmera foi desconectada
+
+#: apps/grabador/main/gr_engine.c:316
+La cámara no manda imagen	A câmera não envia imagem
+
+#: apps/grabador/main/gr_engine.c:339
+Imagen de prueba	Imagem de teste
+
+#: apps/grabador/main/gr_engine.c:342
+Enchufá una webcam USB en el puerto de arriba (USB 2.0)	Conecte uma webcam USB na porta de cima (USB 2.0)
+
+#: apps/grabador/main/gr_engine.c:377
+El codificador H.264 está ocupado (¿se está grabando la pantalla?)	O codificador H.264 está ocupado (a tela está sendo gravada?)
+
+#: apps/grabador/main/gr_engine.c:418
+🎥 Movimiento en la cámara: grabando (%02d:%02d)	🎥 Movimento na câmera: gravando (%02d:%02d)
+
+#: apps/grabador/main/gr_engine.c:422
+No se pudo escribir en la tarjeta	Não foi possível gravar no cartão
+
+#: apps/grabador/main/gr_ui.c:194
+Desarmar	Desarmar
+
+#: apps/grabador/main/gr_ui.c:194
+Armar	Armar
+
+#: apps/grabador/main/gr_ui.c:196
+#: apps/grabador/main/gr_ui.c:253
+Grabar ahora	Gravar agora
+
+#: apps/grabador/main/gr_ui.c:198
+Listo	OK
+
+#: apps/grabador/main/gr_ui.c:198
+Zonas	Zonas
+
+#: apps/grabador/main/gr_ui.c:200
+Tocá las partes de la imagen que no hay que mirar (una calle, un árbol que se mueve): se oscurecen.	Toque nas partes da imagem que não devem ser vigiadas (uma rua, uma árvore que se mexe): elas escurecem.
+
+#: apps/grabador/main/gr_ui.c:228
+Sin cámara	Sem câmera
+
+#: apps/grabador/main/gr_ui.c:229
+Arrancando la cámara…	Iniciando a câmera…
+
+#: apps/grabador/main/gr_ui.c:230
+Con problemas	Com problemas
+
+#: apps/grabador/main/gr_ui.c:232
+Grabando a mano	Gravando manualmente
+
+#: apps/grabador/main/gr_ui.c:232
+Grabando: hay movimiento	Gravando: há movimento
+
+#: apps/grabador/main/gr_ui.c:235
+Vigilando	Vigiando
+
+#: apps/grabador/main/gr_ui.c:235
+Mirando (desarmado)	Olhando (desarmado)
+
+#: apps/grabador/main/gr_ui.c:240
+%s · %dx%d · %.1f cuadros/s · %u kbit/s	%s · %dx%d · %.1f quadros/s · %u kbit/s
+
+#: apps/grabador/main/gr_ui.c:243
+\nRTSP: rtsp://%s.local:%d/ · %d mirando	\nRTSP: rtsp://%s.local:%d/ · %d assistindo
+
+#: apps/grabador/main/gr_ui.c:246
+\n%u grabaciones desde que se abrió	\n%u gravações desde que abriu
+
+#: apps/grabador/main/gr_ui.c:253
+Detener	Parar
+
+#: apps/grabador/main/gr_ui.c:270
+Hace falta la app Video (Tienda)	Precisa do app Vídeo (Loja)
+
+#: apps/grabador/main/gr_ui.c:286
+Todavía no hay grabaciones. Armá la cámara: graba cuando algo se mueve.	Ainda não há gravações. Arme a câmera: ela grava quando algo se mexe.
+
+#: apps/grabador/main/gr_ui.c:293
+%d grabaciones · %u MB de %d	%d gravações · %u MB de %d
+
+#: apps/grabador/main/gr_ui.c:312
+Ver	Ver
+
+#: apps/grabador/main/gr_ui.c:313
+Borrar	Apagar
+
+#: apps/grabador/main/gr_ui.c:326
+Baja (0,8 Mbit/s)	Baixa (0,8 Mbit/s)
+
+#: apps/grabador/main/gr_ui.c:326
+Media (1,5 Mbit/s)	Média (1,5 Mbit/s)
+
+#: apps/grabador/main/gr_ui.c:326
+Alta (3 Mbit/s)	Alta (3 Mbit/s)
+
+#: apps/grabador/main/gr_ui.c:326
+Muy alta (5 Mbit/s)	Muito alta (5 Mbit/s)
+
+#: apps/grabador/main/gr_ui.c:328
+Baja	Baixa
+
+#: apps/grabador/main/gr_ui.c:328
+Media	Média
+
+#: apps/grabador/main/gr_ui.c:328
+Alta	Alta
+
+#: apps/grabador/main/gr_ui.c:330
+Nada	Nada
+
+#: apps/grabador/main/gr_ui.c:330
+2 segundos	2 segundos
+
+#: apps/grabador/main/gr_ui.c:330
+3 segundos	3 segundos
+
+#: apps/grabador/main/gr_ui.c:330
+#: apps/grabador/main/gr_ui.c:332
+5 segundos	5 segundos
+
+#: apps/grabador/main/gr_ui.c:332
+10 segundos	10 segundos
+
+#: apps/grabador/main/gr_ui.c:332
+20 segundos	20 segundos
+
+#: apps/grabador/main/gr_ui.c:332
+30 segundos	30 segundos
+
+#: apps/grabador/main/gr_ui.c:332
+#: apps/grabador/main/gr_ui.c:334
+1 minuto	1 minuto
+
+#: apps/grabador/main/gr_ui.c:334
+5 minutos	5 minutos
+
+#: apps/grabador/main/gr_ui.c:334
+10 minutos	10 minutos
+
+#: apps/grabador/main/gr_ui.c:407
+Tamaño	Tamanho
+
+#: apps/grabador/main/gr_ui.c:408
+Cuadros por segundo	Quadros por segundo
+
+#: apps/grabador/main/gr_ui.c:409
+Calidad	Qualidade
+
+#: apps/grabador/main/gr_ui.c:410
+Sensibilidad al movimiento	Sensibilidade ao movimento
+
+#: apps/grabador/main/gr_ui.c:411
+Grabar desde antes del movimiento	Gravar desde antes do movimento
+
+#: apps/grabador/main/gr_ui.c:412
+Seguir grabando después	Continuar gravando depois
+
+#: apps/grabador/main/gr_ui.c:413
+Cortar las grabaciones cada	Dividir as gravações a cada
+
+#: apps/grabador/main/gr_ui.c:414
+Espacio para grabaciones	Espaço para gravações
+
+#: apps/grabador/main/gr_ui.c:419
+A 1280 x 720 la app Video la reproduce más lento que en vivo (la placa decodifica H.264 por software).	A 1280 x 720 o app Vídeo reproduz mais devagar que ao vivo (a placa decodifica H.264 por software).
+
+#: apps/grabador/main/gr_ui.c:424
+Sólo a ciertas horas	Só em certos horários
+
+#: apps/grabador/main/gr_ui.c:429
+de	das
+
+#: apps/grabador/main/gr_ui.c:435
+a	às
+
+#: apps/grabador/main/gr_ui.c:442
+Avisar por el bot de Telegram	Avisar pelo bot do Telegram
+
+#: apps/grabador/main/gr_ui.c:443
+Cámara IP por RTSP (Frigate, VLC, Cámaras)	Câmera IP por RTSP (Frigate, VLC, Câmeras)
+
+#: apps/grabador/main/gr_ui.c:485
+Cámara	Câmera
+
+#: apps/grabador/main/gr_ui.c:485
+Grabaciones	Gravações
+
+#: apps/grabador/main/gr_ui.c:485
+Ajustes	Ajustes
+
+#: apps/grabador/main/grabador.c:49
+No hay memoria para la cámara	Sem memória para a câmera

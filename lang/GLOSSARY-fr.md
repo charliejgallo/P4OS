@@ -136,6 +136,7 @@ Bus).
 | Oficina | Office | Bureau |
 | Radio | Radio | Radio |
 | Grabadora | Recorder | Enregistreur |
+| Grabador | Recorder | Surveillance |
 | Solitario | Solitaire | Solitaire |
 | Topos | Whack-a-Mole | Taupes |
 | Traductor | Translator | Traducteur |
@@ -146,6 +147,10 @@ Bus).
 | Correo | Mail | Mail |
 | Malla | Mesh | Maillage |
 | Mensajes | Messages | Messages |
+
+Grabador (la cámara de seguridad) no puede llamarse como Grabadora, la
+grabadora de audio, aunque en inglés las dos sean "Recorder": por eso
+lleva el nombre de lo que hace.
 
 Metegol se traduce porque el inglés también lo traduce (Table Football):
 la regla es la del inglés.
