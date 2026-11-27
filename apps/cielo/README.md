@@ -169,18 +169,50 @@ fake TLE server (below) is what the passes were tried against.
   `CIELO_JD` starts at that Julian date, `CIELO_VIEW="az alt fov"`,
   `CIELO_PICK=<body>` or `h<HR>`, `CIELO_SCREEN=settings|place|date|sats`,
   `CIELO_ALERT_MIN=<minutes>` to see an alert without waiting for one.
-- The fps and the frame's time are logged every five seconds
-  (`cielo: 24.5 fps, a frame 2.7 ms (max 5.8) ...`), and the PSRAM taken at
-  opening.
+- The fps are logged every five seconds with what was asked (frames are
+  asked 30 a second while something moves or time runs fast, 10 with a
+  satellite up, 1 when still: a low rate with mostly "still" is the policy,
+  not slowness), the frame's time and where it goes (the sky, the bodies,
+  the stars and the satellites; the Milky Way's grid; the labels; the
+  drawing on the two cores). The passes log their time and their SGP4
+  propagations per satellite.
+
+## The passes, and the board that restarted
+
+The first build hung the board (2026-11-27): the passes of three
+satellites stepped every 30 s through three days and sampled each pass
+every 10 s with the whole look, some 11 000 SGP4 propagations a satellite in
+soft double, in a thread at priority 2 that never slept. The tick thread
+(priority 1, core 0), which the hang watchdog wants to beat every 30 s,
+never ran, and the watchdog restarted the board. Now:
+
+- the search steps by how far under the horizon the satellite is (6 s a
+  degree, 30 s to 8 min) and looks only at the elevation; the edges are
+  bisected, the top golden-searched, the visible part sampled every 30 s and
+  not at all in daylight: about 2 900 propagations a satellite for three
+  days, a quarter. `tests/run.sh` checks against a brute-force scan every
+  10 s that no pass is missed (and so did 24 satellite-latitude pairs);
+- the thread runs at priority 1, sleeps 2 ms every 8 ms of work, gives up a
+  satellite after 12 s, and publishes the passes as each satellite is done;
+- the worker sleeps 2 ms after every frame, so a run of frames (a finger on
+  the sky, time running fast) never starves the priority-1 tasks of core 0;
+- the frame keeps the bodies' places (again every 20 s of shown time), the
+  precession and nutation (every hour), the satellites' looks (every 0.2 s)
+  and the Milky Way's grid (now 16 px; again when the view moves or a
+  minute passes);
+- rise and set look the body up once an hour and interpolate, and use the
+  sidereal time directly: a card no longer works out the whole sky hundreds
+  of times on the LVGL thread.
 
 ## Measured
 
 In the simulator (a Mac): a frame takes 2.7 to 5.7 ms with the whole
 catalogue and the Milky Way, the passes of three satellites for three days
-20-35 ms. The PSRAM taken at opening is 5.4 MB there, 3.6 of it the
+11 ms (8 700 propagations). The PSRAM taken at opening is 5.4 MB there, 3.6 of it the
 simulator's two frames, which the board does not allocate (it draws into the
-panel's buffer): about 1.9 MB on the board. **On the board: not measured
-yet** (the fps, the frame's time and the PSRAM come out in the log).
+panel's buffer): about 1.9 MB on the board. **On the board:** the first build ran 4 to 9 fps (mostly the still and
+satellite rates, with the passes thread hogging a core) and hung the board
+with the passes (above); the fixed one is not measured yet.
 
 ## What is missing
 

@@ -37,7 +37,7 @@
 
 #define WORKER_STACK    (24 * 1024)
 #define IDLE_FRAME_MS   1000
-#define FAST_FRAME_MS   33
+#define FAST_FRAME_MS   28
 #define SAT_FRAME_MS    100
 
 static const double RATES[] = { -3600, -600, -60, 0, 1, 60, 600, 3600 };
@@ -203,7 +203,7 @@ static void card_build(app_t *a, cl_scene_t *s, bool with_times)
         fmt_radec(v, sizeof v, atan2f(c->xyz[3 * i + 1], c->xyz[3 * i]), asinf(c->xyz[3 * i + 2]));
         row(s, _("AR / Dec (J2000)"), v);
         if (with_times) {
-            cl_rts_star_t u;
+            cl_rts_star_t u = { { 0 }, 0, 0, 0, 0, false };
             memcpy(u.v, &c->xyz[3 * i], sizeof u.v);
             u.lat = a->conf.lat;
             u.lon = a->conf.lon;
@@ -247,7 +247,7 @@ static void card_build(app_t *a, cl_scene_t *s, bool with_times)
             row(s, _("AR / Dec"), v);
         }
         if (with_times) {
-            cl_rts_body_t u = { b, a->conf.lat, a->conf.lon };
+            cl_rts_body_t u = { .body = b, .lat = a->conf.lat, .lon = a->conf.lon };
             rts_foot(a, s, cl_alt_body, &u, (b == CL_SUN || b == CL_MOON ? -0.8333 : -0.5667) * CL_D2R);
         }
     } else if (a->sel_type == OBJ_MESS && a->have_cat && a->sel_idx < a->cat.nmess) {
@@ -277,7 +277,7 @@ static void card_build(app_t *a, cl_scene_t *s, bool with_times)
         fmt_radec(v, sizeof v, atan2f(m->xyz[1], m->xyz[0]), asinf(m->xyz[2]));
         row(s, _("AR / Dec (J2000)"), v);
         if (with_times) {
-            cl_rts_star_t u;
+            cl_rts_star_t u = { { 0 }, 0, 0, 0, 0, false };
             memcpy(u.v, m->xyz, sizeof u.v);
             u.lat = a->conf.lat;
             u.lon = a->conf.lon;
@@ -508,10 +508,13 @@ static void worker(void *arg)
             cl_fb_plain(&j.fb, a->frame[idx], s->sw, s->sh);
         }
         j.by_y = j.fb.sx == 1 || j.fb.sx == -1;
+        uint64_t td = aos_hal_uptime_us();
         if (!aos_hal_worker_split(job_half, &j)) {
             job_half(&j, 0);
             job_half(&j, 1);
+            a->no_split = true;
         }
+        a->us_draw += (uint32_t)(aos_hal_uptime_us() - td);
         if (back) {
             if (!a->over_bits && a->viewing) aos_hal_display_flip(back);
         } else {
@@ -526,6 +529,11 @@ static void worker(void *arg)
         if (us > a->draw_us_max) a->draw_us_max = us;
         a->fps_frames++;
         a->done_seq = seq;
+        /* always a breath between frames: the worker is above the system's
+         * priority-1 tasks on core 0 (the tick the hang watchdog watches),
+         * and with time running fast or a finger on the sky the frames
+         * would follow one another without a gap */
+        aos_hal_worker_sleep(2);
     }
 }
 
@@ -786,14 +794,28 @@ static void log_fps(app_t *a, uint32_t now)
     if (n) {
         uint32_t li = 0, lp = 0;
         aos_hal_heap_info(&li, &lp);
-        aos_hal_log("cielo", "%u.%u fps, a frame %u.%u ms (max %u.%u), %u stars in the pack, PSRAM free %u KB",
-                    (unsigned)(n * 1000 / dt), (unsigned)(n * 10000 / dt % 10), (unsigned)(a->draw_us_sum / n / 1000),
+        /* the rate is what was asked as much as what could be drawn: 30 a
+         * second while something moves, 10 with a satellite up, 1 when
+         * still. The frame's time (and its parts: the sky, the bodies, the
+         * stars and the satellites; the Milky Way's grid; the labels; the
+         * drawing on the two cores) says whether it keeps up. */
+        aos_hal_log("cielo",
+                    "%u.%u fps (asked: %u moving, %u satellite, %u still), a frame %u.%u ms (max %u.%u): "
+                    "sky %u.%u, milky way %u.%u, labels %u.%u, drawing %u.%u%s; PSRAM free %u KB",
+                    (unsigned)(n * 1000 / dt), (unsigned)(n * 10000 / dt % 10), (unsigned)a->n_move,
+                    (unsigned)a->n_sat, (unsigned)a->n_idle, (unsigned)(a->draw_us_sum / n / 1000),
                     (unsigned)(a->draw_us_sum / n / 100 % 10), (unsigned)(a->draw_us_max / 1000),
-                    (unsigned)(a->draw_us_max / 100 % 10), (unsigned)a->cat.n, (unsigned)(lp / 1024));
+                    (unsigned)(a->draw_us_max / 100 % 10), (unsigned)(a->us_sky / n / 1000),
+                    (unsigned)(a->us_sky / n / 100 % 10), (unsigned)(a->us_mw / n / 1000),
+                    (unsigned)(a->us_mw / n / 100 % 10), (unsigned)(a->us_lab / n / 1000),
+                    (unsigned)(a->us_lab / n / 100 % 10), (unsigned)(a->us_draw / n / 1000),
+                    (unsigned)(a->us_draw / n / 100 % 10), a->no_split ? " (one core)" : "", (unsigned)(lp / 1024));
     }
     a->fps_frames = 0;
     a->draw_us_sum = 0;
     a->draw_us_max = 0;
+    a->us_sky = a->us_mw = a->us_lab = a->us_draw = 0;
+    a->n_move = a->n_sat = a->n_idle = 0;
     a->fps_t0 = now;
 }
 
@@ -870,6 +892,9 @@ static void tick(lv_timer_t *t)
     uint32_t every = fast ? FAST_FRAME_MS : sat_up ? SAT_FRAME_MS : IDLE_FRAME_MS;
     if (a->req_seq == a->done_seq && (a->last_push_ms == 0 || now - a->last_push_ms >= every)) {
         a->last_push_ms = now;
+        if (fast) a->n_move++;
+        else if (sat_up) a->n_sat++;
+        else a->n_idle++;
         scene_build(a, now);
         push(a);
     }

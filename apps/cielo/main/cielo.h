@@ -207,6 +207,9 @@ typedef struct app {
 
     /* measuring */
     uint32_t   fps_frames, fps_t0, draw_us_sum, draw_us_max;
+    uint32_t   us_sky, us_mw, us_lab, us_draw;     /* where a frame's time goes */
+    uint32_t   n_move, n_sat, n_idle;              /* frames asked, by why */
+    bool       no_split;
 
     /* satellites */
     cl_satx_t  sats[CL_MAX_SATS];
@@ -226,6 +229,7 @@ typedef struct app {
     volatile bool pass_busy, pass_stop, pass_redo;
     volatile bool pass_thread;
     double     pass_jd;             /* computed from */
+    uint32_t   replan_ms;
     uint32_t   json_ms;
     const char *alert_fmt;          /* copied translations for alerts made hidden */
     char       alert_txt[96];

@@ -67,7 +67,12 @@ typedef struct {
 } cl_pass_t;
 
 /* The passes from jd0 over 'days', up to max of them. Only those whose
- * highest point is above el_min. Returns how many. Coarse steps of 30 s
- * refined by bisection to a second. */
+ * highest point is above el_min. Returns how many. yield(ctx), if given,
+ * runs every 16 propagations: it may sleep to let other tasks run, and
+ * returns true to stop the search (what was found until then is
+ * returned). */
 int cl_passes(const cl_sat_t *s, double jd0, double days, double lat_deg, double lon_deg, double h_km,
-              float el_min_rad, float std_mag, cl_pass_t *out, int max, volatile const bool *stop);
+              float el_min_rad, float std_mag, cl_pass_t *out, int max, bool (*yield)(void *), void *ctx);
+
+/* SGP4 propagations so far (all threads), for measuring */
+extern uint32_t cl_sgp4_evals;

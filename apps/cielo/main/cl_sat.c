@@ -10,7 +10,8 @@
  * file while offline, saying how old it is.
  *
  * The passes are worked out in a thread of their own (cl_passes, SGP4 in
- * soft double: about a second per satellite and three days on the board),
+ * soft double, some 3000 propagations a satellite for three days), at
+ * priority 1 and sleeping 2 ms every 8, with at most 12 s a satellite,
  * from the shown time, and written for the portal page to
  * <data>/cielo_pasadas.json. <data>/cielo_ahora.json is the sky of the
  * moment (the bodies and the satellites up, and the sidereal time the page
@@ -199,6 +200,50 @@ static int cmp_pass(const void *x, const void *y)
     return a->p.rise < b->p.rise ? -1 : a->p.rise > b->p.rise ? 1 : 0;
 }
 
+/* Called every 16 propagations: lets the system's tasks in (the hang
+ * watchdog wants the tick thread, priority 1, to beat at least every 30 s;
+ * the first version, at priority 2 and never sleeping, starved it and the
+ * board restarted), and stops a satellite that takes too long or a search
+ * that is no longer wanted. */
+typedef struct {
+    app_t   *a;
+    uint32_t sat_t0, slept;
+    bool     over;
+} pass_ctx_t;
+
+#define PASS_WORK_MS    8       /* work this long, then sleep */
+#define PASS_SLEEP_MS   2
+#define PASS_SAT_MS     12000   /* at most this long a satellite */
+
+static bool pass_yield(void *ctx)
+{
+    pass_ctx_t *c = (pass_ctx_t *)ctx;
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    if (now - c->slept >= PASS_WORK_MS) {
+        aos_hal_sleep_ms(PASS_SLEEP_MS);
+        c->slept = (uint32_t)aos_hal_uptime_ms();
+    }
+    if (now - c->sat_t0 > PASS_SAT_MS) c->over = true;
+    return c->over || c->a->pass_stop || c->a->pass_redo;
+}
+
+static void publish(app_t *a, cl_passx_t *out, int n, uint32_t gen)
+{
+    qsort(out, (size_t)n, sizeof(cl_passx_t), cmp_pass);
+    aos_hal_mutex_lock(a->mutex);
+    if (gen == a->sats_gen) {
+        /* keep what was already alerted */
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < a->npasses; j++)
+                if (a->passes[j].alerted && a->passes[j].sat == out[i].sat &&
+                    cl_dabs(a->passes[j].p.rise - out[i].p.rise) < 60.0 / 86400)
+                    out[i].alerted = true;
+        memcpy(a->passes, out, sizeof(cl_passx_t) * (size_t)n);
+        a->npasses = n;
+    }
+    aos_hal_mutex_unlock(a->mutex);
+}
+
 static void pass_main(void *arg)
 {
     app_t *a = (app_t *)arg;
@@ -219,34 +264,40 @@ static void pass_main(void *arg)
         double jd0 = a->pass_jd;
         float lat = a->conf.lat, lon = a->conf.lon, h = a->conf.height / 1000.0f;
         aos_hal_mutex_unlock(a->mutex);
-        uint64_t t0 = aos_hal_uptime_ms();
+        uint32_t t0 = (uint32_t)aos_hal_uptime_ms();
+        pass_ctx_t ctx = { a, t0, t0, false };
         int n = 0;
-        for (int k = 0; k < ns && !a->pass_stop && !a->pass_redo; k++) {
+        bool redo = false;
+        for (int k = 0; k < ns && !a->pass_stop; k++) {
+            uint32_t e0 = cl_sgp4_evals, ts = (uint32_t)aos_hal_uptime_ms();
+            ctx.sat_t0 = ts;
+            ctx.over = false;
+            int room = CL_MAX_PASSES - n;
+            /* a fair share of the room for each satellite still to do */
+            int share = room / (ns - k);
+            if (share < 4) share = room;
             int got = cl_passes(&sats[k].el, jd0, PASS_DAYS, lat, lon, h, 10.0f * (float)CL_D2R, sats[k].std_mag,
-                                tmp, CL_MAX_PASSES, &a->pass_stop);
+                                tmp, share, pass_yield, &ctx);
+            if (a->pass_redo) {
+                redo = true;
+                break;
+            }
             for (int i = 0; i < got && n < CL_MAX_PASSES; i++) {
                 out[n].sat = k;
                 out[n].p = tmp[i];
                 out[n].alerted = false;
                 n++;
             }
+            aos_hal_log("cielo", "passes: %s, %d in %u ms, %u propagations%s", sats[k].el.name, got,
+                        (unsigned)((uint32_t)aos_hal_uptime_ms() - ts), (unsigned)(cl_sgp4_evals - e0),
+                        ctx.over ? " (cut: too long)" : "");
+            /* the list fills as each satellite is done */
+            publish(a, out, n, gen);
+            a->json_ms = 0;
         }
         if (a->pass_stop) break;
-        if (a->pass_redo) continue;
-        qsort(out, (size_t)n, sizeof(cl_passx_t), cmp_pass);
-        aos_hal_mutex_lock(a->mutex);
-        if (gen == a->sats_gen) {
-            /* keep what was already alerted */
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < a->npasses; j++)
-                    if (a->passes[j].alerted && a->passes[j].sat == out[i].sat &&
-                        cl_dabs(a->passes[j].p.rise - out[i].p.rise) < 60.0 / 86400)
-                        out[i].alerted = true;
-            memcpy(a->passes, out, sizeof(cl_passx_t) * (size_t)n);
-            a->npasses = n;
-        }
-        aos_hal_mutex_unlock(a->mutex);
-        aos_hal_log("cielo", "passes: %d for %d satellites in %u ms", n, ns, (unsigned)(aos_hal_uptime_ms() - t0));
+        if (redo) continue;
+        aos_hal_log("cielo", "passes: %d for %d satellites in %u ms", n, ns, (unsigned)((uint32_t)aos_hal_uptime_ms() - t0));
         a->pass_busy = false;
         a->json_ms = 0;         /* write them for the page */
     }
@@ -259,8 +310,11 @@ static void pass_main(void *arg)
 
 void cl_sat_replan(app_t *a)
 {
-    a->pass_jd = cl_now_jd(a) - 10.0 / 1440;
+    double jd = cl_now_jd(a);
+    /* time running backwards: from a day earlier, so the window lasts */
+    a->pass_jd = a->rate < 0 ? jd - 1.0 : jd - 10.0 / 1440;
     a->pass_redo = true;
+    a->replan_ms = (uint32_t)aos_hal_uptime_ms();
 }
 
 void cl_sat_init(app_t *a)
@@ -268,7 +322,7 @@ void cl_sat_init(app_t *a)
     cl_sat_reload(a);
     a->pass_thread = true;
     a->pass_stop = false;
-    if (!aos_hal_thread_start("cielo_pass", pass_main, a, 16384, 2)) {
+    if (!aos_hal_thread_start("cielo_pass", pass_main, a, 16384, 1)) {
         a->pass_thread = false;
         aos_hal_log("cielo", "no thread for the passes");
     }
@@ -404,7 +458,8 @@ void cl_sat_tick(app_t *a, double jd_now, uint32_t now_ms)
         cl_sat_fetch(a, false);
 
     /* the shown time ran off the passes worked out: again */
-    if (!a->pass_busy && !a->pass_redo && (jd_now < a->pass_jd || jd_now > a->pass_jd + PASS_DAYS - 0.5))
+    if (!a->pass_busy && !a->pass_redo && (jd_now < a->pass_jd || jd_now > a->pass_jd + PASS_DAYS - 0.5) &&
+        now_ms - a->replan_ms > 20000)
         cl_sat_replan(a);
 
     /* the alerts, against the real clock */

@@ -146,19 +146,28 @@ void cl_precess(double jde, const double in[3], double out[3])
     for (int i = 0; i < 3; i++) out[i] = p[i][0] * in[0] + p[i][1] * in[1] + p[i][2] * in[2];
 }
 
-void cl_sky_set(cl_sky_t *s, double jd, double lat_deg, double lon_deg)
+static void sky_fill(cl_sky_t *s, double jd, double lat_deg, double lon_deg, bool keep)
 {
     double jde = jd + cl_delta_t(jd) / 86400.0;
-    double dpsi, deps, eps0;
-    nutation(jde, &dpsi, &deps, &eps0);
+    if (!keep || !s->pn_ok || cl_dabs(jde - s->pn_jde) > 1.0 / 24) {
+        double dpsi, deps, eps0, p[3][3], n[3][3];
+        nutation(jde, &dpsi, &deps, &eps0);
+        precession(jde, p);
+        nutation_matrix(eps0, eps0 + deps, dpsi, n);
+        mat_mul(s->pn, n, p);
+        s->pn_jde = jde;
+        s->pn_eps = eps0 + deps;
+        s->pn_dpsi = dpsi;
+        s->pn_ok = true;
+    }
     s->jd = jd;
     s->lat = lat_deg * CL_D2R;
     s->lon = lon_deg * CL_D2R;
-    s->eps = eps0 + deps;
-    s->dpsi = dpsi;
+    s->eps = s->pn_eps;
+    s->dpsi = s->pn_dpsi;
     /* the apparent sidereal time: the mean one plus the equation of the
      * equinoxes */
-    double gast = cl_gmst_deg(jd) * CL_D2R + dpsi * cl_dcos(s->eps);
+    double gast = cl_gmst_deg(jd) * CL_D2R + s->dpsi * cl_dcos(s->eps);
     s->lst = cl_fmod_pos(gast + s->lon, CL_TWOPI);
 
     double sl, cl, sp, cp;
@@ -170,16 +179,24 @@ void cl_sky_set(cl_sky_t *s, double jd, double lat_deg, double lon_deg)
         { cp * cl, cp * sl, sp },
     };
     memcpy(s->m_date_enu_d, h, sizeof h);
-    double p[3][3], n[3][3], m[3][3];
-    precession(jde, p);
-    nutation_matrix(eps0, s->eps, dpsi, n);
-    mat_mul(m, n, p);
-    mat_mul(m, h, m);
+    double m[3][3];
+    mat_mul(m, h, s->pn);
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++) {
             s->m_j2000_enu[i][j] = (float)m[i][j];
             s->m_date_enu[i][j] = (float)h[i][j];
         }
+}
+
+void cl_sky_set(cl_sky_t *s, double jd, double lat_deg, double lon_deg)
+{
+    s->pn_ok = false;
+    sky_fill(s, jd, lat_deg, lon_deg, false);
+}
+
+void cl_sky_update(cl_sky_t *s, double jd, double lat_deg, double lon_deg)
+{
+    sky_fill(s, jd, lat_deg, lon_deg, true);
 }
 
 void cl_radec_to_enu(const cl_sky_t *s, double ra, double dec, double dist_au, float enu[3])
@@ -660,38 +677,64 @@ void cl_rts(cl_alt_fn fn, void *user, double jd, double h0, cl_rts_t *o)
     o->transit = culmination(fn, user, a, b, &o->transit_alt);
 }
 
+/* altitude and hour angle of a direction of date: the mean sidereal time
+ * (the nutation's second is nothing to a rise), float trigonometry */
+static double alt_of(double jd, double ra, double dec, double lat_deg, double lon_deg, double *ha)
+{
+    double lst = cl_gmst_deg(jd) * CL_D2R + lon_deg * CL_D2R;
+    double h = cl_fmod_pos(lst - ra + CL_PI, CL_TWOPI) - CL_PI;
+    *ha = h;
+    float la = (float)(lat_deg * CL_D2R), d = (float)dec;
+    float sa = sinf(la) * sinf(d) + cosf(la) * cosf(d) * cosf((float)h);
+    return asinf(sa > 1 ? 1 : sa < -1 ? -1 : sa);
+}
+
 double cl_alt_body(double jd, void *user, double *ha)
 {
-    const cl_rts_body_t *b = (const cl_rts_body_t *)user;
-    cl_body_t p;
-    cl_body(b->body, jd, &p);
-    cl_sky_t s;
-    cl_sky_set(&s, jd, b->lat, b->lon);
-    float enu[3], alt, az;
-    cl_radec_to_enu(&s, p.ra, p.dec, b->body == CL_MOON ? p.dist_au : 0, enu);
-    cl_enu_altaz(enu, &alt, &az);
-    double h = s.lst - p.ra;
-    h = cl_fmod_pos(h + CL_PI, CL_TWOPI) - CL_PI;
-    *ha = h;
+    cl_rts_body_t *b = (cl_rts_body_t *)user;
+    if (b->k0 == 0) b->k0 = cl_floor(jd * 24) / 24 - 1.25;
+    double f = (jd - b->k0) * 24;
+    int i = (int)cl_floor(f);
+    if (i < 0 || i + 1 >= CL_RTS_KNOTS) {
+        /* outside the knots: the place itself */
+        cl_body_t p;
+        cl_body(b->body, jd, &p);
+        double alt = alt_of(jd, p.ra, p.dec, b->lat, b->lon, ha);
+        if (b->body == CL_MOON) alt -= asinf((float)(6378.14 / (p.dist_au * 149597870.7))) * cosf((float)alt);
+        return alt;
+    }
+    for (int k = i; k <= i + 1; k++) {
+        if (b->have[k]) continue;
+        cl_body_t p;
+        cl_body(b->body, b->k0 + k / 24.0, &p);
+        b->ra[k] = (float)p.ra;
+        b->dec[k] = (float)p.dec;
+        b->par[k] = b->body == CL_MOON ? (float)(6378.14 / (p.dist_au * 149597870.7)) : 0;
+        b->have[k] = true;
+    }
+    float t = (float)(f - i);
+    float r0 = b->ra[i], r1 = b->ra[i + 1];
+    if (r1 - r0 > 3.14159f) r1 -= 6.2831853f;
+    if (r0 - r1 > 3.14159f) r1 += 6.2831853f;
+    float ra = r0 + (r1 - r0) * t, dec = b->dec[i] + (b->dec[i + 1] - b->dec[i]) * t;
+    float par = b->par[i] + (b->par[i + 1] - b->par[i]) * t;
+    double alt = alt_of(jd, ra, dec, b->lat, b->lon, ha);
+    /* the Moon's parallax lowers it by its horizontal parallax times cos alt */
+    if (par > 0) alt -= par * cosf((float)alt);
     return alt;
 }
 
 double cl_alt_star(double jd, void *user, double *ha)
 {
-    const cl_rts_star_t *st = (const cl_rts_star_t *)user;
-    cl_sky_t s;
-    cl_sky_set(&s, jd, st->lat, st->lon);
-    float enu[3], alt, az;
-    for (int i = 0; i < 3; i++)
-        enu[i] = s.m_j2000_enu[i][0] * st->v[0] + s.m_j2000_enu[i][1] * st->v[1] + s.m_j2000_enu[i][2] * st->v[2];
-    cl_enu_altaz(enu, &alt, &az);
-    /* the hour angle, from the equator of date */
-    float eq[3];
-    for (int i = 0; i < 3; i++)
-        eq[i] = s.m_date_enu[0][i] * enu[0] + s.m_date_enu[1][i] * enu[1] + s.m_date_enu[2][i] * enu[2];
-    double ra = atan2f(eq[1], eq[0]);
-    *ha = cl_fmod_pos(s.lst - ra + CL_PI, CL_TWOPI) - CL_PI;
-    return alt;
+    cl_rts_star_t *st = (cl_rts_star_t *)user;
+    if (!st->ok) {
+        double in[3] = { st->v[0], st->v[1], st->v[2] }, o[3];
+        cl_precess(jd + cl_delta_t(jd) / 86400.0, in, o);
+        st->ra = cl_datan2(o[1], o[0]);
+        st->dec = cl_dasin(o[2]);
+        st->ok = true;
+    }
+    return alt_of(jd, st->ra, st->dec, st->lat, st->lon, ha);
 }
 
 /* ---------------------------------------------------------------------------

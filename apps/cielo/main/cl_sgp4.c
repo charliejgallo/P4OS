@@ -448,13 +448,76 @@ bool cl_sat_look(const cl_sat_t *s, double jd, double lat_deg, double lon_deg, d
 
 /* ---------------------------------------------------------------------------
  * Passes
+ *
+ * On the board every SGP4 step is soft-float double: about a millisecond,
+ * so the search must be frugal. The first version stepped every 30 s
+ * through three days (8640 steps a satellite) and sampled each pass every
+ * 10 s with the whole look (shadow, phase, brightness): it took more than
+ * the 30 s the hang watchdog allows, at a priority over the system's tick,
+ * and the board restarted (2026-11-27). Now:
+ *
+ *   - the coarse search looks only at the elevation (SGP4, the sidereal
+ *     time, the topocentric vector: nothing of the Sun), and steps by how
+ *     far under the horizon the satellite is. A satellite at an elevation
+ *     of -e degrees is at least that far from coming up: for a low orbit
+ *     (the ISS, 420 km) -10 degrees means a central angle 12 degrees beyond
+ *     the horizon, three minutes at its 4 degrees a minute; -30 means
+ *     46 degrees, eleven minutes. Steps of 6 s per degree (30 s to 8 min)
+ *     stay inside that for every orbit under 225 minutes;
+ *   - the edges are bisected to a quarter of a second, the top to a second;
+ *   - the visible part is sampled every 30 s, and not at all when the Sun
+ *     is up at the pass's start, top and end;
+ *   - every 16 steps the caller's yield() runs: it lets the other tasks in
+ *     and can stop the search (a budget, the app closing).
  * ------------------------------------------------------------------------- */
 
-static double el_at(const cl_sat_t *s, double jd, double lat, double lon, double h, bool *ok)
+uint32_t cl_sgp4_evals;
+
+typedef struct {
+    double ob[3];               /* the observer, earth-fixed, km */
+    double sp, cp, sl, cl;      /* sin and cos of the latitude and longitude */
+    double lat, lon, h;         /* degrees, km */
+    bool (*yield)(void *);
+    void *ctx;
+    bool abort;
+} site_t;
+
+static void site_init(site_t *st, double lat, double lon, double h, bool (*yield)(void *), void *ctx)
 {
-    cl_look_t lk;
-    *ok = cl_sat_look(s, jd, lat, lon, h, 99, &lk);
-    return *ok ? lk.el : -2;
+    memset(st, 0, sizeof *st);
+    st->lat = lat;
+    st->lon = lon;
+    st->h = h;
+    site(lat * CL_D2R, lon * CL_D2R, h, st->ob);
+    cl_dsincos(lat * CL_D2R, &st->sp, &st->cp);
+    cl_dsincos(lon * CL_D2R, &st->sl, &st->cl);
+    st->yield = yield;
+    st->ctx = ctx;
+}
+
+/* the elevation alone, radians; -2 when the propagation fails */
+static double el_fast(const cl_sat_t *s, double jd, site_t *st, bool *ok)
+{
+    if ((++cl_sgp4_evals & 15) == 0 && st->yield && st->yield(st->ctx)) st->abort = true;
+    if (st->abort) {
+        *ok = false;
+        return -2;
+    }
+    double r[3], v[3];
+    if (!cl_sgp4(s, (jd - s->epoch_jd) * 1440.0, r, v)) {
+        *ok = false;
+        return -2;
+    }
+    double sg, cg;
+    cl_dsincos(gstime(jd), &sg, &cg);
+    double ex = cg * r[0] + sg * r[1], ey = -sg * r[0] + cg * r[1], ez = r[2];
+    double dx = ex - st->ob[0], dy = ey - st->ob[1], dz = ez - st->ob[2];
+    double up = st->cp * st->cl * dx + st->cp * st->sl * dy + st->sp * dz;
+    double rng = cl_dsqrt(dx * dx + dy * dy + dz * dz);
+    *ok = true;
+    /* asin in float is plenty for a search (and for the top's degree) */
+    float q = (float)(up / rng);
+    return (double)asinf(q > 1 ? 1 : q < -1 ? -1 : q);
 }
 
 static double sun_alt(double jd, double lat, double lon)
@@ -469,104 +532,105 @@ static double sun_alt(double jd, double lat, double lon)
     return cl_dasin(up);
 }
 
-/* whether it can be seen at jd: above the horizon, lit, the sky dark */
-static bool seen(const cl_sat_t *s, double jd, double lat, double lon, double h, float std_mag, float *mag)
+/* how far to step from an elevation, days */
+static double coarse_step(double el)
 {
-    cl_look_t lk;
-    if (!cl_sat_look(s, jd, lat, lon, h, std_mag, &lk)) return false;
-    *mag = lk.mag;
-    return lk.el > 0 && lk.sunlit && sun_alt(jd, lat, lon) < -6.0 * CL_D2R;
+    double deg = -el * CL_R2D, s = deg * 6.0;
+    if (s < 30) s = 30;
+    if (s > 480) s = 480;
+    return s / 86400.0;
+}
+
+/* the crossing of the horizon between a (down) and b (up), or the other way */
+static double edge(const cl_sat_t *s, double a, double b, bool rising, site_t *st)
+{
+    bool ok;
+    for (int k = 0; k < 12 && !st->abort; k++) {
+        double m = 0.5 * (a + b);
+        bool up = el_fast(s, m, st, &ok) > 0;
+        if (up == rising) b = m;
+        else a = m;
+    }
+    return 0.5 * (a + b);
 }
 
 int cl_passes(const cl_sat_t *s, double jd0, double days, double lat, double lon, double h, float el_min,
-              float std_mag, cl_pass_t *out, int max, volatile const bool *stop)
+              float std_mag, cl_pass_t *out, int max, bool (*yield)(void *), void *ctx)
 {
     if (!s->ok || max <= 0) return 0;
-    const double step = 30.0 / 86400.0;
+    site_t st;
+    site_init(&st, lat, lon, h, yield, ctx);
+    const double fine = 30.0 / 86400.0;
     int n = 0;
     bool ok;
-    double t = jd0, e = el_at(s, t, lat, lon, h, &ok);
+    double t = jd0, e = el_fast(s, t, &st, &ok);
     if (!ok) return 0;
-    /* a pass already under way: start from its rise */
-    if (e > 0) {
-        double b = t;
-        for (int i = 0; i < 60 && e > 0; i++) {
-            b -= step;
-            e = el_at(s, b, lat, lon, h, &ok);
-        }
-        t = b;
+    /* a pass already under way: back to its rise */
+    for (int i = 0; i < 60 && e > 0 && ok; i++) {
+        t -= fine;
+        e = el_fast(s, t, &st, &ok);
     }
+    if (!ok) return 0;
     double end = jd0 + days;
-    while (t < end && n < max) {
-        if (stop && *stop) break;
-        double t2 = t + step, e2 = el_at(s, t2, lat, lon, h, &ok);
+    while (t < end && n < max && !st.abort) {
+        double t2 = t + (e > 0 ? fine : coarse_step(e)), e2 = el_fast(s, t2, &st, &ok);
         if (!ok) break;
-        if (e <= 0 && e2 > 0) {
-            /* rising: bisect it, then walk to the set */
-            double a = t, b = t2;
-            for (int k = 0; k < 15; k++) {
-                double m = 0.5 * (a + b);
-                if (el_at(s, m, lat, lon, h, &ok) > 0) b = m;
-                else a = m;
-            }
-            cl_pass_t p;
-            memset(&p, 0, sizeof p);
-            p.rise = b;
-            double tt = t2, ee = e2, best = e2, best_t = t2;
-            while (ee > 0 && tt < b + 0.05) {
-                double tn = tt + step, en = el_at(s, tn, lat, lon, h, &ok);
-                if (!ok) break;
-                if (en > best) {
-                    best = en;
-                    best_t = tn;
-                }
-                if (en <= 0) {
-                    double a2 = tt, b2 = tn;
-                    for (int k = 0; k < 15; k++) {
-                        double m = 0.5 * (a2 + b2);
-                        if (el_at(s, m, lat, lon, h, &ok) > 0) a2 = m;
-                        else b2 = m;
-                    }
-                    p.set = a2;
-                }
-                tt = tn;
-                ee = en;
-            }
-            if (!p.set) p.set = tt;
-            /* the top, by a golden search around the best sample */
-            double lo = best_t - step, hi = best_t + step;
-            for (int k = 0; k < 20; k++) {
-                double m1 = hi - (hi - lo) * 0.618, m2 = lo + (hi - lo) * 0.618;
-                if (el_at(s, m1, lat, lon, h, &ok) > el_at(s, m2, lat, lon, h, &ok)) hi = m2;
-                else lo = m1;
-            }
-            p.top = 0.5 * (lo + hi);
-            cl_look_t lk;
-            if (cl_sat_look(s, p.top, lat, lon, h, std_mag, &lk)) {
-                p.top_el = (float)lk.el;
-                p.top_az = (float)lk.az;
-            }
-            if (cl_sat_look(s, p.rise, lat, lon, h, std_mag, &lk)) p.rise_az = (float)lk.az;
-            if (cl_sat_look(s, p.set, lat, lon, h, std_mag, &lk)) p.set_az = (float)lk.az;
-            /* the visible part, sampled every 10 s */
-            p.mag = 99;
-            const double vstep = 10.0 / 86400.0;
-            for (double tv = p.rise; tv <= p.set; tv += vstep) {
-                float mg;
-                if (seen(s, tv, lat, lon, h, std_mag, &mg)) {
-                    if (!p.vis_start) p.vis_start = tv;
-                    p.vis_end = tv;
-                    if (mg < p.mag) p.mag = mg;
-                }
-            }
-            if (p.top_el >= el_min) out[n++] = p;
-            t = p.set + step;
-            e = el_at(s, t, lat, lon, h, &ok);
-            if (!ok) break;
+        if (!(e <= 0 && e2 > 0)) {
+            t = t2;
+            e = e2;
             continue;
         }
-        t = t2;
-        e = e2;
+        /* rising between t and t2: the edge, then along it to the set */
+        cl_pass_t p;
+        memset(&p, 0, sizeof p);
+        p.rise = edge(s, t, t2, true, &st);
+        double tt = t2, ee = e2, best = e2, best_t = t2;
+        while (ee > 0 && tt < p.rise + 0.05 && !st.abort) {
+            double tn = tt + fine, en = el_fast(s, tn, &st, &ok);
+            if (!ok) break;
+            if (en > best) {
+                best = en;
+                best_t = tn;
+            }
+            if (en <= 0) p.set = edge(s, tt, tn, false, &st);
+            tt = tn;
+            ee = en;
+        }
+        if (st.abort || !ok) break;
+        if (!p.set) p.set = tt;
+        /* the top, by a golden search around the best sample */
+        double lo = best_t - fine, hi = best_t + fine;
+        for (int k = 0; k < 10; k++) {
+            double m1 = hi - (hi - lo) * 0.618, m2 = lo + (hi - lo) * 0.618;
+            if (el_fast(s, m1, &st, &ok) > el_fast(s, m2, &st, &ok)) hi = m2;
+            else lo = m1;
+        }
+        p.top = 0.5 * (lo + hi);
+        p.top_el = (float)el_fast(s, p.top, &st, &ok);
+        if (p.top_el >= el_min) {
+            cl_look_t lk;
+            if (cl_sat_look(s, p.top, lat, lon, h, std_mag, &lk)) p.top_az = (float)lk.az;
+            if (cl_sat_look(s, p.rise, lat, lon, h, std_mag, &lk)) p.rise_az = (float)lk.az;
+            if (cl_sat_look(s, p.set, lat, lon, h, std_mag, &lk)) p.set_az = (float)lk.az;
+            /* the visible part: lit, the sky dark; not looked for in daylight */
+            p.mag = 99;
+            const double dark = -6.0 * CL_D2R;
+            bool night = sun_alt(p.rise, lat, lon) < dark || sun_alt(p.top, lat, lon) < dark ||
+                         sun_alt(p.set, lat, lon) < dark;
+            for (double tv = p.rise; night && tv <= p.set && !st.abort; tv += 30.0 / 86400.0) {
+                if ((++cl_sgp4_evals & 15) == 0 && st.yield && st.yield(st.ctx)) st.abort = true;
+                if (!cl_sat_look(s, tv, lat, lon, h, std_mag, &lk)) break;
+                if (lk.el > 0 && lk.sunlit && sun_alt(tv, lat, lon) < dark) {
+                    if (!p.vis_start) p.vis_start = tv;
+                    p.vis_end = tv;
+                    if (lk.mag < p.mag) p.mag = lk.mag;
+                }
+            }
+            if (!st.abort) out[n++] = p;
+        }
+        t = p.set + fine;
+        e = el_fast(s, t, &st, &ok);
+        if (!ok) break;
     }
     return n;
 }

@@ -64,9 +64,16 @@ typedef struct {
     /* equator of date -> east, north, up */
     float  m_date_enu[3][3];
     double m_date_enu_d[3][3];
+    /* the slow part, kept by cl_sky_update(): precession and nutation */
+    double pn[3][3], pn_jde, pn_eps, pn_dpsi;
+    bool   pn_ok;
 } cl_sky_t;
 
 void cl_sky_set(cl_sky_t *s, double jd, double lat_deg, double lon_deg);
+/* The same, keeping the precession and the nutation of s's last call while
+ * they move less than an arcsecond (an hour): what changes from one frame
+ * to the next is only the sidereal time. s must have been zeroed once. */
+void cl_sky_update(cl_sky_t *s, double jd, double lat_deg, double lon_deg);
 
 /* A J2000 unit vector to the mean equator of date (precession only;
  * jde in dynamical time). */
@@ -125,16 +132,24 @@ typedef struct {
 void cl_rts(cl_alt_fn fn, void *user, double jd, double h0_rad, cl_rts_t *out);
 
 /* A ready-made altitude for a body (user: a cl_rts_body_t). */
+#define CL_RTS_KNOTS 84
 typedef struct {
     int    body;
     double lat, lon;            /* degrees */
+    /* filled as needed: the body's place every hour from k0, which a
+     * search interpolates (the Moon's path bends by arcseconds in an hour) */
+    double k0;
+    float  ra[CL_RTS_KNOTS], dec[CL_RTS_KNOTS], par[CL_RTS_KNOTS];
+    bool   have[CL_RTS_KNOTS];
 } cl_rts_body_t;
 double cl_alt_body(double jd, void *user, double *ha);
 
 /* ... and for a J2000 direction (user: a cl_rts_star_t) */
 typedef struct {
-    float  v[3];
+    float  v[3];                /* J2000 */
     double lat, lon;
+    double ra, dec;             /* of date, worked out on the first call */
+    bool   ok;
 } cl_rts_star_t;
 double cl_alt_star(double jd, void *user, double *ha);
 

@@ -178,7 +178,7 @@ static void test_rts(void)
         { CL_JUPITER, 4 + 1 / 60.0, 9 + 25 / 60.0, 14 + 50 / 60.0, -0.5667 },
     };
     for (int i = 0; i < 3; i++) {
-        cl_rts_body_t u = { T[i].body, -34.6037, -58.3816 };
+        cl_rts_body_t u = { .body = T[i].body, .lat = -34.6037, .lon = -58.3816 };
         cl_rts_t o;
         /* from the day's 0h, when all three are below the horizon */
         cl_rts(cl_alt_body, &u, 2461371.5, T[i].h0 * M_PI / 180, &o);
@@ -242,7 +242,7 @@ static void test_sgp4(void)
                  "1 25544U 98067A   19343.69339541  .00001764  00000-0  38792-4 0  9991",
                  "2 25544  51.6439 211.2001 0007417  17.6667  85.6398 15.50103472202482");
     cl_pass_t p[16];
-    int n = cl_passes(&s, s.epoch_jd, 2.0, -34.6037, -58.3816, 0.02, 10 * M_PI / 180, -1.8f, p, 16, NULL);
+    int n = cl_passes(&s, s.epoch_jd, 2.0, -34.6037, -58.3816, 0.02, 10 * M_PI / 180, -1.8f, p, 16, NULL, NULL);
     int bad = 0;
     for (int i = 0; i < n; i++) {
         if (!(p[i].rise < p[i].top && p[i].top < p[i].set)) bad++;
@@ -251,6 +251,32 @@ static void test_sgp4(void)
         if (dur < 1 || dur > 12) bad++;
     }
     printf("     %d ISS passes over 10 degrees in two days from the epoch\n", n);
+    /* the adaptive search misses none: every pass a brute-force scan every
+     * 10 s finds over 10 degrees, it has too, with its top within a second */
+    {
+        int bf = 0, matched = 0;
+        bool up = false;
+        double best = -9, best_t = 0;
+        for (double t = s.epoch_jd; t < s.epoch_jd + 2.0; t += 10.0 / 86400) {
+            cl_look_t lk;
+            cl_sat_look(&s, t, -34.6037, -58.3816, 0.02, 99, &lk);
+            if (lk.el > 0) {
+                if (!up) best = -9;
+                up = true;
+                if (lk.el > best) best = lk.el, best_t = t;
+            } else if (up) {
+                up = false;
+                if (best >= 10 * M_PI / 180) {
+                    bf++;
+                    for (int i = 0; i < n; i++)
+                        if (fabs(p[i].top - best_t) * 86400 < 10) matched++;
+                }
+            }
+        }
+        printf("     brute force: %d passes, %d matched\n", bf, matched);
+        check("adaptive search finds every pass", bf - n, 0, "");
+        check("adaptive search, tops matched", bf - matched, 0, "");
+    }
     check("passes ordered, 1-12 minutes each", bad, 0, "");
     check("passes found", n >= 2 ? 0 : 1, 0, "");
 }

@@ -9,8 +9,8 @@
  * y up, z ahead) lands at (x, y) / (1 + z) times S.
  *
  * A frame is made in two steps. cl_frame_prepare(), once, on the worker:
- * the sky of the moment (cl_sky_set), every star and object projected, the
- * Milky Way sampled on a grid of 8 px, where each label goes (decided once
+ * the sky of the moment (cl_sky_update), every star and object projected, the
+ * Milky Way sampled on a grid of 16 px, where each label goes (decided once
  * so the two halves agree) and where each object landed, for the taps.
  * Then cl_render() draws, once per half of the screen, each half on its
  * own core (aos_hal_worker_split), clipped to it.
@@ -165,7 +165,8 @@ void cl_unproject(const cl_scene_t *s, float x, float y, float enu[3])
  * The frame's preparation
  * ------------------------------------------------------------------------- */
 
-#define MW_STEP     8
+#define MW_STEP     16
+#define MW_SHIFT    8           /* log2(MW_STEP * MW_STEP) */
 #define MAX_LABELS  160
 #define TRACK_N     CL_TRACK_N
 
@@ -216,6 +217,19 @@ typedef struct {
     bool     tr_on[TRACK_N];
     float    cardinal[8][2];
     bool     card_on[8];
+    /* kept from frame to frame (see where each is used) */
+    cl_body_t bp[CL_NBODY];
+    double   b_jd;
+    bool     b_ok, b_planets;
+    cl_look_t sl[CL_MAX_SATS];
+    bool     sl_ok[CL_MAX_SATS];
+    double   sl_jd[CL_MAX_SATS];
+    uint32_t sl_gen;
+    int      sl_n;
+    bool     mw_ok, mw_ground, mw_atmos;
+    float    mw_az, mw_alt, mw_fov;
+    int      mw_sw, mw_sh;
+    double   mw_jd;
 } frame_t;
 
 static frame_t *s_f;
@@ -328,7 +342,8 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
     *nhits = 0;
     f->nlab = 0;
     proj_init(&f->p, s);
-    cl_sky_set(&f->sky, s->jd, s->lat, s->lon);
+    uint64_t t0 = aos_hal_uptime_us();
+    cl_sky_update(&f->sky, s->jd, s->lat, s->lon);
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             f->M[i][j] = f->p.cam[i][0] * f->sky.m_j2000_enu[0][j] + f->p.cam[i][1] * f->sky.m_j2000_enu[1][j] +
@@ -345,24 +360,28 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
     occ_take(L->t_back2.x - BTN_R, L->time_y - BTN_R, L->t_fwd2.x + BTN_R, L->time_y + BTN_R, true);
     if (s->card) occ_take(L->card_x, L->card_y, L->card_x + L->card_w, L->card_y + L->card_h, true);
 
-    /* the bodies first: the Sun sets the sky */
-    cl_body_t bp[CL_NBODY];
+    /* the bodies first: the Sun sets the sky. Their places are worked out
+     * again only when the shown time moved 20 s (the Moon, the fastest,
+     * moves 10 arcseconds in that): the theories are soft double on the
+     * board, thousands of operations a frame for nothing */
+    bool want_pl = s->planets;
+    if (!f->b_ok || cl_dabs(s->jd - f->b_jd) > 20.0 / 86400 || f->b_planets != want_pl) {
+        for (int b = 0; b < CL_NBODY; b++)
+            if (want_pl || b <= CL_MOON) cl_body(b, s->jd, &f->bp[b]);
+        f->b_jd = s->jd;
+        f->b_planets = want_pl;
+        f->b_ok = true;
+    }
+    cl_body_t *bp = f->bp;
     float benu[CL_NBODY][3];
     for (int b = 0; b < CL_NBODY; b++) {
-        if (!s->planets && b >= CL_MERCURY) {
+        if (!want_pl && b >= CL_MERCURY) {
             f->body[b].on = false;
             continue;
         }
-        cl_body(b, s->jd, &bp[b]);
         cl_radec_to_enu(&f->sky, bp[b].ra, bp[b].dec, b == CL_MOON ? bp[b].dist_au : 0, benu[b]);
     }
-    if (s->planets) {
-        f->sun_alt = asinf(benu[CL_SUN][2]) * 57.29578f;
-    } else {
-        cl_body(CL_SUN, s->jd, &bp[0]);
-        cl_radec_to_enu(&f->sky, bp[0].ra, bp[0].dec, 0, benu[0]);
-        f->sun_alt = asinf(benu[CL_SUN][2]) * 57.29578f;
-    }
+    f->sun_alt = asinf(benu[CL_SUN][2]) * 57.29578f;
     f->bg = sky_colour(f->sun_alt, s->atmos);
     f->dark = s->atmos ? (f->sun_alt < -18 ? 1 : f->sun_alt > -6 ? 0 : (-6 - f->sun_alt) / 12) : 1;
     float day = s->atmos ? (f->sun_alt > 0 ? 1 : f->sun_alt < -6 ? 0 : (f->sun_alt + 6) / 6) : 0;
@@ -406,10 +425,6 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
         bodyp_t *q = &f->body[b];
         q->on = false;
         if (!s->planets && b != CL_SUN && b != CL_MOON) continue;
-        if (!s->planets && b == CL_MOON) {
-            cl_body(CL_MOON, s->jd, &bp[CL_MOON]);
-            cl_radec_to_enu(&f->sky, bp[CL_MOON].ra, bp[CL_MOON].dec, bp[CL_MOON].dist_au, benu[CL_MOON]);
-        }
         float cc[3];
         mat_vec(f->p.cam, benu[b], cc);
         float x, y;
@@ -440,8 +455,16 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
     for (int k = 0; k < s->nsat; k++) {
         satp_t *q = &f->sat[k];
         q->on = false;
-        cl_look_t lk;
-        if (!s->sats || !cl_sat_look(&s->sat[k].el, s->jd, s->lat, s->lon, 0.02, s->sat[k].std_mag, &lk)) continue;
+        if (!s->sats) continue;
+        /* again when the shown time moved a fifth of a second: a frame at
+         * thirty a second reuses the look of the frame before */
+        cl_look_t *lkp = &f->sl[k];
+        if (f->sl_gen != s->gen || k >= f->sl_n || cl_dabs(s->jd - f->sl_jd[k]) > 0.2 / 86400) {
+            f->sl_ok[k] = cl_sat_look(&s->sat[k].el, s->jd, s->lat, s->lon, 0.02, s->sat[k].std_mag, lkp);
+            f->sl_jd[k] = s->jd;
+        }
+        if (!f->sl_ok[k]) continue;
+        cl_look_t lk = *lkp;
         float ce = cosf((float)lk.el);
         float e[3] = { ce * sinf((float)lk.az), ce * cosf((float)lk.az), sinf((float)lk.el) }, cc[3];
         mat_vec(f->p.cam, e, cc);
@@ -454,6 +477,9 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
         q->mag = lk.mag;
         q->on = q->up && x > -20 && x < s->sw + 20 && y > -20 && y < s->sh + 20;
     }
+    f->sl_gen = s->gen;
+    f->sl_n = s->nsat;
+    uint64_t t1 = aos_hal_uptime_us();
     /* the traced pass */
     if (s->track_sat >= 0 && s->track_sat < s->nsat) {
         if (f->tr_sat != s->track_sat || f->tr_t0 != s->track_t0 || f->tr_t1 != s->track_t1 || f->tr_gen != s->gen) {
@@ -487,7 +513,22 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
     f->mw_gain = s->mw && a->cat.mw ? f->dark * (s->night ? 0.5f : 0.75f) : 0;
     f->mw_w = s->sw / MW_STEP + 2;
     f->mw_h = s->sh / MW_STEP + 2;
-    if (f->mw_gain > 0.01f && a->mwgrid) {
+    /* the grid again only when the view or the ground changed, or the sky
+     * turned a quarter of a degree (a minute): it is 4000 inverse
+     * projections and the float atan2 and asin of each */
+    bool mw_same = f->mw_ok && f->mw_az == s->az && f->mw_alt == s->alt && f->mw_fov == s->fov &&
+                   f->mw_sw == s->sw && f->mw_sh == s->sh && f->mw_ground == s->ground && f->mw_atmos == s->atmos &&
+                   cl_dabs(s->jd - f->mw_jd) < 60.0 / 86400;
+    if (f->mw_gain > 0.01f && a->mwgrid && !mw_same) {
+        f->mw_ok = true;
+        f->mw_az = s->az;
+        f->mw_alt = s->alt;
+        f->mw_fov = s->fov;
+        f->mw_sw = s->sw;
+        f->mw_sh = s->sh;
+        f->mw_ground = s->ground;
+        f->mw_atmos = s->atmos;
+        f->mw_jd = s->jd;
         float gal_from_cam[3][3];
         /* camera -> ENU is cam^T; ENU -> J2000 is m^T; J2000 -> galactic */
         for (int i = 0; i < f->mw_h; i++) {
@@ -509,6 +550,7 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
         (void)gal_from_cam;
     }
 
+    uint64_t t2 = aos_hal_uptime_us();
     /* the cardinal points */
     for (int k = 0; k < 8; k++) {
         float az = (float)k * PI_F / 4;
@@ -570,7 +612,7 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
             }
         }
     }
-    if (s->cnames && fovd < 200) {
+    if (s->cnames && fovd < 200 && f->dark > 0.15f) {
         for (int i = 0; i < c->ncons; i++) {
             const struct cl_cons *k = &c->cons[i];
             float cc[3], x, y;
@@ -584,6 +626,10 @@ void cl_frame_prepare(app_t *a, const cl_scene_t *s, cl_hit_t *hits, int *nhits)
             add_label(a, x - (float)w / 2, y, 0, nm, F_S, 0x6F93C0, false);
         }
     }
+    uint64_t t3 = aos_hal_uptime_us();
+    a->us_sky += (uint32_t)(t1 - t0);
+    a->us_mw += (uint32_t)(t2 - t1);
+    a->us_lab += (uint32_t)(t3 - t2);
 }
 
 /* ---------------------------------------------------------------------------
@@ -611,11 +657,11 @@ static void milky_way(app_t *a, const cl_scene_t *s, cl_fb_t *fb)
             int xa = x0 < fb->cx0 ? fb->cx0 : x0, xb = x1 > fb->cx1 ? fb->cx1 : x1;
             for (int y = ya; y < yb; y++) {
                 int fy = y - y0;
-                int l = v00 * (MW_STEP - fy) + v10 * fy, r = v01 * (MW_STEP - fy) + v11 * fy;  /* * 8 */
+                int l = v00 * (MW_STEP - fy) + v10 * fy, r = v01 * (MW_STEP - fy) + v11 * fy;  /* * MW_STEP */
                 uint16_t *p = cl_px(fb, xa, y);
                 for (int x = xa; x < xb; x++, p += fb->sx) {
                     int fx = x - x0;
-                    int v = (l * (MW_STEP - fx) + r * fx) >> 6;     /* 0..255 */
+                    int v = (l * (MW_STEP - fx) + r * fx) >> MW_SHIFT;  /* 0..255 */
                     int amt = (v * gain) >> 8;
                     if (amt < 3) continue;
                     uint16_t px = *p;
