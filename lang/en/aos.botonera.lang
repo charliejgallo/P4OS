@@ -1,0 +1,212 @@
+# amoledos-lang 1   es -> en
+# aos.botonera.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/botonera/main/bn_edit.c:28
+Cortar	Cut
+
+#: apps/botonera/main/bn_edit.c:28
+Superponer	Overlap
+
+#: apps/botonera/main/bn_edit.c:28
+Mantener	Hold
+
+#: apps/botonera/main/bn_edit.c:30
+Un toque lo hace sonar y otro lo corta.	One touch plays it and another stops it.
+
+#: apps/botonera/main/bn_edit.c:31
+Cada toque lo hace sonar de nuevo, encima de lo que ya suena.	Every touch plays it again, on top of what is already playing.
+
+#: apps/botonera/main/bn_edit.c:32
+Suena mientras el dedo está apoyado.	It plays while your finger rests on it.
+
+#: apps/botonera/main/bn_edit.c:91
+#: apps/botonera/main/bn_ui.c:449
+Listo	Done
+
+#: apps/botonera/main/bn_edit.c:225
+Ninguno	None
+
+#: apps/botonera/main/bn_edit.c:228
+Sin nombre	No name
+
+#: apps/botonera/main/bn_edit.c:249
+¿Vaciar? Tocá de nuevo	Clear? Tap again
+
+#: apps/botonera/main/bn_edit.c:249
+#: apps/botonera/main/bn_edit.c:488
+Vaciar	Clear
+
+#: apps/botonera/main/bn_edit.c:321
+Nombre del botón	Button name
+
+#: apps/botonera/main/bn_edit.c:369
+Botón %d	Button %d
+
+#: apps/botonera/main/bn_edit.c:393
+Probar	Try
+
+#: apps/botonera/main/bn_edit.c:396
+Sonido	Sound
+
+#: apps/botonera/main/bn_edit.c:399
+Elegir	Choose
+
+#: apps/botonera/main/bn_edit.c:403
+Nombre	Name
+
+#: apps/botonera/main/bn_edit.c:409
+Color	Colour
+
+#: apps/botonera/main/bn_edit.c:425
+Ícono	Icon
+
+#: apps/botonera/main/bn_edit.c:446
+Al tocarlo	When touched
+
+#: apps/botonera/main/bn_edit.c:457
+Repetir en bucle	Repeat in a loop
+
+#: apps/botonera/main/bn_edit.c:463
+Volumen	Volume
+
+#: apps/botonera/main/bn_edit.c:487
+Mover	Move
+
+#: apps/botonera/main/bn_edit.c:548
+No hay sonidos en %s. Grabá uno o subilos desde el portal.	There are no sounds in %s. Record one or upload them from the portal.
+
+#: apps/botonera/main/bn_edit.c:598
+Elegir un sonido	Choose a sound
+
+#: apps/botonera/main/bn_edit.c:599
+Grabar uno nuevo	Record a new one
+
+#: apps/botonera/main/bn_edit.c:646
+Guardado como %s	Saved as %s
+
+#: apps/botonera/main/bn_edit.c:649
+No quedó nada grabado	Nothing was recorded
+
+#: apps/botonera/main/bn_edit.c:670
+No se pudo abrir el micrófono	Could not open the microphone
+
+#: apps/botonera/main/bn_edit.c:677
+Grabando... (hasta %d segundos)	Recording... (up to %d seconds)
+
+#: apps/botonera/main/bn_edit.c:704
+#: apps/botonera/main/bn_edit.c:743
+Tocá el botón rojo para grabar	Tap the red button to record
+
+#: apps/botonera/main/bn_edit.c:711
+Grabar un sonido	Record a sound
+
+#: apps/botonera/main/bn_edit.c:753
+Usar este	Use this one
+
+#: apps/botonera/main/bn_edit.c:754
+Escuchar	Listen
+
+#: apps/botonera/main/bn_edit.c:755
+Grabar otro	Record another
+
+#: apps/botonera/main/bn_grid.c:145
+#: apps/botonera/main/bn_grid.c:220
+Efectos	Effects
+
+#: apps/botonera/main/bn_grid.c:146
+Ambiente	Ambience
+
+#: apps/botonera/main/bn_synth.c:31
+Aplausos	Applause
+
+#: apps/botonera/main/bn_synth.c:32
+Bocina	Horn
+
+#: apps/botonera/main/bn_synth.c:33
+Redoble	Drum roll
+
+#: apps/botonera/main/bn_synth.c:34
+Tadá	Ta-da
+
+#: apps/botonera/main/bn_synth.c:35
+Campana	Bell
+
+#: apps/botonera/main/bn_synth.c:36
+Correcto	Correct
+
+#: apps/botonera/main/bn_synth.c:37
+Error	Error
+
+#: apps/botonera/main/bn_synth.c:38
+Láser	Laser
+
+#: apps/botonera/main/bn_synth.c:39
+Boing	Boing
+
+#: apps/botonera/main/bn_synth.c:40
+Trombón triste	Sad trombone
+
+#: apps/botonera/main/bn_synth.c:41
+Sirena	Siren
+
+#: apps/botonera/main/bn_synth.c:42
+Tic tac	Tick tock
+
+#: apps/botonera/main/bn_synth.c:44
+Ritmo	Beat
+
+#: apps/botonera/main/bn_synth.c:45
+Lluvia	Rain
+
+#: apps/botonera/main/bn_synth.c:46
+Viento	Wind
+
+#: apps/botonera/main/bn_synth.c:47
+Latido	Heartbeat
+
+#: apps/botonera/main/bn_ui.c:234
+No se pudo abrir el parlante	Could not open the speaker
+
+#: apps/botonera/main/bn_ui.c:242
+Suenan los primeros %d segundos	Only the first %d seconds play
+
+#: apps/botonera/main/bn_ui.c:250
+No se pudo leer %s	Could not read %s
+
+#: apps/botonera/main/bn_ui.c:362
+Vacío	Empty
+
+#: apps/botonera/main/bn_ui.c:434
+Página %d de %d	Page %d of %d
+
+#: apps/botonera/main/bn_ui.c:449
+#: apps/botonera/main/bn_ui.c:861
+Editar	Edit
+
+#: apps/botonera/main/bn_ui.c:466
+Preparando los sonidos de ejemplo...	Preparing the example sounds...
+
+#: apps/botonera/main/bn_ui.c:467
+Tocá dónde ponerlo (también en otra página)	Tap where to put it (on another page too)
+
+#: apps/botonera/main/bn_ui.c:468
+Tocá un botón, o el nombre de la página, para cambiarlo	Tap a button, or the page's name, to change it
+
+#: apps/botonera/main/bn_ui.c:516
+No se pudo guardar la botonera	Could not save the soundboard
+
+#: apps/botonera/main/bn_ui.c:581
+Nombre de la página	Page name
+
+#: apps/botonera/main/bn_ui.c:591
+Página %d	Page %d
+
+#: apps/botonera/main/bn_ui.c:604
+Tocá de nuevo para borrar la página (los sonidos quedan en la tarjeta)	Tap again to delete the page (the sounds stay on the card)
+
+#: apps/botonera/main/bn_ui.c:941
+Parar todo	Stop all
