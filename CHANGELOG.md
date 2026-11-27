@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.35.0 — 2026-11-27
+
+Eight new apps, a Telegram bot of the board's own, the phone as a gamepad,
+the App Library and widgets on the lock screen.
 
 - **Marcador** (new, `apps/marcador`): a scorekeeper with seven ways of
   keeping the score, each drawn and sounding like the real thing: matches
