@@ -55,6 +55,7 @@ typedef struct {
     char     ver[28];       /* the catalogue's version */
     char     have[28];      /* the installed one, "" when none */
     char     fw_min[16];
+    char     cat[12];       /* its category in the catalogue ("juegos", "red"...), "" when it has none */
     aos_store_state_t state;
     bool     fits;          /* this firmware can run it (ABI and fw_min) */
     int      src;           /* which source lists it: 0 is the official one, -1 when none does */

@@ -41,6 +41,7 @@ void aos_ha_widget_register(void);
 /* Services that run without their app (alarms); from the main loop, 5 Hz. */
 void aos_apps_service_tick(void);
 void aos_clock_service_tick(void);
+void aos_clock_lock_widget_register(void);   /* the next alarm on the lock screen */
 void aos_app_flasher_service_tick(void);    /* "Grabación terminada" with the app closed */
 bool aos_alarm_get(int index, int *minute_of_day, bool *enabled, int *days);
 bool aos_alarm_set(int index, int minute_of_day, bool enabled, int days);

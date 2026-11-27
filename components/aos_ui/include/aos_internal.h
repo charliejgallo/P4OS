@@ -65,6 +65,16 @@ void aos_home_tick(void);                /* once a second: widgets */
 /* An app's icon at 'size', squircle with the app's gradient. */
 lv_obj_t *aos_home_app_icon(lv_obj_t *parent, const aos_app_t *app, int32_t size);
 
+/* The App Library, the home screen's last page (aos_library.c): there when a
+ * service said how to group the apps; filled only while it is on screen. */
+bool aos_library_on(void);
+void aos_library_create(lv_obj_t *page, int32_t w);
+void aos_library_fill(void);
+void aos_library_drop(void);
+void aos_library_forget(void);          /* its page was deleted with the home screen */
+bool aos_library_sheet_open(void);
+void aos_library_sheet_close(void);
+
 /* ---- status bar (aos_statusbar.c) ---- */
 void aos_statusbar_create(lv_obj_t *layer);
 void aos_statusbar_layout(void);         /* orientation changed */

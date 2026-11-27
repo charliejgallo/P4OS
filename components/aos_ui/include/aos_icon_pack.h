@@ -67,6 +67,14 @@ void aos_icon_pack_let_go(void);
 /* The pack in use, or NULL. */
 const char *aos_icon_pack_current(void);
 
+/* For the portal, from any task: the pack in use (its name in 'pack') and
+ * its picture for the app 'id' at the smallest size at or above 'size' (or
+ * the largest), as the QOI file it is stored as, in a malloc'd buffer the
+ * caller frees; NULL when there is no pack or it has no picture for 'id'.
+ * It reads the file by itself, never the board's index or its pictures.
+ * With 'id' NULL it only says whether there is a pack (returns NULL). */
+uint8_t *aos_icon_pack_read_qoi(const char *id, int32_t size, size_t *len, char *pack, size_t pack_n);
+
 #ifdef __cplusplus
 }
 #endif

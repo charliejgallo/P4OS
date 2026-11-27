@@ -18,13 +18,17 @@ a poco; esta lista dice qué está hecho y qué queda.
 | Widgets elegidos en la placa: "+ Widget" en el modo edición, y tocar un widget para su tamaño, qué muestra o quitarlo (antes, sólo desde el portal); se arrastran como los íconos | `aos_widget_edit.c`, `aos_home.c` | después de 0.21.6 |
 | Presentación de fotos en el bloqueo: una carpeta de Fotos, otra foto al azar cada vez que se bloquea | `aos_wallpaper.c` (`lock_album`), Fotos, Ajustes | después de 0.21.6 |
 
+| Biblioteca de apps: la última página del inicio, por las categorías de la Tienda, con las apps sacadas del inicio también; se llena sólo mientras se ve | `aos_library.c`, `aos_app_library.c` | 0.35.0 |
+| Widgets en el bloqueo: hasta tres cápsulas bajo la fecha (próxima alarma, sensores, Zigbee), elegidas en Ajustes; `aos_ui_register_lock_widget()` para sumar otros | `aos_lock.c` | 0.35.0 |
+| Animación de arranque con la marca (el chip y sus patas) sobre la barra de avance real | `aos_boot.c` | 0.35.0 |
+
 ## Pendientes
 
 | # | Mejora | Costo | Notas |
 |---|---|---|---|
 | 7 | **Modo reposo**: con la placa acostada (y cargando, si algún día hay batería), un reloj grande con fotos o sensores, como el StandBy del iPhone | PSRAM | una app de sistema o una capa como el bloqueo |
 | 8 | **Estilo de íconos**: forma (redondeado, círculo), cuántas columnas, nombres sí o no | nada | `aos_home.c`, `aos_icon.c` |
-| 9 | **Animación de arranque** con logo, y **carpetas que se abren animadas** | poco | la pantalla de arranque ya muestra el avance real |
+| 9 | ~~**Animación de arranque** con logo~~ (0.35.0); las carpetas ya se abren animadas | poco | |
 
 ## Lo que se midió y conviene recordar
 

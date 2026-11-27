@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- **Visión** (new, `apps/vision`): a USB webcam that sees, on the board
+  itself with Espressif's esp-dl: faces, people, the 80 kinds of thing of
+  COCO, hands and their gesture, and QR and EAN/UPC codes. Boxes with their
+  names on the live picture, a sound and a note when something appears, a
+  photo with the boxes, and its portal page. The models come in packs: the
+  faces, people and codes (0.6 MB) with the app, COCO (3 MB) and the hands
+  (1.5 MB) as extras. Measured on the board: faces at about 20 frames a
+  second, people at 10.
+- **Malla** (new, `apps/malla`, GPL-3.0): a Meshtastic client over USB,
+  TCP or Bluetooth (with the node's PIN): the channels' chats and direct
+  messages with their receipts, the nodes, the map, telemetry with graphs,
+  traceroute, and the node's settings, channels and their QR code.
+- **Mensajes** (new, `apps/mensajes`): Telegram with your own account, by
+  MTProto 2.0 written in C, with no server in the middle: signing in with
+  the number, the code and the two-step password, the chats, and sending
+  and receiving. Its portal page.
+- **Correo** (new, `apps/correo`): mail over IMAP and SMTP, several
+  accounts set up by themselves (Gmail, Outlook, iCloud, Fastmail, Yahoo,
+  or by hand) with a word on each one's app password, a unified inbox,
+  threads and folders. Its portal page.
+- **Cielo** (new, `apps/cielo`): tonight's sky from where the board is, as
+  a dome or towards the horizon, dragged and pinched, turning with the
+  Earth; each object's card (magnitude, distance, rising, culminating,
+  setting) and a night mode.
 - **Grabador** (new, `apps/grabador`): a USB webcam as a security camera.
   It records an H.264 MP4 when something moves, from a few seconds before,
   with zones, hours, sensitivity and a space limit; a note through the
@@ -42,6 +66,32 @@
   "Pairing with a device"), for Meshtastic nodes and other devices that keep
   their characteristics behind encryption. Six bonds instead of three;
   Settings' "forget" leaves the devices' keys alone.
+- **The App Library**, the home screen's last page: every app on the
+  board, those taken off the home screen too, in the Store's categories
+  (games, sound and picture, network, workshop, create, programming,
+  utilities, system), a card each with its first three apps big and the
+  rest as a cluster that opens the whole category; a search pill on top.
+  Its icons are made only while the page is on screen.
+- **Widgets on the lock screen**, under the date, up to three, chosen in
+  Settings, Lock screen: the next alarm, the sensors (the first two
+  quantities, as the home screen's card picks them) and the Zigbee network
+  with its devices, in the status bar's colours. Each shows only when it
+  has something to say; services register more with
+  `aos_ui_register_lock_widget()`.
+- **The portal shows the icon pack's icons**: the Inicio page draws the
+  same pictures the screen does (`/api/apps/icon_hd`, the pack's QOI
+  decoded in the browser), and the old drawings without a pack.
+- **A boot mark**: a chip that pops in with its pins lighting up one by one
+  and the name closing in, over the real progress bar.
+- **Archivos opens .mp4 and .avi in Video**, as it opens pictures in
+  Fotos; without Video on the card, it says it is in the Store.
+- **The home screen's badges** (the Store's updates, unread messages) no
+  longer lose their top: they started 6 px above the icon's cell, which
+  clips them.
+- **Both icon packs (3D toy and Line) have the new apps** (Grabador,
+  Malla, Mensajes, Correo, Cielo, Bot), now 110 apps each.
+- Tortuga repaints where the turtle was (bits of it stayed on the board).
+- Cielo no longer hangs the board while it works out the passes.
 
 ## 0.34.2 — 2026-11-26
 

@@ -1044,3 +1044,40 @@ void aos_app_clock_get(aos_app_t *app)
         .create = create, .destroy = destroy, .back = back, .tick = tick,
     };
 }
+
+/* -------------------------------------------------------------------------- */
+/* The lock screen's widget: the next alarm                                    */
+/* -------------------------------------------------------------------------- */
+
+/* The soonest alarm on, from now: "7:30", "mañana 7:30" or "JUE 7:30". */
+static bool lock_alarm_fill(char *text, size_t n, const char **glyph, uint32_t *rgb)
+{
+    (void)glyph;
+    if (!aos_hal_time_is_valid()) return false;
+    struct tm t;
+    aos_hal_time_now(&t);
+    int now = t.tm_hour * 60 + t.tm_min, best = -1, best_min = 0, best_d = 0;
+    for (int i = 0; i < MAX_ALARMS; i++) {
+        int minute, days;
+        bool on;
+        if (!aos_alarm_get(i, &minute, &on, &days) || !on || minute < 0) continue;
+        for (int d = 0; d < 8; d++) {
+            int wday = (t.tm_wday + d) % 7;
+            if (!(days & 1 << ((wday + 6) % 7)) || (d == 0 && minute <= now)) continue;
+            int until = d * 1440 + minute - now;
+            if (best < 0 || until < best) { best = until; best_min = minute; best_d = d; }
+            break;
+        }
+    }
+    if (best < 0) return false;
+    if (best_d == 0) snprintf(text, n, "%d:%02d", best_min / 60, best_min % 60);
+    else if (best_d == 1) snprintf(text, n, _("mañana %d:%02d"), best_min / 60, best_min % 60);
+    else snprintf(text, n, "%s %d:%02d", aos_day_name((t.tm_wday + best_d) % 7), best_min / 60, best_min % 60);
+    *rgb = 0xFF9F0A;
+    return true;
+}
+
+void aos_clock_lock_widget_register(void)
+{
+    aos_ui_register_lock_widget("alarm", N_("Próxima alarma"), AOS_SYM_ALARM, lock_alarm_fill);
+}

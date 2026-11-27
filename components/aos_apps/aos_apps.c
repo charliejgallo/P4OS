@@ -42,6 +42,9 @@ void aos_apps_register_builtin(void)
         aos_ui_register_app(&app);
     }
     aos_app_soon_register();
+    void aos_app_library_register(void);
+    aos_app_library_register();         /* the App Library's categories */
+    aos_clock_lock_widget_register();   /* the next alarm, on the lock screen */
     aos_ha_widget_register();       /* "widget ha" on the home screen */
     aos_claude_widget_register();   /* "widget claude" */
     aos_bot_boot();
