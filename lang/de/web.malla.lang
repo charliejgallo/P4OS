@@ -1,0 +1,168 @@
+# amoledos-lang 1   es -> de
+# web.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/web/malla.js:44
+no hay ruta	keine Route
+
+#: apps/malla/web/malla.js:44
+lo rechazaron	abgelehnt
+
+#: apps/malla/web/malla.js:44
+no hubo respuesta	keine Antwort
+
+#: apps/malla/web/malla.js:44
+sin radio	kein Funk
+
+#: apps/malla/web/malla.js:45
+nadie lo confirmó	niemand hat es bestätigt
+
+#: apps/malla/web/malla.js:45
+canal desconocido	unbekannter Kanal
+
+#: apps/malla/web/malla.js:45
+demasiado largo	zu lang
+
+#: apps/malla/web/malla.js:45
+sin respuesta	ohne Antwort
+
+#: apps/malla/web/malla.js:46
+límite de uso del canal	Kanal-Nutzungsgrenze
+
+#: apps/malla/web/malla.js:46
+#: apps/malla/web/malla.js:46
+falta su clave pública	sein öffentlicher Schlüssel fehlt
+
+#: apps/malla/web/malla.js:47
+demasiados seguidos	zu viele hintereinander
+
+#: apps/malla/web/malla.js:61
+nunca	nie
+
+#: apps/malla/web/malla.js:61
+recién	gerade eben
+
+#: apps/malla/web/malla.js:61
+hace %d min	vor %d Min.
+
+#: apps/malla/web/malla.js:62
+hace %d h	vor %d Std.
+
+#: apps/malla/web/malla.js:62
+hace %d d	vor %d T.
+
+#: apps/malla/web/malla.js:81
+#: apps/malla/web/malla.js:102
+Malla	Mesh
+
+#: apps/malla/web/malla.js:91
+Mensaje	Nachricht
+
+#: apps/malla/web/malla.js:93
+Enviar	Senden
+
+#: apps/malla/web/malla.js:98
+Tomar canales de una URL	Kanäle aus einer URL übernehmen
+
+#: apps/malla/web/malla.js:99
+Reemplaza los canales del nodo (y su radio, si la URL la trae). El nodo se reinicia.	Ersetzt die Kanäle des Knotens (und den Funk, falls die URL ihn enthält). Der Knoten startet neu.
+
+#: apps/malla/web/malla.js:100
+Aplicar	Anwenden
+
+#: apps/malla/web/malla.js:113
+Es demasiado largo para la malla	Zu lang für das Mesh
+
+#: apps/malla/web/malla.js:120
+No es una URL de canales de Meshtastic	Keine Meshtastic-Kanal-URL
+
+#: apps/malla/web/malla.js:121
+¿Reemplazar los canales del nodo? Se reinicia.	Die Kanäle des Knotens ersetzen? Er startet neu.
+
+#: apps/malla/web/malla.js:122
+Mandado al nodo	An den Knoten gesendet
+
+#: apps/malla/web/malla.js:152
+#: apps/malla/web/malla.js:176
+Vos	Du
+
+#: apps/malla/web/malla.js:152
+Sin mensajes todavía	Noch keine Nachrichten
+
+#: apps/malla/web/malla.js:161
+en cola	in der Warteschlange
+
+#: apps/malla/web/malla.js:161
+enviado	gesendet
+
+#: apps/malla/web/malla.js:162
+repetido	weitergeleitet
+
+#: apps/malla/web/malla.js:162
+recibido	zugestellt
+
+#: apps/malla/web/malla.js:163
+error	Fehler
+
+#: apps/malla/web/malla.js:170
+Canal %d	Kanal %d
+
+#: apps/malla/web/malla.js:182
+Escribí el primer mensaje directo.	Schreib die erste Direktnachricht.
+
+#: apps/malla/web/malla.js:182
+Todavía no hay mensajes en este canal.	Noch keine Nachrichten in diesem Kanal.
+
+#: apps/malla/web/malla.js:190
+%d nodos	%d Knoten
+
+#: apps/malla/web/malla.js:192
+Nodo	Knoten
+
+#: apps/malla/web/malla.js:192
+Visto	Gehört
+
+#: apps/malla/web/malla.js:192
+Saltos	Sprünge
+
+#: apps/malla/web/malla.js:192
+Batería	Akku
+
+#: apps/malla/web/malla.js:193
+Distancia	Entfernung
+
+#: apps/malla/web/malla.js:196
+este	dieser
+
+#: apps/malla/web/malla.js:197
+directo	direkt
+
+#: apps/malla/web/malla.js:198
+enchufado	am Netz
+
+#: apps/malla/web/malla.js:205
+Malla no está abierta en la placa.	Mesh ist auf der Platine nicht geöffnet.
+
+#: apps/malla/web/malla.js:206
+Abrir Malla en la placa	Mesh auf der Platine öffnen
+
+#: apps/malla/web/malla.js:209
+Conectado	Verbunden
+
+#: apps/malla/web/malla.js:209
+Cargando la base de nodos	Lade die Knotendatenbank
+
+#: apps/malla/web/malla.js:209
+Conectando	Verbinde
+
+#: apps/malla/web/malla.js:210
+Reintentando	Neuer Versuch
+
+#: apps/malla/web/malla.js:210
+Sin conexión	Nicht verbunden
+
+#: apps/malla/web/malla.js:213
+Sin nodo	Kein Knoten
