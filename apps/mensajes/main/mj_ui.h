@@ -83,6 +83,9 @@ typedef struct {
     char data_dir[160], dl_dir[160];
 } mj_ui_t;
 
+/* "U" in the code; mj_U to the linker: the simulator links every app together
+ * and CAN, Datalog and EEPROM have a global U of their own. */
+#define U mj_U
 extern mj_ui_t U;
 
 /* ---- mensajes.c ---- */

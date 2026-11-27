@@ -1,0 +1,479 @@
+# amoledos-lang 1   es -> en
+# aos.mensajes.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mensajes/main/mj_ui_chat.c:254
+Ya está en la tarjeta: %s	Already on the card: %s
+
+#: apps/mensajes/main/mj_ui_chat.c:259
+Bajando a la tarjeta…	Downloading to the card…
+
+#: apps/mensajes/main/mj_ui_chat.c:338
+#: apps/mensajes/main/mj_ui_util.c:313
+Nota de voz	Voice message
+
+#: apps/mensajes/main/mj_ui_chat.c:342
+#: apps/mensajes/main/mj_ui_util.c:314
+Audio	Audio file
+
+#: apps/mensajes/main/mj_ui_chat.c:346
+#: apps/mensajes/main/mj_ui_util.c:319
+Archivo	File
+
+#: apps/mensajes/main/mj_ui_chat.c:350
+#: apps/mensajes/main/mj_ui_util.c:315
+Video	Video clip
+
+#: apps/mensajes/main/mj_ui_chat.c:359
+en la tarjeta	on the card
+
+#: apps/mensajes/main/mj_ui_chat.c:458
+Reenviado de %s	Forwarded from %s
+
+#: apps/mensajes/main/mj_ui_chat.c:540
+editado	edited
+
+#: apps/mensajes/main/mj_ui_chat.c:605
+Copiado	Copied
+
+#: apps/mensajes/main/mj_ui_chat.c:642
+#: apps/mensajes/main/mj_ui_chat.c:1028
+Mensaje	Message
+
+#: apps/mensajes/main/mj_ui_chat.c:661
+Responder	Reply
+
+#: apps/mensajes/main/mj_ui_chat.c:662
+Reenviar	Forward
+
+#: apps/mensajes/main/mj_ui_chat.c:663
+Copiar	Copy
+
+#: apps/mensajes/main/mj_ui_chat.c:664
+Editar	Edit
+
+#: apps/mensajes/main/mj_ui_chat.c:666
+Borrar para todos	Delete for everyone
+
+#: apps/mensajes/main/mj_ui_chat.c:666
+Borrar	Delete
+
+#: apps/mensajes/main/mj_ui_chat.c:680
+Editando el mensaje	Editing the message
+
+#: apps/mensajes/main/mj_ui_chat.c:681
+Respondiendo a %s: %s	Replying to %s: %s
+
+#: apps/mensajes/main/mj_ui_chat.c:863
+Mandar una foto	Send a photo
+
+#: apps/mensajes/main/mj_ui_chat.c:866
+No hay fotos JPEG en %s. Copialas ahí desde el portal (Archivos) o la computadora.	There are no JPEG photos in %s. Copy them there from the portal (Files) or a computer.
+
+#: apps/mensajes/main/mj_ui_chat.c:949
+Elegí un chat de la lista	Pick a chat from the list
+
+#: apps/mensajes/main/mj_ui_chat.c:971
+#: apps/mensajes/main/mj_ui_list.c:73
+#: apps/mensajes/main/mj_web.c:133
+Mensajes guardados	Saved Messages
+
+#: apps/mensajes/main/mj_ui_chat.c:1043
+Sólo los administradores escriben en este canal	Only the admins post in this channel
+
+#: apps/mensajes/main/mj_ui_list.c:100
+#: apps/mensajes/main/mj_ui_util.c:318
+Sticker	Sticker 
+
+#: apps/mensajes/main/mj_ui_list.c:116
+Vos	You
+
+#: apps/mensajes/main/mj_ui_list.c:213
+Buscando…	Searching…
+
+#: apps/mensajes/main/mj_ui_list.c:217
+No se encontró nada	Nothing found
+
+#: apps/mensajes/main/mj_ui_list.c:220
+Chats y contactos	Chats and contacts
+
+#: apps/mensajes/main/mj_ui_list.c:242
+#: apps/mensajes/main/mj_ui_login.c:199
+Mensajes	Messages
+
+#: apps/mensajes/main/mj_ui_list.c:301
+Cargando los chats…	Loading the chats…
+
+#: apps/mensajes/main/mj_ui_list.c:301
+Ningún chat se llama así	No chat is called that
+
+#: apps/mensajes/main/mj_ui_list.c:301
+Todavía no hay chats	No chats yet
+
+#: apps/mensajes/main/mj_ui_list.c:313
+Actualizando…	Updating…
+
+#: apps/mensajes/main/mj_ui_list.c:314
+Conectando de forma segura…	Connecting securely…
+
+#: apps/mensajes/main/mj_ui_list.c:315
+Esperando la red…	Waiting for the network…
+
+#: apps/mensajes/main/mj_ui_list.c:355
+Chats	Chats 
+
+#: apps/mensajes/main/mj_ui_list.c:364
+Buscar	Search
+
+#: apps/mensajes/main/mj_ui_list.c:407
+Se vació la caché	The cache was emptied
+
+#: apps/mensajes/main/mj_ui_list.c:421
+¿Cerrar la sesión?	Log out?
+
+#: apps/mensajes/main/mj_ui_list.c:422
+La placa se desconecta de tu cuenta. Para volver hay que entrar de nuevo con el código.	The board disconnects from your account. To come back you sign in again with the code.
+
+#: apps/mensajes/main/mj_ui_list.c:426
+#: apps/mensajes/main/mj_ui_list.c:494
+Cerrar la sesión	Log out
+
+#: apps/mensajes/main/mj_ui_list.c:459
+Ajustes	Settings
+
+#: apps/mensajes/main/mj_ui_list.c:471
+Cuenta	Account
+
+#: apps/mensajes/main/mj_ui_list.c:472
+Teléfono	Phone
+
+#: apps/mensajes/main/mj_ui_list.c:473
+Usuario	Username
+
+#: apps/mensajes/main/mj_ui_list.c:474
+Avisos de mensajes nuevos	New message notifications
+
+#: apps/mensajes/main/mj_ui_list.c:475
+Arrancar con la placa	Start with the board
+
+#: apps/mensajes/main/mj_ui_list.c:480
+%u archivos, %s	%u files, %s
+
+#: apps/mensajes/main/mj_ui_list.c:481
+Caché de fotos	Photo cache
+
+#: apps/mensajes/main/mj_ui_list.c:482
+Vaciar la caché	Empty the cache
+
+#: apps/mensajes/main/mj_ui_list.c:484
+%u KB (pico %u) y %u KB de fotos	%u KB (peak %u) and %u KB of photos
+
+#: apps/mensajes/main/mj_ui_list.c:485
+Memoria	Memory
+
+#: apps/mensajes/main/mj_ui_list.c:488
+de prueba, DC %d	test server, DC %d
+
+#: apps/mensajes/main/mj_ui_list.c:488
+Telegram, DC %d	Telegram, DC %d 
+
+#: apps/mensajes/main/mj_ui_list.c:489
+Servidor	Server
+
+#: apps/mensajes/main/mj_ui_list.c:490
+Un cliente no oficial para Telegram, escrito para esta placa.	An unofficial client for Telegram, written for this board.
+
+#: apps/mensajes/main/mj_ui_list.c:519
+Reenviar a…	Forward to…
+
+#: apps/mensajes/main/mj_ui_login.c:34
+#: apps/mensajes/main/mj_ui_login.c:126
+Ese número no es válido: va con el código de país.	That number is not valid: it goes with the country code.
+
+#: apps/mensajes/main/mj_ui_login.c:36
+El api_id o el api_hash no son válidos.	The api_id or the api_hash is not valid.
+
+#: apps/mensajes/main/mj_ui_login.c:37
+El código no es el correcto.	That is not the right code.
+
+#: apps/mensajes/main/mj_ui_login.c:38
+El código venció: pedí otro.	The code expired: ask for another one.
+
+#: apps/mensajes/main/mj_ui_login.c:39
+Falta el código.	The code is missing.
+
+#: apps/mensajes/main/mj_ui_login.c:40
+La contraseña no es la correcta.	That is not the right password.
+
+#: apps/mensajes/main/mj_ui_login.c:41
+Telegram bloqueó ese número.	Telegram has banned that number.
+
+#: apps/mensajes/main/mj_ui_login.c:43
+Demasiados intentos: esperá un rato y probá de nuevo.	Too many tries: wait a while and try again.
+
+#: apps/mensajes/main/mj_ui_login.c:45
+Telegram pide configurar un correo desde la app oficial antes de entrar acá.	Telegram asks you to set up an e-mail in the official app before signing in here.
+
+#: apps/mensajes/main/mj_ui_login.c:46
+La contraseña usa un método que la placa no conoce.	The password uses a method the board does not know.
+
+#: apps/mensajes/main/mj_ui_login.c:47
+Telegram no contestó. ¿Hay red?	Telegram did not answer. Is there a network?
+
+#: apps/mensajes/main/mj_ui_login.c:115
+El api_id es un número y el api_hash tiene 32 letras y números (0-9, a-f).	The api_id is a number and the api_hash has 32 letters and digits (0-9, a-f).
+
+#: apps/mensajes/main/mj_ui_login.c:200
+Hablando con Telegram…	Talking to Telegram…
+
+#: apps/mensajes/main/mj_ui_login.c:203
+Mensajes para Telegram	Messages for Telegram
+
+#: apps/mensajes/main/mj_ui_login.c:204
+Para entrar con tu cuenta, la placa necesita un api_id y un api_hash tuyos. Se sacan gratis en my.telegram.org, en «API development tools». También se cargan desde la página Mensajes del portal.	To sign in with your account, the board needs an api_id and an api_hash of your own. You get them free at my.telegram.org, under "API development tools". They can also be entered on the Messages page of the portal.
+
+#: apps/mensajes/main/mj_ui_login.c:207
+api_id	api_id 
+
+#: apps/mensajes/main/mj_ui_login.c:208
+api_hash	api_hash 
+
+#: apps/mensajes/main/mj_ui_login.c:209
+Guardar	Save
+
+#: apps/mensajes/main/mj_ui_login.c:212
+Tu número	Your number
+
+#: apps/mensajes/main/mj_ui_login.c:213
+Con el código de país: +54 9 11 y el resto, por ejemplo. Te va a llegar un código.	With the country code: +44 7 and the rest, for example. A code will be sent to you.
+
+#: apps/mensajes/main/mj_ui_login.c:215
+Seguir	Next
+
+#: apps/mensajes/main/mj_ui_login.c:216
+Cambiar el api_id	Change the api_id
+
+#: apps/mensajes/main/mj_ui_login.c:219
+El código	The code
+
+#: apps/mensajes/main/mj_ui_login.c:221
+Telegram te lo mandó a la app, en tu otro dispositivo.	Telegram sent it to the app on your other device.
+
+#: apps/mensajes/main/mj_ui_login.c:222
+Te llega por SMS.	It comes by SMS.
+
+#: apps/mensajes/main/mj_ui_login.c:223
+Te lo dicen en una llamada.	It comes in a phone call.
+
+#: apps/mensajes/main/mj_ui_login.c:224
+Te llega a tu correo.	It comes to your e-mail.
+
+#: apps/mensajes/main/mj_ui_login.c:225
+Telegram te mandó un código.	Telegram sent you a code.
+
+#: apps/mensajes/main/mj_ui_login.c:229
+#: apps/mensajes/main/mj_ui_login.c:243
+Entrar	Sign in
+
+#: apps/mensajes/main/mj_ui_login.c:230
+#: apps/mensajes/main/mj_ui_login.c:244
+#: apps/mensajes/main/mj_ui_login.c:249
+Otro número	Another number
+
+#: apps/mensajes/main/mj_ui_login.c:234
+Contraseña en dos pasos	Two-step password
+
+#: apps/mensajes/main/mj_ui_login.c:236
+Tu cuenta tiene una contraseña además del código. Pista: %s	Your account has a password besides the code. Hint: %s
+
+#: apps/mensajes/main/mj_ui_login.c:240
+Tu cuenta tiene una contraseña además del código.	Your account has a password besides the code.
+
+#: apps/mensajes/main/mj_ui_login.c:242
+Contraseña	Password
+
+#: apps/mensajes/main/mj_ui_login.c:247
+Ese número no tiene cuenta	That number has no account
+
+#: apps/mensajes/main/mj_ui_login.c:248
+Creala desde la app oficial de Telegram y volvé: la placa entra a cuentas que ya existen.	Create it in Telegram's official app and come back: the board signs in to accounts that already exist.
+
+#: apps/mensajes/main/mj_ui_util.c:229
+ayer	yesterday
+
+#: apps/mensajes/main/mj_ui_util.c:233
+dom	Sun
+
+#: apps/mensajes/main/mj_ui_util.c:233
+lun	Mon
+
+#: apps/mensajes/main/mj_ui_util.c:233
+mar	Tue
+
+#: apps/mensajes/main/mj_ui_util.c:233
+mié	Wed
+
+#: apps/mensajes/main/mj_ui_util.c:233
+jue	Thu
+
+#: apps/mensajes/main/mj_ui_util.c:233
+vie	Fri
+
+#: apps/mensajes/main/mj_ui_util.c:233
+sáb	Sat
+
+#: apps/mensajes/main/mj_ui_util.c:242
+enero	January
+
+#: apps/mensajes/main/mj_ui_util.c:242
+febrero	February
+
+#: apps/mensajes/main/mj_ui_util.c:242
+marzo	March
+
+#: apps/mensajes/main/mj_ui_util.c:242
+abril	April
+
+#: apps/mensajes/main/mj_ui_util.c:242
+mayo	May
+
+#: apps/mensajes/main/mj_ui_util.c:242
+junio	June
+
+#: apps/mensajes/main/mj_ui_util.c:243
+julio	July
+
+#: apps/mensajes/main/mj_ui_util.c:243
+agosto	August
+
+#: apps/mensajes/main/mj_ui_util.c:243
+septiembre	September
+
+#: apps/mensajes/main/mj_ui_util.c:243
+octubre	October
+
+#: apps/mensajes/main/mj_ui_util.c:243
+noviembre	November
+
+#: apps/mensajes/main/mj_ui_util.c:244
+diciembre	December
+
+#: apps/mensajes/main/mj_ui_util.c:250
+Hoy	Today
+
+#: apps/mensajes/main/mj_ui_util.c:257
+Ayer	Yesterday
+
+#: apps/mensajes/main/mj_ui_util.c:261
+%d de %s	%d %s
+
+#: apps/mensajes/main/mj_ui_util.c:278
+escribiendo…	typing…
+
+#: apps/mensajes/main/mj_ui_util.c:279
+%s está escribiendo…	%s is typing…
+
+#: apps/mensajes/main/mj_ui_util.c:282
+tus mensajes guardados	your saved messages
+
+#: apps/mensajes/main/mj_ui_util.c:283
+bot	bot 
+
+#: apps/mensajes/main/mj_ui_util.c:284
+en línea	online
+
+#: apps/mensajes/main/mj_ui_util.c:288
+visto: %s	last seen %s
+
+#: apps/mensajes/main/mj_ui_util.c:289
+visto hace un rato	last seen recently
+
+#: apps/mensajes/main/mj_ui_util.c:291
+canal	channel
+
+#: apps/mensajes/main/mj_ui_util.c:293
+grupo	group
+
+#: apps/mensajes/main/mj_ui_util.c:312
+Foto	Photo
+
+#: apps/mensajes/main/mj_ui_util.c:316
+Videomensaje	Video message
+
+#: apps/mensajes/main/mj_ui_util.c:320
+Ubicación	Location
+
+#: apps/mensajes/main/mj_ui_util.c:322
+Encuesta	Poll
+
+#: apps/mensajes/main/mj_ui_util.c:324
+Un adjunto que la placa no muestra	An attachment the board does not show
+
+#: apps/mensajes/main/mj_ui_util.c:331
+%s creó el grupo «%s»	%s created the group "%s"
+
+#: apps/mensajes/main/mj_ui_util.c:332
+%s cambió el nombre a «%s»	%s changed the name to "%s"
+
+#: apps/mensajes/main/mj_ui_util.c:333
+%s cambió la foto del grupo	%s changed the group photo
+
+#: apps/mensajes/main/mj_ui_util.c:334
+%s sumó a %s	%s added %s
+
+#: apps/mensajes/main/mj_ui_util.c:335
+%s salió del grupo	%s left the group
+
+#: apps/mensajes/main/mj_ui_util.c:336
+%s se sumó con un enlace	%s joined with a link
+
+#: apps/mensajes/main/mj_ui_util.c:337
+%s fijó un mensaje	%s pinned a message
+
+#: apps/mensajes/main/mj_ui_util.c:338
+Llamada	Call
+
+#: apps/mensajes/main/mj_ui_util.c:339
+Un aviso del grupo	A group notice
+
+#: apps/mensajes/main/mj_ui_util.c:403
+No se pudo mandar el mensaje	The message could not be sent
+
+#: apps/mensajes/main/mj_ui_util.c:404
+No se pudo editar	It could not be edited
+
+#: apps/mensajes/main/mj_ui_util.c:405
+No se pudo borrar	It could not be deleted
+
+#: apps/mensajes/main/mj_ui_util.c:406
+Reenviado	Forwarded
+
+#: apps/mensajes/main/mj_ui_util.c:407
+No se pudo reenviar	It could not be forwarded
+
+#: apps/mensajes/main/mj_ui_util.c:410
+Guardado en la tarjeta: %s	Saved to the card: %s
+
+#: apps/mensajes/main/mj_ui_util.c:413
+No se pudo bajar el archivo	The file could not be downloaded
+
+#: apps/mensajes/main/mj_ui_util.c:414
+No se pudo mandar la foto	The photo could not be sent
+
+#: apps/mensajes/main/mj_ui_util.c:415
+La foto pasa de 10 MB	The photo is over 10 MB
+
+#: apps/mensajes/main/mj_ui_util.c:416
+Telegram pide esperar un poco	Telegram asks to wait a little
+
+#: apps/mensajes/main/mj_ui_util.c:417
+La sesión se cerró	The session was closed
+
+#: apps/mensajes/main/mj_ui_util.c:418
+No se pudo reaccionar	The reaction could not be sent
+
+#: apps/mensajes/main/mj_web.c:237
+Se guardaron el api_id y el api_hash	The api_id and the api_hash were saved

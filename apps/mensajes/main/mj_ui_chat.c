@@ -1025,6 +1025,7 @@ void mj_chat_build(lv_obj_t *pane)
         lv_obj_align(em, LV_ALIGN_LEFT_MID, 84, 0);
         U.ta = lv_textarea_create(U.composer);
         lv_textarea_set_one_line(U.ta, true);
+        lv_obj_set_scrollbar_mode(U.ta, LV_SCROLLBAR_MODE_OFF);
         lv_textarea_set_placeholder_text(U.ta, _("Mensaje"));
         lv_obj_set_size(U.ta, w - 84 - 72 - 96 - 12, 64);
         lv_obj_align(U.ta, LV_ALIGN_LEFT_MID, 160, 0);

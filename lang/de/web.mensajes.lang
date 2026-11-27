@@ -1,0 +1,73 @@
+# amoledos-lang 1   es -> de
+# web.mensajes.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mensajes/web/mensajes.js:66
+#: apps/mensajes/web/mensajes.js:106
+Mensajes	Nachrichten
+
+#: apps/mensajes/web/mensajes.js:74
+Buscando la app en la placa…	Suche die App auf dem Board…
+
+#: apps/mensajes/web/mensajes.js:81
+Escribí un mensaje	Nachricht schreiben
+
+#: apps/mensajes/web/mensajes.js:88
+Enviar	Senden
+
+#: apps/mensajes/web/mensajes.js:97
+Las claves de la app	Die Schlüssel der App
+
+#: apps/mensajes/web/mensajes.js:98
+Para entrar con tu cuenta, Mensajes necesita un api_id y un api_hash tuyos. Se sacan gratis en my.telegram.org, en «API development tools». Se guardan en la placa, no en la tarjeta.	Zum Anmelden braucht Nachrichten eine eigene api_id und einen api_hash. Du bekommst sie kostenlos auf my.telegram.org unter „API development tools“. Sie werden auf dem Board gespeichert, nicht auf der Karte.
+
+#: apps/mensajes/web/mensajes.js:102
+El api_id es un número y el api_hash tiene 32 letras y números (0-9, a-f).	Die api_id ist eine Zahl und der api_hash hat 32 Buchstaben und Ziffern (0-9, a-f).
+
+#: apps/mensajes/web/mensajes.js:103
+Guardadas: seguí en la placa con tu número	Gespeichert: Mach am Board mit deiner Nummer weiter
+
+#: apps/mensajes/web/mensajes.js:104
+Guardar	Speichern
+
+#: apps/mensajes/web/mensajes.js:120
+Todavía no hay chats	Noch keine Chats
+
+#: apps/mensajes/web/mensajes.js:125
+Elegí un chat	Wähle einen Chat
+
+#: apps/mensajes/web/mensajes.js:127
+Cargando…	Lädt…
+
+#: apps/mensajes/web/mensajes.js:135
+Reenviado de %s	Weitergeleitet von %s
+
+#: apps/mensajes/web/mensajes.js:140
+editado	bearbeitet
+
+#: apps/mensajes/web/mensajes.js:150
+Mensajes no está abierta en la placa.	Nachrichten ist auf dem Board nicht geöffnet.
+
+#: apps/mensajes/web/mensajes.js:151
+Abierta en la placa	Auf dem Board geöffnet
+
+#: apps/mensajes/web/mensajes.js:151
+Abrir Mensajes en la placa	Nachrichten auf dem Board öffnen
+
+#: apps/mensajes/web/mensajes.js:158
+conectando…	verbinde…
+
+#: apps/mensajes/web/mensajes.js:159
+Conectada como %s	Angemeldet als %s
+
+#: apps/mensajes/web/mensajes.js:159
+%s sin leer	%s ungelesen
+
+#: apps/mensajes/web/mensajes.js:160
+Faltan las claves de la app.	Die Schlüssel der App fehlen.
+
+#: apps/mensajes/web/mensajes.js:161
+No hay sesión: entrá desde la placa con tu número y el código.	Nicht angemeldet: Melde dich am Board mit Nummer und Code an.

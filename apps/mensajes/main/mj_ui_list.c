@@ -361,6 +361,7 @@ void mj_list_build(lv_obj_t *pane)
     lv_obj_align(g, LV_ALIGN_TOP_RIGHT, -AOS_UI_PAD, 14);
     U.search_ta = lv_textarea_create(pane);
     lv_textarea_set_one_line(U.search_ta, true);
+    lv_obj_set_scrollbar_mode(U.search_ta, LV_SCROLLBAR_MODE_OFF);
     lv_textarea_set_placeholder_text(U.search_ta, _("Buscar"));
     lv_obj_set_size(U.search_ta, w - 2 * AOS_UI_PAD, 64);
     lv_obj_set_pos(U.search_ta, AOS_UI_PAD, 92);
@@ -436,7 +437,7 @@ static lv_obj_t *set_row(lv_obj_t *b, const char *name, const char *val)
         lv_obj_set_style_text_font(v, aos_font_small, 0);
         lv_obj_set_style_text_color(v, AOS_C_DIM, 0);
         mj_label_safe(v, val);
-        lv_obj_set_width(v, U.land ? 300 : 340);
+        lv_obj_set_size(v, U.land ? 380 : 400, lv_font_get_line_height(aos_font_small));
         lv_label_set_long_mode(v, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_set_style_text_align(v, LV_TEXT_ALIGN_RIGHT, 0);
         lv_obj_align(v, LV_ALIGN_RIGHT_MID, 0, 0);
@@ -481,7 +482,8 @@ void mj_settings_open(void)
     set_row(b, _("Caché de fotos"), v);
     lv_obj_t *clr = mj_pill_btn(b, _("Vaciar la caché"), AOS_C_CARD2, clear_cb, NULL);
     (void)clr;
-    snprintf(v, sizeof v, _("%u KB y %u KB de fotos"), (unsigned)(mj_mem_used() / 1024), (unsigned)(mj_img_bytes() / 1024));
+    snprintf(v, sizeof v, _("%u KB (pico %u) y %u KB de fotos"), (unsigned)(mj_mem_used() / 1024),
+             (unsigned)(mj_mem_peak() / 1024), (unsigned)(mj_img_bytes() / 1024));
     set_row(b, _("Memoria"), v);
     char srv[200];
     snprintf(srv, sizeof srv, "%s/servidor.txt", U.data_dir);

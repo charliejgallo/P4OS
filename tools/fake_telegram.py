@@ -303,6 +303,7 @@ class Store:
         self.log = []              # (pts, pts_count, update) of the common box
         self.files = {}            # (kind, id, thumb) -> bytes
         self.photos = {}           # photo id -> photo dict
+        self.photo_dc = {}         # photo id -> where its bytes are
         self.uploads = {}          # file_id -> {part: bytes}
         self.pinned = []
         self.unread = {}
@@ -329,8 +330,11 @@ class Store:
         self.users[uid] = u
         return u
 
-    def photo(self, kind, dc=1):
+    def photo(self, kind, dc=1, real_dc=None):
+        """real_dc: where the bytes really are, when the photo says another
+        data centre (FILE_MIGRATE_X for whoever asks the one it says)."""
         pid = 8000000 + len(self.photos)
+        self.photo_dc[pid] = real_dc or dc
         sizes = []
         for t, (w, h) in (('m', (320, 240)), ('x', (800, 600))):
             b = scene(kind, w, h)
@@ -358,6 +362,7 @@ class Store:
             small, mw, mh = data, w, h
         self.files[('photo', pid, 'x')] = data
         self.files[('photo', pid, 'm')] = small
+        self.photo_dc[pid] = 1
         p = {'_': 'photo', 'id': pid, 'access_hash': self.access + pid, 'file_reference': b'\x01up',
              'date': int(time.time()), 'dc_id': 1,
              'sizes': [{'_': 'photoSize', 'type': 'm', 'w': mw, 'h': mh, 'size': len(small)},
@@ -441,7 +446,7 @@ class Store:
         a = self.add
         # the board's news, a channel
         a('channel', 4002, T('m16'), ago=30 * H, count=False)
-        a('channel', 4002, T('m17'), ago=5 * H, media={'_': 'messageMediaPhoto', 'photo': self.photo('board', dc=3)},
+        a('channel', 4002, T('m17'), ago=5 * H, media={'_': 'messageMediaPhoto', 'photo': self.photo('board', dc=1, real_dc=3)},
           count=False)
         # Diego, a document
         a('user', 2004, T('m12'), out=True, ago=50 * H, count=False)
@@ -1229,8 +1234,7 @@ class Conn(socketserver.BaseRequestHandler):
             dc = 1
         elif k == 'inputPhotoFileLocation':
             data = STORE.files.get(('photo', loc['id'], loc['thumb_size']))
-            p = STORE.photos.get(loc['id'])
-            dc = p['dc_id'] if p else 1
+            dc = STORE.photo_dc.get(loc['id'], 1)
         elif k == 'inputDocumentFileLocation':
             data = STORE.files.get(('doc', loc['id'], loc['thumb_size']))
             dc = 1
