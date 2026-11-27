@@ -11756,3 +11756,12 @@ Token borrado	Token erased
 
 #: components/aos_apps/aos_app_bot.c:736  (nombre de app)
 Bot	Bot
+
+#: components/aos_apps/aos_bot.c
+Arranco la red Zigbee	Starting the Zigbee network
+
+#: components/aos_apps/aos_bot.c
+La red Zigbee no estaba andando: la arranco. Los dispositivos aparecen a medida que hablan; probá /zigbee en un minuto.	The Zigbee network wasn't running: starting it. The devices show up as they speak; try /zigbee in a minute.
+
+#: components/aos_apps/aos_bot.c
+La red Zigbee no estaba andando: la arranco. Probá de nuevo en un minuto.	The Zigbee network wasn't running: starting it. Try again in a minute.

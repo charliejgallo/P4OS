@@ -23,6 +23,8 @@
 #include "aos_i18n.h"
 #include "aos_ui.h"
 #include "aos_zigbee.h"
+#include "aos_154.h"
+#include "aos_154_proto.h"
 #include "aos_notif_internal.h"
 
 #include "cJSON.h"
@@ -588,6 +590,28 @@ static void dev_name(const aos_zigbee_dev_t *d, char *out, size_t n)
     }
 }
 
+/* The board's Zigbee network starts when the Zigbee app asks for it, so
+ * after a restart it is not up until someone opens it. The bot brings it up
+ * itself when it needs it (a Zigbee command, a rule about a device), if
+ * the radio is not doing anything else (a scan, a sniff, emulating).
+ * true if it had to start it now. */
+#define ZB_CHANNEL 26                   /* aos_app_zigbee.c's */
+static bool zb_ensure(void)
+{
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.state != AOS_ZB_OFF || z.emu) return false;
+    aos_154_info_t in;
+    aos_154_info(&in);
+    if (in.state != AOS_154_IDLE) return false;
+    static uint32_t tried;
+    uint32_t now = now_ms();
+    if (tried && now - tried < 300000) return false;
+    tried = now ? now : 1;
+    logf_("%s", _("Arranco la red Zigbee"));
+    return aos_zigbee_start(ZB_CHANNEL);
+}
+
 static int zb_snapshot(aos_zigbee_dev_t *buf)
 {
     if (!buf) return 0;
@@ -864,6 +888,7 @@ static void help(int64_t chat)
 
 static void zigbee_list(int64_t chat)
 {
+    if (zb_ensure()) { say(chat, _("La red Zigbee no estaba andando: la arranco. Los dispositivos aparecen a medida que hablan; probá /zigbee en un minuto."), NULL); return; }
     int nd = zb_snapshot(s_zb_in);
     if (nd <= 0) { say(chat, _("No hay dispositivos Zigbee (o la red Zigbee no está andando)."), NULL); return; }
     size_t o = (size_t)snprintf(s_txt, sizeof s_txt, "%s\n", _("Dispositivos Zigbee:"));
@@ -908,6 +933,7 @@ static void zigbee_switch(int64_t chat, const char *arg, int cmd)
 {
     while (*arg == ' ') arg++;
     if (!*arg) { say(chat, cmd ? _("¿Qué prendo? /prender <nombre>") : _("¿Qué apago? /apagar <nombre>"), NULL); return; }
+    if (zb_ensure()) { say(chat, _("La red Zigbee no estaba andando: la arranco. Probá de nuevo en un minuto."), NULL); return; }
     int nd = zb_snapshot(s_zb_in);
     const aos_zigbee_dev_t *d = zb_find(arg, nd);
     if (!d) { snprintf(s_txt, sizeof s_txt, _("No encuentro \"%s\" entre los que se prenden y apagan."), arg); say(chat, s_txt, NULL); return; }
@@ -925,6 +951,7 @@ static void ir_list(int64_t chat, const char *arg)
 {
     while (*arg == ' ') arg++;
     int n = aos_zigbee_ir_codes(s_ir, 24);
+    if (n > 0 && zb_ensure()) { say(chat, _("La red Zigbee no estaba andando: la arranco. Probá de nuevo en un minuto."), NULL); return; }
     if (*arg) {
         for (int pass = 0; pass < 2; pass++)
             for (int i = 0; i < n; i++)
@@ -1540,6 +1567,11 @@ static void rules_tick(bool online)
     if (boot) B->boot_pending = false;
     unlock();
     if (gen != s_rs_gen) { memset(s_rs, 0, sizeof s_rs); s_rs_gen = gen; }
+    for (int i = 0; i < n; i++)
+        if (R[i].on && (R[i].trig == AOS_BOT_T_ZIGBEE || (R[i].act >= AOS_BOT_A_ZB_ON && R[i].act <= AOS_BOT_A_IR))) {
+            zb_ensure();
+            break;
+        }
     int nd = -1;
     time_t t = time(NULL);
     struct tm tm;
