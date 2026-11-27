@@ -45,8 +45,23 @@ static uint64_t s_off_since;    /* when the screen went dark, 0 while it is on *
 static int s_fails;
 static uint64_t s_wait_until;
 
+#define LW_MAX      8           /* widget kinds registered */
+#define LW_PREF     "lock_wdg"  /* the ones on: "id,id"; unset: the alarm and the sensors */
+#define LW_DEFAULT  "alarm,sensors"
+
+static struct {
+    char id[16];
+    const char *name, *glyph;
+    aos_lock_widget_fill_t fill;
+} s_lw[LW_MAX];
+static int s_nlw;
+static char s_lw_on[64];
+static bool s_lw_read;
+
 static struct {
     lv_obj_t *layer, *time, *date, *msgs, *music, *m_title, *m_artist, *m_play, *hint, *chev;
+    lv_obj_t *wrow, *wcap[AOS_LOCK_WIDGETS_ON], *wglyph[AOS_LOCK_WIDGETS_ON], *wtext[AOS_LOCK_WIDGETS_ON];
+    int wkind[AOS_LOCK_WIDGETS_ON], nw;
     int32_t drag0;
     bool dragging;
     int notif_n;
@@ -571,6 +586,130 @@ static void music_refresh(void)
     }
 }
 
+/* ---- the widgets ---- */
+
+void aos_ui_register_lock_widget(const char *id, const char *name, const char *glyph, aos_lock_widget_fill_t fill)
+{
+    if (!id || !fill) return;
+    int i = 0;
+    while (i < s_nlw && strcmp(s_lw[i].id, id)) i++;
+    if (i == s_nlw) {
+        if (s_nlw == LW_MAX) return;
+        s_nlw++;
+    }
+    snprintf(s_lw[i].id, sizeof s_lw[i].id, "%s", id);
+    s_lw[i].name = name;
+    s_lw[i].glyph = glyph;
+    s_lw[i].fill = fill;
+}
+
+int aos_lock_widget_count(void) { return s_nlw; }
+
+bool aos_lock_widget_at(int i, const char **id, const char **name, const char **glyph)
+{
+    if (i < 0 || i >= s_nlw) return false;
+    if (id) *id = s_lw[i].id;
+    if (name) *name = s_lw[i].name;
+    if (glyph) *glyph = s_lw[i].glyph;
+    return true;
+}
+
+static const char *lw_on_list(void)
+{
+    if (!s_lw_read) {
+        s_lw_read = true;
+        if (!aos_hal_pref_get_str(LW_PREF, s_lw_on, sizeof s_lw_on)) snprintf(s_lw_on, sizeof s_lw_on, "%s", LW_DEFAULT);
+    }
+    return s_lw_on;
+}
+
+/* 'id' as a whole word of the comma list */
+static bool in_list(const char *list, const char *id)
+{
+    size_t n = strlen(id);
+    for (const char *p = list; (p = strstr(p, id)) != NULL; p += n)
+        if ((p == list || p[-1] == ',') && (p[n] == ',' || !p[n])) return true;
+    return false;
+}
+
+bool aos_lock_widget_on(const char *id) { return id && in_list(lw_on_list(), id); }
+
+bool aos_lock_widget_set(const char *id, bool on)
+{
+    if (!id || !id[0] || strchr(id, ',')) return false;
+    char out[sizeof s_lw_on] = "";
+    int n = 0;
+    /* in the order they are registered: the alarm, then the sensors... */
+    for (int i = 0; i < s_nlw; i++) {
+        bool want = !strcmp(s_lw[i].id, id) ? on : in_list(lw_on_list(), s_lw[i].id);
+        if (!want) continue;
+        if (n == AOS_LOCK_WIDGETS_ON) return false;
+        size_t at = strlen(out);
+        snprintf(out + at, sizeof out - at, "%s%.15s", n ? "," : "", s_lw[i].id);
+        n++;
+    }
+    memcpy(s_lw_on, out, sizeof s_lw_on);
+    aos_hal_pref_set_str(LW_PREF, s_lw_on);
+    return true;
+}
+
+static void widgets_refresh(void)
+{
+    if (!L.wrow) return;
+    bool any = false;
+    for (int i = 0; i < L.nw; i++) {
+        char text[64] = "";
+        const char *glyph = s_lw[L.wkind[i]].glyph;
+        uint32_t rgb = 0;
+        bool show = s_lw[L.wkind[i]].fill(text, sizeof text, &glyph, &rgb) && text[0];
+        lv_obj_set_flag(L.wcap[i], LV_OBJ_FLAG_HIDDEN, !show);
+        if (!show) continue;
+        any = true;
+        if (strcmp(lv_label_get_text(L.wtext[i]), text)) lv_label_set_text(L.wtext[i], text);
+        if (glyph && strcmp(lv_label_get_text(L.wglyph[i]), glyph)) lv_label_set_text(L.wglyph[i], glyph);
+        lv_obj_set_style_text_color(L.wglyph[i], lv_color_hex(rgb ? rgb : 0xFFFFFF), 0);
+    }
+    lv_obj_set_flag(L.wrow, LV_OBJ_FLAG_HIDDEN, !any);
+}
+
+/* A row of capsules, centred, as many as are on and registered. */
+static void widgets_build(lv_obj_t *parent, int32_t w)
+{
+    L.nw = 0;
+    for (int k = 0; k < s_nlw && L.nw < AOS_LOCK_WIDGETS_ON; k++)
+        if (aos_lock_widget_on(s_lw[k].id)) L.wkind[L.nw++] = k;
+    if (!L.nw) return;
+    L.wrow = lv_obj_create(parent);
+    lv_obj_remove_style_all(L.wrow);
+    lv_obj_set_size(L.wrow, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(L.wrow, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_align(L.wrow, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(L.wrow, 12, 0);
+    lv_obj_set_style_pad_row(L.wrow, 12, 0);
+    lv_obj_remove_flag(L.wrow, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(L.wrow, LV_OBJ_FLAG_SCROLLABLE);
+    for (int i = 0; i < L.nw; i++) {
+        lv_obj_t *c = lv_obj_create(L.wrow);
+        lv_obj_remove_style_all(c);
+        lv_obj_set_size(c, LV_SIZE_CONTENT, 60);
+        lv_obj_set_style_bg_color(c, lv_color_black(), 0);
+        lv_obj_set_style_bg_opa(c, LV_OPA_40, 0);
+        lv_obj_set_style_radius(c, LV_RADIUS_CIRCLE, 0);
+        lv_obj_set_style_pad_hor(c, 20, 0);
+        lv_obj_set_flex_flow(c, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(c, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_column(c, 10, 0);
+        lv_obj_remove_flag(c, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_remove_flag(c, LV_OBJ_FLAG_SCROLLABLE);
+        L.wcap[i] = c;
+        L.wglyph[i] = aos_label(c, s_lw[L.wkind[i]].glyph ? s_lw[L.wkind[i]].glyph : "", &aos_sym_28, lv_color_white());
+        L.wtext[i] = aos_label(c, "", aos_font_small, lv_color_white());
+        lv_obj_set_style_max_width(L.wtext[i], w - 100, 0);
+        lv_label_set_long_mode(L.wtext[i], LV_LABEL_LONG_MODE_DOTS);
+    }
+    widgets_refresh();
+}
+
 static void hint_breathe(void *o, int32_t v) { lv_obj_set_style_opa(o, (lv_opa_t)v, 0); }
 
 static void build(void)
@@ -643,6 +782,8 @@ static void build(void)
     lv_obj_remove_flag(col, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_remove_flag(col, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_pos(col, mx, g->landscape ? g->bar_h + 30 : dy + 90);
+    /* the widgets chosen (Settings, Lock screen), under the date */
+    widgets_build(col, mw);
     /* the space for the messages: notifications today, Bluetooth and Home
      * Assistant's when they come, through the same store */
     if (s_cfg.show_notifs) {
@@ -751,6 +892,7 @@ void aos_lock_tick(void)
         clock_refresh();
         msgs_refresh(false);
         music_refresh();
+        widgets_refresh();
     }
     if (P.msg && wait_left_s()) pad_msg_refresh();
     else if (P.msg && s_wait_until && !wait_left_s()) {

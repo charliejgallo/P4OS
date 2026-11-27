@@ -91,6 +91,8 @@ static lv_obj_t *s_dock_cells[AOS_MENU_DOCK_MAX];
 static lv_obj_t *s_dock_badges[AOS_MENU_DOCK_MAX];
 static int s_ndock;
 static int s_npages;
+static int s_ntotal;              /* the pages and the App Library after them */
+static int s_lib = -1;             /* the library's page, -1 without one (editing) */
 
 static lv_obj_t *s_root, *s_pages, *s_dots, *s_dock_panel, *s_done_btn, *s_add_btn;
 static lv_obj_t *s_page_obj[MAX_PAGES];
@@ -774,8 +776,16 @@ static void pages_scrolled(lv_event_t *e)
 {
     const aos_geo_t *g = aos_ui_geo();
     int p = (lv_obj_get_scroll_x(s_pages) + g->w / 2) / g->w;
-    p = LV_CLAMP(0, p, s_npages - 1);
+    p = LV_CLAMP(0, p, s_ntotal - 1);
     if (p != s_page) { s_page = p; dots_refresh(); }
+    if (p == s_lib) aos_library_fill();
+}
+
+/* away from the library, its icons go (they are PSRAM: aos_library.c) */
+static void pages_scroll_end(lv_event_t *e)
+{
+    (void)e;
+    if (s_page != s_lib) aos_library_drop();
 }
 
 static void long_press_empty(lv_event_t *e)
@@ -891,6 +901,8 @@ static bool s_suspended, s_want_build;
 
 static void forget_objects(void)
 {
+    aos_library_sheet_close();
+    aos_library_forget();
     memset(s_page_obj, 0, sizeof s_page_obj);
     memset(s_dock_cells, 0, sizeof s_dock_cells);
     memset(s_dock_badges, 0, sizeof s_dock_badges);
@@ -911,6 +923,8 @@ static void build(void)
     const aos_geo_t *g = aos_ui_geo();
     layout_compute();
     folder_close(false);
+    aos_library_sheet_close();
+    aos_library_forget();
     lv_obj_clean(s_root);
     memset(s_page_obj, 0, sizeof s_page_obj);
     memset(s_dock_cells, 0, sizeof s_dock_cells);
@@ -926,6 +940,7 @@ static void build(void)
     lv_obj_add_flag(s_pages, LV_OBJ_FLAG_SCROLL_ONE);
     lv_obj_set_scrollbar_mode(s_pages, LV_SCROLLBAR_MODE_OFF);
     lv_obj_add_event_cb(s_pages, pages_scrolled, LV_EVENT_SCROLL, NULL);
+    lv_obj_add_event_cb(s_pages, pages_scroll_end, LV_EVENT_SCROLL_END, NULL);
     /* while editing too: a swipe turns the page, an icon held a moment drags
      * (cell_event), and held against an edge it takes the next page along */
     lv_obj_add_event_cb(s_pages, long_press_empty, LV_EVENT_LONG_PRESSED, NULL);
@@ -969,6 +984,19 @@ static void build(void)
         if (s_editing) wiggle(p->cell, true, i);
     }
 
+    /* the App Library after the pages, but not while editing: nothing is
+     * dropped on it */
+    s_lib = !s_editing && aos_library_on() && s_npages < MAX_PAGES ? s_npages : -1;
+    s_ntotal = s_npages + (s_lib >= 0);
+    if (s_lib >= 0) {
+        lv_obj_t *pg = lv_obj_create(s_pages);
+        lv_obj_remove_style_all(pg);
+        lv_obj_set_pos(pg, s_lib * g->w, 0);
+        lv_obj_set_size(pg, g->w, L.grid_h);
+        lv_obj_add_flag(pg, LV_OBJ_FLAG_EVENT_BUBBLE);
+        aos_library_create(pg, g->w);
+    }
+
     /* page dots */
     s_dots = lv_obj_create(s_root);
     lv_obj_remove_style_all(s_dots);
@@ -976,7 +1004,7 @@ static void build(void)
     lv_obj_set_flex_flow(s_dots, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_column(s_dots, 14, 0);
     lv_obj_remove_flag(s_dots, LV_OBJ_FLAG_CLICKABLE);
-    for (int i = 0; i < s_npages; i++) {
+    for (int i = 0; i < s_ntotal; i++) {
         lv_obj_t *d = lv_obj_create(s_dots);
         lv_obj_remove_style_all(d);
         lv_obj_set_size(d, 14, 14);
@@ -986,10 +1014,11 @@ static void build(void)
     }
     lv_obj_update_layout(s_dots);
     lv_obj_set_pos(s_dots, (g->w - lv_obj_get_width(s_dots)) / 2, L.dots_y + 12);
-    lv_obj_set_flag(s_dots, LV_OBJ_FLAG_HIDDEN, s_npages < 2);
-    if (s_page >= s_npages) s_page = s_npages - 1;
+    lv_obj_set_flag(s_dots, LV_OBJ_FLAG_HIDDEN, s_ntotal < 2);
+    if (s_page >= s_ntotal) s_page = s_ntotal - 1;
     dots_refresh();
     lv_obj_scroll_to_x(s_pages, s_page * g->w, LV_ANIM_OFF);
+    if (s_page == s_lib) aos_library_fill();
 
     /* dock */
     s_dock_panel = lv_obj_create(s_root);
@@ -1463,6 +1492,7 @@ bool aos_home_back(void)
     if (s_suspended) return false;
     if (aos_wedit_close()) return true;
     if (s_folder_ov) { folder_close(true); return true; }
+    if (aos_library_sheet_open()) { aos_library_sheet_close(); return true; }
     if (s_editing) { aos_home_edit(false); return true; }
     if (s_page != 0) { lv_obj_scroll_to_x(s_pages, 0, LV_ANIM_ON); return true; }
     return false;

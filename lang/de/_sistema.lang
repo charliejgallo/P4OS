@@ -13008,3 +13008,24 @@ Planeo	Gleitflug
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Flüge
+
+#: components/aos_ui/aos_library.c, aos_lock.c, aos_app_settings.c, aos_sys_status.c, aos_portal.c (0.35.0)
+Juegos	Spiele
+Sonido e imagen	Ton und Bild
+Taller	Werkstatt
+Programar	Programmieren
+Útiles	Werkzeuge
+Biblioteca de apps	App-Mediathek
+mañana %d:%02d	morgen %d:%02d
+Próxima alarma	Nächster Wecker
+Hasta tres widgets a la vez	Höchstens drei Widgets gleichzeitig
+WIDGETS	WIDGETS
+Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Unter dem Datum, bis zu drei. Jedes erscheint nur, wenn es etwas zu zeigen hat: ein gestellter Wecker, ein angeschlossener Sensor, das laufende Zigbee-Netz.
+Zigbee: emulando	Zigbee: emuliert
+Zigbee: buscando una red	Zigbee: sucht ein Netz
+Zigbee: abierta para unir	Zigbee: offen zum Beitreten
+Zigbee: 1 equipo	Zigbee: 1 Gerät
+Zigbee: %d equipos	Zigbee: %d Geräte
+Zigbee: no arrancó	Zigbee: nicht gestartet
+no hay un pack de íconos	kein Symbolpaket vorhanden
+el pack no tiene ese ícono	das Paket hat dieses Symbol nicht

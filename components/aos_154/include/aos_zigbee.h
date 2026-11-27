@@ -182,6 +182,7 @@ bool aos_zigbee_meas_text(const aos_zigbee_dev_t *d, const aos_zigbee_meas_t *m,
 int  aos_zigbee_meas_attrs(uint16_t cluster, uint16_t *out, int max);
 int  aos_zigbee_permit_left(void);
 int  aos_zigbee_devices(aos_zigbee_dev_t *out, int max);
+int  aos_zigbee_device_count(void);   /* those listed, without copying them */
 /* Emulating a device (docs/plan/ZIGBEE-EMULAR.md, aos_zigbee_emu.c): the
  * board joins someone else's network (Home Assistant's coordinator) as a
  * router showing a device, instead of forming its own. One network at a

@@ -1911,3 +1911,13 @@ int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
     unlock();
     return n;
 }
+
+int aos_zigbee_device_count(void)
+{
+    lock();
+    int n = 0;
+    for (int i = 0; i < s_n; i++)
+        if (s_dev[i].step != AOS_ZB_DEV_REMOVED) n++;
+    unlock();
+    return n;
+}

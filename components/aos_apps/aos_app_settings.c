@@ -2688,6 +2688,19 @@ static void lock_hide_cb(lv_event_t *e)
 
 static void lock_now_cb(lv_event_t *e) { aos_lock_now(); }
 
+/* a widget on or off; its index in the switch's user data */
+static void lock_widget_cb(lv_event_t *e)
+{
+    lv_obj_t *sw = lv_event_get_target(e);
+    const char *id;
+    if (!aos_lock_widget_at((int)(intptr_t)lv_obj_get_user_data(sw), &id, NULL, NULL)) return;
+    bool on = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    if (!aos_lock_widget_set(id, on)) {
+        lv_obj_remove_state(sw, LV_STATE_CHECKED);
+        aos_ui_toast(_("Hasta tres widgets a la vez"), 1800);
+    }
+}
+
 static void build_lock(lv_obj_t *p)
 {
     aos_lock_cfg_t c;
@@ -2728,6 +2741,17 @@ static void build_lock(lv_obj_t *p)
     for (int i = 0; i < 3; i++)
         row(g, NULL, 0, _(COL[i]), c.clock_color == i ? AOS_SYM_CHECK : NULL, false, lock_clock_cb, (void *)(intptr_t)(2 << 8 | i));
     note(p, _("El color de la foto es el de la foto de la pantalla de bloqueo, aclarado; sin foto, el reloj queda blanco."));
+
+    if (aos_lock_widget_count()) {
+        g = group(p, _("WIDGETS"));
+        for (int i = 0; i < aos_lock_widget_count(); i++) {
+            const char *id, *name, *glyph;
+            aos_lock_widget_at(i, &id, &name, &glyph);
+            lv_obj_t *r = row_switch(g, glyph, 0x5E5CE6, _(name), aos_lock_widget_on(id), lock_widget_cb);
+            lv_obj_set_user_data(lv_obj_get_child(r, -1), (void *)(intptr_t)i);
+        }
+        note(p, _("Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando."));
+    }
 
     g = group(p, _("QUÉ SE MUESTRA"));
     row_switch(g, AOS_SYM_BELL, 0xFF453A, _("Mensajes"), c.show_notifs, lock_notifs_cb);

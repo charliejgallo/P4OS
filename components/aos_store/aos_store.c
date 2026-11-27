@@ -613,6 +613,7 @@ static int loose_apps(app_t *apps, int n, char *all, size_t *w, size_t cap)
                 snprintf(a->pub.file, sizeof a->pub.file, "%s", file);
                 snprintf(a->pub.id, sizeof a->pub.id, "%s", jstr(r, "id"));
                 snprintf(a->pub.ver, sizeof a->pub.ver, "%s", jstr(r, "ver"));
+                snprintf(a->pub.cat, sizeof a->pub.cat, "%s", jstr(r, "cat"));
                 /* its own receipt's package: "installed", never "update" */
                 snprintf(a->pkg_sha, sizeof a->pkg_sha, "%s", jstr(r, "pkg_sha256"));
                 a->pub.fits = true;
@@ -717,6 +718,7 @@ static bool catalog_load(err_t *e)
                     snprintf(a->pub.id, sizeof a->pub.id, "%s", id);
                     snprintf(a->pub.ver, sizeof a->pub.ver, "%s", jstr(o, "ver"));
                     snprintf(a->pub.fw_min, sizeof a->pub.fw_min, "%s", jstr(o, "fw_min"));
+                    snprintf(a->pub.cat, sizeof a->pub.cat, "%s", jstr(o, "cat"));
                     snprintf(a->pkg_sha, sizeof a->pkg_sha, "%s", jstr(pkg, "sha256"));
                     snprintf(a->so_sha, sizeof a->so_sha, "%s", jstr(pkg, "so_sha256"));
                     a->pub.fits = (a->pub.system || jnum(o, "abi") == AOS_STORE_ABI) && fw_fits(a->pub.fw_min);

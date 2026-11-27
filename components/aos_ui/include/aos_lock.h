@@ -42,6 +42,14 @@ void aos_lock_wall_refresh(void); /* the gradient changed (the time of day's) */
 void aos_lock_get_cfg(aos_lock_cfg_t *out);
 void aos_lock_set_cfg(const aos_lock_cfg_t *cfg);
 
+/* The widgets (aos_ui_register_lock_widget): those registered, by index,
+ * and whether each is on; at most AOS_LOCK_WIDGETS_ON on at once. */
+#define AOS_LOCK_WIDGETS_ON 3
+int  aos_lock_widget_count(void);
+bool aos_lock_widget_at(int i, const char **id, const char **name, const char **glyph);
+bool aos_lock_widget_on(const char *id);
+bool aos_lock_widget_set(const char *id, bool on);   /* false: already AOS_LOCK_WIDGETS_ON on */
+
 int  aos_lock_pin_len(void);    /* 0: no code; 4 or 6 */
 bool aos_lock_pin_check(const char *pin);
 void aos_lock_pin_set(const char *pin);     /* NULL or "": no code */

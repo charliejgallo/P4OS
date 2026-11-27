@@ -13008,3 +13008,24 @@ Planeo	Vol plané
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Vols
+
+#: components/aos_ui/aos_library.c, aos_lock.c, aos_app_settings.c, aos_sys_status.c, aos_portal.c (0.35.0)
+Juegos	Jeux
+Sonido e imagen	Son et image
+Taller	Atelier
+Programar	Programmation
+Útiles	Utilitaires
+Biblioteca de apps	Bibliothèque d'apps
+mañana %d:%02d	demain %d:%02d
+Próxima alarma	Prochaine alarme
+Hasta tres widgets a la vez	Trois widgets au plus à la fois
+WIDGETS	WIDGETS
+Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Sous la date, jusqu'à trois. Chacun n'apparaît que s'il a quelque chose à montrer : une alarme réglée, un capteur branché, le réseau Zigbee en marche.
+Zigbee: emulando	Zigbee : émulation
+Zigbee: buscando una red	Zigbee : recherche d'un réseau
+Zigbee: abierta para unir	Zigbee : ouvert aux appareils
+Zigbee: 1 equipo	Zigbee : 1 appareil
+Zigbee: %d equipos	Zigbee : %d appareils
+Zigbee: no arrancó	Zigbee : n'a pas démarré
+no hay un pack de íconos	aucun pack d'icônes
+el pack no tiene ese ícono	le pack n'a pas cette icône

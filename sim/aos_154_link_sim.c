@@ -296,6 +296,12 @@ void aos_zigbee_info(aos_zigbee_info_t *out)
     }
 }
 
+int aos_zigbee_device_count(void)
+{
+    static aos_zigbee_dev_t tmp[4];         /* the fakes: a handful at most */
+    return aos_zigbee_devices(tmp, 4);
+}
+
 int aos_zigbee_devices(aos_zigbee_dev_t *out, int max)
 {
     if (!sim_ir() || max < 1) return 0;

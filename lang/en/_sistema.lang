@@ -11810,3 +11810,24 @@ Grabador	Surveillance
 
 #: apps/vision  (nombre de app)
 Visión	Vision
+
+#: components/aos_ui/aos_library.c, aos_lock.c, aos_app_settings.c, aos_sys_status.c, aos_portal.c (0.35.0)
+Juegos	Games
+Sonido e imagen	Sound and picture
+Taller	Workshop
+Programar	Programming
+Útiles	Utilities
+Biblioteca de apps	App Library
+mañana %d:%02d	tomorrow %d:%02d
+Próxima alarma	Next alarm
+Hasta tres widgets a la vez	Up to three widgets at a time
+WIDGETS	WIDGETS
+Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Under the date, up to three. Each shows only when it has something to show: an alarm set, a sensor connected, the Zigbee network running.
+Zigbee: emulando	Zigbee: emulating
+Zigbee: buscando una red	Zigbee: looking for a network
+Zigbee: abierta para unir	Zigbee: open to join
+Zigbee: 1 equipo	Zigbee: 1 device
+Zigbee: %d equipos	Zigbee: %d devices
+Zigbee: no arrancó	Zigbee: did not start
+no hay un pack de íconos	there is no icon pack
+el pack no tiene ese ícono	the pack has no such icon

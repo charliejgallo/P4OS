@@ -66,6 +66,23 @@
   "Pairing with a device"), for Meshtastic nodes and other devices that keep
   their characteristics behind encryption. Six bonds instead of three;
   Settings' "forget" leaves the devices' keys alone.
+- **The App Library**, the home screen's last page: every app on the
+  board, those taken off the home screen too, in the Store's categories
+  (games, sound and picture, network, workshop, create, programming,
+  utilities, system), a card each with its first three apps big and the
+  rest as a cluster that opens the whole category; a search pill on top.
+  Its icons are made only while the page is on screen.
+- **Widgets on the lock screen**, under the date, up to three, chosen in
+  Settings, Lock screen: the next alarm, the sensors (the first two
+  quantities, as the home screen's card picks them) and the Zigbee network
+  with its devices, in the status bar's colours. Each shows only when it
+  has something to say; services register more with
+  `aos_ui_register_lock_widget()`.
+- **The portal shows the icon pack's icons**: the Inicio page draws the
+  same pictures the screen does (`/api/apps/icon_hd`, the pack's QOI
+  decoded in the browser), and the old drawings without a pack.
+- **A boot mark**: a chip that pops in with its pins lighting up one by one
+  and the name closing in, over the real progress bar.
 - **Archivos opens .mp4 and .avi in Video**, as it opens pictures in
   Fotos; without Video on the card, it says it is in the Store.
 - **The home screen's badges** (the Store's updates, unread messages) no

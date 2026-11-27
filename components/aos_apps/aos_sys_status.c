@@ -22,6 +22,8 @@
 #include "aos_bot.h"
 #include "aos_ui.h"
 #include "aos_sys_glyphs.h"
+#include "aos_i18n.h"
+#include <stdio.h>
 #include "aos_zigbee.h"
 #include "aos_154.h"
 #include "aos_154_proto.h"
@@ -78,7 +80,39 @@ static void provider(void)
     bot();
 }
 
+/* The lock screen's widget: the board's network and its devices, or the
+ * device it emulates, in the colours of the bar's glyph. */
+static bool lock_zigbee_fill(char *text, size_t n, const char **glyph, uint32_t *rgb)
+{
+    (void)glyph;
+    aos_zigbee_info_t z;
+    aos_zigbee_info(&z);
+    if (z.emu) {
+        aos_zigbee_emu_t e;
+        aos_zigbee_emu_info(&e);
+        bool in = e.state == AOS_ZBE_JOINED;
+        snprintf(text, n, "%s", in ? _("Zigbee: emulando") : _("Zigbee: buscando una red"));
+        *rgb = in ? C_PURPLE : C_PURPLE2;
+        return true;
+    }
+    if (z.state == AOS_ZB_FORMED) {
+        int d = aos_zigbee_device_count();
+        if (aos_zigbee_permit_left() > 0) snprintf(text, n, "%s", _("Zigbee: abierta para unir"));
+        else if (d == 1) snprintf(text, n, "%s", _("Zigbee: 1 equipo"));
+        else snprintf(text, n, _("Zigbee: %d equipos"), d);
+        *rgb = aos_zigbee_permit_left() > 0 ? C_ORANGE : C_GREEN;
+        return true;
+    }
+    if (z.state == AOS_ZB_FAILED) {
+        snprintf(text, n, "%s", _("Zigbee: no arrancó"));
+        *rgb = C_RED;
+        return true;
+    }
+    return false;
+}
+
 void aos_sys_status_start(void)
 {
     aos_ui_status_provider(provider);
+    aos_ui_register_lock_widget("zigbee", "Zigbee", AOS_SYM_ZIGBEE, lock_zigbee_fill);
 }

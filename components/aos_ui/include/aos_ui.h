@@ -299,6 +299,23 @@ void aos_ui_toast(const char *text, uint32_t ms);
 typedef void (*aos_widget_create_t)(lv_obj_t *card, int32_t w, int32_t h, const char *arg);
 void aos_ui_register_widget(const char *type, aos_widget_create_t create);
 
+/* The lock screen's widgets: small capsules under its date (a glyph and a
+ * short line), the ones chosen in Settings, Lock screen, up to three. A
+ * service registers one with its id, its name (a Spanish literal, N_() it)
+ * and its glyph (aos_sym_28); fill() is called on the LVGL task every few
+ * seconds while the lock screen shows, writes the line (and may change the
+ * glyph and its colour, 0 for white) and returns false when it has nothing
+ * to say now (no alarm set, no sensor): the capsule hides. */
+typedef bool (*aos_lock_widget_fill_t)(char *text, size_t n, const char **glyph, uint32_t *rgb);
+void aos_ui_register_lock_widget(const char *id, const char *name, const char *glyph, aos_lock_widget_fill_t fill);
+
+/* The App Library (the home screen's last page) groups the apps by the
+ * Store's categories: fn() says an app's ("juegos", "medios", "red",
+ * "taller", "crear", "programar", "utiles", "sistema"), by its id; NULL or
+ * another word puts it in "utiles". Without it there is no library. */
+typedef const char *(*aos_app_category_fn)(const char *id);
+void aos_ui_set_app_category(aos_app_category_fn fn);
+
 /* What the home screen's edit mode needs to offer a registered type: its
  * name and a line about it (Spanish literals, translated where they are
  * shown: N_() them), its glyph (aos_sym_44), and, if the widget can be told

@@ -238,8 +238,38 @@ static int choices(aos_widget_choice_t *out, int max)
     return n;
 }
 
+/* The lock screen's widget: the first two quantities a home wants (the
+ * card's order), "650 ppm · 22,5 °C", with the first one's glyph. */
+static bool lock_fill(char *text, size_t n, const char **glyph, uint32_t *rgb)
+{
+    int ns = aos_sensor_count(), got = 0;
+    text[0] = '\0';
+    /* one value of each quantity: two thermometers make temperature once */
+    for (size_t p = 0; p < sizeof PRIORITY / sizeof PRIORITY[0] && got < 2; p++) {
+        int before = got;
+        for (int i = 0; i < ns && got == before; i++) {
+            aos_sensor_value_t v[AOS_SENSOR_XVALUES];
+            int nv = aos_sensor_values(i, v, AOS_SENSOR_XVALUES);
+            for (int k = 0; k < nv && got == before; k++) {
+                if (v[k].q != PRIORITY[p] || isnan(v[k].v)) continue;
+                char one[32];
+                aos_sensor_fmt(v[k].q, v[k].v, one, sizeof one);
+                size_t at = strlen(text);
+                snprintf(text + at, n - at, "%s%s", got ? "  ·  " : "", one);
+                if (!got) {
+                    *glyph = aos_sensor_glyph(v[k].q, v[k].key);
+                    *rgb = lv_color_to_u32(tint(v[k].q, v[k].v)) & 0xFFFFFF;
+                }
+                got++;
+            }
+        }
+    }
+    return got > 0;
+}
+
 void aos_widget_sensors_register(void)
 {
+    aos_ui_register_lock_widget("sensors", N_("Sensores"), AOS_SYM_THERMOMETER, lock_fill);
     aos_ui_register_widget("sensors", widget_create);
     aos_ui_describe_widget("sensors", N_("Sensores"), N_("Lo que miden los sensores conectados: CO₂, temperatura, humedad…"),
                            AOS_SYM_THERMOMETER, CELLS, choices);
