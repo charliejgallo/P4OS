@@ -39,130 +39,130 @@ falta su clave pública	its public key is missing
 #: apps/malla/web/malla.js:47
 demasiados seguidos	too many in a row
 
-#: apps/malla/web/malla.js:56
+#: apps/malla/web/malla.js:61
 nunca	never
 
-#: apps/malla/web/malla.js:56
+#: apps/malla/web/malla.js:61
 recién	just now
 
-#: apps/malla/web/malla.js:56
+#: apps/malla/web/malla.js:61
 hace %d min	%d min ago
 
-#: apps/malla/web/malla.js:57
+#: apps/malla/web/malla.js:62
 hace %d h	%d h ago
 
-#: apps/malla/web/malla.js:57
+#: apps/malla/web/malla.js:62
 hace %d d	%d d ago
 
-#: apps/malla/web/malla.js:76
-#: apps/malla/web/malla.js:97
+#: apps/malla/web/malla.js:81
+#: apps/malla/web/malla.js:102
 Malla	Mesh
 
-#: apps/malla/web/malla.js:86
+#: apps/malla/web/malla.js:91
 Mensaje	Message
 
-#: apps/malla/web/malla.js:88
+#: apps/malla/web/malla.js:93
 Enviar	Send
 
-#: apps/malla/web/malla.js:93
+#: apps/malla/web/malla.js:98
 Tomar canales de una URL	Take channels from a URL
 
-#: apps/malla/web/malla.js:94
+#: apps/malla/web/malla.js:99
 Reemplaza los canales del nodo (y su radio, si la URL la trae). El nodo se reinicia.	Replaces the node's channels (and its radio, if the URL brings it). The node restarts.
 
-#: apps/malla/web/malla.js:95
+#: apps/malla/web/malla.js:100
 Aplicar	Apply
 
-#: apps/malla/web/malla.js:108
+#: apps/malla/web/malla.js:113
 Es demasiado largo para la malla	Too long for the mesh
 
-#: apps/malla/web/malla.js:115
+#: apps/malla/web/malla.js:120
 No es una URL de canales de Meshtastic	Not a Meshtastic channel URL
 
-#: apps/malla/web/malla.js:116
+#: apps/malla/web/malla.js:121
 ¿Reemplazar los canales del nodo? Se reinicia.	Replace the node's channels? It restarts.
 
-#: apps/malla/web/malla.js:117
+#: apps/malla/web/malla.js:122
 Mandado al nodo	Sent to the node
 
-#: apps/malla/web/malla.js:147
-#: apps/malla/web/malla.js:171
+#: apps/malla/web/malla.js:152
+#: apps/malla/web/malla.js:176
 Vos	You
 
-#: apps/malla/web/malla.js:147
+#: apps/malla/web/malla.js:152
 Sin mensajes todavía	No messages yet
 
-#: apps/malla/web/malla.js:156
+#: apps/malla/web/malla.js:161
 en cola	queued
 
-#: apps/malla/web/malla.js:156
+#: apps/malla/web/malla.js:161
 enviado	sent
 
-#: apps/malla/web/malla.js:157
+#: apps/malla/web/malla.js:162
 repetido	relayed
 
-#: apps/malla/web/malla.js:157
+#: apps/malla/web/malla.js:162
 recibido	delivered
 
-#: apps/malla/web/malla.js:158
+#: apps/malla/web/malla.js:163
 error	failed
 
-#: apps/malla/web/malla.js:165
+#: apps/malla/web/malla.js:170
 Canal %d	Channel %d
 
-#: apps/malla/web/malla.js:177
+#: apps/malla/web/malla.js:182
 Escribí el primer mensaje directo.	Write the first direct message.
 
-#: apps/malla/web/malla.js:177
+#: apps/malla/web/malla.js:182
 Todavía no hay mensajes en este canal.	No messages on this channel yet.
 
-#: apps/malla/web/malla.js:185
+#: apps/malla/web/malla.js:190
 %d nodos	%d nodes
 
-#: apps/malla/web/malla.js:187
+#: apps/malla/web/malla.js:192
 Nodo	Node
 
-#: apps/malla/web/malla.js:187
+#: apps/malla/web/malla.js:192
 Visto	Heard
 
-#: apps/malla/web/malla.js:187
+#: apps/malla/web/malla.js:192
 Saltos	Hops
 
-#: apps/malla/web/malla.js:187
+#: apps/malla/web/malla.js:192
 Batería	Battery
 
-#: apps/malla/web/malla.js:188
+#: apps/malla/web/malla.js:193
 Distancia	Distance
 
-#: apps/malla/web/malla.js:191
+#: apps/malla/web/malla.js:196
 este	this one
 
-#: apps/malla/web/malla.js:192
+#: apps/malla/web/malla.js:197
 directo	direct
 
-#: apps/malla/web/malla.js:193
+#: apps/malla/web/malla.js:198
 enchufado	plugged in
 
-#: apps/malla/web/malla.js:200
+#: apps/malla/web/malla.js:205
 Malla no está abierta en la placa.	Mesh is not open on the board.
 
-#: apps/malla/web/malla.js:201
+#: apps/malla/web/malla.js:206
 Abrir Malla en la placa	Open Mesh on the board
 
-#: apps/malla/web/malla.js:204
+#: apps/malla/web/malla.js:209
 Conectado	Connected
 
-#: apps/malla/web/malla.js:204
+#: apps/malla/web/malla.js:209
 Cargando la base de nodos	Loading the node database
 
-#: apps/malla/web/malla.js:204
+#: apps/malla/web/malla.js:209
 Conectando	Connecting
 
-#: apps/malla/web/malla.js:205
+#: apps/malla/web/malla.js:210
 Reintentando	Retrying
 
-#: apps/malla/web/malla.js:205
+#: apps/malla/web/malla.js:210
 Sin conexión	Not connected
 
-#: apps/malla/web/malla.js:208
+#: apps/malla/web/malla.js:213
 Sin nodo	No node

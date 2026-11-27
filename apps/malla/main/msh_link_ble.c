@@ -97,6 +97,13 @@ bool msh_ble_adv_is_meshtastic(const uint8_t *data, int len)
     return false;
 }
 
+static void say(msh_link_t *l, msh_ask_t ask, const char *note)
+{
+    l->ask = ask;
+    l->note = note;
+    if (l->changed) l->changed(l);
+}
+
 /* Waits for the GATT client to leave CONNECTING/DISCOVERING. */
 static aos_ble_gatt_state_t wait_ready(msh_link_t *l, int ms, int *reason)
 {
@@ -127,7 +134,7 @@ static aos_ble_gatt_ev_t *next_ev(ble_t *b)
 static bool pair(msh_link_t *l, ble_t *b, char *err, size_t err_len)
 {
     if (aos_hal_ble_gatt_secure()) return true;
-    l->note = N_("Emparejando…");
+    say(l, MSH_ASK_NONE, N_("Emparejando…"));
     if (!aos_hal_ble_gatt_pair()) {
         snprintf(err, err_len, "%s", N_("No se pudo pedir el emparejamiento"));
         return false;
@@ -142,27 +149,25 @@ static bool pair(msh_link_t *l, ble_t *b, char *err, size_t err_len)
                 return false;
             }
             if (l->ask == MSH_ASK_PIN && l->answered) {
-                l->ask = MSH_ASK_NONE;
                 l->answered = false;
                 aos_hal_ble_gatt_passkey(l->pin);
-                l->note = N_("Emparejando…");
+                say(l, MSH_ASK_NONE, N_("Emparejando…"));
             }
             aos_hal_sleep_ms(20);
             continue;
         }
         if (e->type == AOS_BLE_EV_PASSKEY) {
             l->answered = false;
-            l->ask = MSH_ASK_PIN;
-            l->note = N_("El nodo pide el PIN");
+            say(l, MSH_ASK_PIN, N_("El nodo pide el PIN"));
             t = 0;                  /* the person gets the whole time to type it */
         } else if (e->type == AOS_BLE_EV_SECURITY) {
-            l->ask = MSH_ASK_NONE;
+            say(l, MSH_ASK_NONE, "");
             if (e->status == 0) return true;
             snprintf(err, err_len, "%s", N_("El emparejamiento falló (¿PIN equivocado?)"));
             return false;
         }
     }
-    l->ask = MSH_ASK_NONE;
+    say(l, MSH_ASK_NONE, "");
     snprintf(err, err_len, "%s", N_("El emparejamiento no terminó a tiempo"));
     return false;
 }
@@ -180,7 +185,7 @@ static bool ble_open(msh_link_t *l, char *err, size_t err_len)
     memset(b, 0, sizeof *b);
     aos_ble_gatt_ev_t drop[EV_MAX];
     while (aos_hal_ble_gatt_events(drop, EV_MAX) > 0) {}     /* an old connection's leftovers */
-    l->note = N_("Conectando por Bluetooth…");
+    say(l, MSH_ASK_NONE, N_("Conectando por Bluetooth…"));
     if (!aos_hal_ble_gatt_connect(l->t.addr, l->t.addr_type)) {
         snprintf(err, err_len, "%s", N_("El Bluetooth no aceptó la conexión"));
         return false;
@@ -214,7 +219,7 @@ static bool ble_open(msh_link_t *l, char *err, size_t err_len)
     }
 #endif
     if (b->h_num) aos_hal_ble_gatt_subscribe(b->h_num, 1);
-    l->note = "";
+    say(l, MSH_ASK_NONE, "");
     return true;
 }
 

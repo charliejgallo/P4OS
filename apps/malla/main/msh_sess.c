@@ -130,6 +130,16 @@ static void on_log(void *ctx, const char *line)
     msh_unlock();
 }
 
+/* What the link asks of the person, copied for the UI the moment it changes. */
+static void on_changed(msh_link_t *l)
+{
+    msh_lock();
+    MSH.ask = l->ask;
+    MSH.note = l->note;
+    MSH.seq_state++;
+    msh_unlock();
+}
+
 static bool send_now(msh_link_t *l, const meshtastic_ToRadio *tr)
 {
     uint8_t buf[MSH_FRAME_MAX];
@@ -162,8 +172,6 @@ static void talk(msh_link_t *l)
     want_config(l);
     set_state(MSH_ST_CONFIG);
     uint32_t last_hb = msh_now_s(), last_save = msh_now_s();
-    msh_ask_t ask_was = MSH_ASK_NONE;
-    const char *note_was = NULL;
     char err[96] = "";
     while (!S.stop) {
         int n = l->ops->recv(l, S.rx, sizeof S.rx, 40, err, sizeof err);
@@ -194,16 +202,6 @@ static void talk(msh_link_t *l)
             } else {
                 aos_hal_log(MSH_TAG, "FromRadio of %d bytes: %s", n, PB_GET_ERROR(&is));
             }
-        }
-        /* what the link asks of the person, for the UI */
-        if (l->ask != ask_was || l->note != note_was) {
-            ask_was = l->ask;
-            note_was = l->note;
-            msh_lock();
-            MSH.ask = ask_was;
-            MSH.note = note_was;
-            MSH.seq_state++;
-            msh_unlock();
         }
         /* what the UI queued, once the node has told us who it is */
         if (MSH.state == MSH_ST_READY) {
@@ -262,6 +260,7 @@ static void sess_thread(void *arg)
             break;
         }
         l->log_line = on_log;
+        l->changed = on_changed;
         S.link = l;
         char err[96] = "";
         if (l->ops->open(l, err, sizeof err)) {

@@ -80,6 +80,9 @@ struct msh_link {
     volatile bool cancel;
     /* a line on how it goes ("Emparejando…"): a key for _(), or "" */
     const char *volatile note;
+    /* called by the link right after it changes ask or note, from the
+     * session's thread (an open that pairs is still inside open()) */
+    void (*changed)(msh_link_t *l);
     void *priv;                     /* the transport's own */
     /* bytes of the node's log that came between frames (serial, TCP) */
     void (*log_line)(void *ctx, const char *line);

@@ -169,6 +169,24 @@ static void bt_on_cb(lv_event_t *e)
     msh_ui_conn_sheet();
 }
 
+#if MSH_BLE_PAIR
+/* The node's keys go: the next connection pairs again and asks for the PIN
+ * (a node reflashed, or whose PIN was changed). */
+static void forget_cb(lv_event_t *e)
+{
+    (void)e;
+    msh_lock();
+    msh_target_t t = MSH.target;
+    msh_unlock();
+    if (t.kind != MSH_LINK_BLE) return;
+    msh_sess_stop();
+    aos_hal_ble_gatt_forget(t.addr, t.addr_type);
+    aos_ui_toast(_("Emparejamiento olvidado: la próxima vez pide el PIN"), 2500);
+    msh_ui_sheet_close();
+    msh_app_connect(&t);
+}
+#endif
+
 static void disconnect_cb(lv_event_t *e)
 {
     (void)e;
@@ -262,7 +280,13 @@ void msh_ui_conn_sheet(void)
         msh_target_text(&cur, t, sizeof t);
         snprintf(line, sizeof line, "%s: %s%s%s", _("Ahora"), t, err[0] ? "  ·  " : "", err[0] ? _(err) : "");
         wrap_label(msh_ui_label(p, line, aos_font_small, err[0] ? AOS_C_ORANGE : AOS_C_DIM));
-        msh_ui_btn(p, _("Desconectar y olvidar"), AOS_C_CARD2, disconnect_cb, NULL);
+        lv_obj_t *r0 = msh_ui_row(p);
+        lv_obj_set_flex_flow(r0, LV_FLEX_FLOW_ROW_WRAP);
+        lv_obj_set_style_pad_row(r0, 12, 0);
+        msh_ui_btn(r0, _("Desconectar y olvidar"), AOS_C_CARD2, disconnect_cb, NULL);
+#if MSH_BLE_PAIR
+        if (cur.kind == MSH_LINK_BLE) msh_ui_btn(r0, _("Emparejar de nuevo"), AOS_C_CARD2, forget_cb, NULL);
+#endif
     }
 
     /* serial */
