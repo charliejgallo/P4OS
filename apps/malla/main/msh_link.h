@@ -52,7 +52,9 @@ typedef struct {
  * for the UI, and the UI answers through msh_sess_passkey(). */
 typedef enum {
     MSH_ASK_NONE = 0,
-    MSH_ASK_PIN,                    /* the node shows a six-digit PIN */
+    MSH_ASK_PIN,                    /* the node shows a six-digit PIN: type it here */
+    MSH_ASK_SHOW,                   /* the board chose the PIN (num): type it on the node */
+    MSH_ASK_COMPARE,                /* both show a number (num): the same? 1 yes, 0 no */
 } msh_ask_t;
 
 typedef struct msh_link msh_link_t;
@@ -74,7 +76,8 @@ struct msh_link {
     /* what the link asks of the person, and the answer */
     volatile msh_ask_t ask;
     volatile bool      answered;
-    volatile uint32_t  pin;
+    volatile uint32_t  pin;         /* the answer: the PIN, or 1/0 for a comparison */
+    volatile uint32_t  num;         /* the number to show (MSH_ASK_SHOW, _COMPARE) */
     /* set by the session when it is told to stop: a link that waits long
      * (a BLE connection, a pairing) gives up when it sees it */
     volatile bool cancel;

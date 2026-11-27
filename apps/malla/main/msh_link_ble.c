@@ -148,7 +148,7 @@ static bool pair(msh_link_t *l, ble_t *b, char *err, size_t err_len)
                 snprintf(err, err_len, "%s", N_("Se cortó mientras emparejaba"));
                 return false;
             }
-            if (l->ask == MSH_ASK_PIN && l->answered) {
+            if ((l->ask == MSH_ASK_PIN || l->ask == MSH_ASK_COMPARE) && l->answered) {
                 l->answered = false;
                 aos_hal_ble_gatt_passkey(l->pin);
                 say(l, MSH_ASK_NONE, N_("Emparejando…"));
@@ -157,9 +157,18 @@ static bool pair(msh_link_t *l, ble_t *b, char *err, size_t err_len)
             continue;
         }
         if (e->type == AOS_BLE_EV_PASSKEY) {
+            /* data[0]: 0 the node shows a PIN to type here (a Meshtastic
+             * node with a screen, or its fixed one); 1 the board chose it
+             * (data[1..4], little endian) to type on the node; 2 compare
+             * that number with the node's */
+            int mode = e->len ? e->data[0] : 0;
+            l->num = e->len >= 5 ? (uint32_t)e->data[1] | (uint32_t)e->data[2] << 8
+                                   | (uint32_t)e->data[3] << 16 | (uint32_t)e->data[4] << 24 : 0;
             l->answered = false;
-            say(l, MSH_ASK_PIN, N_("El nodo pide el PIN"));
-            t = 0;                  /* the person gets the whole time to type it */
+            if (mode == 1) say(l, MSH_ASK_SHOW, N_("Escribí el PIN en el nodo"));
+            else if (mode == 2) say(l, MSH_ASK_COMPARE, N_("Compará el número con el del nodo"));
+            else say(l, MSH_ASK_PIN, N_("El nodo pide el PIN"));
+            t = 0;                  /* the person gets the whole time to answer */
         } else if (e->type == AOS_BLE_EV_SECURITY) {
             say(l, MSH_ASK_NONE, "");
             if (e->status == 0) return true;

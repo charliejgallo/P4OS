@@ -517,7 +517,7 @@ void msh_ui_refresh(void)
     }
     if (ask != UI.seen_ask) {
         UI.seen_ask = ask;
-        if (ask == MSH_ASK_PIN) msh_ui_pin_sheet();
+        if (ask != MSH_ASK_NONE) msh_ui_pin_sheet();
         else if (UI.sheet_kind == MSH_SHEET_PIN) msh_ui_sheet_close();
     }
     if (sno != UI.seen_notice) {

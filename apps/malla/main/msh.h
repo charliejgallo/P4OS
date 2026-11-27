@@ -152,6 +152,7 @@ typedef struct {
     char err[96];                   /* why the last try failed: a key for _() */
     const char *note;
     msh_ask_t ask;
+    uint32_t ask_num;               /* the number a pairing shows (MSH_ASK_SHOW, _COMPARE) */
     uint32_t ready_up;              /* msh_now_s() when it became READY */
     uint32_t pkts_in, pkts_out;
     char log[MSH_LOG_LINES][96];
@@ -239,7 +240,7 @@ void msh_target_text(const msh_target_t *t, char *out, size_t cap);   /* "TCP 10
 void        msh_sess_start(const msh_target_t *t);
 void        msh_sess_stop(void);                /* waits for the thread */
 bool        msh_sess_running(void);
-void        msh_sess_passkey(uint32_t pin);     /* the answer to MSH_ASK_PIN */
+void        msh_sess_passkey(uint32_t pin);     /* the answer to MSH_ASK_PIN (the PIN) or _COMPARE (1/0) */
 /* What goes out. Each returns false when it could not be queued. The
  * message is in the model already as MSH_MSG_QUEUED when send_text
  * returns true. */

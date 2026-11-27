@@ -379,8 +379,44 @@ static void pin_kb_cb(lv_event_t *e)
     if (lv_event_get_code(e) == LV_EVENT_READY) pin_ok_cb(e);
 }
 
+static void cmp_cb(lv_event_t *e)
+{
+    msh_sess_passkey((uint32_t)(uintptr_t)lv_event_get_user_data(e));
+    msh_ui_sheet_close();
+}
+
+/* The board chose the PIN, or both sides show a number to compare: the
+ * number big, and for a comparison the two answers. */
+static void number_sheet(msh_ask_t ask, uint32_t num)
+{
+    lv_obj_t *p = msh_ui_sheet(MSH_SHEET_PIN, _("Emparejar"));
+    wrap_label(msh_ui_label(p, ask == MSH_ASK_SHOW ? _("Escribí este PIN en el nodo para emparejarlo.")
+                                                   : _("¿El nodo muestra este mismo número?"),
+                            aos_font_small, AOS_C_DIM));
+    char n[12];
+    snprintf(n, sizeof n, "%06lu", (unsigned long)(num % 1000000));
+    lv_obj_t *nl = msh_ui_label(p, n, aos_font_huge, AOS_C_TEXT);
+    lv_obj_set_width(nl, LV_PCT(100));
+    lv_obj_set_style_text_align(nl, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_t *r = msh_ui_row(p);
+    if (ask == MSH_ASK_COMPARE) {
+        msh_ui_btn(r, _("No es el mismo"), AOS_C_CARD2, cmp_cb, (void *)0);
+        msh_ui_btn(r, _("Es el mismo"), AOS_C_ACCENT, cmp_cb, (void *)1);
+    } else {
+        msh_ui_btn(r, _("Listo"), AOS_C_CARD2, sheet_close_cb, NULL);
+    }
+}
+
 void msh_ui_pin_sheet(void)
 {
+    msh_lock();
+    msh_ask_t ask = MSH.ask;
+    uint32_t num = MSH.ask_num;
+    msh_unlock();
+    if (ask == MSH_ASK_SHOW || ask == MSH_ASK_COMPARE) {
+        number_sheet(ask, num);
+        return;
+    }
     lv_obj_t *p = msh_ui_sheet(MSH_SHEET_PIN, _("Emparejar"));
     wrap_label(msh_ui_label(p, _("Escribí el PIN de seis cifras que muestra el nodo. Uno sin pantalla suele usar 123456."),
                             aos_font_small, AOS_C_DIM));

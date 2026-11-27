@@ -135,6 +135,7 @@ static void on_changed(msh_link_t *l)
 {
     msh_lock();
     MSH.ask = l->ask;
+    MSH.ask_num = l->num;
     MSH.note = l->note;
     MSH.seq_state++;
     msh_unlock();

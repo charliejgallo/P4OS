@@ -95,7 +95,9 @@ The links (`main/msh_link_*.c`):
   The node keeps those behind an encrypted link: right after discovery the
   link asks for pairing (`aos_hal_ble_gatt_pair`, firmware 0.35); a node
   bonded before only encrypts again, a new one shows a PIN and the app asks
-  for it (`AOS_BLE_EV_PASSKEY`, then `aos_hal_ble_gatt_passkey`). "Emparejar
+  for it (`AOS_BLE_EV_PASSKEY` with mode 0, then `aos_hal_ble_gatt_passkey`);
+  the other two modes are handled too: the board's own PIN shown to type on
+  the node (1), and a number to compare, answered yes or no (2). "Emparejar
   de nuevo" forgets the bond. The build sets `MSH_BLE_PAIR` when `aos_hal.h`
   has the API; without it, only a node in no-PIN mode works.
 
