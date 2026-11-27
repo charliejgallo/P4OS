@@ -12988,3 +12988,9 @@ Planeo	Planata
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Voli
+
+#: apps/malla  (nombre de app)
+Malla	Mesh
+
+#: apps/cielo  (nombre de app)
+Cielo	Cielo

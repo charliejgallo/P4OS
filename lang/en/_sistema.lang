@@ -11792,3 +11792,9 @@ Cuando %s deja de ver a alguien	When %s stops seeing anyone
 
 #: components/aos_apps/aos_bot.c
 Cuando %s hace algo (un botón, un control)	When %s does something (a button, a remote)
+
+#: apps/malla  (nombre de app)
+Malla	Mesh
+
+#: apps/cielo  (nombre de app)
+Cielo	Sky

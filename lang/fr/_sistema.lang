@@ -12988,3 +12988,9 @@ Planeo	Vol plané
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Vols
+
+#: apps/malla  (nombre de app)
+Malla	Maillage
+
+#: apps/cielo  (nombre de app)
+Cielo	Ciel
