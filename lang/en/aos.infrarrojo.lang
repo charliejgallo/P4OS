@@ -844,3 +844,42 @@ Amarillo	Yellow
 
 #: apps/infrarrojo/main/ir_store.c:208
 Azul	Blue
+
+#: apps/infrarrojo/main/ir_base.c:609
+Todos	All
+
+#: apps/infrarrojo/main/ir_base.c:612
+Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.	Searching with 1 button. Two or three buttons of the same remote tell the model apart better.
+
+#: apps/infrarrojo/main/ir_base.c:613
+Buscando con %d botones del mismo control.	Searching with %d buttons of the same remote.
+
+#: apps/infrarrojo/main/ir_base.c:619
+Apuntá el control a la placa y apretá otro botón (no el mismo)…	Point the remote at the board and press another button (not the same one)…
+
+#: apps/infrarrojo/main/ir_base.c:621
+Sumar otro botón	Add another button
+
+#: apps/infrarrojo/main/ir_base.c:621
+Cambiar el último botón	Replace the last button
+
+#: apps/infrarrojo/main/ir_base.c:639
+Tienen todos los botones leídos:	They have every button read:
+
+#: apps/infrarrojo/main/ir_base.c:666
+1 código parecido	1 similar code
+
+#: apps/infrarrojo/main/ir_base.c:666
+%d códigos parecidos	%d similar codes
+
+#: apps/infrarrojo/main/ir_base.c:668
+%d %% · %d de %d botones · %s · %s · %s	%d %% · %d of %d buttons · %s · %s · %s
+
+#: apps/infrarrojo/main/ir_base.c:677
+Ver y agregar	View and add
+
+#: apps/infrarrojo/main/ir_portal.c:263
+Esas capturas ya no están	Those captures are gone
+
+#: apps/infrarrojo/main/ir_portal.c:353
+Ningún control de la base manda algo parecido.	No remote in the library sends anything alike.

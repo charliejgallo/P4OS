@@ -24,7 +24,19 @@ the app does not load on an older one.
 - **Codes.** SmartIR's library by kind, brand and model; a command is tried
   with a tap before the device is added. "¿De qué control es?" searches the
   library for a captured button: exact protocol fields for a known
-  protocol, SmartIR's duration matching for a raw frame.
+  protocol, SmartIR's duration matching for a raw frame (the likeness of
+  smartir-universal's `tools/ir_code_finder.py`: each duration within 20 %,
+  60 µs at least, over the longer of the two).
+  - **Of one kind or all** (televisions and audio, air conditioners, fans,
+    lights), changed on the results and searched again.
+  - **Up to four buttons of one remote** ("Sumar otro botón": the board
+    listens for the next one). A device's score is the mean of each
+    button's best code in it, so the models that share a power code part
+    ways at the second button; each result says in how many of the
+    buttons it has a code (60 % or more) and how many of its codes are
+    within 90 % of one of them, which breaks ties.
+  - **From a result:** "Probar" sends the code that matched the first
+    button, "Ver y agregar" opens the model to add it to Controles.
 - **Through a Zigbee IR blaster** (a Tuya "Zosung" TS1201 joined to the
   board's Zigbee network) instead of the LED: the output is chosen in
   Cableado (the LED or any blaster in the network, shown once there is
@@ -48,6 +60,8 @@ the app does not load on an older one.
   appear in the browser), an air conditioner's state, a code by hand or
   pasted (Broadlink base64 or hex, Pronto, Tuya, raw), importing a SmartIR
   file of a television, fan or light, and downloading a device's JSON.
+  Which remote it is, too: up to four of the captures ticked, of one kind
+  or all, searched on the board, each result tried or added from the page.
 
 ## Files
 

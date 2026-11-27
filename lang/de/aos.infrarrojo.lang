@@ -844,3 +844,42 @@ Amarillo	Gelb
 
 #: apps/infrarrojo/main/ir_store.c:208
 Azul	Blau
+
+#: apps/infrarrojo/main/ir_base.c:609
+Todos	Alle
+
+#: apps/infrarrojo/main/ir_base.c:612
+Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.	Suche mit 1 Taste. Zwei oder drei Tasten derselben Fernbedienung unterscheiden das Modell besser.
+
+#: apps/infrarrojo/main/ir_base.c:613
+Buscando con %d botones del mismo control.	Suche mit %d Tasten derselben Fernbedienung.
+
+#: apps/infrarrojo/main/ir_base.c:619
+Apuntá el control a la placa y apretá otro botón (no el mismo)…	Richte die Fernbedienung auf die Platine und drücke eine andere Taste (nicht dieselbe)…
+
+#: apps/infrarrojo/main/ir_base.c:621
+Sumar otro botón	Weitere Taste hinzufügen
+
+#: apps/infrarrojo/main/ir_base.c:621
+Cambiar el último botón	Letzte Taste ersetzen
+
+#: apps/infrarrojo/main/ir_base.c:639
+Tienen todos los botones leídos:	Sie haben alle gelesenen Tasten:
+
+#: apps/infrarrojo/main/ir_base.c:666
+1 código parecido	1 ähnlicher Code
+
+#: apps/infrarrojo/main/ir_base.c:666
+%d códigos parecidos	%d ähnliche Codes
+
+#: apps/infrarrojo/main/ir_base.c:668
+%d %% · %d de %d botones · %s · %s · %s	%d %% · %d von %d Tasten · %s · %s · %s
+
+#: apps/infrarrojo/main/ir_base.c:677
+Ver y agregar	Ansehen und hinzufügen
+
+#: apps/infrarrojo/main/ir_portal.c:263
+Esas capturas ya no están	Diese Aufnahmen sind nicht mehr da
+
+#: apps/infrarrojo/main/ir_portal.c:353
+Ningún control de la base manda algo parecido.	Keine Fernbedienung der Bibliothek sendet etwas Ähnliches.

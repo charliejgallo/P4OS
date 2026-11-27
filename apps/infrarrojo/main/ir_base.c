@@ -12,7 +12,11 @@
  *
  * The search ("which remote is this button from") runs in the app's thread over
  * every code of the pack and shows the best device for each brand and
- * model, with the command it matched and how well.
+ * model, with the command it matched and how well. Up to IR_FIND_Q buttons
+ * of one remote are searched together (models that share a power code part
+ * ways at the second button), over one kind or all of them; a result is
+ * tried with a tap and opened to be added. As SmartIR's finder of
+ * smartir-universal (tools/ir_code_finder.py): the same likeness.
  *
  * Climate files nest their codes as mode, then [preset], fan, [swing], then
  * temperature; ir_ac_shape() finds which level is which from the lists the
@@ -40,7 +44,15 @@ static struct {
     ir_match_t     found[IR_FIND_MAX];
     int            nfound;
     bool           have_find;
+    bool           adding;          /* listening for one more button */
+    uint32_t       seen;
 } B = { .blob_dev = -1 };
+
+/* the buttons searched, kept across a rebuild (PSRAM, IR_CAP_MAX each) */
+static uint32_t *s_qd[IR_FIND_Q];
+static int s_qlen[IR_FIND_Q], s_nq;
+static int s_kind = -1;             /* IR_C_*, -1 every kind */
+static ir_capture_t *s_cap;
 
 /* across a rebuild */
 static int  s_scr, s_cls, s_dev = -1;
@@ -196,13 +208,16 @@ static void send_code(int code)
     if (n <= 0 || ir_out_send("", buf, n, 38000, 0) == 0) ir_ui_toast(_("No se pudo mandar"));
 }
 
+/* the model on screen, again: the portal's "Probar" may have loaded another */
 static void cmd_cb(lv_event_t *e)
 {
+    if (!load_dev(s_dev)) return;
     send_code((int)(intptr_t)lv_event_get_user_data(e));
 }
 
 static void ac_try(bool on)
 {
+    if (!load_dev(s_dev)) return;
     ir_dev_t d;
     memset(&d, 0, sizeof d);
     const ij_doc_t *j = &B.blob.js;
@@ -272,11 +287,13 @@ static void add_walk(add_ctx_t *a, const ij_doc_t *j, int node, char *path, size
     }
 }
 
-static void add_cb(lv_event_t *e)
+/* A library device into Controles: its file name in file. 0 done, -1 the
+ * library could not be read, -2 the card could not be written. Also for
+ * the portal's page (ir_portal.c). */
+int ir_base_add(int dev, char *file, size_t fn)
 {
-    (void)e;
-    const ir_pack_dev_t *p = ir_pack_at(s_dev);
-    if (!p || !load_dev(s_dev)) return;
+    const ir_pack_dev_t *p = ir_pack_at(dev);
+    if (!p || !load_dev(dev)) return -1;
     ir_dev_t d;
     memset(&d, 0, sizeof d);
     char name[48];
@@ -308,10 +325,18 @@ static void add_cb(lv_event_t *e)
         }
     }
     bool ok = ir_dev_save(&d);
-    char file[48];
-    ir_copy(file, sizeof file, d.file);
+    if (file && fn) ir_copy(file, fn, d.file);
     ir_dev_clear(&d);
-    if (!ok) { ir_ui_toast(_("No se pudo escribir en la tarjeta")); return; }
+    return ok ? 0 : -2;
+}
+
+static void add_cb(lv_event_t *e)
+{
+    (void)e;
+    char file[48];
+    int rc = ir_base_add(s_dev, file, sizeof file);
+    if (rc == -1) return;
+    if (rc) { ir_ui_toast(_("No se pudo escribir en la tarjeta")); return; }
     ir_ui_toast(_("Agregado a Controles"));
     ir_remote_open_file(file);
     ir_ui_goto_tab(0);
@@ -506,9 +531,95 @@ static void scr_device(lv_obj_t *s)
     }
 }
 
+static bool find_run(void)
+{
+    const uint32_t *d[IR_FIND_Q];
+    for (int k = 0; k < s_nq; k++) d[k] = s_qd[k];
+    unsigned mask = s_kind < 0 ? 0xF : 1u << s_kind;
+    if (!s_nq || !ir_hw_find_multi(d, s_qlen, s_nq, mask)) return false;
+    B.finding = true;
+    B.have_find = true;
+    B.nfound = 0;
+    return true;
+}
+
+static bool find_add(const uint32_t *d, int n)
+{
+    if (n <= 0) return false;
+    int k = s_nq < IR_FIND_Q ? s_nq : IR_FIND_Q - 1;    /* full: the last one is replaced */
+    if (!s_qd[k]) s_qd[k] = ir_alloc(IR_CAP_MAX * sizeof(uint32_t));
+    if (!s_qd[k]) return false;
+    if (n > IR_CAP_MAX) n = IR_CAP_MAX;
+    memcpy(s_qd[k], d, (size_t)n * sizeof *d);
+    s_qlen[k] = n;
+    if (k == s_nq) s_nq++;
+    return true;
+}
+
+static void adding(bool on)
+{
+    B.adding = on;
+    if (on) B.seen = ir_hw_capture_seq();
+    ir_out_listen(IR_WHO_UI, on, "");
+}
+
+static void kind_cb(lv_event_t *e)
+{
+    s_kind = (int)(intptr_t)lv_event_get_user_data(e);
+    if (!find_run()) ir_ui_toast(_("Ya hay una búsqueda en curso"));
+    show();
+}
+
+static void more_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!s_cap) s_cap = ir_alloc(sizeof *s_cap);
+    if (!s_cap) return;
+    adding(!B.adding);
+    show();
+}
+
+/* A library code through the app's output (the portal's "Probar"). */
+bool ir_base_try(int dev, int code)
+{
+    if (!load_dev(dev)) return false;
+    static uint32_t buf[IR_TX_MAX];
+    int n = ir_pack_code(&B.blob, code, buf, IR_TX_MAX);
+    return n > 0 && ir_out_send("", buf, n, 38000, 0) != 0;
+}
+
+static void try_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    if (i < 0 || i >= B.nfound) return;
+    if (!load_dev(B.found[i].dev)) { ir_ui_toast(_("No se pudo leer este modelo de la base.")); return; }
+    send_code(B.found[i].code);
+}
+
 static void scr_find(lv_obj_t *s)
 {
     lv_obj_t *c = ir_ui_card(s);
+    /* the kinds, and the buttons read */
+    lv_obj_t *row = lv_obj_create(c);
+    lv_obj_remove_style_all(row);
+    lv_obj_set_size(row, LV_PCT(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_column(row, 10, 0);
+    lv_obj_set_style_pad_row(row, 10, 0);
+    chip(row, _("Todos"), s_kind < 0, kind_cb, (void *)(intptr_t)-1);
+    for (int k = 0; k < IR_C_COUNT; k++) chip(row, _(CLASS_NAME[k]), s_kind == k, kind_cb, (void *)(intptr_t)k);
+    char t[160];
+    snprintf(t, sizeof t, s_nq == 1 ? _("Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.")
+                                    : _("Buscando con %d botones del mismo control."), s_nq);
+    text(c, t, aos_font_small, AOS_C_DIM);
+    lv_obj_t *br = ir_sheet_buttons(c);
+    lv_obj_set_flex_align(br, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    if (B.adding) {
+        ir_ui_btn(br, _("Cancelar"), AOS_C_CARD2, more_cb, NULL);
+        text(c, _("Apuntá el control a la placa y apretá otro botón (no el mismo)…"), aos_font_body, AOS_C_ACCENT);
+    } else if (!B.finding) {
+        ir_ui_btn(br, s_nq < IR_FIND_Q ? _("Sumar otro botón") : _("Cambiar el último botón"), AOS_C_ACCENT, more_cb, NULL);
+    }
     B.bar_lbl = text(c, B.finding ? _("Buscando en la base…") : _("Listo."), aos_font_body, AOS_C_TEXT);
     B.bar = lv_bar_create(c);
     lv_obj_set_size(B.bar, LV_PCT(100), 16);
@@ -524,11 +635,12 @@ static void scr_find(lv_obj_t *s)
         lv_label_set_long_mode(B.bar_lbl, LV_LABEL_LONG_MODE_WRAP);
         return;
     }
-    lv_label_set_text(B.bar_lbl, B.found[0].score >= 0.999f ? _("Mandan este mismo código:") :
-                                                         _("Los más parecidos, de más a menos:"));
+    lv_label_set_text(B.bar_lbl, B.found[0].score < 0.999f ? _("Los más parecidos, de más a menos:")
+                                 : B.found[0].buttons > 1 ? _("Tienen todos los botones leídos:") : _("Mandan este mismo código:"));
     for (int i = 0; i < B.nfound; i++) {
         const ir_pack_dev_t *d = ir_pack_at(B.found[i].dev);
         if (!d) continue;
+        const ir_match_t *m = &B.found[i];
         char name[64] = "", sub[128];
         ir_pack_blob_t b;
         if (ir_pack_load(B.found[i].dev, &b)) {
@@ -548,9 +660,21 @@ static void scr_find(lv_obj_t *s)
         }
         char title[128];
         snprintf(title, sizeof title, "%s · %s", d->brand, d->models[0] ? d->models : "?");
-        snprintf(sub, sizeof sub, "%d %% · %s · %s", (int)(B.found[i].score * 100 + 0.5f), _(CLASS_NAME[d->cls % IR_C_COUNT]),
-                 name[0] ? name : "?");
-        ir_ui_row(s, NULL, AOS_C_CARD, title, sub, found_cb, (void *)(intptr_t)B.found[i].dev);
+        lv_obj_t *rc = ir_ui_card(s);
+        text(rc, title, aos_font_body, AOS_C_TEXT);
+        char hits[48];
+        snprintf(hits, sizeof hits, m->hits == 1 ? _("1 código parecido") : _("%d códigos parecidos"), m->hits);
+        if (m->buttons > 1)
+            snprintf(sub, sizeof sub, _("%d %% · %d de %d botones · %s · %s · %s"), (int)(m->score * 100 + 0.5f),
+                     m->matched, m->buttons, hits, _(CLASS_NAME[d->cls % IR_C_COUNT]), name[0] ? name : "?");
+        else
+            snprintf(sub, sizeof sub, "%d %% · %s · %s · %s", (int)(m->score * 100 + 0.5f), hits,
+                     _(CLASS_NAME[d->cls % IR_C_COUNT]), name[0] ? name : "?");
+        text(rc, sub, aos_font_small, AOS_C_DIM);
+        lv_obj_t *r = ir_sheet_buttons(rc);
+        lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        if (m->code >= 0) ir_ui_btn(r, _("Probar"), AOS_C_CARD2, try_cb, (void *)(intptr_t)i);
+        ir_ui_btn(r, _("Ver y agregar"), AOS_C_GREEN, found_cb, (void *)(intptr_t)m->dev);
     }
     credit(s);
 }
@@ -606,10 +730,15 @@ static void show(void)
 
 void ir_base_find(const uint32_t *d, int n)
 {
-    if (!ir_hw_find(d, n, 0xF)) { ir_ui_toast(_("Ya hay una búsqueda en curso")); return; }
-    B.finding = true;
-    B.have_find = true;
-    B.nfound = 0;
+    /* a new search: this button alone */
+    int keep = s_nq;
+    s_nq = 0;
+    if (!find_add(d, n) || !find_run()) {
+        s_nq = keep;
+        ir_ui_toast(_("Ya hay una búsqueda en curso"));
+        return;
+    }
+    if (B.adding) adding(false);
     s_from_find = false;
     s_scr = SCR_FIND;
     show();
@@ -624,6 +753,15 @@ void ir_base_build(lv_obj_t *page)
 
 void ir_base_tick(void)
 {
+    if (B.adding && s_cap && ir_hw_capture(&B.seen, s_cap) && s_cap->n > 8) {
+        adding(false);
+        if (find_add(s_cap->d, s_cap->n) && find_run()) {
+            if (s_scr == SCR_FIND) show();
+        } else {
+            ir_ui_toast(_("Ya hay una búsqueda en curso"));
+        }
+        return;
+    }
     if (!B.finding) return;
     int p = ir_hw_find_progress();
     if (p >= 100) {
@@ -637,6 +775,13 @@ void ir_base_tick(void)
 
 void ir_base_free(void)
 {
+    if (B.adding) ir_out_listen(IR_WHO_UI, false, "");
+    /* the buttons read go with the app (an answer shown after a turn of the
+     * screen is kept; one more button then starts a search of its own) */
+    for (int k = 0; k < IR_FIND_Q; k++) { ir_free(s_qd[k]); s_qd[k] = NULL; }
+    s_nq = 0;
+    ir_free(s_cap);
+    s_cap = NULL;
     ir_pack_blob_free(&B.blob);
     bool finding = B.finding, have = B.have_find;
     int nf = B.nfound;

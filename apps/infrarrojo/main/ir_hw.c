@@ -60,8 +60,8 @@ static bool       s_loop_req;
 static bool       s_rx_open;
 
 /* the search */
-static uint32_t  *s_q;
-static int        s_qn;
+static uint32_t  *s_q;                 /* IR_FIND_Q captures, one after the other */
+static int        s_qn[IR_FIND_Q], s_qcount;
 static unsigned   s_qmask;
 static bool       s_find_req;
 static int        s_find_prog = -1;
@@ -90,16 +90,22 @@ static void set_err(const char *what, int gpio)
 
 /* ---------------------------------------------------------------- the search */
 
-static void find_insert(int dev, int code, float score)
+/* best first: the score, then the buttons it has, then the hits */
+static bool find_better(const ir_match_t *a, const ir_match_t *b)
+{
+    if (a->score != b->score) return a->score > b->score;
+    if (a->matched != b->matched) return a->matched > b->matched;
+    return a->hits > b->hits;
+}
+
+static void find_insert(const ir_match_t *m)
 {
     int at = s_nfound;
-    while (at > 0 && s_found[at - 1].score < score) at--;
+    while (at > 0 && find_better(m, &s_found[at - 1])) at--;
     if (at >= IR_FIND_MAX) return;
     int last = s_nfound < IR_FIND_MAX ? s_nfound : IR_FIND_MAX - 1;
     memmove(&s_found[at + 1], &s_found[at], (size_t)(last - at) * sizeof *s_found);
-    s_found[at].dev = (int16_t)dev;
-    s_found[at].code = (int16_t)code;
-    s_found[at].score = score;
+    s_found[at] = *m;
     if (s_nfound < IR_FIND_MAX) s_nfound++;
 }
 
@@ -110,17 +116,28 @@ static void run_find(void)
     int count = ir_pack_count();
     lock();
     s_nfound = 0;
-    int qn = s_qn;
+    int nq = s_qcount;
+    int qn[IR_FIND_Q];
+    memcpy(qn, s_qn, sizeof qn);
     unsigned mask = s_qmask;
     unlock();
-    if (!f || !count) { if (f) fclose(f); lock(); s_find_prog = 100; unlock(); return; }
+    if (!f || !count || nq <= 0) { if (f) fclose(f); lock(); s_find_prog = 100; unlock(); return; }
     fseek(f, 0, SEEK_END);
     uint32_t file_end = (uint32_t)ftell(f);
-    int qf = ir_frame_len(s_q, qn);
-    /* a known protocol is matched by its fields: two NEC keys of one remote
-     * differ in a few spaces only and would look 97 % alike */
-    ir_code_t qc;
-    bool qknown = ir_decode(s_q, qn, &qc) && !qc.repeat;
+    /* each button: where it is, its first frame's length, and its fields
+     * when it is a known protocol (two NEC keys of one remote differ in a
+     * few spaces only and would look 97 % alike: those are matched by
+     * protocol, address and command) */
+    const uint32_t *q[IR_FIND_Q];
+    int qf[IR_FIND_Q];
+    ir_code_t qc[IR_FIND_Q];
+    bool qknown[IR_FIND_Q];
+    for (int k = 0, at = 0; k < nq; k++) {
+        q[k] = s_q + at;
+        at += qn[k];
+        qf[k] = ir_frame_len(q[k], qn[k]);
+        qknown[k] = ir_decode(q[k], qn[k], &qc[k]) && !qc[k].repeat;
+    }
     size_t cap = 0;
     uint8_t *buf = NULL;
     for (int i = 0; i < count && !s_stop; i++) {
@@ -136,31 +153,52 @@ static void run_find(void)
         if (!buf || fseek(f, (long)d->blob, SEEK_SET) != 0 || fread(buf, 1, len, f) != len) continue;
         ir_pack_blob_t b;
         if (!ir_pack_parse_blob(buf, len, &b, false)) continue;
-        float best = 0;
-        int best_code = -1;
+        float best[IR_FIND_Q] = { 0 };
+        int best_code[IR_FIND_Q];
+        int hits = 0;
+        for (int k = 0; k < nq; k++) best_code[k] = -1;
         for (int c = 0; c < b.ncodes; c++) {
             /* a cheap look at the length first: pairs against durations */
             uint32_t off = (uint32_t)b.offs[4 * c] | (uint32_t)b.offs[4 * c + 1] << 8 |
                            (uint32_t)b.offs[4 * c + 2] << 16 | (uint32_t)b.offs[4 * c + 3] << 24;
             if (off + 2 > b.codes_len) continue;
             int pairs = b.codes[off] | b.codes[off + 1] << 8;
-            if (pairs * 2 < qf / 2 || pairs > qn * 2 + 8) continue;
+            bool any = false;
+            for (int k = 0; k < nq && !any; k++) any = !(pairs * 2 < qf[k] / 2 || pairs > qn[k] * 2 + 8);
+            if (!any) continue;
             int n = ir_pack_code(&b, c, s_seg, IR_TX_MAX);
-            float sc;
-            if (qknown) {
-                ir_code_t k;
-                sc = (ir_decode(s_seg, n, &k) && !strcmp(k.proto, qc.proto) && k.addr == qc.addr &&
-                      k.cmd == qc.cmd && (strcmp(k.proto, "Kaseikyo") || k.extra == qc.extra)) ? 1.0f : 0.0f;
-            } else {
-                sc = ir_similarity(s_q, qn, s_seg, n);
-                float s1 = ir_similarity(s_q, qf, s_seg, ir_frame_len(s_seg, n));
-                if (s1 > sc) sc = s1;
+            ir_code_t kc;
+            bool kdec = false, kdone = false;
+            bool hit = false;
+            for (int k = 0; k < nq; k++) {
+                if (pairs * 2 < qf[k] / 2 || pairs > qn[k] * 2 + 8) continue;
+                float sc;
+                if (qknown[k]) {
+                    if (!kdone) { kdec = ir_decode(s_seg, n, &kc); kdone = true; }
+                    sc = (kdec && !strcmp(kc.proto, qc[k].proto) && kc.addr == qc[k].addr && kc.cmd == qc[k].cmd &&
+                          (strcmp(kc.proto, "Kaseikyo") || kc.extra == qc[k].extra)) ? 1.0f : 0.0f;
+                } else {
+                    sc = ir_similarity(q[k], qn[k], s_seg, n);
+                    float s1 = ir_similarity(q[k], qf[k], s_seg, ir_frame_len(s_seg, n));
+                    if (s1 > sc) sc = s1;
+                }
+                if (sc >= 0.9f) hit = true;
+                if (sc > best[k]) { best[k] = sc; best_code[k] = c; }
             }
-            if (sc > best) { best = sc; best_code = c; }
+            if (hit) hits++;
         }
-        if (best >= 0.6f) {
+        ir_match_t m = { .dev = (int16_t)i, .code = (int16_t)best_code[0], .buttons = (uint8_t)nq,
+                         .hits = (uint16_t)(hits > 65535 ? 65535 : hits) };
+        float sum = 0;
+        for (int k = 0; k < nq; k++) {
+            sum += best[k];
+            if (best[k] >= 0.6f) m.matched++;
+            if (m.code < 0 && best_code[k] >= 0) m.code = (int16_t)best_code[k];
+        }
+        m.score = sum / (float)nq;
+        if (m.score >= 0.6f || (nq > 1 && m.matched > 0 && m.score >= 0.45f)) {
             lock();
-            find_insert(i, best_code, best);
+            find_insert(&m);
             unlock();
         }
         lock();
@@ -409,7 +447,7 @@ void ir_hw_start(void)
     if (!s_work) s_work = ir_alloc(sizeof *s_work);
     if (!s_rd) s_rd = ir_alloc(AOS_IR_MAX_DURATIONS * sizeof(uint16_t));
     if (!s_seg) s_seg = ir_alloc(IR_TX_MAX * sizeof(uint32_t));
-    if (!s_q) s_q = ir_alloc(IR_CAP_MAX * sizeof(uint32_t));
+    if (!s_q) s_q = ir_alloc(IR_FIND_Q * IR_CAP_MAX * sizeof(uint32_t));
     s_head = s_count = 0;
     s_listen = 0;
     s_find_prog = -1;
@@ -573,13 +611,25 @@ void ir_hw_idle_close(void)
 
 bool ir_hw_find(const uint32_t *d, int n, unsigned cls_mask)
 {
-    if (!s_running || n <= 0 || !ir_pack_open()) return false;
-    if (n > IR_CAP_MAX) n = IR_CAP_MAX;
+    return ir_hw_find_multi(&d, &n, 1, cls_mask);
+}
+
+bool ir_hw_find_multi(const uint32_t *const *d, const int *n, int nq, unsigned cls_mask)
+{
+    if (!s_running || nq <= 0 || !ir_pack_open() || !s_q) return false;
+    if (nq > IR_FIND_Q) nq = IR_FIND_Q;
+    for (int k = 0; k < nq; k++) if (n[k] <= 0) return false;
     lock();
     bool busy = s_find_req || (s_find_prog >= 0 && s_find_prog < 100);
     if (!busy) {
-        memcpy(s_q, d, (size_t)n * sizeof *d);
-        s_qn = n;
+        int at = 0;
+        for (int k = 0; k < nq; k++) {
+            int m = n[k] > IR_CAP_MAX ? IR_CAP_MAX : n[k];
+            memcpy(s_q + at, d[k], (size_t)m * sizeof *d[k]);
+            s_qn[k] = m;
+            at += m;
+        }
+        s_qcount = nq;
         s_qmask = cls_mask;
         s_find_req = true;
         s_find_prog = 0;

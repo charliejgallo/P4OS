@@ -790,3 +790,42 @@ Sale por %s	Esce da %s
 Sale por	Esce da
 La de Cableado	Quella di Cablaggio
 La de Cableado ahora: %s.	Quella di Cablaggio ora: %s.
+
+#: apps/infrarrojo/main/ir_base.c:609
+Todos	Tutti
+
+#: apps/infrarrojo/main/ir_base.c:612
+Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.	Ricerca con 1 tasto. Due o tre tasti dello stesso telecomando distinguono meglio il modello.
+
+#: apps/infrarrojo/main/ir_base.c:613
+Buscando con %d botones del mismo control.	Ricerca con %d tasti dello stesso telecomando.
+
+#: apps/infrarrojo/main/ir_base.c:619
+Apuntá el control a la placa y apretá otro botón (no el mismo)…	Punta il telecomando verso la scheda e premi un altro tasto (non lo stesso)…
+
+#: apps/infrarrojo/main/ir_base.c:621
+Sumar otro botón	Aggiungi un altro tasto
+
+#: apps/infrarrojo/main/ir_base.c:621
+Cambiar el último botón	Sostituisci l'ultimo tasto
+
+#: apps/infrarrojo/main/ir_base.c:639
+Tienen todos los botones leídos:	Hanno tutti i tasti letti:
+
+#: apps/infrarrojo/main/ir_base.c:666
+1 código parecido	1 codice simile
+
+#: apps/infrarrojo/main/ir_base.c:666
+%d códigos parecidos	%d codici simili
+
+#: apps/infrarrojo/main/ir_base.c:668
+%d %% · %d de %d botones · %s · %s · %s	%d %% · %d tasti su %d · %s · %s · %s
+
+#: apps/infrarrojo/main/ir_base.c:677
+Ver y agregar	Vedi e aggiungi
+
+#: apps/infrarrojo/main/ir_portal.c:263
+Esas capturas ya no están	Quelle acquisizioni non ci sono più
+
+#: apps/infrarrojo/main/ir_portal.c:353
+Ningún control de la base manda algo parecido.	Nessun telecomando della libreria invia qualcosa di simile.

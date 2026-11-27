@@ -790,3 +790,42 @@ Sale por %s	Sai por %s
 Sale por	Sai por
 La de Cableado	A da Fiação
 La de Cableado ahora: %s.	A da Fiação agora: %s.
+
+#: apps/infrarrojo/main/ir_base.c:609
+Todos	Todos
+
+#: apps/infrarrojo/main/ir_base.c:612
+Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.	Buscando com 1 botão. Dois ou três botões do mesmo controle distinguem melhor o modelo.
+
+#: apps/infrarrojo/main/ir_base.c:613
+Buscando con %d botones del mismo control.	Buscando com %d botões do mesmo controle.
+
+#: apps/infrarrojo/main/ir_base.c:619
+Apuntá el control a la placa y apretá otro botón (no el mismo)…	Aponte o controle para a placa e aperte outro botão (não o mesmo)…
+
+#: apps/infrarrojo/main/ir_base.c:621
+Sumar otro botón	Somar outro botão
+
+#: apps/infrarrojo/main/ir_base.c:621
+Cambiar el último botón	Trocar o último botão
+
+#: apps/infrarrojo/main/ir_base.c:639
+Tienen todos los botones leídos:	Têm todos os botões lidos:
+
+#: apps/infrarrojo/main/ir_base.c:666
+1 código parecido	1 código parecido
+
+#: apps/infrarrojo/main/ir_base.c:666
+%d códigos parecidos	%d códigos parecidos
+
+#: apps/infrarrojo/main/ir_base.c:668
+%d %% · %d de %d botones · %s · %s · %s	%d %% · %d de %d botões · %s · %s · %s
+
+#: apps/infrarrojo/main/ir_base.c:677
+Ver y agregar	Ver e adicionar
+
+#: apps/infrarrojo/main/ir_portal.c:263
+Esas capturas ya no están	Essas capturas não existem mais
+
+#: apps/infrarrojo/main/ir_portal.c:353
+Ningún control de la base manda algo parecido.	Nenhum controle da base manda algo parecido.

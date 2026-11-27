@@ -483,3 +483,45 @@ Mandar el código pegado	Invia il codice incollato
 
 #: apps/infrarrojo/web/infrarrojo.js:610
 Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.	I codici della base sono di SmartIR (licenza MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). Il ricevitore va a 3,3 V e il LED con un transistor: il cablaggio è nella scheda Cablaggio dell'app.
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Todos los tipos	Tutti i tipi
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Teles y audio	TV e audio
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Aires	Condizionatori
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Ventiladores	Ventilatori
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Luces	Luci
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %% · %s de %s botones	%s %% · %s tasti su %s
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %%	%s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:285
+%s códigos parecidos	%s codici simili
+
+#: apps/infrarrojo/web/infrarrojo.js:286
+Probar	Prova
+
+#: apps/infrarrojo/web/infrarrojo.js:289
+¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.	Di quale telecomando è? Seleziona fino a quattro acquisizioni di tasti diversi dello stesso telecomando: due o tre distinguono meglio il modello.
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscando… %s %%	Ricerca… %s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscar en la base (%s)	Cerca nella libreria (%s)
+
+#: apps/infrarrojo/web/infrarrojo.js:293
+Ningún control de la base manda algo parecido.	Nessun telecomando della libreria invia qualcosa di simile.
+
+#: apps/infrarrojo/web/infrarrojo.js:468
+Hasta cuatro botones	Fino a quattro tasti

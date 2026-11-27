@@ -483,3 +483,45 @@ Mandar el código pegado	Send the pasted code
 
 #: apps/infrarrojo/web/infrarrojo.js:610
 Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.	The database codes come from SmartIR (MIT license, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). The receiver runs on 3.3 V and the LED through a transistor: the wiring is in the app's Wiring tab.
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Todos los tipos	Every kind
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Teles y audio	TVs and audio
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Aires	Air conditioners
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Ventiladores	Fans
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Luces	Lights
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %% · %s de %s botones	%s %% · %s of %s buttons
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %%	%s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:285
+%s códigos parecidos	%s similar codes
+
+#: apps/infrarrojo/web/infrarrojo.js:286
+Probar	Try
+
+#: apps/infrarrojo/web/infrarrojo.js:289
+¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.	Which remote is it? Tick up to four captures of different buttons of the same remote: two or three tell the model apart better.
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscando… %s %%	Searching… %s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscar en la base (%s)	Search the library (%s)
+
+#: apps/infrarrojo/web/infrarrojo.js:293
+Ningún control de la base manda algo parecido.	No remote in the library sends anything alike.
+
+#: apps/infrarrojo/web/infrarrojo.js:468
+Hasta cuatro botones	Up to four buttons

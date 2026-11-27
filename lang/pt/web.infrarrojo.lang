@@ -483,3 +483,45 @@ Mandar el código pegado	Enviar o código colado
 
 #: apps/infrarrojo/web/infrarrojo.js:610
 Los códigos de la base son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). El receptor va a 3,3 V y el LED con un transistor: el cableado está en la pestaña Cableado de la app.	Os códigos da base são do SmartIR (licença MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle). O receptor funciona com 3,3 V e o LED com um transistor: a fiação está na aba Fiação do app.
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Todos los tipos	Todos os tipos
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Teles y audio	TVs e áudio
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Aires	Ar-condicionados
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Ventiladores	Ventiladores
+
+#: apps/infrarrojo/web/infrarrojo.js:275
+Luces	Luzes
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %% · %s de %s botones	%s %% · %s de %s botões
+
+#: apps/infrarrojo/web/infrarrojo.js:284
+%s %%	%s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:285
+%s códigos parecidos	%s códigos parecidos
+
+#: apps/infrarrojo/web/infrarrojo.js:286
+Probar	Testar
+
+#: apps/infrarrojo/web/infrarrojo.js:289
+¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.	De qual controle é? Marque até quatro capturas de botões diferentes do mesmo controle: com dois ou três o modelo se distingue melhor.
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscando… %s %%	Buscando… %s %%
+
+#: apps/infrarrojo/web/infrarrojo.js:292
+Buscar en la base (%s)	Buscar na base (%s)
+
+#: apps/infrarrojo/web/infrarrojo.js:293
+Ningún control de la base manda algo parecido.	Nenhum controle da base manda algo parecido.
+
+#: apps/infrarrojo/web/infrarrojo.js:468
+Hasta cuatro botones	Até quatro botões

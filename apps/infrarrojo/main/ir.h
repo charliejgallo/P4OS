@@ -231,11 +231,15 @@ typedef struct {
 
 typedef struct {
     int16_t dev;                /* index into the pack */
-    int16_t code;
-    float   score;
+    int16_t code;               /* the code that matched the first button read */
+    float   score;              /* the mean of each button's best, 0..1 */
+    uint8_t matched;            /* buttons it has a code for (60 % or more) */
+    uint8_t buttons;            /* buttons searched */
+    uint16_t hits;              /* its codes within 90 % of any button: a tie-breaker */
 } ir_match_t;
 
 #define IR_FIND_MAX 24
+#define IR_FIND_Q   4           /* buttons of one remote searched together */
 
 void ir_hw_start(void);
 void ir_hw_stop(void);
@@ -252,6 +256,10 @@ uint32_t ir_hw_sent(void);                  /* transmissions done */
 const char *ir_hw_error(void);              /* "" none; cleared when read */
 void ir_hw_idle_close(void);                /* closes the LED's pin if nothing is queued */
 bool ir_hw_find(const uint32_t *d, int n, unsigned cls_mask);
+/* Several buttons of one remote at once: a device's score is the mean of
+ * each button's best code in it, so the models that share a power code
+ * part ways at the second button. */
+bool ir_hw_find_multi(const uint32_t *const *d, const int *n, int nq, unsigned cls_mask);
 int  ir_hw_find_progress(void);             /* -1 idle, 0..99, 100 done */
 int  ir_hw_find_results(ir_match_t *out, int max);
 void ir_hw_loop_test(void);                 /* sends a frame and listens for it */
@@ -352,6 +360,8 @@ void ir_base_build(lv_obj_t *page);
 void ir_base_tick(void);
 bool ir_base_back(void);
 void ir_base_find(const uint32_t *d, int n);
+int  ir_base_add(int dev, char *file, size_t fn);  /* 0, -1 the library, -2 the card */
+bool ir_base_try(int dev, int code);
 void ir_base_free(void);
 /* climate: the tree of a device and the choices at each level */
 typedef struct {

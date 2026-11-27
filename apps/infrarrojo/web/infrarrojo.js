@@ -255,7 +255,7 @@ P.registerPage({
   icon: '◉',
   render(main) {
     const { h, put } = P;
-    let gone = false, listening = false, lastSeq = 0, timer = null, keepAlive = null;
+    let gone = false, listening = false, lastSeq = 0, timer = null, keepAlive = null, lastState = null;
     let devices = [];
     /* the outputs, as the app said them last */
     let outs = [], out = '', statusKey = '', fails = null;
@@ -269,6 +269,30 @@ P.registerPage({
     const status = h('div', { class: 'card pad' }, h('span', { class: 'muted' }, tr('Cargando…')));
     const devBox = h('div', {});
     const capBox = h('div', {});
+    /* which remote: captures picked here, searched in the library on the board */
+    const findSel = new Set();
+    const findBox = h('div', {});
+    const findKind = select([['-1', tr('Todos los tipos')], ['0', tr('Teles y audio')], ['1', tr('Aires')], ['2', tr('Ventiladores')], ['3', tr('Luces')]], '-1');
+    let findKey = '';
+    function drawFind(st) {
+      const f = st?.find || {};
+      const key = JSON.stringify([f, [...findSel]]);
+      if (key === findKey) return;
+      findKey = key;
+      const rows = (f.results || []).map(r => h('div', { class: 'row' },
+        h('div', { class: 'grow' }, h('div', {}, `${r.brand} · ${r.models || '?'}`),
+          h('div', { class: 'muted small' }, (f.buttons > 1 ? tr('%s %% · %s de %s botones', r.score, r.matched, f.buttons) : tr('%s %%', r.score)) +
+            ' · ' + tr('%s códigos parecidos', r.hits))),
+        r.code >= 0 ? h('button', { class: 'btn', onclick: () => ask('find_try', { dev: r.dev, code: r.code }).then(s => P.toast(s.msg)).catch(fail) }, tr('Probar')) : null,
+        h('button', { class: 'btn pri', onclick: () => ask('find_add', { dev: r.dev }).then(s => { P.toast(s.msg, !s.ok); refresh(); }).catch(fail) }, tr('Agregar'))));
+      put(findBox,
+        h('p', { class: 'note' }, tr('¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.')),
+        h('div', { class: 'btns' }, findKind,
+          h('button', { class: 'btn pri', disabled: !findSel.size || f.busy, onclick: () => ask('find', { seqs: [...findSel], kind: +findKind.value }).then(s => P.toast(s.msg, !s.ok)).catch(fail) },
+            f.busy ? tr('Buscando… %s %%', Math.max(0, f.progress || 0)) : tr('Buscar en la base (%s)', findSel.size))),
+        f.progress === 100 && !f.busy && !rows.length ? h('p', { class: 'muted' }, tr('Ningún control de la base manda algo parecido.')) : null,
+        rows);
+    }
     const learnBtn = h('button', { class: 'btn pri' }, tr('Escuchar'));
 
     const fail = e => P.toast(e.message, true);
@@ -440,8 +464,11 @@ P.registerPage({
       put(capBox, caps.length ? caps.map(c => {
         const nm = h('input', { placeholder: tr('Nombre del botón') });
         const to = select([...devices.filter(x => x.d && !x.err).map(x => [x.file, x.d.name]), ['', tr('Aparato nuevo…')]], devices[0]?.file || '');
+        const pick = h('input', { type: 'checkbox', checked: findSel.has(c.seq), onchange: e => {
+          if (e.target.checked && findSel.size >= 4) { e.target.checked = false; P.toast(tr('Hasta cuatro botones'), true); return; }
+          e.target.checked ? findSel.add(c.seq) : findSel.delete(c.seq); drawFind(lastState); } });
         return h('div', { class: 'ircap' },
-          h('div', { class: 't' }, `#${c.seq} · ${c.text}`),
+          h('div', { class: 't' }, h('label', {}, pick, ` #${c.seq} · ${c.text}`)),
           h('div', { class: 'd' }, c.desc),
           wave(c.raw || []),
           h('div', { class: 'irgrid' }, h('label', {}, tr('Nombre'), nm), h('label', {}, tr('Guardar en'), to)),
@@ -499,7 +526,10 @@ P.registerPage({
         }
         if (was !== JSON.stringify([out, outs])) { refresh(); learnNote.textContent = learnText(); }
         const seq = st.captures?.[0]?.seq || 0;
+        lastState = st;
+        for (const k of [...findSel]) if (!(st.captures || []).some(c => c.seq === k)) findSel.delete(k);
         if (seq !== lastSeq) { lastSeq = seq; drawCaptures(st); }
+        drawFind(st);
         if (listening && !st.listening) stopLearn(false);
       } else {
         statusKey = '';
@@ -589,7 +619,7 @@ P.registerPage({
       h('h2', {}, tr('Aprender')),
       h('div', { class: 'card pad' },
         h('div', { class: 'row' }, learnNote, learnBtn),
-        capBox),
+        capBox, findBox),
       h('h2', {}, tr('Agregar')),
       h('div', { class: 'card pad' },
         h('div', { class: 'irgrid' }, h('label', {}, tr('Aparato nuevo'), newName), h('label', {}, tr('Tipo'), newKind)),

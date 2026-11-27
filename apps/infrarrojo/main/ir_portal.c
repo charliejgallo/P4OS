@@ -13,13 +13,22 @@
  *                          {"id": 12, "op": "stop"}
  *                          {"id": 13, "op": "out", "via": "a42f8efeff0c4b7a"}   the app's
  *                                                 output ("" the LED, ir_out.c)
+ *                          {"id": 14, "op": "find", "seqs": [3, 5], "kind": -1}
+ *                                                 which remote: up to IR_FIND_Q of the
+ *                                                 captures below, one kind (IR_C_*) or all
+ *                          {"id": 15, "op": "find_try", "dev": 120, "code": 4}
+ *                          {"id": 16, "op": "find_add", "dev": 120}   into Controles
  *   /data/ir_estado.json   {"id": 7, "ok": true, "msg": "...", "listening": false,
  *                           "rx": 28, "tx": 32, "sent": 5,
  *                           "out": "", "outs": [{"via": "a42f...", "name": "TS1201 · 4b7a"}],
  *                           "zb_busy": false, "zb_msg": "", "zb_fails": 0, "zb_why": "",
  *                           "captures": [ newest first, up to 6:
  *                             {"seq": 3, "proto": "NEC", "addr": 4, "cmd": 8, "text": "...",
- *                              "desc": "...", "freq": 38000, "raw": [...]} ]}
+ *                              "desc": "...", "freq": 38000, "raw": [...]} ],
+ *                           "find": {"busy": false, "progress": 100, "buttons": 2,
+ *                              "results": [{"dev": 120, "brand": "LG", "models": "...",
+ *                                "kind": 0, "score": 100, "matched": 2, "hits": 3,
+ *                                "code": 4}, ...]}}
  *
  * "outs" are the Zigbee IR blasters in the network; a device's own output
  * is "via" in its file, which the page writes itself. A send through a
@@ -60,6 +69,11 @@ static struct {
     bool     ok, dirty;
     /* what the state shows of the outputs, to write it again when it changes */
     uint32_t out_sig;
+    /* the page's search */
+    bool     finding, found_any;
+    int      find_buttons;
+    ir_match_t found[IR_FIND_MAX];
+    int      nfound;
 } P;
 
 static uint32_t out_signature(void)
@@ -129,7 +143,19 @@ static void write_state(void)
         for (int k = 0; k < c->n; k++) ir_sb_printf(&sb, k ? ",%u" : "%u", (unsigned)c->d[k]);
         ir_sb_put(&sb, "]}", 2);
     }
-    ir_sb_put(&sb, "\n]}\n", -1);
+    ir_sb_printf(&sb, "\n], \"find\": {\"busy\": %s, \"progress\": %d, \"buttons\": %d, \"results\": [",
+                 P.finding ? "true" : "false", P.finding ? ir_hw_find_progress() : (P.found_any ? 100 : -1), P.find_buttons);
+    for (int i = 0; i < P.nfound; i++) {
+        const ir_pack_dev_t *d = ir_pack_at(P.found[i].dev);
+        if (!d) continue;
+        ir_sb_printf(&sb, "%s\n  {\"dev\": %d, \"brand\": ", i ? "," : "", P.found[i].dev);
+        ir_sb_json(&sb, d->brand);
+        ir_sb_put(&sb, ", \"models\": ", -1);
+        ir_sb_json(&sb, d->models);
+        ir_sb_printf(&sb, ", \"kind\": %d, \"score\": %d, \"matched\": %d, \"hits\": %d, \"code\": %d}", d->cls,
+                     (int)(P.found[i].score * 100 + 0.5f), P.found[i].matched, P.found[i].hits, P.found[i].code);
+    }
+    ir_sb_put(&sb, "]}}\n", -1);
     char path[128], tmp[136];
     mkdir(aos_hal_path_data(), 0777);
     path_of("ir_estado.json", path, sizeof path);
@@ -222,6 +248,35 @@ static void do_request(const ij_doc_t *j)
         bool ok = ir_out_send_button("", &b, false) > 0;
         ir_button_clear(&b);
         sent(ok, ir_out_is_zigbee(""));
+    } else if (!strcmp(op, "find")) {
+        /* the captures the page names, newest first as it lists them */
+        const uint32_t *d[IR_FIND_Q];
+        int n[IR_FIND_Q], nq = 0;
+        int seqs = ij_get(j, 0, "seqs");
+        IJ_EACH(j, seqs, k) {
+            uint32_t seq = (uint32_t)ij_num(j, k, 0);
+            for (int i = 0; i < P.ncap && nq < IR_FIND_Q; i++)
+                if (P.cap[i].seq == seq) { d[nq] = P.cap[i].d; n[nq] = P.cap[i].n; nq++; break; }
+        }
+        int kind = (int)ij_num(j, ij_get(j, 0, "kind"), -1);
+        unsigned mask = kind >= 0 && kind < IR_C_COUNT ? 1u << kind : 0xF;
+        if (!nq) say(false, _("Esas capturas ya no están"));
+        else if (!ir_hw_find_multi(d, n, nq, mask)) say(false, _("Ya hay una búsqueda en curso"));
+        else {
+            P.finding = true;
+            P.found_any = false;
+            P.nfound = 0;
+            P.find_buttons = nq;
+            say(true, _("Buscando en la base…"));
+        }
+    } else if (!strcmp(op, "find_try")) {
+        bool ok = ir_base_try((int)ij_num(j, ij_get(j, 0, "dev"), -1), (int)ij_num(j, ij_get(j, 0, "code"), -1));
+        sent(ok, ir_out_default()[0] != 0);
+    } else if (!strcmp(op, "find_add")) {
+        char file[48];
+        int rc = ir_base_add((int)ij_num(j, ij_get(j, 0, "dev"), -1), file, sizeof file);
+        if (rc == 0) { ir_remote_reload(); say(true, _("Agregado a Controles")); }
+        else say(false, rc == -1 ? _("No se pudo leer este modelo de la base.") : _("No se pudo escribir en la tarjeta"));
     } else if (!strcmp(op, "reload")) {
         ir_remote_reload();
         say(true, _("Listo"));
@@ -290,6 +345,16 @@ void ir_portal_tick(void)
             ir_out_listen(IR_WHO_PORTAL, false, NULL);
             P.dirty = true;
         }
+    }
+    if (P.finding && ir_hw_find_progress() >= 100) {
+        P.finding = false;
+        P.found_any = true;
+        P.nfound = ir_hw_find_results(P.found, IR_FIND_MAX);
+        say(true, P.nfound ? _("Listo") : _("Ningún control de la base manda algo parecido."));
+    } else if (P.finding) {
+        static int last;
+        int pr = ir_hw_find_progress();
+        if (pr / 10 != last / 10) { last = pr; P.dirty = true; }
     }
     uint32_t sig = out_signature();
     if (sig != P.out_sig) { P.out_sig = sig; P.dirty = true; }

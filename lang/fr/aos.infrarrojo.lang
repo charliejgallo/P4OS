@@ -790,3 +790,42 @@ Sale por %s	Sort par %s
 Sale por	Sort par
 La de Cableado	Celle de Câblage
 La de Cableado ahora: %s.	Celle de Câblage pour l'instant : %s.
+
+#: apps/infrarrojo/main/ir_base.c:609
+Todos	Tous
+
+#: apps/infrarrojo/main/ir_base.c:612
+Buscando con 1 botón. Con dos o tres botones del mismo control se distingue mejor el modelo.	Recherche avec 1 touche. Deux ou trois touches de la même télécommande distinguent mieux le modèle.
+
+#: apps/infrarrojo/main/ir_base.c:613
+Buscando con %d botones del mismo control.	Recherche avec %d touches de la même télécommande.
+
+#: apps/infrarrojo/main/ir_base.c:619
+Apuntá el control a la placa y apretá otro botón (no el mismo)…	Pointez la télécommande vers la carte et appuyez sur une autre touche (pas la même)…
+
+#: apps/infrarrojo/main/ir_base.c:621
+Sumar otro botón	Ajouter une autre touche
+
+#: apps/infrarrojo/main/ir_base.c:621
+Cambiar el último botón	Remplacer la dernière touche
+
+#: apps/infrarrojo/main/ir_base.c:639
+Tienen todos los botones leídos:	Ils ont toutes les touches lues :
+
+#: apps/infrarrojo/main/ir_base.c:666
+1 código parecido	1 code similaire
+
+#: apps/infrarrojo/main/ir_base.c:666
+%d códigos parecidos	%d codes similaires
+
+#: apps/infrarrojo/main/ir_base.c:668
+%d %% · %d de %d botones · %s · %s · %s	%d %% · %d touches sur %d · %s · %s · %s
+
+#: apps/infrarrojo/main/ir_base.c:677
+Ver y agregar	Voir et ajouter
+
+#: apps/infrarrojo/main/ir_portal.c:263
+Esas capturas ya no están	Ces captures n'existent plus
+
+#: apps/infrarrojo/main/ir_portal.c:353
+Ningún control de la base manda algo parecido.	Aucune télécommande de la base n'envoie rien de semblable.
