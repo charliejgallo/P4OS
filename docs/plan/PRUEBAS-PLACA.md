@@ -15,8 +15,9 @@ se prueba.
       interna (205 → 203 KB libres). Falta: `/ir` con un código guardado.
       Con la placa en inglés, el pack de idioma de la tarjeta todavía no
       tiene los textos del bot (quedan en castellano hasta la release).
-- [ ] Una regla con un sensor real: la puerta que se abre manda un mensaje;
-      una temperatura que pasa de un valor; reenviar los avisos del iPhone.
+- [x] Una regla con un sensor real (2026-11-27): la puerta que se abre
+      (SNZB, IAS) mandó "🔔 sensor puerta: open" al iPhone del usuario.
+- [ ] Una temperatura que pasa de un valor; reenviar los avisos del iPhone.
 - [ ] La RAM interna libre con el bot prendido y apagado (los hilos y sus
       buferes van a PSRAM; lo único interno son los dos TCB).
 - [ ] El emparejamiento con PIN desde la app Malla (Meshtastic) con la
