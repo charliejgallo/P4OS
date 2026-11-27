@@ -51,38 +51,38 @@ Rechazar	Refuser
 #: components/aos_ui/aos_panels.c:526
 Atender	Répondre
 
-#: components/aos_ui/aos_home.c:662
+#: components/aos_ui/aos_home.c:664
 Home Assistant: configurar en Ajustes	Home Assistant : à configurer dans Réglages
 
-#: components/aos_ui/aos_home.c:663
+#: components/aos_ui/aos_home.c:665
 Clima: próximamente	Météo : bientôt
 
-#: components/aos_ui/aos_home.c:1030
-#: components/aos_ui/aos_home.c:1292
+#: components/aos_ui/aos_home.c:1032
+#: components/aos_ui/aos_home.c:1294
 #: components/aos_ui/aos_widget_edit.c:190
 #: components/aos_apps/aos_app_bus.c:1118
 Listo	OK
 
-#: components/aos_ui/aos_home.c:1045
+#: components/aos_ui/aos_home.c:1047
 + Widget	+ Widget
 
-#: components/aos_ui/aos_home.c:1171
+#: components/aos_ui/aos_home.c:1173
 Nombre de la carpeta	Nom du dossier
 
-#: components/aos_ui/aos_home.c:1292
+#: components/aos_ui/aos_home.c:1294
 #: components/aos_apps/aos_app_modules.c:753
 Editar	Modifier
 
-#: components/aos_ui/aos_home.c:1299
-#: components/aos_apps/aos_app_files.c:2589
+#: components/aos_ui/aos_home.c:1301
+#: components/aos_apps/aos_app_files.c:2596
 #: components/aos_apps/aos_app_music.c:1021
 #: components/aos_apps/aos_app_photos.c:1555
 Carpeta vacía	Dossier vide
 
-#: components/aos_ui/aos_home.c:1334
+#: components/aos_ui/aos_home.c:1336
 No se pudo guardar el inicio	Impossible d'enregistrer l'accueil
 
-#: components/aos_ui/aos_home.c:1363
+#: components/aos_ui/aos_home.c:1365
 #: components/aos_apps/aos_app_files.c:335
 #: components/aos_apps/aos_app_music.c:805
 #: components/aos_apps/aos_app_settings.c:2364
@@ -196,7 +196,7 @@ y %d más	et %d de plus
 
 #: components/aos_ui/aos_lock.c:562
 #: components/aos_ui/aos_panels.c:555
-#: components/aos_apps/aos_app_files.c:2698
+#: components/aos_apps/aos_app_files.c:2705
 #: components/aos_apps/aos_app_music.c:585
 Música	Musique
 
@@ -369,7 +369,7 @@ Desarrollador	Développeur
 Acerca de	À propos
 
 #: components/aos_ui/aos_search.c:480
-#: components/aos_apps/aos_app_files.c:4167
+#: components/aos_apps/aos_app_files.c:4183
 Copiado	Copié
 
 #: components/aos_ui/aos_search.c:601
@@ -379,7 +379,7 @@ Cuenta	Calcul
 Tocá para copiarlo	Touche pour copier
 
 #: components/aos_ui/aos_search.c:623
-#: components/aos_apps/aos_app_files.c:2701
+#: components/aos_apps/aos_app_files.c:2708
 Apps	Apps
 
 #: components/aos_ui/aos_search.c:641
@@ -387,8 +387,8 @@ Apps	Apps
 Notas	Notes
 
 #: components/aos_ui/aos_search.c:645
-#: components/aos_apps/aos_app_files.c:2835
-#: components/aos_apps/aos_app_files.c:5084  (nombre de app)
+#: components/aos_apps/aos_app_files.c:2842
+#: components/aos_apps/aos_app_files.c:5100  (nombre de app)
 Archivos	Fichiers
 
 #: components/aos_ui/aos_search.c:654
@@ -399,7 +399,7 @@ Nada con eso	Rien trouvé
 
 #: components/aos_ui/aos_search.c:760
 #: components/aos_apps/aos_app_bus.c:1728
-#: components/aos_apps/aos_app_files.c:3132
+#: components/aos_apps/aos_app_files.c:3139
 #: components/aos_apps/aos_app_store.c:1394
 Buscar	Chercher
 
@@ -1080,18 +1080,18 @@ Permitir	Autoriser
 No hay apps abiertas	Aucune app ouverte
 
 #: components/aos_ui/aos_textsel.c:338
-#: components/aos_apps/aos_app_files.c:3659
-#: components/aos_apps/aos_app_files.c:3745
+#: components/aos_apps/aos_app_files.c:3675
+#: components/aos_apps/aos_app_files.c:3761
 Cortar	Couper
 
 #: components/aos_ui/aos_textsel.c:339
-#: components/aos_apps/aos_app_files.c:3658
-#: components/aos_apps/aos_app_files.c:3745
+#: components/aos_apps/aos_app_files.c:3674
+#: components/aos_apps/aos_app_files.c:3761
 #: components/aos_apps/aos_app_macropad.c:2170
 Copiar	Copier
 
 #: components/aos_ui/aos_textsel.c:340
-#: components/aos_apps/aos_app_files.c:2960
+#: components/aos_apps/aos_app_files.c:2967
 Seleccionar	Sélectionner
 
 #: components/aos_ui/aos_textsel.c:341
@@ -1202,9 +1202,9 @@ Hasta %d	Jusqu'à %d
 no está ahora	absent
 
 #: components/aos_ui/aos_widget_edit.c:437
-#: components/aos_apps/aos_app_files.c:707
-#: components/aos_apps/aos_app_files.c:3997
-#: components/aos_apps/aos_app_files.c:4014
+#: components/aos_apps/aos_app_files.c:714
+#: components/aos_apps/aos_app_files.c:4013
+#: components/aos_apps/aos_app_files.c:4030
 Tamaño	Taille
 
 #: components/aos_ui/aos_widget_edit.c:468
@@ -1713,8 +1713,8 @@ Como mucho, una vez cada	Au plus une fois toutes les
 
 #: components/aos_apps/aos_app_bot.c:725
 #: components/aos_apps/aos_app_clock.c:538
-#: components/aos_apps/aos_app_files.c:3516
-#: components/aos_apps/aos_app_files.c:3664
+#: components/aos_apps/aos_app_files.c:3531
+#: components/aos_apps/aos_app_files.c:3680
 Borrar	Effacer
 
 #: components/aos_apps/aos_app_bot.c:727
@@ -1731,7 +1731,7 @@ libre	libre
 
 #: components/aos_apps/aos_app_bus.c:329
 #: components/aos_apps/aos_app_bus.c:1661
-#: components/aos_apps/aos_app_files.c:2588
+#: components/aos_apps/aos_app_files.c:2595
 #: components/aos_apps/aos_app_modules.c:1420
 Buscando…	Recherche…
 
@@ -1765,7 +1765,7 @@ Tocá Escanear.	Touche Scanner.
 Escanear	Scanner
 
 #: components/aos_apps/aos_app_bus.c:519
-#: components/aos_apps/aos_app_files.c:2590
+#: components/aos_apps/aos_app_files.c:2597
 Leyendo…	Lecture…
 
 #: components/aos_apps/aos_app_bus.c:520
@@ -2918,7 +2918,7 @@ El nombre es demasiado largo.	Le nom est trop long.
 1 elemento	1 élément
 
 #: components/aos_apps/aos_app_files.c:293
-#: components/aos_apps/aos_app_files.c:3984
+#: components/aos_apps/aos_app_files.c:4000
 %s elementos	%s éléments
 
 #: components/aos_apps/aos_app_files.c:297
@@ -2982,7 +2982,7 @@ Tabla CSV	Tableau CSV
 Datos o configuración	Données ou réglages
 
 #: components/aos_apps/aos_app_files.c:341
-#: components/aos_apps/aos_app_files.c:2700
+#: components/aos_apps/aos_app_files.c:2707
 #: components/aos_apps/aos_app_settings.c:2833
 Firmware	Firmware
 
@@ -2996,528 +2996,538 @@ App de P4OS	App P4OS
 Documento	Document
 
 #: components/aos_apps/aos_app_files.c:345
+#: apps/video  (nombre de app)
+Video	Vidéo
+
+#: components/aos_apps/aos_app_files.c:346
 Archivo	Fichier
 
-#: components/aos_apps/aos_app_files.c:393
+#: components/aos_apps/aos_app_files.c:400
 menu.txt ordena la pantalla de inicio.	menu.txt organise l'écran d'accueil.
 
-#: components/aos_apps/aos_app_files.c:394
+#: components/aos_apps/aos_app_files.c:401
 modules.txt dice qué hay conectado al header.	modules.txt indique ce qui est sur le connecteur.
 
-#: components/aos_apps/aos_app_files.c:395
+#: components/aos_apps/aos_app_files.c:402
 ha.txt tiene los paneles de Home Assistant.	ha.txt contient les panneaux Home Assistant.
 
-#: components/aos_apps/aos_app_files.c:396
+#: components/aos_apps/aos_app_files.c:403
 prefs.txt guarda los ajustes del sistema.	prefs.txt garde les réglages du système.
 
-#: components/aos_apps/aos_app_files.c:397
+#: components/aos_apps/aos_app_files.c:404
 En /apps están las apps instaladas.	/apps contient les apps installées.
 
-#: components/aos_apps/aos_app_files.c:398
+#: components/aos_apps/aos_app_files.c:405
 En /firmware está lo que graba el Programador.	/firmware contient ce qu'écrit le Programmateur.
 
-#: components/aos_apps/aos_app_files.c:399
+#: components/aos_apps/aos_app_files.c:406
 En /data guardan su estado las apps.	Les apps gardent leur état dans /data.
 
-#: components/aos_apps/aos_app_files.c:400
+#: components/aos_apps/aos_app_files.c:407
 En /lang están los idiomas.	/lang contient les langues.
 
-#: components/aos_apps/aos_app_files.c:401
+#: components/aos_apps/aos_app_files.c:408
 En /icons están los íconos de las apps.	/icons contient les icônes des apps.
 
-#: components/aos_apps/aos_app_files.c:707
+#: components/aos_apps/aos_app_files.c:714
 #: components/aos_apps/aos_app_macropad.c:2521
 #: components/aos_apps/aos_app_net.c:2232
 #: components/aos_apps/aos_app_net.c:2604
 Nombre	Nom
 
-#: components/aos_apps/aos_app_files.c:707
+#: components/aos_apps/aos_app_files.c:714
 Fecha	Date
 
-#: components/aos_apps/aos_app_files.c:707
+#: components/aos_apps/aos_app_files.c:714
 #: components/aos_apps/aos_app_settings.c:1735
 #: components/aos_apps/aos_app_sysmon.c:1230
 Tipo	Type
 
-#: components/aos_apps/aos_app_files.c:989
+#: components/aos_apps/aos_app_files.c:996
 No se pudo leer %s	%s illisible
 
-#: components/aos_apps/aos_app_files.c:991
+#: components/aos_apps/aos_app_files.c:998
 #: components/aos_flasher/aos_flasher.c:222
 No se pudo crear %s	Impossible de créer %s
 
-#: components/aos_apps/aos_app_files.c:1006
+#: components/aos_apps/aos_app_files.c:1013
 Error al leer %s	Erreur de lecture de %s
 
-#: components/aos_apps/aos_app_files.c:1013
+#: components/aos_apps/aos_app_files.c:1020
 No entra %s: la tarjeta está llena	%s ne tient pas : carte SD pleine
 
-#: components/aos_apps/aos_app_files.c:1023
+#: components/aos_apps/aos_app_files.c:1030
 Error al escribir %s	Erreur d'écriture de %s
 
-#: components/aos_apps/aos_app_files.c:1044
+#: components/aos_apps/aos_app_files.c:1051
 No se encontró %s	%s introuvable
 
-#: components/aos_apps/aos_app_files.c:1047
+#: components/aos_apps/aos_app_files.c:1054
 No se pudo crear la carpeta %s	Impossible de créer le dossier %s
 
-#: components/aos_apps/aos_app_files.c:1057
+#: components/aos_apps/aos_app_files.c:1064
 Ruta demasiado larga: %s	Chemin trop long : %s
 
-#: components/aos_apps/aos_app_files.c:1083
+#: components/aos_apps/aos_app_files.c:1090
 No se pudo borrar la carpeta %s	Impossible d'effacer le dossier %s
 
-#: components/aos_apps/aos_app_files.c:1085
+#: components/aos_apps/aos_app_files.c:1092
 No se pudo borrar %s	Impossible d'effacer %s
 
-#: components/aos_apps/aos_app_files.c:1098
+#: components/aos_apps/aos_app_files.c:1105
 No hay memoria.	Plus de mémoire.
 
-#: components/aos_apps/aos_app_files.c:1113
+#: components/aos_apps/aos_app_files.c:1120
 Hace falta %s y quedan %s libres.	Il faut %s et il ne reste que %s.
 
-#: components/aos_apps/aos_app_files.c:1120
+#: components/aos_apps/aos_app_files.c:1127
 No hay memoria para copiar.	Pas de mémoire pour copier.
 
-#: components/aos_apps/aos_app_files.c:1129
+#: components/aos_apps/aos_app_files.c:1136
 No se puede copiar %s dentro de sí misma.	Impossible de copier %s dans lui-même.
 
-#: components/aos_apps/aos_app_files.c:1131
-#: components/aos_apps/aos_app_files.c:1154
+#: components/aos_apps/aos_app_files.c:1138
+#: components/aos_apps/aos_app_files.c:1161
 No hay un nombre libre para %s	Pas de nom libre pour %s
 
-#: components/aos_apps/aos_app_files.c:1152
+#: components/aos_apps/aos_app_files.c:1159
 No se puede mover %s dentro de sí misma.	Impossible de déplacer %s dans lui-même.
 
-#: components/aos_apps/aos_app_files.c:1158
+#: components/aos_apps/aos_app_files.c:1165
 No se pudo mover %s	Impossible de déplacer %s
 
-#: components/aos_apps/aos_app_files.c:2437
-#: components/aos_apps/aos_app_files.c:2696
-#: components/aos_apps/aos_app_files.c:2871
-#: components/aos_apps/aos_app_files.c:2893
+#: components/aos_apps/aos_app_files.c:2444
+#: components/aos_apps/aos_app_files.c:2703
+#: components/aos_apps/aos_app_files.c:2878
+#: components/aos_apps/aos_app_files.c:2900
 Tarjeta	Carte SD
 
-#: components/aos_apps/aos_app_files.c:2553
+#: components/aos_apps/aos_app_files.c:2560
 Buscando… %s encontrados, %s revisados	Recherche… %s trouvés, %s vérifiés
 
-#: components/aos_apps/aos_app_files.c:2554
+#: components/aos_apps/aos_app_files.c:2561
 %s resultados · la búsqueda se cortó ahí	%s résultats · recherche arrêtée là
 
-#: components/aos_apps/aos_app_files.c:2555
+#: components/aos_apps/aos_app_files.c:2562
 1 resultado	1 résultat
 
-#: components/aos_apps/aos_app_files.c:2556
+#: components/aos_apps/aos_app_files.c:2563
 %s resultados	%s résultats
 
-#: components/aos_apps/aos_app_files.c:2559
+#: components/aos_apps/aos_app_files.c:2566
 Leyendo… %s	Lecture… %s
 
-#: components/aos_apps/aos_app_files.c:2566
-#: components/aos_apps/aos_app_files.c:4146
+#: components/aos_apps/aos_app_files.c:2573
+#: components/aos_apps/aos_app_files.c:4162
 %s de %s	%s sur %s
 
-#: components/aos_apps/aos_app_files.c:2570
+#: components/aos_apps/aos_app_files.c:2577
 %s · %s disponibles	%s · %s disponibles
 
-#: components/aos_apps/aos_app_files.c:2574
+#: components/aos_apps/aos_app_files.c:2581
  · leyendo tamaños (%d %%)	 · lecture des tailles (%d %%)
 
-#: components/aos_apps/aos_app_files.c:2578
+#: components/aos_apps/aos_app_files.c:2585
  · no entran todos	 · tout ne tient pas
 
-#: components/aos_apps/aos_app_files.c:2586
+#: components/aos_apps/aos_app_files.c:2593
 No se pudo abrir la carpeta	Impossible d'ouvrir le dossier
 
-#: components/aos_apps/aos_app_files.c:2587
+#: components/aos_apps/aos_app_files.c:2594
 No se encontró nada	Rien trouvé
 
-#: components/aos_apps/aos_app_files.c:2588
+#: components/aos_apps/aos_app_files.c:2595
 Nada coincide en esta carpeta	Aucun résultat dans ce dossier
 
-#: components/aos_apps/aos_app_files.c:2697
+#: components/aos_apps/aos_app_files.c:2704
 #: components/aos_apps/aos_app_photos.c:1240
 #: components/aos_apps/aos_app_photos.c:1245
 #: components/aos_apps/aos_app_photos.c:1382
 Fotos	Photos
 
-#: components/aos_apps/aos_app_files.c:2699
+#: components/aos_apps/aos_app_files.c:2706
 Registros	Journaux
 
-#: components/aos_apps/aos_app_files.c:2732
+#: components/aos_apps/aos_app_files.c:2739
 Esa carpeta no está en la tarjeta	Ce dossier n'est pas sur la carte SD
 
-#: components/aos_apps/aos_app_files.c:2744
+#: components/aos_apps/aos_app_files.c:2751
 Calculando el espacio…	Calcul de l'espace…
 
-#: components/aos_apps/aos_app_files.c:2748
+#: components/aos_apps/aos_app_files.c:2755
 %s libres de %s	%s libres sur %s
 
-#: components/aos_apps/aos_app_files.c:2798
-#: components/aos_apps/aos_app_files.c:2946
+#: components/aos_apps/aos_app_files.c:2805
+#: components/aos_apps/aos_app_files.c:2953
 Ubicaciones	Emplacements
 
-#: components/aos_apps/aos_app_files.c:2806
-#: components/aos_apps/aos_app_files.c:2844
+#: components/aos_apps/aos_app_files.c:2813
+#: components/aos_apps/aos_app_files.c:2851
 #: components/aos_apps/aos_app_ha.c:981
 Favoritos	Favoris
 
-#: components/aos_apps/aos_app_files.c:2810
+#: components/aos_apps/aos_app_files.c:2817
 Mantené apretada una carpeta y elegí Agregar a favoritos.	Maintiens un dossier appuyé et choisis Ajouter aux favoris.
 
-#: components/aos_apps/aos_app_files.c:2848
+#: components/aos_apps/aos_app_files.c:2855
 Mantené apretada una carpeta para agregarla.	Maintiens un dossier appuyé pour l'ajouter.
 
-#: components/aos_apps/aos_app_files.c:2960
+#: components/aos_apps/aos_app_files.c:2967
 OK	OK
 
-#: components/aos_apps/aos_app_files.c:3147
+#: components/aos_apps/aos_app_files.c:3154
 Subcarpetas	Sous-dossiers
 
-#: components/aos_apps/aos_app_files.c:3257
+#: components/aos_apps/aos_app_files.c:3264
 Copiá el paquete a la tarjeta primero	Copie d'abord le paquet sur la carte SD
 
-#: components/aos_apps/aos_app_files.c:3258
+#: components/aos_apps/aos_app_files.c:3265
 La Tienda no pudo tomar el paquete	La Boutique n'a pas pu prendre le paquet
 
-#: components/aos_apps/aos_app_files.c:3260
+#: components/aos_apps/aos_app_files.c:3267
 La Tienda está instalando el paquete	La Boutique installe le paquet
 
-#: components/aos_apps/aos_app_files.c:3265
+#: components/aos_apps/aos_app_files.c:3272
 No se pudo abrir Fotos	Impossible d'ouvrir Photos
 
-#: components/aos_apps/aos_app_files.c:3266
+#: components/aos_apps/aos_app_files.c:3273
 No se pudo abrir Música	Impossible d'ouvrir Musique
 
-#: components/aos_apps/aos_app_files.c:3268
-#: components/aos_apps/aos_app_files.c:3336
+#: components/aos_apps/aos_app_files.c:3276
+Video lo reproduce: está en la Tienda	Vidéo le lit : voir la Boutique
+
+#: components/aos_apps/aos_app_files.c:3278
+No se pudo abrir Video	Impossible d'ouvrir Vidéo
+
+#: components/aos_apps/aos_app_files.c:3283
+#: components/aos_apps/aos_app_files.c:3351
 No se pudo abrir el Programador	Impossible d'ouvrir le Programmateur
 
-#: components/aos_apps/aos_app_files.c:3273
+#: components/aos_apps/aos_app_files.c:3288
 Oficina lo abre: está en la Tienda	Bureau l'ouvre : voir la Boutique
-Video lo reproduce: está en la Tienda	Vidéo le lit : voir la Boutique
-No se pudo abrir Video	Impossible d'ouvrir Vidéo
-Reproducir en Video	Lire dans Vidéo
 
-#: components/aos_apps/aos_app_files.c:3275
-#: components/aos_apps/aos_app_files.c:3328
+#: components/aos_apps/aos_app_files.c:3290
+#: components/aos_apps/aos_app_files.c:3343
 No se pudo abrir Oficina	Impossible d'ouvrir Bureau
 
-#: components/aos_apps/aos_app_files.c:3306
+#: components/aos_apps/aos_app_files.c:3321
 Ya no está	N'existe plus
 
-#: components/aos_apps/aos_app_files.c:3366
-#: components/aos_apps/aos_app_files.c:3595
+#: components/aos_apps/aos_app_files.c:3381
+#: components/aos_apps/aos_app_files.c:3610
 Quitada de favoritos	Retiré des favoris
 
-#: components/aos_apps/aos_app_files.c:3368
-#: components/aos_apps/aos_app_files.c:3600
+#: components/aos_apps/aos_app_files.c:3383
+#: components/aos_apps/aos_app_files.c:3615
 Ya hay 8 favoritos: quitá uno primero	Déjà 8 favoris : retires-en un d'abord
 
-#: components/aos_apps/aos_app_files.c:3371
+#: components/aos_apps/aos_app_files.c:3386
 La ruta es demasiado larga para favoritos	Chemin trop long pour les favoris
 
-#: components/aos_apps/aos_app_files.c:3375
-#: components/aos_apps/aos_app_files.c:3598
+#: components/aos_apps/aos_app_files.c:3390
+#: components/aos_apps/aos_app_files.c:3613
 Agregada a favoritos	Ajouté aux favoris
 
-#: components/aos_apps/aos_app_files.c:3398
+#: components/aos_apps/aos_app_files.c:3413
 Demasiados elementos a la vez	Trop d'éléments à la fois
 
-#: components/aos_apps/aos_app_files.c:3407
+#: components/aos_apps/aos_app_files.c:3422
 Cortado: andá a otra carpeta y tocá Pegar	Coupé : touche Coller dans un autre dossier
 
-#: components/aos_apps/aos_app_files.c:3407
+#: components/aos_apps/aos_app_files.c:3422
 Copiado: andá a otra carpeta y tocá Pegar	Copié : touche Coller dans un autre dossier
 
-#: components/aos_apps/aos_app_files.c:3408
+#: components/aos_apps/aos_app_files.c:3423
 %s elementos para mover: tocá Pegar en otra carpeta	%s éléments à déplacer : touche Coller dans un autre dossier
 
-#: components/aos_apps/aos_app_files.c:3408
+#: components/aos_apps/aos_app_files.c:3423
 %s elementos copiados: tocá Pegar en otra carpeta	%s éléments copiés : touche Coller dans un autre dossier
 
-#: components/aos_apps/aos_app_files.c:3432
+#: components/aos_apps/aos_app_files.c:3447
 Es del sistema: %s Si lo movés, lo que depende de él deja de encontrarlo.	Fichier système : %s Si tu le déplaces, ce qui en dépend ne le trouvera plus.
 
-#: components/aos_apps/aos_app_files.c:3433
+#: components/aos_apps/aos_app_files.c:3448
 ¿Mover archivos del sistema?	Déplacer des fichiers système ?
 
-#: components/aos_apps/aos_app_files.c:3433
+#: components/aos_apps/aos_app_files.c:3448
 Cortar igual	Couper quand même
 
-#: components/aos_apps/aos_app_files.c:3446
-#: components/aos_apps/aos_app_files.c:3473
+#: components/aos_apps/aos_app_files.c:3461
+#: components/aos_apps/aos_app_files.c:3488
 Ya hay una copia en curso	Une copie est déjà en cours
 
-#: components/aos_apps/aos_app_files.c:3486
+#: components/aos_apps/aos_app_files.c:3501
 Hay otra operación en curso	Une autre opération est en cours
 
-#: components/aos_apps/aos_app_files.c:3502
+#: components/aos_apps/aos_app_files.c:3517
 ¿Borrar «%s»?	Effacer « %s » ?
 
-#: components/aos_apps/aos_app_files.c:3503
+#: components/aos_apps/aos_app_files.c:3518
 Se borra la carpeta con todo lo que tiene adentro. La tarjeta no tiene papelera.	Le dossier est effacé avec tout son contenu. La carte SD n'a pas de corbeille.
 
-#: components/aos_apps/aos_app_files.c:3504
+#: components/aos_apps/aos_app_files.c:3519
 Se borra de la tarjeta. No tiene papelera.	Il est effacé de la carte SD. Pas de corbeille.
 
-#: components/aos_apps/aos_app_files.c:3508
+#: components/aos_apps/aos_app_files.c:3523
 ¿Borrar %s elementos?	Effacer %s éléments ?
 
-#: components/aos_apps/aos_app_files.c:3509
+#: components/aos_apps/aos_app_files.c:3524
 Se borran de la tarjeta, las carpetas con todo lo que tienen adentro. No hay papelera.	Ils sont effacés de la carte SD, les dossiers avec tout leur contenu. Pas de corbeille.
 
-#: components/aos_apps/aos_app_files.c:3514
+#: components/aos_apps/aos_app_files.c:3529
 Es del sistema: %s	Fichier système : %s
 
-#: components/aos_apps/aos_app_files.c:3516
+#: components/aos_apps/aos_app_files.c:3531
 Borrar igual	Effacer quand même
 
-#: components/aos_apps/aos_app_files.c:3531
+#: components/aos_apps/aos_app_files.c:3546
 El nombre es demasiado largo	Le nom est trop long
 
-#: components/aos_apps/aos_app_files.c:3533
-#: components/aos_apps/aos_app_files.c:3569
+#: components/aos_apps/aos_app_files.c:3548
+#: components/aos_apps/aos_app_files.c:3584
 Ya hay algo con ese nombre	Ce nom existe déjà
 
-#: components/aos_apps/aos_app_files.c:3534
+#: components/aos_apps/aos_app_files.c:3549
 No se pudo cambiar el nombre	Impossible de renommer
 
-#: components/aos_apps/aos_app_files.c:3544
-#: components/aos_apps/aos_app_files.c:3656
+#: components/aos_apps/aos_app_files.c:3559
+#: components/aos_apps/aos_app_files.c:3672
 Cambiar nombre	Renommer
 
-#: components/aos_apps/aos_app_files.c:3558
+#: components/aos_apps/aos_app_files.c:3573
 Es del sistema: %s Con otro nombre, lo que lo busca no lo encuentra.	Fichier système : %s Renommé, ce qui le cherche ne le trouvera plus.
 
-#: components/aos_apps/aos_app_files.c:3559
+#: components/aos_apps/aos_app_files.c:3574
 ¿Cambiar el nombre?	Renommer ?
 
-#: components/aos_apps/aos_app_files.c:3559
+#: components/aos_apps/aos_app_files.c:3574
 Cambiar igual	Renommer quand même
 
-#: components/aos_apps/aos_app_files.c:3570
+#: components/aos_apps/aos_app_files.c:3585
 No se pudo crear la carpeta	Impossible de créer le dossier
 
-#: components/aos_apps/aos_app_files.c:3579
-#: components/aos_apps/aos_app_files.c:3579
-#: components/aos_apps/aos_app_files.c:3580
-#: components/aos_apps/aos_app_files.c:3619
+#: components/aos_apps/aos_app_files.c:3594
+#: components/aos_apps/aos_app_files.c:3594
+#: components/aos_apps/aos_app_files.c:3595
+#: components/aos_apps/aos_app_files.c:3634
 Carpeta nueva	Nouveau dossier
 
-#: components/aos_apps/aos_app_files.c:3580
+#: components/aos_apps/aos_app_files.c:3595
 Crear	Créer
 
-#: components/aos_apps/aos_app_files.c:3620
-#: components/aos_apps/aos_app_files.c:3779
+#: components/aos_apps/aos_app_files.c:3635
+#: components/aos_apps/aos_app_files.c:3795
 Mover acá	Déplacer ici
 
-#: components/aos_apps/aos_app_files.c:3620
-#: components/aos_apps/aos_app_files.c:3779
+#: components/aos_apps/aos_app_files.c:3635
+#: components/aos_apps/aos_app_files.c:3795
 Pegar acá	Coller ici
 
-#: components/aos_apps/aos_app_files.c:3622
-#: components/aos_apps/aos_app_files.c:3662
+#: components/aos_apps/aos_app_files.c:3637
+#: components/aos_apps/aos_app_files.c:3678
 Quitar de favoritos	Retirer des favoris
 
-#: components/aos_apps/aos_app_files.c:3622
-#: components/aos_apps/aos_app_files.c:3662
+#: components/aos_apps/aos_app_files.c:3637
+#: components/aos_apps/aos_app_files.c:3678
 Agregar a favoritos	Ajouter aux favoris
 
-#: components/aos_apps/aos_app_files.c:3623
+#: components/aos_apps/aos_app_files.c:3638
 Información de la carpeta	Infos du dossier
 
-#: components/aos_apps/aos_app_files.c:3624
+#: components/aos_apps/aos_app_files.c:3639
 Volver a leer	Relire
 
-#: components/aos_apps/aos_app_files.c:3640
-#: components/aos_apps/aos_app_files.c:4051
+#: components/aos_apps/aos_app_files.c:3655
+#: components/aos_apps/aos_app_files.c:4067
 #: components/aos_apps/aos_app_ha.c:348
 #: components/aos_apps/aos_app_ha.c:741
 Abrir	Ouvrir
 
-#: components/aos_apps/aos_app_files.c:3641
+#: components/aos_apps/aos_app_files.c:3656
 Abrir en Fotos	Voir dans Photos
 
-#: components/aos_apps/aos_app_files.c:3642
+#: components/aos_apps/aos_app_files.c:3657
 Reproducir en Música	Lire dans Musique
 
-#: components/aos_apps/aos_app_files.c:3643
-#: components/aos_apps/aos_app_files.c:3653
+#: components/aos_apps/aos_app_files.c:3658
+#: components/aos_apps/aos_app_files.c:3669
 Abrir en el Programador	Ouvrir dans Programmateur
 
-#: components/aos_apps/aos_app_files.c:3644
+#: components/aos_apps/aos_app_files.c:3659
 Ver	Voir
 
-#: components/aos_apps/aos_app_files.c:3645
-#: components/aos_apps/aos_app_files.c:3650
+#: components/aos_apps/aos_app_files.c:3660
+#: components/aos_apps/aos_app_files.c:3666
 Abrir en Oficina	Ouvrir dans Bureau
 
-#: components/aos_apps/aos_app_files.c:3651
+#: components/aos_apps/aos_app_files.c:3661
+Reproducir en Video	Lire dans Vidéo
+
+#: components/aos_apps/aos_app_files.c:3667
 Ver el contenido	Voir le contenu
 
-#: components/aos_apps/aos_app_files.c:3654
+#: components/aos_apps/aos_app_files.c:3670
 Información	Infos
 
-#: components/aos_apps/aos_app_files.c:3655
+#: components/aos_apps/aos_app_files.c:3671
 Mostrar en su carpeta	Voir dans son dossier
 
-#: components/aos_apps/aos_app_files.c:3657
+#: components/aos_apps/aos_app_files.c:3673
 Duplicar	Dupliquer
 
-#: components/aos_apps/aos_app_files.c:3710
+#: components/aos_apps/aos_app_files.c:3726
 #: components/aos_apps/aos_app_leds.c:394
 #: components/aos_apps/aos_app_modules.c:450
 Ninguno	Aucun
 
-#: components/aos_apps/aos_app_files.c:3710
+#: components/aos_apps/aos_app_files.c:3726
 Todos	Tous
 
-#: components/aos_apps/aos_app_files.c:3715
+#: components/aos_apps/aos_app_files.c:3731
 Elegí archivos	Choix de fichiers
 
-#: components/aos_apps/aos_app_files.c:3716
+#: components/aos_apps/aos_app_files.c:3732
 1 elegido	1 choisi
 
-#: components/aos_apps/aos_app_files.c:3717
+#: components/aos_apps/aos_app_files.c:3733
 %s elegidos	%s choisis
 
-#: components/aos_apps/aos_app_files.c:3745
+#: components/aos_apps/aos_app_files.c:3761
 #: components/aos_apps/aos_app_macropad.c:2083
 Renombrar	Renommer
 
-#: components/aos_apps/aos_app_files.c:3745
+#: components/aos_apps/aos_app_files.c:3761
 Info	Info
 
-#: components/aos_apps/aos_app_files.c:3775
+#: components/aos_apps/aos_app_files.c:3791
 %s elementos para mover	%s éléments à déplacer
 
-#: components/aos_apps/aos_app_files.c:3775
-#: components/aos_apps/aos_app_files.c:4168
+#: components/aos_apps/aos_app_files.c:3791
+#: components/aos_apps/aos_app_files.c:4184
 %s elementos copiados	%s éléments copiés
 
-#: components/aos_apps/aos_app_files.c:3840
+#: components/aos_apps/aos_app_files.c:3856
 #: components/aos_apps/aos_app_flasher.c:996
 #: components/aos_apps/aos_app_settings.c:617
 #: components/aos_apps/aos_app_settings.c:2322
 No hay tarjeta	Pas de carte SD
 
-#: components/aos_apps/aos_app_files.c:3842
+#: components/aos_apps/aos_app_files.c:3858
 Poné una microSD en la ranura de la placa.	Insère une microSD dans la fente de la carte.
 
-#: components/aos_apps/aos_app_files.c:3940
+#: components/aos_apps/aos_app_files.c:3956
 %s y contando…	%s et plus…
 
-#: components/aos_apps/aos_app_files.c:3944
+#: components/aos_apps/aos_app_files.c:3960
 %s archivos, %s carpetas	%s fichiers, %s dossiers
 
-#: components/aos_apps/aos_app_files.c:3992
+#: components/aos_apps/aos_app_files.c:4008
 Selección	Sélection
 
-#: components/aos_apps/aos_app_files.c:3997
+#: components/aos_apps/aos_app_files.c:4013
 Calculando…	Calcul…
 
-#: components/aos_apps/aos_app_files.c:3998
+#: components/aos_apps/aos_app_files.c:4014
 Contiene	Contient
 
-#: components/aos_apps/aos_app_files.c:4019
+#: components/aos_apps/aos_app_files.c:4035
 Modificado	Modifié
 
-#: components/aos_apps/aos_app_files.c:4030
+#: components/aos_apps/aos_app_files.c:4046
 La tarjeta	La carte SD
 
-#: components/aos_apps/aos_app_files.c:4032
+#: components/aos_apps/aos_app_files.c:4048
 Ubicación	Chemin
 
-#: components/aos_apps/aos_app_files.c:4063
+#: components/aos_apps/aos_app_files.c:4079
 Preparando…	Préparation…
 
-#: components/aos_apps/aos_app_files.c:4065
+#: components/aos_apps/aos_app_files.c:4081
 Moviendo…	Déplacement…
 
-#: components/aos_apps/aos_app_files.c:4066
+#: components/aos_apps/aos_app_files.c:4082
 Duplicando…	Duplication…
 
-#: components/aos_apps/aos_app_files.c:4067
+#: components/aos_apps/aos_app_files.c:4083
 Borrando…	Effacement…
 
-#: components/aos_apps/aos_app_files.c:4068
+#: components/aos_apps/aos_app_files.c:4084
 Copiando…	Copie…
 
-#: components/aos_apps/aos_app_files.c:4100
+#: components/aos_apps/aos_app_files.c:4116
 Seguir usando	Continuer
 
-#: components/aos_apps/aos_app_files.c:4144
+#: components/aos_apps/aos_app_files.c:4160
 %s de %s · %s de %s%s%s	%s sur %s · %s sur %s%s%s
 
-#: components/aos_apps/aos_app_files.c:4163
+#: components/aos_apps/aos_app_files.c:4179
 #: components/aos_flasher/aos_flasher.c:336
 #: components/aos_flasher/aos_flasher.c:351
 Cancelado	Annulé
 
-#: components/aos_apps/aos_app_files.c:4164
+#: components/aos_apps/aos_app_files.c:4180
 %s (y %d problemas más)	%s (et %d autres problèmes)
 
-#: components/aos_apps/aos_app_files.c:4167
+#: components/aos_apps/aos_app_files.c:4183
 Movido	Déplacé
 
-#: components/aos_apps/aos_app_files.c:4167
+#: components/aos_apps/aos_app_files.c:4183
 Duplicado	Dupliqué
 
-#: components/aos_apps/aos_app_files.c:4167
+#: components/aos_apps/aos_app_files.c:4183
 Borrado	Effacé
 
-#: components/aos_apps/aos_app_files.c:4168
+#: components/aos_apps/aos_app_files.c:4184
 %s elementos movidos	%s éléments déplacés
 
-#: components/aos_apps/aos_app_files.c:4169
+#: components/aos_apps/aos_app_files.c:4185
 %s elementos duplicados	%s éléments dupliqués
 
-#: components/aos_apps/aos_app_files.c:4169
+#: components/aos_apps/aos_app_files.c:4185
 %s elementos borrados	%s éléments effacés
 
-#: components/aos_apps/aos_app_files.c:4396
+#: components/aos_apps/aos_app_files.c:4412
 %s · se muestra en hexadecimal	%s · affiché en hexadécimal
 
-#: components/aos_apps/aos_app_files.c:4399
+#: components/aos_apps/aos_app_files.c:4415
 %s filas · %d columnas · %s	%s lignes · %d colonnes · %s
 
-#: components/aos_apps/aos_app_files.c:4402
+#: components/aos_apps/aos_app_files.c:4418
 1 línea · %s	1 ligne · %s
 
-#: components/aos_apps/aos_app_files.c:4403
+#: components/aos_apps/aos_app_files.c:4419
 %s líneas · %s	%s lignes · %s
 
-#: components/aos_apps/aos_app_files.c:4407
+#: components/aos_apps/aos_app_files.c:4423
  · leyendo %d %%	 · lecture %d %%
 
-#: components/aos_apps/aos_app_files.c:4411
+#: components/aos_apps/aos_app_files.c:4427
  · se muestra el primer millón de filas	 · le premier million de lignes
 
-#: components/aos_apps/aos_app_files.c:4535
+#: components/aos_apps/aos_app_files.c:4551
 Leyendo la columna…	Lecture de la colonne…
 
-#: components/aos_apps/aos_app_files.c:4545
+#: components/aos_apps/aos_app_files.c:4561
 Esa columna no tiene números	Cette colonne n'a pas de nombres
 
-#: components/aos_apps/aos_app_files.c:4570
+#: components/aos_apps/aos_app_files.c:4586
 mín %s · máx %s · media %s · %s valores, de %s a %s %s	min %s · max %s · moyenne %s · %s valeurs, de %s à %s %s
 
-#: components/aos_apps/aos_app_files.c:4573
+#: components/aos_apps/aos_app_files.c:4589
 mín %s · máx %s · media %s · %s valores	min %s · max %s · moyenne %s · %s valeurs
 
-#: components/aos_apps/aos_app_files.c:4606
-#: components/aos_apps/aos_app_files.c:4733
+#: components/aos_apps/aos_app_files.c:4622
+#: components/aos_apps/aos_app_files.c:4749
 Gráfico	Graphique
 
-#: components/aos_apps/aos_app_files.c:4686
+#: components/aos_apps/aos_app_files.c:4702
 Leyendo el archivo hasta el final…	Lecture du fichier jusqu'au bout…
 
-#: components/aos_apps/aos_app_files.c:4731
+#: components/aos_apps/aos_app_files.c:4747
 Ajustar	Ajuster
 
-#: components/aos_apps/aos_app_files.c:4880
-#: components/aos_apps/aos_app_files.c:4889
+#: components/aos_apps/aos_app_files.c:4896
+#: components/aos_apps/aos_app_files.c:4905
 No se pudo abrir el archivo	Impossible d'ouvrir le fichier
 
 #: components/aos_apps/aos_app_flasher.c:77
@@ -12889,9 +12899,6 @@ Golf	Golf
 #: apps/grabador  (nombre de app)
 Grabador	Surveillance
 
-#: apps/vision  (nombre de app)
-Visión	Vision
-
 #: apps/hockey  (nombre de app)
 Hockey de mesa	Air hockey
 
@@ -12991,8 +12998,8 @@ Truco	Truco
 #: apps/turbo  (nombre de app)
 Turbo	Turbo
 
-#: apps/video  (nombre de app)
-Video	Vidéo
+#: apps/vision  (nombre de app)
+Visión	Vision
 
 #: apps/visor3d  (nombre de app)
 Visor 3D	Visionneuse 3D
@@ -13008,3 +13015,48 @@ Planeo	Vol plané
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Vols
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Escribiendo	Saisie
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Tecla	Touche
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Espera	Délai
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Mouse	Souris
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Volver	Retour
+
+#: components/aos_apps/_pending/aos_app_pato.c
+No se pudo leer el script	Impossible de lire le script
+
+#: components/aos_apps/_pending/aos_app_pato.c
+pasos	étapes
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Se perdio el teclado USB	Clavier USB perdu
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Pasa el USB a Teclado	Passe l'USB en Clavier
+
+#: components/aos_apps/_pending/aos_app_pato.c
+El script esta vacio	Le script est vide
+
+#: components/aos_apps/_pending/aos_app_pato.c
+No hay scripts.\nCrealos en el portal,\npagina Pato goma.	Aucun script.\nCrée-les dans le portail,\npage Pato goma.
+
+#: components/aos_apps/_pending/aos_app_pato.c
+USB: teclado listo	USB : clavier prêt
+
+#: components/aos_apps/_pending/aos_app_pato.c
+USB: pasalo a \"Teclado y red\"	USB : passe-le en \"Clavier et réseau\"
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Pasar a Teclado	Passer en Clavier
+
+#: components/aos_apps/_pending/aos_app_pato.c
+Se enviara al teclado y mouse de la computadora.	Envoyé au clavier et à la souris de l'ordinateur.
