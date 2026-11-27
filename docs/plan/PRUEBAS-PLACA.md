@@ -7,10 +7,14 @@ se prueba.
 
 ## El bot de Telegram y el emparejamiento BLE (2026-11-27, sin publicar)
 
-- [ ] El bot contra Telegram de verdad, con un bot del usuario (@BotFather):
-      el token desde el portal, vincular su chat, cada comando, una captura,
-      los botones de un dispositivo Zigbee con salida (el módulo de dos
-      relés), un código IR guardado (`docs/BOT.md`).
+- [x] El bot contra Telegram de verdad (2026-11-27, @P4os_bot del usuario):
+      el token desde el portal, su chat vinculado con el código, `/estado`,
+      `/captura`, `/zigbee` (arrancó la red Zigbee él solo después de un
+      reinicio) y los botones de las dos salidas del módulo de dos relés:
+      los dos relés hicieron clic. Prendido, el bot cuesta ~2 KB de RAM
+      interna (205 → 203 KB libres). Falta: `/ir` con un código guardado.
+      Con la placa en inglés, el pack de idioma de la tarjeta todavía no
+      tiene los textos del bot (quedan en castellano hasta la release).
 - [ ] Una regla con un sensor real: la puerta que se abre manda un mensaje;
       una temperatura que pasa de un valor; reenviar los avisos del iPhone.
 - [ ] La RAM interna libre con el bot prendido y apagado (los hilos y sus
