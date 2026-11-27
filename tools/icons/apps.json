@@ -1415,6 +1415,76 @@
     "b": "una webcam USB dentro de un recuadro de detección",
     "c": "una carita en un recuadro de detección con su etiqueta"
    }
+  },
+  {
+   "id": "aos.malla",
+   "name": "Malla",
+   "group": "nuevas",
+   "colors": [
+    "#34C77B",
+    "#0B6B44"
+   ],
+   "juguete": {
+    "a": "tres nodos de radio en malla",
+    "b": "un nodo LoRa con su antena y ondas",
+    "c": "un globo de mensaje sobre una malla"
+   }
+  },
+  {
+   "id": "aos.mensajes",
+   "name": "Mensajes",
+   "group": "nuevas",
+   "colors": [
+    "#3AA0F0",
+    "#1A5FB4"
+   ],
+   "juguete": {
+    "a": "dos globos de diálogo",
+    "b": "una ventana de chat con globos",
+    "c": "un globo grande escribiendo"
+   }
+  },
+  {
+   "id": "aos.correo",
+   "name": "Correo",
+   "group": "nuevas",
+   "colors": [
+    "#3AA0FF",
+    "#0A4FB8"
+   ],
+   "juguete": {
+    "a": "un sobre cerrado con lacre",
+    "b": "un sobre abierto con la carta",
+    "c": "un buzón con la bandera"
+   }
+  },
+  {
+   "id": "aos.cielo",
+   "name": "Cielo",
+   "group": "nuevas",
+   "colors": [
+    "#1A2E5C",
+    "#070D1C"
+   ],
+   "juguete": {
+    "a": "un telescopio y estrellas",
+    "b": "un planeta con anillo",
+    "c": "la Luna y una estación espacial"
+   }
+  },
+  {
+   "id": "aos.bot",
+   "name": "Bot",
+   "group": "nuevas",
+   "colors": [
+    "#5AC8FA",
+    "#1C7ED6"
+   ],
+   "juguete": {
+    "a": "la cabeza de un robot",
+    "b": "un robot con un globo de diálogo",
+    "c": "un robot con un engranaje"
+   }
   }
  ]
 }
