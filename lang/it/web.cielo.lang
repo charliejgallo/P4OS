@@ -1,0 +1,170 @@
+# amoledos-lang 1   es -> it
+# web.cielo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cielo/web/cielo.js:44
+N	N
+
+#: apps/cielo/web/cielo.js:44
+NE	NE
+
+#: apps/cielo/web/cielo.js:44
+E	E
+
+#: apps/cielo/web/cielo.js:44
+SE	SE
+
+#: apps/cielo/web/cielo.js:44
+S	S
+
+#: apps/cielo/web/cielo.js:44
+SO	SO
+
+#: apps/cielo/web/cielo.js:44
+O	O
+
+#: apps/cielo/web/cielo.js:44
+NO	NO
+
+#: apps/cielo/web/cielo.js:46
+dom	dom
+
+#: apps/cielo/web/cielo.js:46
+lun	lun
+
+#: apps/cielo/web/cielo.js:46
+mar	mar
+
+#: apps/cielo/web/cielo.js:46
+mié	mer
+
+#: apps/cielo/web/cielo.js:46
+jue	gio
+
+#: apps/cielo/web/cielo.js:46
+vie	ven
+
+#: apps/cielo/web/cielo.js:46
+sáb	sab
+
+#: apps/cielo/web/cielo.js:54
+el pack no es de esta versión	il pack non è di questa versione
+
+#: apps/cielo/web/cielo.js:160
+#: apps/cielo/web/cielo.js:264
+Cielo	Cielo
+
+#: apps/cielo/web/cielo.js:166
+#: apps/cielo/web/cielo.js:167
+Cargando…	Caricamento…
+
+#: apps/cielo/web/cielo.js:169
+Ciudad, pueblo o barrio	Città, paese o quartiere
+
+#: apps/cielo/web/cielo.js:170
+Latitud	Latitudine
+
+#: apps/cielo/web/cielo.js:171
+Longitud	Longitudine
+
+#: apps/cielo/web/cielo.js:179
+La app todavía no escribió el cielo: abrila en la placa.	L'app non ha ancora scritto il cielo: aprila sulla scheda.
+
+#: apps/cielo/web/cielo.js:185
+El cielo a las %s	Il cielo alle %s
+
+#: apps/cielo/web/cielo.js:188
+bajo el horizonte	sotto l'orizzonte
+
+#: apps/cielo/web/cielo.js:189
+Sin el pack del cielo en la tarjeta, sólo los planetas.	Senza il pack del cielo sulla microSD, solo i pianeti.
+
+#: apps/cielo/web/cielo.js:196
+Todavía no hay pasadas: la app las calcula al abrirse.	Ancora nessun passaggio: l'app li calcola all'apertura.
+
+#: apps/cielo/web/cielo.js:199
+Órbitas de hace %s h	Orbite di %s h fa
+
+#: apps/cielo/web/cielo.js:199
+Sin órbitas todavía	Ancora senza orbite
+
+#: apps/cielo/web/cielo.js:202
+Sólo las visibles	Solo i visibili
+
+#: apps/cielo/web/cielo.js:205
+Satélite	Satellite
+
+#: apps/cielo/web/cielo.js:205
+Empieza	Inizio
+
+#: apps/cielo/web/cielo.js:205
+Máximo	Massimo
+
+#: apps/cielo/web/cielo.js:205
+Termina	Fine
+
+#: apps/cielo/web/cielo.js:205
+Brillo	Luminosità
+
+#: apps/cielo/web/cielo.js:213
+no visible	non visibile
+
+#: apps/cielo/web/cielo.js:214
+Ninguna pasada visible en los próximos días.	Nessun passaggio visibile nei prossimi giorni.
+
+#: apps/cielo/web/cielo.js:214
+Ninguna pasada en los próximos días.	Nessun passaggio nei prossimi giorni.
+
+#: apps/cielo/web/cielo.js:215
+Visible: el satélite está al sol y el cielo, oscuro. El brillo es una estimación: cuanto más bajo el número, más brilla.	Visibile: il satellite è al sole e il cielo è buio. La luminosità è una stima: più basso è il numero, più brilla.
+
+#: apps/cielo/web/cielo.js:223
+Sin lugar elegido	Nessun luogo scelto
+
+#: apps/cielo/web/cielo.js:224
+Buscar	Cerca
+
+#: apps/cielo/web/cielo.js:225
+Mi lugar	Mio luogo
+
+#: apps/cielo/web/cielo.js:225
+Usar estas coordenadas	Usa queste coordinate
+
+#: apps/cielo/web/cielo.js:226
+La latitud es negativa al sur del ecuador y la longitud, al oeste de Greenwich.	La latitudine è negativa a sud dell'equatore e la longitudine a ovest di Greenwich.
+
+#: apps/cielo/web/cielo.js:232
+Coordenadas fuera de rango	Coordinate fuori intervallo
+
+#: apps/cielo/web/cielo.js:241
+%s: la placa lo toma en unos segundos	%s: la scheda lo prende tra qualche secondo
+
+#: apps/cielo/web/cielo.js:252
+Buscando…	Ricerca…
+
+#: apps/cielo/web/cielo.js:259
+Elegir	Scegli
+
+#: apps/cielo/web/cielo.js:259
+No se encontró ningún lugar con ese nombre.	Nessun luogo trovato con quel nome.
+
+#: apps/cielo/web/cielo.js:260
+No se pudo buscar: %s	Ricerca non riuscita: %s
+
+#: apps/cielo/web/cielo.js:266
+Próximas pasadas	Prossimi passaggi
+
+#: apps/cielo/web/cielo.js:267
+Lugar	Luogo
+
+#: apps/cielo/web/cielo.js:269
+Abierta en la placa	Aperta sulla scheda
+
+#: apps/cielo/web/cielo.js:269
+Abrir Cielo en la placa	Apri Cielo sulla scheda
+
+#: apps/cielo/web/cielo.js:270
+Estrellas: Yale Bright Star Catalogue (dominio público). Órbitas: CelesTrak. Búsqueda de lugares: Open-Meteo.	Stelle: Yale Bright Star Catalogue (pubblico dominio). Orbite: CelesTrak. Ricerca dei luoghi: Open-Meteo.

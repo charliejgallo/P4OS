@@ -1,0 +1,168 @@
+# amoledos-lang 1   es -> pt
+# web.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/web/malla.js:44
+no hay ruta	sem rota
+
+#: apps/malla/web/malla.js:44
+lo rechazaron	rejeitado
+
+#: apps/malla/web/malla.js:44
+no hubo respuesta	sem resposta
+
+#: apps/malla/web/malla.js:44
+sin radio	sem rádio
+
+#: apps/malla/web/malla.js:45
+nadie lo confirmó	ninguém confirmou
+
+#: apps/malla/web/malla.js:45
+canal desconocido	canal desconhecido
+
+#: apps/malla/web/malla.js:45
+demasiado largo	longo demais
+
+#: apps/malla/web/malla.js:45
+sin respuesta	sem resposta
+
+#: apps/malla/web/malla.js:46
+límite de uso del canal	limite de uso do canal
+
+#: apps/malla/web/malla.js:46
+#: apps/malla/web/malla.js:46
+falta su clave pública	falta a chave pública dele
+
+#: apps/malla/web/malla.js:47
+demasiados seguidos	muitos seguidos
+
+#: apps/malla/web/malla.js:61
+nunca	nunca
+
+#: apps/malla/web/malla.js:61
+recién	agora
+
+#: apps/malla/web/malla.js:61
+hace %d min	há %d min
+
+#: apps/malla/web/malla.js:62
+hace %d h	há %d h
+
+#: apps/malla/web/malla.js:62
+hace %d d	há %d d
+
+#: apps/malla/web/malla.js:81
+#: apps/malla/web/malla.js:102
+Malla	Malha
+
+#: apps/malla/web/malla.js:91
+Mensaje	Mensagem
+
+#: apps/malla/web/malla.js:93
+Enviar	Enviar
+
+#: apps/malla/web/malla.js:98
+Tomar canales de una URL	Usar canais de uma URL
+
+#: apps/malla/web/malla.js:99
+Reemplaza los canales del nodo (y su radio, si la URL la trae). El nodo se reinicia.	Substitui os canais do nó (e o rádio, se a URL trouxer). O nó reinicia.
+
+#: apps/malla/web/malla.js:100
+Aplicar	Aplicar
+
+#: apps/malla/web/malla.js:113
+Es demasiado largo para la malla	É longo demais para a malha
+
+#: apps/malla/web/malla.js:120
+No es una URL de canales de Meshtastic	Não é uma URL de canais Meshtastic
+
+#: apps/malla/web/malla.js:121
+¿Reemplazar los canales del nodo? Se reinicia.	Substituir os canais do nó? Ele reinicia.
+
+#: apps/malla/web/malla.js:122
+Mandado al nodo	Enviado ao nó
+
+#: apps/malla/web/malla.js:152
+#: apps/malla/web/malla.js:176
+Vos	Você
+
+#: apps/malla/web/malla.js:152
+Sin mensajes todavía	Nenhuma mensagem ainda
+
+#: apps/malla/web/malla.js:161
+en cola	na fila
+
+#: apps/malla/web/malla.js:161
+enviado	enviado
+
+#: apps/malla/web/malla.js:162
+repetido	repetido
+
+#: apps/malla/web/malla.js:162
+recibido	entregue
+
+#: apps/malla/web/malla.js:163
+error	erro
+
+#: apps/malla/web/malla.js:170
+Canal %d	Canal %d
+
+#: apps/malla/web/malla.js:182
+Escribí el primer mensaje directo.	Escreva a primeira mensagem direta.
+
+#: apps/malla/web/malla.js:182
+Todavía no hay mensajes en este canal.	Ainda não há mensagens neste canal.
+
+#: apps/malla/web/malla.js:190
+%d nodos	%d nós
+
+#: apps/malla/web/malla.js:192
+Nodo	Nó
+
+#: apps/malla/web/malla.js:192
+Visto	Visto
+
+#: apps/malla/web/malla.js:192
+Saltos	Saltos
+
+#: apps/malla/web/malla.js:192
+Batería	Bateria
+
+#: apps/malla/web/malla.js:193
+Distancia	Distância
+
+#: apps/malla/web/malla.js:196
+este	este
+
+#: apps/malla/web/malla.js:197
+directo	direto
+
+#: apps/malla/web/malla.js:198
+enchufado	conectado
+
+#: apps/malla/web/malla.js:205
+Malla no está abierta en la placa.	Malha não está aberto na placa.
+
+#: apps/malla/web/malla.js:206
+Abrir Malla en la placa	Abrir Malha na placa
+
+#: apps/malla/web/malla.js:209
+Conectado	Conectado
+
+#: apps/malla/web/malla.js:209
+Cargando la base de nodos	Carregando a base de nós
+
+#: apps/malla/web/malla.js:209
+Conectando	Conectando
+
+#: apps/malla/web/malla.js:210
+Reintentando	Tentando
+
+#: apps/malla/web/malla.js:210
+Sin conexión	Sem conexão
+
+#: apps/malla/web/malla.js:213
+Sin nodo	Sem nó

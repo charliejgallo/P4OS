@@ -1,0 +1,137 @@
+# amoledos-lang 1   es -> pt
+# web.correo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/correo/web/correo.js:110
+La placa no contestó	A placa não respondeu
+
+#: apps/correo/web/correo.js:159
+#: apps/correo/web/correo.js:168
+Correo	Mail
+
+#: apps/correo/web/correo.js:184
+Todas las entradas	Todas as entradas
+
+#: apps/correo/web/correo.js:194
+Escribir	Escrever
+
+#: apps/correo/web/correo.js:199
+Buscar	Buscar
+
+#: apps/correo/web/correo.js:206
+#: apps/correo/web/correo.js:274
+(sin asunto)	(sem assunto)
+
+#: apps/correo/web/correo.js:207
+No hay mensajes	Não há mensagens
+
+#: apps/correo/web/correo.js:208
+Buzones	Caixas
+
+#: apps/correo/web/correo.js:212
+Abriendo...	Abrindo...
+
+#: apps/correo/web/correo.js:222
+No se pudo abrir el mensaje	Não foi possível abrir a mensagem
+
+#: apps/correo/web/correo.js:231
+No se pudo	Não foi possível
+
+#: apps/correo/web/correo.js:240
+Listo	Pronto
+
+#: apps/correo/web/correo.js:255
+Imagen	Imagem
+
+#: apps/correo/web/correo.js:261
+Las imágenes de internet no se bajan.	As imagens da internet não são baixadas.
+
+#: apps/correo/web/correo.js:266
+Lista	Lista
+
+#: apps/correo/web/correo.js:267
+Responder	Responder
+
+#: apps/correo/web/correo.js:268
+A todos	A todos
+
+#: apps/correo/web/correo.js:269
+Reenviar	Encaminhar
+
+#: apps/correo/web/correo.js:270
+Archivar	Arquivar
+
+#: apps/correo/web/correo.js:272
+No leído	Não lido
+
+#: apps/correo/web/correo.js:273
+Borrar	Apagar
+
+#: apps/correo/web/correo.js:276
+Para:	Para:
+
+#: apps/correo/web/correo.js:276
+Cc:	Cc:
+
+#: apps/correo/web/correo.js:291
+Mensaje reenviado	Mensagem encaminhada
+
+#: apps/correo/web/correo.js:291
+#: apps/correo/web/correo.js:346
+De	De
+
+#: apps/correo/web/correo.js:291
+Fecha	Data
+
+#: apps/correo/web/correo.js:291
+#: apps/correo/web/correo.js:347
+Asunto	Assunto
+
+#: apps/correo/web/correo.js:299
+escribió	escreveu
+
+#: apps/correo/web/correo.js:313
+Falta a quién mandarlo	Falta o destinatário
+
+#: apps/correo/web/correo.js:317
+Enviando...	Enviando...
+
+#: apps/correo/web/correo.js:335
+#: apps/correo/web/correo.js:339
+No se pudo enviar	Não foi possível enviar
+
+#: apps/correo/web/correo.js:336
+Enviado	Enviado
+
+#: apps/correo/web/correo.js:344
+Cancelar	Cancelar
+
+#: apps/correo/web/correo.js:345
+Enviar	Enviar
+
+#: apps/correo/web/correo.js:346
+Para	Para
+
+#: apps/correo/web/correo.js:346
+Cc	Cc
+
+#: apps/correo/web/correo.js:347
+Cco	Cco
+
+#: apps/correo/web/correo.js:347
+Mensaje	Mensagem
+
+#: apps/correo/web/correo.js:348
+Adjuntos	Anexos
+
+#: apps/correo/web/correo.js:362
+No hay cuentas: agregalas en la placa, en Correo, Ajustes.	Não há contas: adicione-as na placa, em Mail, Ajustes.
+
+#: apps/correo/web/correo.js:370
+Correo no está abierto en la placa.	O Mail não está aberto na placa.
+
+#: apps/correo/web/correo.js:371
+Abrir en la placa	Abrir na placa

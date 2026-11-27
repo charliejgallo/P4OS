@@ -1,0 +1,895 @@
+# amoledos-lang 1   es -> fr
+# aos.cielo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cielo/main/cielo.c:77
+dom	dim
+
+#: apps/cielo/main/cielo.c:77
+lun	lun
+
+#: apps/cielo/main/cielo.c:77
+mar	mar
+
+#: apps/cielo/main/cielo.c:77
+mié	mer
+
+#: apps/cielo/main/cielo.c:77
+jue	jeu
+
+#: apps/cielo/main/cielo.c:77
+vie	ven
+
+#: apps/cielo/main/cielo.c:77
+sáb	sam
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+N	N
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+NE	NE
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+E	E
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+SE	SE
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+S	S
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+SO	SO
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+O	O
+
+#: apps/cielo/main/cielo.c:102
+#: apps/cielo/main/cielo.c:952
+#: apps/cielo/main/cl_sat.c:392
+NO	NO
+
+#: apps/cielo/main/cielo.c:108
+M a.l.	M al
+
+#: apps/cielo/main/cielo.c:109
+mil a.l.	k al
+
+#: apps/cielo/main/cielo.c:110
+a.l.	al
+
+#: apps/cielo/main/cielo.c:140
+Siempre sobre el horizonte	Circumpolaire
+
+#: apps/cielo/main/cielo.c:140
+#: apps/cielo/main/cielo.c:148
+Culmina	Culmine
+
+#: apps/cielo/main/cielo.c:142
+No sale en las próximas 24 h	Ne se lève pas d'ici 24 h
+
+#: apps/cielo/main/cielo.c:148
+Salió	Levé
+
+#: apps/cielo/main/cielo.c:148
+Sale	Lever
+
+#: apps/cielo/main/cielo.c:149
+Se pone	Coucher
+
+#: apps/cielo/main/cielo.c:159
+Altura	Hauteur
+
+#: apps/cielo/main/cielo.c:161
+Acimut	Azimut
+
+#: apps/cielo/main/cielo.c:190
+Estrella	Étoile
+
+#: apps/cielo/main/cielo.c:192
+#: apps/cielo/main/cielo.c:220
+#: apps/cielo/main/cielo.c:261
+#: apps/cielo/main/cielo.c:321
+Magnitud	Magnitude
+
+#: apps/cielo/main/cielo.c:195
+#: apps/cielo/main/cielo.c:224
+#: apps/cielo/main/cielo.c:270
+#: apps/cielo/main/cielo.c:315
+Distancia	Distance
+
+#: apps/cielo/main/cielo.c:196
+Clase	Classe
+
+#: apps/cielo/main/cielo.c:197
+Espectro	Spectre
+
+#: apps/cielo/main/cielo.c:204
+#: apps/cielo/main/cielo.c:278
+AR / Dec (J2000)	AD / Déc (J2000)
+
+#: apps/cielo/main/cielo.c:218
+Nuestra estrella	Notre étoile
+
+#: apps/cielo/main/cielo.c:218
+Satélite de la Tierra	Satellite de la Terre
+
+#: apps/cielo/main/cielo.c:218
+Planeta	Planète
+
+#: apps/cielo/main/cielo.c:227
+Diámetro	Diamètre
+
+#: apps/cielo/main/cielo.c:230
+Iluminada	Éclairée
+
+#: apps/cielo/main/cielo.c:230
+#: apps/cielo/main/cielo.c:244
+Fase	Phase
+
+#: apps/cielo/main/cielo.c:240
+Luna nueva	Nouvelle lune
+
+#: apps/cielo/main/cielo.c:241
+Creciente	Premier croissant
+
+#: apps/cielo/main/cielo.c:241
+Cuarto creciente	Premier quartier
+
+#: apps/cielo/main/cielo.c:242
+Gibosa creciente	Gibbeuse croissante
+
+#: apps/cielo/main/cielo.c:242
+Luna llena	Pleine lune
+
+#: apps/cielo/main/cielo.c:243
+Gibosa menguante	Gibbeuse décroissante
+
+#: apps/cielo/main/cielo.c:243
+Cuarto menguante	Dernier quartier
+
+#: apps/cielo/main/cielo.c:243
+Menguante	Dernier croissant
+
+#: apps/cielo/main/cielo.c:247
+AR / Dec	AD / Déc
+
+#: apps/cielo/main/cielo.c:272
+Tamaño	Taille
+
+#: apps/cielo/main/cielo.c:308
+Satélite	Satellite
+
+#: apps/cielo/main/cielo.c:317
+Altitud	Altitude
+
+#: apps/cielo/main/cielo.c:318
+Iluminado	Éclairé
+
+#: apps/cielo/main/cielo.c:318
+sí	oui
+
+#: apps/cielo/main/cielo.c:318
+no, en sombra	non, à l'ombre
+
+#: apps/cielo/main/cielo.c:328
+Pasada visible	Passage visible
+
+#: apps/cielo/main/cielo.c:328
+Pasada (no visible)	Passage (non visible)
+
+#: apps/cielo/main/cielo.c:328
+#: apps/cielo/main/cl_ui.c:636
+máx.	max.
+
+#: apps/cielo/main/cielo.c:332
+#: apps/cielo/main/cl_ui.c:644
+Calculando pasadas...	Calcul des passages...
+
+#: apps/cielo/main/cielo.c:332
+Sin pasadas sobre 10° en 3 días	Aucun passage à plus de 10° en 3 jours
+
+#: apps/cielo/main/cielo.c:357
+pausa	pause
+
+#: apps/cielo/main/cielo.c:394
+#: apps/cielo/main/cielo.c:954
+#: apps/cielo/main/cl_ui.c:555
+Ahora	Direct
+
+#: apps/cielo/main/cielo.c:394
+Volver a ahora	Retour au direct
+
+#: apps/cielo/main/cielo.c:397
+Falta el pack del cielo (cielo_p4.pak)	Pack du ciel manquant (cielo_p4.pak)
+
+#: apps/cielo/main/cielo.c:398
+La placa todavía no tiene hora	La carte n'a pas encore l'heure
+
+#: apps/cielo/main/cielo.c:946
+#: apps/cielo/main/cielo.c:986
+Sin memoria	Mémoire pleine
+
+#: apps/cielo/main/cielo.c:955
+%s: pasada visible a las %s, sale por el %s, sube a %d°	%s : passage visible à %s, apparaît au %s, monte à %d°
+
+#: apps/cielo/main/cl_names.c:18
+Sol	Soleil
+
+#: apps/cielo/main/cl_names.c:18
+Luna	Lune
+
+#: apps/cielo/main/cl_names.c:18
+Mercurio	Mercure
+
+#: apps/cielo/main/cl_names.c:18
+Venus	Vénus
+
+#: apps/cielo/main/cl_names.c:18
+Marte	Mars
+
+#: apps/cielo/main/cl_names.c:19
+Júpiter	Jupiter
+
+#: apps/cielo/main/cl_names.c:19
+Saturno	Saturne
+
+#: apps/cielo/main/cl_names.c:19
+Urano	Uranus
+
+#: apps/cielo/main/cl_names.c:19
+Neptuno	Neptune
+
+#: apps/cielo/main/cl_names.c:31
+Andrómeda	Andromède
+
+#: apps/cielo/main/cl_names.c:31
+Máquina Neumática	Machine pneumatique
+
+#: apps/cielo/main/cl_names.c:31
+Ave del Paraíso	Oiseau de paradis
+
+#: apps/cielo/main/cl_names.c:32
+Acuario	Verseau
+
+#: apps/cielo/main/cl_names.c:32
+Águila	Aigle
+
+#: apps/cielo/main/cl_names.c:32
+Altar	Autel
+
+#: apps/cielo/main/cl_names.c:32
+Aries	Bélier
+
+#: apps/cielo/main/cl_names.c:33
+Auriga	Cocher
+
+#: apps/cielo/main/cl_names.c:33
+Boyero	Bouvier
+
+#: apps/cielo/main/cl_names.c:33
+Cincel	Burin
+
+#: apps/cielo/main/cl_names.c:33
+Jirafa	Girafe
+
+#: apps/cielo/main/cl_names.c:34
+Cáncer	Cancer
+
+#: apps/cielo/main/cl_names.c:34
+Perros de Caza	Chiens de chasse
+
+#: apps/cielo/main/cl_names.c:34
+Can Mayor	Grand Chien
+
+#: apps/cielo/main/cl_names.c:35
+Can Menor	Petit Chien
+
+#: apps/cielo/main/cl_names.c:35
+Capricornio	Capricorne
+
+#: apps/cielo/main/cl_names.c:35
+Quilla	Carène
+
+#: apps/cielo/main/cl_names.c:36
+Casiopea	Cassiopée
+
+#: apps/cielo/main/cl_names.c:36
+Centauro	Centaure
+
+#: apps/cielo/main/cl_names.c:36
+Cefeo	Céphée
+
+#: apps/cielo/main/cl_names.c:36
+Ballena	Baleine
+
+#: apps/cielo/main/cl_names.c:37
+Camaleón	Caméléon
+
+#: apps/cielo/main/cl_names.c:37
+Compás	Compas
+
+#: apps/cielo/main/cl_names.c:37
+Paloma	Colombe
+
+#: apps/cielo/main/cl_names.c:38
+Cabellera de Berenice	Chevelure de Bérénice
+
+#: apps/cielo/main/cl_names.c:38
+Corona Austral	Couronne australe
+
+#: apps/cielo/main/cl_names.c:38
+Corona Boreal	Couronne boréale
+
+#: apps/cielo/main/cl_names.c:39
+Cuervo	Corbeau
+
+#: apps/cielo/main/cl_names.c:39
+Copa	Coupe
+
+#: apps/cielo/main/cl_names.c:39
+Cruz del Sur	Croix du Sud
+
+#: apps/cielo/main/cl_names.c:39
+Cisne	Cygne
+
+#: apps/cielo/main/cl_names.c:40
+Delfín	Dauphin
+
+#: apps/cielo/main/cl_names.c:40
+Dorado	Dorade
+
+#: apps/cielo/main/cl_names.c:40
+Dragón	Dragon
+
+#: apps/cielo/main/cl_names.c:40
+Caballito	Petit Cheval
+
+#: apps/cielo/main/cl_names.c:41
+Erídano	Éridan
+
+#: apps/cielo/main/cl_names.c:41
+Horno	Fourneau
+
+#: apps/cielo/main/cl_names.c:41
+Géminis	Gémeaux
+
+#: apps/cielo/main/cl_names.c:41
+Grulla	Grue
+
+#: apps/cielo/main/cl_names.c:42
+Hércules	Hercule
+
+#: apps/cielo/main/cl_names.c:42
+Reloj	Horloge
+
+#: apps/cielo/main/cl_names.c:42
+Hidra	Hydre
+
+#: apps/cielo/main/cl_names.c:42
+Hidra Macho	Hydre mâle
+
+#: apps/cielo/main/cl_names.c:43
+Indio	Indien
+
+#: apps/cielo/main/cl_names.c:43
+Lagarto	Lézard
+
+#: apps/cielo/main/cl_names.c:43
+Leo	Lion
+
+#: apps/cielo/main/cl_names.c:43
+León Menor	Petit Lion
+
+#: apps/cielo/main/cl_names.c:44
+Liebre	Lièvre
+
+#: apps/cielo/main/cl_names.c:44
+Libra	Balance
+
+#: apps/cielo/main/cl_names.c:44
+Lobo	Loup
+
+#: apps/cielo/main/cl_names.c:44
+Lince	Lynx
+
+#: apps/cielo/main/cl_names.c:45
+Lira	Lyre
+
+#: apps/cielo/main/cl_names.c:45
+Mesa	Table
+
+#: apps/cielo/main/cl_names.c:45
+Microscopio	Microscope
+
+#: apps/cielo/main/cl_names.c:45
+Unicornio	Licorne
+
+#: apps/cielo/main/cl_names.c:46
+Mosca	Mouche
+
+#: apps/cielo/main/cl_names.c:46
+Escuadra	Règle
+
+#: apps/cielo/main/cl_names.c:46
+Octante	Octant
+
+#: apps/cielo/main/cl_names.c:46
+Ofiuco	Ophiuchus
+
+#: apps/cielo/main/cl_names.c:47
+Orión	Orion
+
+#: apps/cielo/main/cl_names.c:47
+Pavo	Paon
+
+#: apps/cielo/main/cl_names.c:47
+Pegaso	Pégase
+
+#: apps/cielo/main/cl_names.c:47
+Perseo	Persée
+
+#: apps/cielo/main/cl_names.c:48
+Fénix	Phénix
+
+#: apps/cielo/main/cl_names.c:48
+Pintor	Peintre
+
+#: apps/cielo/main/cl_names.c:48
+Pez Austral	Poisson austral
+
+#: apps/cielo/main/cl_names.c:48
+Piscis	Poissons
+
+#: apps/cielo/main/cl_names.c:49
+Popa	Poupe
+
+#: apps/cielo/main/cl_names.c:49
+Brújula	Boussole
+
+#: apps/cielo/main/cl_names.c:49
+Retículo	Réticule
+
+#: apps/cielo/main/cl_names.c:49
+Flecha	Flèche
+
+#: apps/cielo/main/cl_names.c:50
+Sagitario	Sagittaire
+
+#: apps/cielo/main/cl_names.c:50
+Escorpio	Scorpion
+
+#: apps/cielo/main/cl_names.c:50
+Escultor	Sculpteur
+
+#: apps/cielo/main/cl_names.c:50
+Escudo	Écu
+
+#: apps/cielo/main/cl_names.c:51
+Serpiente	Serpent
+
+#: apps/cielo/main/cl_names.c:51
+Sextante	Sextant
+
+#: apps/cielo/main/cl_names.c:51
+Tauro	Taureau
+
+#: apps/cielo/main/cl_names.c:51
+Telescopio	Télescope
+
+#: apps/cielo/main/cl_names.c:52
+Triángulo	Triangle
+
+#: apps/cielo/main/cl_names.c:52
+Triángulo Austral	Triangle austral
+
+#: apps/cielo/main/cl_names.c:52
+Tucán	Toucan
+
+#: apps/cielo/main/cl_names.c:53
+Osa Mayor	Grande Ourse
+
+#: apps/cielo/main/cl_names.c:53
+Osa Menor	Petite Ourse
+
+#: apps/cielo/main/cl_names.c:53
+Vela	Voiles
+
+#: apps/cielo/main/cl_names.c:53
+Virgo	Vierge
+
+#: apps/cielo/main/cl_names.c:54
+Pez Volador	Poisson volant
+
+#: apps/cielo/main/cl_names.c:54
+Zorra	Petit Renard
+
+#: apps/cielo/main/cl_names.c:70
+Sirio	Sirius
+
+#: apps/cielo/main/cl_names.c:70
+Canopo	Canopus
+
+#: apps/cielo/main/cl_names.c:70
+Arturo	Arcturus
+
+#: apps/cielo/main/cl_names.c:70
+Proción	Procyon
+
+#: apps/cielo/main/cl_names.c:70
+Aldebarán	Aldébaran
+
+#: apps/cielo/main/cl_names.c:70
+Espiga	Spica
+
+#: apps/cielo/main/cl_names.c:70
+Pólux	Pollux
+
+#: apps/cielo/main/cl_names.c:71
+Régulo	Régulus
+
+#: apps/cielo/main/cl_names.c:71
+Cástor	Castor
+
+#: apps/cielo/main/cl_names.c:71
+Denébola	Denebola
+
+#: apps/cielo/main/cl_names.c:71
+Polar	Polaire
+
+#: apps/cielo/main/cl_names.c:71
+Alfard	Alphard
+
+#: apps/cielo/main/cl_names.c:71
+El Persa	Le Persan
+
+#: apps/cielo/main/cl_names.c:71
+Alfa Centauri	Alpha Centauri
+
+#: apps/cielo/main/cl_names.c:94
+Nebulosa del Cangrejo	Nébuleuse du Crabe
+
+#: apps/cielo/main/cl_names.c:95
+Cúmulo de la Mariposa	Amas du Papillon
+
+#: apps/cielo/main/cl_names.c:96
+Cúmulo de Ptolomeo	Amas de Ptolémée
+
+#: apps/cielo/main/cl_names.c:97
+Nebulosa de la Laguna	Nébuleuse de la Lagune
+
+#: apps/cielo/main/cl_names.c:98
+Cúmulo del Pato Salvaje	Amas du Canard sauvage
+
+#: apps/cielo/main/cl_names.c:99
+Gran Cúmulo de Hércules	Grand amas d'Hercule
+
+#: apps/cielo/main/cl_names.c:100
+Nebulosa del Águila	Nébuleuse de l'Aigle
+
+#: apps/cielo/main/cl_names.c:101
+Nebulosa Omega	Nébuleuse Oméga
+
+#: apps/cielo/main/cl_names.c:102
+Nebulosa Trífida	Nébuleuse Trifide
+
+#: apps/cielo/main/cl_names.c:103
+Cúmulo de Sagitario	Amas du Sagittaire
+
+#: apps/cielo/main/cl_names.c:104
+Nube Estelar de Sagitario	Nuage du Sagittaire
+
+#: apps/cielo/main/cl_names.c:105
+Nebulosa de la Haltera	Nébuleuse de l'Haltère
+
+#: apps/cielo/main/cl_names.c:106
+Galaxia de Andrómeda	Galaxie d'Andromède
+
+#: apps/cielo/main/cl_names.c:107
+Galaxia del Triángulo	Galaxie du Triangle
+
+#: apps/cielo/main/cl_names.c:108
+Gran Nebulosa de Orión	Nébuleuse d'Orion
+
+#: apps/cielo/main/cl_names.c:109
+El Pesebre	La Crèche
+
+#: apps/cielo/main/cl_names.c:110
+Las Pléyades	Les Pléiades
+
+#: apps/cielo/main/cl_names.c:111
+Galaxia del Remolino	Galaxie du Tourbillon
+
+#: apps/cielo/main/cl_names.c:112
+Nebulosa del Anillo	Nébuleuse de l'Anneau
+
+#: apps/cielo/main/cl_names.c:113
+Galaxia del Ojo Negro	Galaxie de l'Oeil noir
+
+#: apps/cielo/main/cl_names.c:114
+Galaxia de Bode	Galaxie de Bode
+
+#: apps/cielo/main/cl_names.c:115
+Galaxia del Cigarro	Galaxie du Cigare
+
+#: apps/cielo/main/cl_names.c:116
+Molinete Austral	Moulinet austral
+
+#: apps/cielo/main/cl_names.c:117
+Nebulosa del Búho	Nébuleuse du Hibou
+
+#: apps/cielo/main/cl_names.c:118
+Galaxia del Molinete	Galaxie du Moulinet
+
+#: apps/cielo/main/cl_names.c:119
+Galaxia del Sombrero	Galaxie du Sombrero
+
+#: apps/cielo/main/cl_names.c:127
+Cúmulo abierto	Amas ouvert
+
+#: apps/cielo/main/cl_names.c:128
+Cúmulo globular	Amas globulaire
+
+#: apps/cielo/main/cl_names.c:129
+Nebulosa difusa	Nébuleuse diffuse
+
+#: apps/cielo/main/cl_names.c:130
+Nebulosa planetaria	Nébuleuse planétaire
+
+#: apps/cielo/main/cl_names.c:131
+Galaxia espiral	Galaxie spirale
+
+#: apps/cielo/main/cl_names.c:132
+Galaxia elíptica	Galaxie elliptique
+
+#: apps/cielo/main/cl_names.c:133
+Galaxia irregular	Galaxie irrégulière
+
+#: apps/cielo/main/cl_names.c:134
+Resto de supernova	Reste de supernova
+
+#: apps/cielo/main/cl_names.c:135
+Objeto de Messier	Objet de Messier
+
+#: apps/cielo/main/cl_sat.c:143
+Sin red	Hors ligne
+
+#: apps/cielo/main/cl_sat.c:178
+Órbitas actualizadas	Orbites mises à jour
+
+#: apps/cielo/main/cl_sat.c:180
+La respuesta no trae órbitas	Pas d'orbites dans la réponse
+
+#: apps/cielo/main/cl_sat.c:184
+No se pudieron bajar las órbitas	Impossible de télécharger les orbites
+
+#: apps/cielo/main/cl_ui.c:296
+Modo nocturno	Mode nuit
+
+#: apps/cielo/main/cl_ui.c:296
+Todo en rojo, para no perder la vista	Tout en rouge, pour la vision de nuit
+
+#: apps/cielo/main/cl_ui.c:297
+Figuras de las constelaciones	Figures des constellations
+
+#: apps/cielo/main/cl_ui.c:298
+Nombres de las constelaciones	Noms des constellations
+
+#: apps/cielo/main/cl_ui.c:299
+Nombres de las estrellas	Noms des étoiles
+
+#: apps/cielo/main/cl_ui.c:300
+Vía Láctea	Voie lactée
+
+#: apps/cielo/main/cl_ui.c:301
+Objetos de Messier	Objets de Messier
+
+#: apps/cielo/main/cl_ui.c:301
+Cúmulos, nebulosas y galaxias	Amas, nébuleuses et galaxies
+
+#: apps/cielo/main/cl_ui.c:302
+Planetas	Planètes
+
+#: apps/cielo/main/cl_ui.c:303
+#: apps/cielo/main/cl_ui.c:674
+Satélites	Satellites
+
+#: apps/cielo/main/cl_ui.c:304
+Cuadrícula de altura y acimut	Grille hauteur et azimut
+
+#: apps/cielo/main/cl_ui.c:305
+Suelo	Sol
+
+#: apps/cielo/main/cl_ui.c:305
+Tapa lo que está bajo el horizonte	Masque ce qui est sous l'horizon
+
+#: apps/cielo/main/cl_ui.c:306
+Cielo de día	Ciel de jour
+
+#: apps/cielo/main/cl_ui.c:306
+El cielo se aclara con el Sol	Le ciel s'éclaircit avec le Soleil
+
+#: apps/cielo/main/cl_ui.c:307
+Cuántas estrellas	Combien d'étoiles
+
+#: apps/cielo/main/cl_ui.c:307
+Más o menos débiles que lo normal	Plus ou moins faibles que normal
+
+#: apps/cielo/main/cl_ui.c:310
+Qué se ve	Ce qui s'affiche
+
+#: apps/cielo/main/cl_ui.c:313
+#: apps/cielo/main/cl_ui.c:319
+#: apps/cielo/main/cl_ui.c:666
+Sí	Oui
+
+#: apps/cielo/main/cl_ui.c:313
+#: apps/cielo/main/cl_ui.c:319
+No	Non
+
+#: apps/cielo/main/cl_ui.c:317
+Pasadas	Passages
+
+#: apps/cielo/main/cl_ui.c:318
+Avisos de pasadas visibles	Alertes de passages visibles
+
+#: apps/cielo/main/cl_ui.c:318
+También con la app en segundo plano	Aussi avec l'app en arrière-plan
+
+#: apps/cielo/main/cl_ui.c:321
+Cuánto antes	Combien avant
+
+#: apps/cielo/main/cl_ui.c:322
+Satélites y órbitas	Satellites et orbites
+
+#: apps/cielo/main/cl_ui.c:323
+#: apps/cielo/main/cl_ui.c:423
+Lugar	Lieu
+
+#: apps/cielo/main/cl_ui.c:328
+Estrellas: Yale Bright Star Catalogue. Objetos de Messier: HEASARC (NASA). Figuras y Vía Láctea: propias de Cielo. Órbitas: CelesTrak. En la página Cielo del portal se busca el lugar por su nombre y se ven las pasadas.	Étoiles : Yale Bright Star Catalogue. Objets de Messier : HEASARC (NASA). Figures et Voie lactée : propres à Ciel. Orbites : CelesTrak. Sur la page Ciel du portail, on cherche le lieu par son nom et on voit les passages.
+
+#: apps/cielo/main/cl_ui.c:337
+Ajustes	Réglages
+
+#: apps/cielo/main/cl_ui.c:392
+Latitud entre -90 y 90, longitud entre -180 y 180	Latitude entre -90 et 90, longitude entre -180 et 180
+
+#: apps/cielo/main/cl_ui.c:395
+Mi lugar	Mon lieu
+
+#: apps/cielo/main/cl_ui.c:409
+Clima no tiene un lugar elegido	Météo n'a pas de lieu choisi
+
+#: apps/cielo/main/cl_ui.c:428
+Nombre	Nom
+
+#: apps/cielo/main/cl_ui.c:430
+Latitud (sur negativa)	Latitude (sud négatif)
+
+#: apps/cielo/main/cl_ui.c:432
+Longitud (oeste negativa)	Longitude (ouest négatif)
+
+#: apps/cielo/main/cl_ui.c:439
+Guardar	Enregistrer
+
+#: apps/cielo/main/cl_ui.c:440
+El de Clima	Celui de Météo
+
+#: apps/cielo/main/cl_ui.c:441
+En la página Cielo del portal se busca el lugar por su nombre.	Sur la page Ciel du portail, on cherche le lieu par son nom.
+
+#: apps/cielo/main/cl_ui.c:508
+Fecha y hora	Date et heure
+
+#: apps/cielo/main/cl_ui.c:522
+ene	jan
+
+#: apps/cielo/main/cl_ui.c:522
+feb	fév
+
+#: apps/cielo/main/cl_ui.c:522
+mar.	mar
+
+#: apps/cielo/main/cl_ui.c:523
+abr	avr
+
+#: apps/cielo/main/cl_ui.c:523
+may	mai
+
+#: apps/cielo/main/cl_ui.c:523
+jun	jun
+
+#: apps/cielo/main/cl_ui.c:523
+jul	jul
+
+#: apps/cielo/main/cl_ui.c:523
+ago	aoû
+
+#: apps/cielo/main/cl_ui.c:523
+sep	sep
+
+#: apps/cielo/main/cl_ui.c:523
+oct	oct
+
+#: apps/cielo/main/cl_ui.c:523
+nov	nov
+
+#: apps/cielo/main/cl_ui.c:523
+dic	déc
+
+#: apps/cielo/main/cl_ui.c:553
+Ir	OK
+
+#: apps/cielo/main/cl_ui.c:554
+Esta noche	Ce soir
+
+#: apps/cielo/main/cl_ui.c:556
+Abajo, en el cielo: las flechas mueven una hora (sostenidas, un día) y « » cambian la velocidad del tiempo, hacia adelante o hacia atrás.	En bas, dans le ciel : les flèches décalent d'une heure (maintenues, d'un jour) et « » changent la vitesse du temps, en avant ou en arrière.
+
+#: apps/cielo/main/cl_ui.c:590
+Bajando las órbitas...	Chargement des orbites...
+
+#: apps/cielo/main/cl_ui.c:609
+Hasta 12 satélites	Jusqu'à 12 satellites
+
+#: apps/cielo/main/cl_ui.c:628
+Próximas pasadas sobre 10°	Prochains passages (>10°)
+
+#: apps/cielo/main/cl_ui.c:637
+mag	mag
+
+#: apps/cielo/main/cl_ui.c:638
+visible	visible
+
+#: apps/cielo/main/cl_ui.c:638
+no visible	non visible
+
+#: apps/cielo/main/cl_ui.c:644
+Ninguna en los próximos tres días.	Aucun d'ici trois jours.
+
+#: apps/cielo/main/cl_ui.c:645
+Elegí satélites más abajo.	Choisis des satellites en bas.
+
+#: apps/cielo/main/cl_ui.c:647
+Órbitas	Orbites
+
+#: apps/cielo/main/cl_ui.c:650
+#: apps/cielo/main/cl_ui.c:651
+#: apps/cielo/main/cl_ui.c:652
+Bajadas hace	Reçues il y a
+
+#: apps/cielo/main/cl_ui.c:652
+días	jours
+
+#: apps/cielo/main/cl_ui.c:654
+Todavía no hay órbitas	Pas encore d'orbites
+
+#: apps/cielo/main/cl_ui.c:657
+Actualizar las órbitas	Actualiser les orbites
+
+#: apps/cielo/main/cl_ui.c:659
+Satélites a seguir	Satellites à suivre
+
+#: apps/cielo/main/cl_ui.c:660
+Cuando estén las órbitas aparece acá la lista para elegir.	Une fois les orbites reçues, la liste apparaît ici.
+
+#: apps/cielo/main/cielo.c
+UA	UA
