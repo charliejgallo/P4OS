@@ -13023,7 +13023,7 @@ WIDGETS	WIDGETS
 Debajo de la fecha, hasta tres. Cada uno aparece sólo cuando tiene algo para mostrar: una alarma puesta, un sensor conectado, la red Zigbee andando.	Abaixo da data, até três. Cada um aparece só quando tem algo para mostrar: um alarme ativado, um sensor conectado, a rede Zigbee funcionando.
 Zigbee: emulando	Zigbee: emulando
 Zigbee: buscando una red	Zigbee: procurando uma rede
-Zigbee: abierta para unir	Zigbee: aberta para entrar
+Zigbee: abierta para unir	Zigbee: aberta para parear
 Zigbee: 1 equipo	Zigbee: 1 dispositivo
 Zigbee: %d equipos	Zigbee: %d dispositivos
 Zigbee: no arrancó	Zigbee: não iniciou

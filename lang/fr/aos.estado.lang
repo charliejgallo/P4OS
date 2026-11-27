@@ -156,16 +156,16 @@ En pausa: no se prueba	En pause : pas de vérification
 Todavía no se probó	Pas encore vérifié
 
 #: apps/estado/main/ec_detail.c:190
-Último chequeo hace %s: el puerto abre en %s	Dernière vérification il y a %s : le port s'ouvre en %s
+Último chequeo hace %s: el puerto abre en %s	Dernière vérification il y a %s : le port s'ouvre en %s
 
 #: apps/estado/main/ec_detail.c:191
-Último chequeo hace %s: %d, contestó en %s (conectar: %s)	Dernière vérification il y a %s : %d, réponse en %s (connexion : %s)
+Último chequeo hace %s: %d, contestó en %s (conectar: %s)	Dernière vérification il y a %s : %d, réponse en %s (connexion : %s)
 
 #: apps/estado/main/ec_detail.c:193
 contestó %d	a répondu %d
 
 #: apps/estado/main/ec_detail.c:195
-Último chequeo hace %s: %s	Dernière vérification il y a %s : %s
+Último chequeo hace %s: %s	Dernière vérification il y a %s : %s
 
 #: apps/estado/main/ec_detail.c:208
 No se pudo leer el certificado (el servidor sólo habla TLS 1.3, o no es HTTPS).	Impossible de lire le certificat (le serveur ne parle que TLS 1.3, ou ce n'est pas du HTTPS).

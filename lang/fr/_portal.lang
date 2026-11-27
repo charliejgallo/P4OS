@@ -2791,7 +2791,7 @@ todavía sin catálogo	pas encore de catalogue
 Actualizaciones	Mises à jour
 
 #: components/aos_portal/web/app.js:3474
-Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Jusqu'à %s : un pack que la carte a déjà n'est pas retéléchargé
+Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Jusqu'à %s : un pack que la carte a déjà n'est pas retéléchargé
 
 #: components/aos_portal/web/app.js:3475
 Actualizar todas (%s)	Tout mettre à jour (%s)
@@ -3098,7 +3098,7 @@ sin movimiento	aucun mouvement
 agua	eau
 
 #: components/aos_portal/web/app.js:3752
-¡agua!	eau !
+¡agua!	eau !
 
 #: components/aos_portal/web/app.js:3752
 seco	sec
@@ -3163,7 +3163,7 @@ La red no tomó el pedido	Le réseau n'a pas accepté la demande
 
 #: components/aos_portal/web/app.js:3806
 #: components/aos_portal/web/app.js:3967
-No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossible de créer le réseau : le C6 a-t-il son nouveau firmware ? Boutique, Système, Firmware de la radio (C6)
+No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Impossible de créer le réseau : le C6 a-t-il son nouveau firmware ? Boutique, Système, Firmware de la radio (C6)
 
 #: components/aos_portal/web/app.js:3817
 #: components/aos_portal/web/app.js:3938
@@ -3171,7 +3171,7 @@ No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmw
 Nombre del equipo	Nom de l'appareil
 
 #: components/aos_portal/web/app.js:3820
-¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Retirer %s du réseau ? Pour l'ajouter à nouveau, il faudra le réinitialiser.
+¿Sacar %s de la red? Para volver a sumarlo hay que resetearlo.	Retirer %s du réseau ? Pour l'ajouter à nouveau, il faudra le réinitialiser.
 
 #: components/aos_portal/web/app.js:3822
 router	routeur
@@ -3201,7 +3201,7 @@ hay alguien	quelqu'un
 nadie	personne
 
 #: components/aos_portal/web/app.js:3840
-salida %d: %s	sortie %d : %s
+salida %d: %s	sortie %d : %s
 
 #: components/aos_portal/web/app.js:3840
 prendida	allumée
@@ -3225,7 +3225,7 @@ Abajo	Descendre
 Cerrar con llave	Verrouiller
 
 #: components/aos_portal/web/app.js:3886
-Ventilador: otro modo	Ventilateur : mode suivant
+Ventilador: otro modo	Ventilateur : mode suivant
 
 #: components/aos_portal/web/app.js:3892
 Esperando el control remoto... (tocá para cancelar)	En attente de la télécommande... (touchez pour annuler)
@@ -3243,10 +3243,10 @@ Guardarlo...	L'enregistrer...
 Nombre del código	Nom du code
 
 #: components/aos_portal/web/app.js:3904
-Guardados: tocá uno para mandarlo.	Enregistrés : touchez-en un pour l'envoyer.
+Guardados: tocá uno para mandarlo.	Enregistrés : touchez-en un pour l'envoyer.
 
 #: components/aos_portal/web/app.js:3907
-¿Borrar el código %s?	Supprimer le code %s ?
+¿Borrar el código %s?	Supprimer le code %s ?
 
 #: components/aos_portal/web/app.js:3907
 Código borrado	Code supprimé
@@ -3289,19 +3289,19 @@ Sumar equipos	Ajouter des appareils
 Sumar Zigbee 3.0	Ajouter Zigbee 3.0
 
 #: components/aos_portal/web/app.js:3965
-Abierta: %d s	Ouvert : %d s
+Abierta: %d s	Ouvert : %d s
 
 #: components/aos_portal/web/app.js:3966
 Cerrar	Fermer
 
 #: components/aos_portal/web/app.js:3968
-La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
+La placa arma su propia red Zigbee, con el C6 de radio, y los equipos se suman a ella: así se prueba cualquiera. Un equipo está en una sola red: para sumarlo acá hay que resetearlo (en general, el botón apretado hasta que parpadea).	La carte crée son propre réseau Zigbee, avec le C6 comme radio, et les appareils le rejoignent : c'est ainsi qu'on peut tous les essayer. Un appareil n'est que sur un réseau : pour l'ajouter ici, réinitialisez-le (en général, bouton maintenu jusqu'à ce qu'il clignote).
 
 #: components/aos_portal/web/app.js:3969
-Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Ouvert pour ajouter : réinitialisez les appareils un par un ; chacun apparaît ici quand il entre. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
+Abierta para sumar: reseteá los equipos de a uno; cada uno aparece acá cuando entra. Si es a pila, tocale el botón cada tanto mientras se configura.	Ouvert pour ajouter : réinitialisez les appareils un par un ; chacun apparaît ici quand il entre. S'il est sur pile, appuyez de temps en temps sur son bouton pendant sa configuration.
 
 #: components/aos_portal/web/app.js:3970
-Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Réseau sur le canal %s, %s appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut tarder à donner des nouvelles. Si un appareil continue de clignoter sans finir d'entrer, essayez Ajouter Zigbee 3.0.
+Red en el canal %s, %s equipos. Los valores llegan cuando el equipo los manda: uno a pila puede tardar en dar noticias. Si un equipo sigue titilando y no termina de sumarse, probá con Sumar Zigbee 3.0.	Réseau sur le canal %s, %s appareils. Les valeurs arrivent quand l'appareil les envoie : un appareil sur pile peut tarder à donner des nouvelles. Si un appareil continue de clignoter sans finir d'entrer, essayez Ajouter Zigbee 3.0.
 
 #: components/aos_portal/web/app.js:3971
 Todavía no se sumó ningún equipo.	Aucun appareil n'a encore rejoint le réseau.
@@ -3313,13 +3313,13 @@ No se pudo	Impossible
 Emular un equipo	Émuler un appareil
 
 #: components/aos_portal/web/app.js:4007
-La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La carte rejoint un autre réseau Zigbee (celui de Home Assistant) en se faisant passer pour un appareil : une lumière sur l'endpoint 1 et un capteur de température, humidité et batterie sur le 2 (fabricant P4OS, modèle P4OS-EMU-LT). On voit ainsi si le coordinateur le lit, le pilote et ce qu'il demande. Avant, dans Home Assistant : Ajouter un appareil (ZHA) ou Permettre de rejoindre (Zigbee2MQTT).
+La placa se suma a otra red Zigbee (la de Home Assistant) haciéndose pasar por un equipo: una luz en el endpoint 1 y un sensor de temperatura, humedad y batería en el 2 (fabricante P4OS, modelo P4OS-EMU-LT). Así se ve si el coordinador lo lee, lo maneja y qué le pide. Antes, en Home Assistant: Agregar dispositivo (ZHA) o Permitir unirse (Zigbee2MQTT).	La carte rejoint un autre réseau Zigbee (celui de Home Assistant) en se faisant passer pour un appareil : une lumière sur l'endpoint 1 et un capteur de température, humidité et batterie sur le 2 (fabricant P4OS, modèle P4OS-EMU-LT). On voit ainsi si le coordinateur le lit, le pilote et ce qu'il demande. Avant, dans Home Assistant : Ajouter un appareil (ZHA) ou Permettre de rejoindre (Zigbee2MQTT).
 
 #: components/aos_portal/web/app.js:4008
-Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Un réseau de la dernière fois est conservé : la carte y retourne sans qu'on l'ouvre.
+Hay una red guardada de la vez anterior: la placa vuelve a ella sin que la abran.	Un réseau de la dernière fois est conservé : la carte y retourne sans qu'on l'ouvre.
 
 #: components/aos_portal/web/app.js:4011
-La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	La carte redémarre comme appareil. Vos appareils sont conservés et reviennent avec Retour à Mon réseau. Continuer ?
+La placa se reinicia y arranca como equipo. Tus equipos quedan guardados y vuelven con Volver a Mi red. ¿Seguir?	La carte redémarre comme appareil. Vos appareils sont conservés et reviennent avec Retour à Mon réseau. Continuer ?
 
 #: components/aos_portal/web/app.js:4011
 Reiniciando para emular...	Redémarrage pour émuler...
@@ -3341,7 +3341,7 @@ Buscar otra vez	Chercher à nouveau
 
 #: components/aos_portal/web/app.js:4018
 #: components/aos_portal/web/app.js:4030
-Volviendo a la red propia: la placa se reinicia	Retour au réseau propre : la carte redémarre
+Volviendo a la red propia: la placa se reinicia	Retour au réseau propre : la carte redémarre
 
 #: components/aos_portal/web/app.js:4018
 #: components/aos_portal/web/app.js:4030
@@ -3357,19 +3357,19 @@ con su propia clave de enlace	avec sa propre clé de lien
 sin clave propia todavía	pas encore de clé propre
 
 #: components/aos_portal/web/app.js:4022
-Home Assistant pide que se identifique: %s s	Home Assistant demande de s'identifier : %s s
+Home Assistant pide que se identifique: %s s	Home Assistant demande de s'identifier : %s s
 
 #: components/aos_portal/web/app.js:4024
-Luz: prendida	Lumière : allumée
+Luz: prendida	Lumière : allumée
 
 #: components/aos_portal/web/app.js:4024
-Luz: apagada	Lumière : éteinte
+Luz: apagada	Lumière : éteinte
 
 #: components/aos_portal/web/app.js:4029
 Reportar ahora	Signaler maintenant
 
 #: components/aos_portal/web/app.js:4032
-¿Seguro? Tocá otra vez	Sûr ? Touchez encore
+¿Seguro? Tocá otra vez	Sûr ? Touchez encore
 
 #: components/aos_portal/web/app.js:4032
 Salir de la red	Quitter le réseau
@@ -3384,7 +3384,7 @@ Canal %s	Canal %s
 emulando un equipo en otra red, canal %s	émule un appareil sur un autre réseau, canal %s
 
 #: components/aos_portal/web/app.js:4084
-emulando un equipo: buscando una red	émule un appareil : recherche d'un réseau
+emulando un equipo: buscando una red	émule un appareil : recherche d'un réseau
 
 #: components/aos_portal/web/app.js:4085
 la red Zigbee de la placa, canal %s	le réseau Zigbee de la carte, canal %s
@@ -3411,10 +3411,10 @@ Radio	Radio
 Firmware del C6	Firmware du C6
 
 #: components/aos_portal/web/app.js:4093
-La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio ne répond pas : le C6 a besoin de son nouveau firmware (3.0.9-154.15). Sur la carte : 1) Boutique, Système, Firmware de la radio (C6) : le télécharger. 2) Réglages, Mise à jour, Installer sur le C6. Environ 15 s sans Wi-Fi, puis la carte redémarre seule.
+La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). En la placa: 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	La radio ne répond pas : le C6 a besoin de son nouveau firmware (3.0.9-154.15). Sur la carte : 1) Boutique, Système, Firmware de la radio (C6) : le télécharger. 2) Réglages, Mise à jour, Installer sur le C6. Environ 15 s sans Wi-Fi, puis la carte redémarre seule.
 
 #: components/aos_portal/web/app.js:4094
-El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Le C6 a planté avec la radio allumée et l'a laissée éteinte ; analyser ou écouter la réessaie.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Le C6 a planté avec la radio allumée et l'a laissée éteinte ; analyser ou écouter la réessaie.
 
 #: components/aos_portal/web/app.js:4096
 #: components/aos_portal/web/app.js:4142
@@ -3436,7 +3436,7 @@ coordinador	coordinateur
 %s paquetes · %s dBm · hace %s s	%s paquets · %s dBm · il y a %s s
 
 #: components/aos_portal/web/app.js:4113
-Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écoutez un canal avec du trafic.
+Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écoutez un canal avec du trafic.
 
 #: components/aos_portal/web/app.js:4114
 Olvidarlos	Les oublier
@@ -3448,7 +3448,7 @@ Capturas en la tarjeta	Captures sur la carte
 Ninguna todavía.	Aucune pour l'instant.
 
 #: components/aos_portal/web/app.js:4122
-Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Elles s'ouvrent dans Wireshark : chaque paquet porte son canal, son RSSI et son LQI.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Elles s'ouvrent dans Wireshark : chaque paquet porte son canal, son RSSI et son LQI.
 
 #: components/aos_portal/web/app.js:4137
 Canales	Canaux
@@ -3460,7 +3460,7 @@ Escanear	Scanner
 A fondo (2 s por canal)	En profondeur (2 s par canal)
 
 #: components/aos_portal/web/app.js:4141
-La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	La barre est l'énergie du canal ; le nombre, les paquets entendus. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets.
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	La barre est l'énergie du canal ; le nombre, les paquets entendus. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets.
 
 #: components/aos_portal/web/app.js:4143
 Guardar para Wireshark	Enregistrer pour Wireshark

@@ -252,7 +252,7 @@ Escuchar	Écouter
 Abierta en la placa	Ouverte sur la carte
 
 #: apps/infrarrojo/web/infrarrojo.js:296
-Va por el emisor Zigbee: %s	Part par l'émetteur Zigbee : %s
+Va por el emisor Zigbee: %s	Part par l'émetteur Zigbee : %s
 
 #: apps/infrarrojo/web/infrarrojo.js:296
 Mandado: %s	Envoyé : %s
@@ -512,7 +512,7 @@ Luces	Lumières
 Probar	Essayer
 
 #: apps/infrarrojo/web/infrarrojo.js:289
-¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.	De quelle télécommande s'agit-il ? Cochez jusqu'à quatre captures de touches différentes de la même télécommande : deux ou trois distinguent mieux le modèle.
+¿De qué control es? Marcá hasta cuatro capturas de botones distintos del mismo control: con dos o tres se distingue mejor el modelo.	De quelle télécommande s'agit-il ? Cochez jusqu'à quatre captures de touches différentes de la même télécommande : deux ou trois distinguent mieux le modèle.
 
 #: apps/infrarrojo/web/infrarrojo.js:292
 Buscando… %s %%	Recherche… %s %%
