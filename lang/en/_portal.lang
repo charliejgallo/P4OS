@@ -2817,3 +2817,24 @@ Lo último	Latest
 
 #: components/aos_portal/web/app.js
 Todas	All
+
+#: components/aos_portal/web/app.js:1415
+Start	Start
+
+#: components/aos_portal/web/app.js:1425
+Celular	Phone
+
+#: components/aos_portal/web/app.js:1432
+Jugador %s	Player %s
+
+#: components/aos_portal/web/app.js:1432
+Ya hay cuatro mandos en la placa	The board has four pads already
+
+#: components/aos_portal/web/app.js:1438
+Sin conexión: reintentando…	No connection: retrying…
+
+#: components/aos_portal/web/app.js:1477
+Mando	Pad
+
+#: components/aos_portal/web/app.js:1477
+El celular es un mando más para los juegos de la placa.	The phone is one more pad for the board's games.

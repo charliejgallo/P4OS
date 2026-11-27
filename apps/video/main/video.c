@@ -166,9 +166,9 @@ void vd_ui_opened(vd_t *v)
     v->paused = true;               /* vd_play_pause() starts the clock and the sound */
     vd_play_pause(v, false);
     aos_hal_log("video", "%s: %ux%u, %u frames at %u.%02u fps, %u KB biggest, sound %s",
-                v->files[v->cur].name, (unsigned)v->vw, (unsigned)v->vh, (unsigned)v->frames,
+                v->cur >= 0 ? v->files[v->cur].name : "?", (unsigned)v->vw, (unsigned)v->vh, (unsigned)v->frames,
                 (unsigned)(v->rate / v->scale), (unsigned)(v->rate * 100u / v->scale % 100),
-                (unsigned)(v->avi.max_size / 1024), v->has_audio ? v->audio_path : "none");
+                (unsigned)(v->h264 ? 0 : v->avi.max_size / 1024), v->has_audio ? v->audio_path : "none");
     vd_ui_controls(v, true);
     vd_ui_update(v);
 }
@@ -503,7 +503,7 @@ static void open_result(vd_t *v)
     }
     const char *why = v->open_state == OPEN_NOMEM  ? _("No hay memoria para este video")
                     : v->open_state == OPEN_NOTASK ? _("No hay lugar para la tarea de video")
-                    :                                _("No es un AVI de MJPEG que se pueda leer");
+                    :                                _("No es un video que se pueda leer");
     vd_play_stop(v);
     v->playing = false;
     vd_ui_message(v, why);
@@ -585,6 +585,23 @@ static void show(aos_app_t *self, void *inst)
     v->hidden    = false;
     v->reblit    = true;
     v->bar_again = true;            /* the runtime sets the status bar after show() */
+    /* opened on a file (Grabador's recordings, Archivos): its folder's
+     * videos, and that one playing */
+    const char *arg = aos_ui_take_open_arg("aos.video");
+    if (arg && strrchr(arg, '/')) {         /* a path: the simulator's card is relative */
+        char dir[160];
+        snprintf(dir, sizeof dir, "%s", arg);
+        char *slash = strrchr(dir, '/');
+        const char *name = strrchr(arg, '/') + 1;
+        if (slash) *slash = 0;
+        if (v->in_player) leave_player(v);
+        else aos_hal_worker_stop();
+        vd_list_scan_dir(v, dir);
+        build(v);
+        vd_list_thumbs_start(v);
+        for (int i = 0; i < v->count; i++)
+            if (!strcmp(v->files[i].name, name)) { vd_ui_open_file(v, i); break; }
+    }
 }
 
 static bool resize(aos_app_t *self, void *inst, lv_obj_t *root)
@@ -598,7 +615,7 @@ static bool resize(aos_app_t *self, void *inst, lv_obj_t *root)
         if (v->open_state == OPEN_OK) {
             v->show_next = true;    /* the frame, turned, once the worker has one */
         } else if (!v->playing) {
-            vd_ui_message(v, _("No es un AVI de MJPEG que se pueda leer"));
+            vd_ui_message(v, _("No es un video que se pueda leer"));
         }
     }
     v->bar_again = true;

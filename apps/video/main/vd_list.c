@@ -38,7 +38,7 @@ static bool has_ext(const char *name, const char *ext)
 static bool scan_cb(const aos_dir_entry_t *e, void *ctx)
 {
     vd_t *v = ctx;
-    if (e->dir || e->name[0] == '.' || !has_ext(e->name, ".avi")) {
+    if (e->dir || e->name[0] == '.' || !(has_ext(e->name, ".avi") || has_ext(e->name, ".mp4"))) {
         return true;                /* ("._x.avi": macOS's shadow files, hidden) */
     }
     if (v->count >= VD_MAX_FILES) {
@@ -59,6 +59,19 @@ void vd_list_scan(vd_t *v)
 {
     const char *root = aos_hal_path_sd_root();
     snprintf(v->dir, sizeof v->dir, "%s/videos", root ? root : "");
+    vd_list_scan_dir(v, v->dir);
+}
+
+/* Another folder's videos (a file opened from another app: Grabador's
+ * recordings, one in Archivos). */
+void vd_list_scan_dir(vd_t *v, const char *dir)
+{
+    if (dir != v->dir) snprintf(v->dir, sizeof v->dir, "%s", dir);
+    for (int i = 0; i < v->count; i++) {
+        if (v->files[i].thumb) aos_hal_image_free(v->files[i].thumb);
+    }
+    memset(v->files, 0, sizeof v->files);
+    v->thumbs_done = false;
     v->count = 0;
     aos_hal_dir_scan(v->dir, scan_cb, v);
     qsort(v->files, (size_t)v->count, sizeof v->files[0], by_name);
@@ -97,6 +110,37 @@ static void thumbs_worker(void *arg)
         }
         char path[256];
         snprintf(path, sizeof path, "%s/%s", v->dir, f->name);
+        if (has_ext(f->name, ".mp4")) {
+            /* the times from its table; the picture from the .jpg beside it
+             * when there is one (Grabador leaves it), none otherwise */
+            int w = 0, h = 0;
+            uint32_t ms = 0, n = 0;
+            vd_mp4_t *m = vd_mp4_open(path, &w, &h, &ms, &n);
+            if (!m) { f->info = -1; continue; }
+            vd_mp4_free(m);
+            f->w = (uint16_t)w;
+            f->h = (uint16_t)h;
+            f->ms = ms;
+            f->fps_x100 = ms ? (uint32_t)((uint64_t)n * 100000 / ms) : 0;
+            f->audio = false;
+            char jpg[260];
+            snprintf(jpg, sizeof jpg, "%s", path);
+            char *dot = strrchr(jpg, '.');
+            int tw = 0, th = 0;
+            if (dot) {
+                strcpy(dot, ".jpg");
+                FILE *probe = fopen(jpg, "rb");
+                if (probe) {
+                    fclose(probe);
+                    f->thumb = aos_hal_image_decode(jpg, 0, 0, VD_THUMB_W, VD_THUMB_H, false, &tw, &th, NULL, NULL);
+                }
+            }
+            f->tw = tw;
+            f->th = th;
+            __sync_synchronize();
+            f->info = 1;
+            continue;
+        }
         vd_avi_t a;
         if (!vd_avi_open(&a, path, false)) {
             f->info = -1;
@@ -162,7 +206,7 @@ static void fill_row(vd_t *v, vd_file_t *f)
         return;
     }
     if (f->info < 0) {
-        lv_label_set_text(f->meta, _("No es un AVI de MJPEG"));
+        lv_label_set_text(f->meta, _("No es un video que se pueda leer"));
         lv_obj_set_style_text_color(f->meta, AOS_C_ORANGE, 0);
         return;
     }

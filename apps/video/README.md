@@ -15,6 +15,23 @@ cd sim && P4_SIM_SCRIPT="wait 800; open aos.video" ./build-video/p4os_sim
 tools/build_apps.sh video                     # apps/video/build/video.so -> /apps on the card
 ```
 
+## MP4 with H.264 (since 0.35)
+
+`vd_mp4.c` reads MP4s with one video track (what Grabador records, and any
+as simple: `avcC`, `stsz`, `stco`/`co64`, `stts`, `stss`, `stsc`), each sample
+as Annex B with the SPS and PPS before each key frame. The worker feeds the
+HAL's H.264 decoder NAL by NAL, in order: after a seek the reader starts at
+the key frame before the target and the frames up to it are decoded and not
+shown; when it falls behind it skips whole groups, to the key frame before
+where it should be. The picture (I420) is turned to RGB565 on the CPU into
+the slot's own buffer and goes to the screen like a JPEG's. No sound. The
+board's decoder is software (Constrained Baseline only): 640 x 480 plays at
+full speed, 1280 x 720 at about 8 frames a second.
+
+Another app opens a file in Video with `aos_ui_open_app_with("aos.video",
+path)`: the list becomes that file's folder and the file plays (Grabador's
+"Ver").
+
 ## Making the videos
 
 An **AVI of baseline 4:2:0 JPEG frames**, and beside it a **WAV** (16-bit

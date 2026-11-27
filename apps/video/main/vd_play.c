@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #define VD_WORKER_STACK  8192
 #define VD_READER_STACK  6144
@@ -63,11 +64,18 @@ static void reader(void *arg)
             gen   = g;
             __sync_synchronize();
             next  = v->req_frame;
+            /* H.264 decodes from a key frame: the ones before the frame
+             * asked for are decoded and not shown (the worker) */
+            if (v->h264) next = vd_mp4_key_at(v->mp4, next);
         }
-        /* Behind? The frames in between are never read. */
+        /* Behind? The frames in between are never read. With H.264 only
+         * whole groups can be skipped: to the key frame before the target. */
         if (v->skip_gen == gen && v->skip_to > next) {
-            v->r_skipped += v->skip_to - next;
-            next = v->skip_to;
+            uint32_t to = v->h264 ? vd_mp4_key_at(v->mp4, v->skip_to) : v->skip_to;
+            if (to > next) {
+                v->r_skipped += to - next;
+                next = to;
+            }
         }
         if (next >= v->frames) {
             v->eof_gen = gen;
@@ -81,7 +89,13 @@ static void reader(void *arg)
             continue;
         }
         uint64_t t0 = aos_hal_uptime_ms();
-        int n = vd_avi_read(&v->avi, next, p->buf, &p->jpeg);
+        int n;
+        if (v->h264) {
+            n = vd_mp4_sample(v->mp4, next, p->buf, (int)vd_mp4_buf_size(v->mp4), NULL, NULL);
+            p->jpeg = p->buf;
+        } else {
+            n = vd_avi_read(&v->avi, next, p->buf, &p->jpeg);
+        }
         if (n <= 0) {
             /* 0: an empty chunk, the previous frame stays up; -1: a bad one */
             if (n < 0) {
@@ -146,15 +160,48 @@ static void stages_close(vd_t *v)
         v->pkts[i].state = PKT_FREE;
     }
     vd_avi_close(&v->avi);
+    vd_mp4_free(v->mp4);
+    v->mp4 = NULL;
+    if (v->dec) {
+        aos_hal_h264_close(v->dec);
+        v->dec = NULL;
+    }
+}
+
+static bool has_ext(const char *name, const char *ext)
+{
+    const char *dot = strrchr(name, '.');
+    return dot && strcasecmp(dot, ext) == 0;
+}
+
+/* an MP4: the frames' times from its table, the rate as the mean */
+static bool open_mp4(vd_t *v)
+{
+    int w = 0, h = 0;
+    uint32_t ms = 0, n = 0;
+    v->mp4 = vd_mp4_open(v->path, &w, &h, &ms, &n);
+    if (!v->mp4 || !n || !w || !h) return false;
+    v->dec = aos_hal_h264_open();
+    if (!v->dec) return false;
+    v->h264 = true;
+    v->rate = n * 1000u;
+    v->scale = ms ? ms : n * 100u;
+    v->frames = n;
+    v->vw = (uint16_t)w;
+    v->vh = (uint16_t)h;
+    memset(&v->avi, 0, sizeof v->avi);
+    return true;
 }
 
 static bool stages_open(vd_t *v)
 {
-    if (!vd_avi_open(&v->avi, v->path, true)) {
+    v->h264 = false;
+    bool mp4 = has_ext(v->path, ".mp4");
+    if (mp4 ? !open_mp4(v) : !vd_avi_open(&v->avi, v->path, true)) {
         v->open_state = OPEN_BAD;
         return false;
     }
-    size_t sz = vd_avi_buf_size(&v->avi);
+    size_t sz = mp4 ? vd_mp4_buf_size(v->mp4) : vd_avi_buf_size(&v->avi);
     for (int i = 0; i < VD_PKTS; i++) {
         v->pkts[i].state = PKT_FREE;
         v->pkts[i].buf   = aos_hal_io_alloc(sz);
@@ -163,11 +210,13 @@ static bool stages_open(vd_t *v)
             return false;
         }
     }
-    v->rate   = v->avi.rate;
-    v->scale  = v->avi.scale;
-    v->frames = v->avi.frames;
-    v->vw     = v->avi.width;
-    v->vh     = v->avi.height;
+    if (!mp4) {
+        v->rate   = v->avi.rate;
+        v->scale  = v->avi.scale;
+        v->frames = v->avi.frames;
+        v->vw     = v->avi.width;
+        v->vh     = v->avi.height;
+    }
     v->r_stop  = false;
     v->r_alive = true;
     if (!aos_hal_thread_start("vd_read", reader, v, VD_READER_STACK, VD_READER_PRIO)) {
@@ -178,6 +227,90 @@ static bool stages_open(vd_t *v)
     __sync_synchronize();
     v->open_state = OPEN_OK;
     return true;
+}
+
+/* ---- H.264 ------------------------------------------------------------------ */
+
+/* I420 (BT.601, limited range, as H.264 cameras send it) to RGB565 in LVGL's
+ * order, at the picture's size: the blit scales it. */
+static void i420_to_rgb565(const aos_h264_pic_t *pic, uint16_t *out, int w, int h)
+{
+    for (int y = 0; y < h; y++) {
+        const uint8_t *yr = pic->y + (size_t)y * pic->stride_y;
+        const uint8_t *ur = pic->u + (size_t)(y >> 1) * pic->stride_uv;
+        const uint8_t *vr = pic->v + (size_t)(y >> 1) * pic->stride_uv;
+        uint16_t *o = out + (size_t)y * w;
+        for (int x = 0; x < w; x++) {
+            int c = ((int)yr[x] - 16) * 298;
+            int d = (int)ur[x >> 1] - 128, e = (int)vr[x >> 1] - 128;
+            int r = (c + 409 * e + 128) >> 8;
+            int g = (c - 100 * d - 208 * e + 128) >> 8;
+            int b = (c + 516 * d + 128) >> 8;
+            r = r < 0 ? 0 : r > 255 ? 255 : r;
+            g = g < 0 ? 0 : g > 255 ? 255 : g;
+            b = b < 0 ? 0 : b > 255 ? 255 : b;
+            o[x] = (uint16_t)((r >> 3) << 11 | (g >> 2) << 5 | (b >> 3));
+        }
+    }
+}
+
+/* One sample: every NAL of it through the decoder, in order (a P frame needs
+ * the one before), and the picture into the slot when it is to be shown:
+ * not before the frame asked for (the run from the key frame after a seek),
+ * not when it is already late. The packet is let go here. */
+static void h264_packet(vd_t *v, vd_pkt_t *p, vd_slot_t *s, uint32_t gen)
+{
+    uint64_t t0 = aos_hal_uptime_ms();
+    bool late = v->skip_gen == gen && (uint32_t)p->index < v->skip_to;
+    bool show = (uint32_t)p->index >= v->req_frame && !late;
+    if (late) v->w_skipped++;
+    if (show) s->state = SLOT_BUSY;
+    const uint8_t *d = p->jpeg;
+    int n = p->len, i = 0;
+    aos_h264_pic_t pic;
+    bool got = false;
+    while (i + 3 < n) {
+        /* the next start code, and the one after it */
+        int a = i;
+        while (a + 3 < n && !(d[a] == 0 && d[a + 1] == 0 && (d[a + 2] == 1 || (d[a + 2] == 0 && d[a + 3] == 1)))) a++;
+        if (a + 3 >= n) break;
+        int b = a + (d[a + 2] == 1 ? 3 : 4);
+        while (b + 3 < n && !(d[b] == 0 && d[b + 1] == 0 && (d[b + 2] == 1 || (d[b + 2] == 0 && d[b + 3] == 1)))) b++;
+        if (b + 3 >= n) b = n;
+        aos_h264_pic_t q;
+        int r = aos_hal_h264_decode(v->dec, d + a, b - a, &q);
+        if (r > 0) { pic = q; got = true; }
+        else if (r < 0) v->w_errors++;
+        i = b;
+    }
+    int32_t index = p->index;
+    uint32_t read_ms = p->read_ms;
+    __sync_synchronize();
+    p->state = PKT_FREE;
+    if (!show) return;
+    int w = v->vw, h = v->vh;
+    if (!got || pic.width < w || pic.height < h) {
+        s->state = SLOT_FREE;
+        return;
+    }
+    size_t need = ((size_t)w * h * 2 + 127) & ~(size_t)127;
+    if (need > s->own_cap) {
+        aos_hal_retro_free(s->own);
+        s->own = aos_hal_retro_alloc(need);
+        s->own_cap = s->own ? need : 0;
+    }
+    if (!s->own) {
+        s->state = SLOT_FREE;
+        return;
+    }
+    i420_to_rgb565(&pic, s->own, w, h);
+    finish(s, s->own, w, h, w);
+    s->index     = index;
+    s->gen       = gen;
+    s->read_ms   = read_ms;
+    s->decode_ms = (uint32_t)(aos_hal_uptime_ms() - t0);
+    __sync_synchronize();
+    s->state = SLOT_READY;
 }
 
 /* Decodes the packets in order into free slots, until told to stop. Never
@@ -197,7 +330,8 @@ static void worker(void *arg)
             }
             __sync_synchronize();
             uint32_t gen  = v->req_gen;
-            bool     late = p->gen == gen && v->skip_gen == gen && (uint32_t)p->index < v->skip_to;
+            /* late H.264 is still decoded (the next frames need it), not shown */
+            bool     late = !v->h264 && p->gen == gen && v->skip_gen == gen && (uint32_t)p->index < v->skip_to;
             if (p->gen != gen || late) {
                 if (late) {
                     v->w_skipped++;
@@ -210,6 +344,11 @@ static void worker(void *arg)
             if (!s) {
                 aos_hal_worker_sleep(2);
                 v->w_wait_ms += 2;
+                continue;
+            }
+            if (v->h264) {
+                h264_packet(v, p, s, gen);
+                take = (take + 1) % VD_PKTS;
                 continue;
             }
             s->state = SLOT_BUSY;
@@ -273,6 +412,7 @@ void vd_play_stop(vd_t *v)
         if (s->jpeg) {
             aos_hal_jpeg_close(s->jpeg);
         }
+        aos_hal_retro_free(s->own);
         memset(s, 0, sizeof *s);
     }
     v->cur_slot = -1;

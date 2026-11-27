@@ -11798,3 +11798,9 @@ Malla	Mesh
 
 #: apps/cielo  (nombre de app)
 Cielo	Sky
+
+#: components/aos_portal/aos_portal.c:1611
+Celular	Phone
+
+#: apps/grabador  (nombre de app)
+Grabador	Recorder

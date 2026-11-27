@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "video.c" "vd_play.c" "vd_list.c" "vd_avi.c"
+    SRCS "video.c" "vd_play.c" "vd_list.c" "vd_avi.c" "vd_mp4.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

@@ -69,6 +69,7 @@
 #include "lvgl.h"
 
 #include "vd_avi.h"
+#include "vd_mp4.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -95,6 +96,8 @@ typedef struct {
     uint32_t        gen;
     uint32_t        read_ms, decode_ms;
     lv_image_dsc_t  dsc;        /* the LVGL path (simulator) */
+    uint16_t       *own;        /* an H.264 picture, turned to RGB565 here (aos_hal_retro_alloc) */
+    size_t          own_cap;
 } vd_slot_t;
 
 typedef struct {
@@ -198,6 +201,9 @@ typedef struct {
 
     /* ---- the stages ---- */
     vd_avi_t    avi;            /* the worker's and the reader's */
+    bool        h264;           /* an MP4 (vd_mp4.c): frames decoded in order from a key frame */
+    vd_mp4_t   *mp4;
+    aos_h264_t *dec;
     vd_pkt_t    pkts[VD_PKTS];
     vd_slot_t   slots[VD_SLOTS];
     volatile bool r_stop;
@@ -231,6 +237,7 @@ uint32_t vd_duration_ms(const vd_t *v);
 
 /* ---- vd_list.c ---- */
 void vd_list_scan(vd_t *v);
+void vd_list_scan_dir(vd_t *v, const char *dir);
 void vd_list_build(vd_t *v);
 void vd_list_tick(vd_t *v);                 /* puts what the worker found on the rows */
 bool vd_list_thumbs_start(vd_t *v);

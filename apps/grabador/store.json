@@ -1,0 +1,17 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Una webcam USB como cámara de seguridad: graba cuando algo se mueve, con los segundos de antes, y la deja mirar como cámara IP por RTSP.",
+  "en": "A USB webcam as a security camera: it records when something moves, with the seconds before, and lets you watch it as an IP camera over RTSP."
+ },
+ "desc": {
+  "es": "Enchufá una webcam USB a la placa y armala: mira la imagen todo el tiempo y, cuando algo se mueve, graba un video H.264 en la tarjeta con el codificador por hardware de la placa, empezando unos segundos antes del movimiento y siguiendo un rato después. Cada grabación queda con su primera imagen, se ven por día y se reproducen en la app Video.\n\nLa sensibilidad, las zonas de la imagen que no hay que mirar (una calle, un árbol), los horarios, el tamaño, la calidad y el espacio máximo (las más viejas se borran solas) se eligen en la app o en su página del portal, que también muestra la cámara en vivo y deja bajar las grabaciones.\n\nCon el bot de Telegram de la placa prendido, avisa en el chat cuando empieza a grabar. Además es una cámara IP: rtsp://placa.local:8554/ entra en Frigate, VLC o la app Cámaras.\n\nArmada, arranca con la placa: después de un corte de luz vuelve a vigilar sola.",
+  "en": "Plug a USB webcam into the board and arm it: it watches the picture all the time and, when something moves, records an H.264 video to the card with the board's hardware encoder, starting a few seconds before the motion and going on a while after. Each recording keeps its first picture, they are listed by day and play in the Video app.\n\nThe sensitivity, the parts of the picture not to watch (a street, a tree), the hours, the size, the quality and the most space to use (the oldest go by themselves) are set in the app or on its page in the portal, which also shows the camera live and lets you download the recordings.\n\nWith the board's Telegram bot on, it says so in the chat when it starts recording. It is an IP camera too: rtsp://board.local:8554/ goes into Frigate, VLC or the Cámaras app.\n\nArmed, it starts with the board: after a power cut it goes back to watching by itself."
+ },
+ "shots": [
+  "app-grabador.png",
+  "app-grabador-zones.png",
+  "app-grabador-clips.png",
+  "app-grabador-settings.png"
+ ]
+}

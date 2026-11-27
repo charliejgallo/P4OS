@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Grabador** (new, `apps/grabador`): a USB webcam as a security camera.
+  It records an H.264 MP4 when something moves, from a few seconds before,
+  with zones, hours, sensitivity and a space limit; a note through the
+  Telegram bot; an IP camera over RTSP for Frigate, VLC or Cámaras; its page
+  in the portal with the camera live and the recordings to download. Armed,
+  it starts with the board.
+- **Video plays MP4 with H.264** (Grabador's recordings, and any
+  Constrained Baseline MP4), and another app can open a file in it.
 - **The phone as a pad** (`docs/GAMEPAD.md`): the portal's new Mando page
   is a stick and A, B, L, R and Start; the board reads it as one more pad,
   so a phone can be the second player of the two-player games with no

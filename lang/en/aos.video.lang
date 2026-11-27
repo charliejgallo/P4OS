@@ -42,3 +42,6 @@ No hay memoria para este video	Not enough memory for this video
 #: apps/video/main/video.c:506
 #: apps/video/main/video.c:601
 No es un AVI de MJPEG que se pueda leer	Not a readable MJPEG AVI
+
+#: apps/video/main/video.c:618
+No es un video que se pueda leer	Not a video it can play
