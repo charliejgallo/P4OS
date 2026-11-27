@@ -79,6 +79,8 @@ GLYPHS = [
     "arrow-expand-horizontal", "lan-connect", "lan-disconnect",
     # MQTT, Red, Monitor, Archivos, Claude
     "send", "message-text-outline", "pound", "radar", "ip-network-outline", "lan-pending",
+    # the status bar: the Zigbee radio, by its mode (aos_statusbar.c)
+    "zigbee",
     "router-wireless", "cpu-64-bit", "file-outline", "file-document-outline", "file-image-outline",
     "file-music-outline", "file-code-outline", "folder-open", "content-copy", "content-cut",
     "content-paste", "sort", "package-variant", "chart-areaspline", "arrow-up", "arrow-left",

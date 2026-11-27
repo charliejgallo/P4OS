@@ -7,7 +7,9 @@
  * with aos_ui_statusbar_style().
  *
  * The right-hand glyphs, left to right: what apps working in the background
- * show (aos_ui_status_icon_set(): a logger logging, up to four), the
+ * show (aos_ui_status_icon_set(): a logger logging) and the system's
+ * services (the Zigbee radio by its mode, the Telegram bot: their provider
+ * is aos_apps' aos_sys_status.c), up to six in all, the
  * modules on the header (when any is active), Home Assistant, the SD card,
  * Wi-Fi with its bars, and the
  * battery - only when a battery is connected (AOS_CAP_BATTERY); on the bench
@@ -27,7 +29,7 @@ static lv_obj_t *s_wifi, *s_sd, *s_ha, *s_mod, *s_bat, *s_bat_pct;
 
 /* The apps' own glyphs: set from any thread (only these fields change),
  * drawn from the UI's tick, five times a second */
-#define APP_ICONS 4
+#define APP_ICONS 6
 static struct {
     char      id[40];
     char      glyph[8];                 /* one glyph of aos_sym_28, UTF-8 */
@@ -48,6 +50,8 @@ bool aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb)
         if (at >= 0) { s_app[at].id[0] = 0; s_app_dirty = true; }
         return true;
     }
+    /* the same again (the services set theirs every second): nothing to redraw */
+    if (at >= 0 && !strcmp(s_app[at].glyph, glyph) && s_app[at].rgb == rgb) return true;
     if (at < 0) at = free_at;
     if (at < 0 || strlen(glyph) >= sizeof s_app[0].glyph) return false;
     snprintf(s_app[at].id, sizeof s_app[at].id, "%s", app_id);
@@ -58,6 +62,9 @@ bool aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb)
 }
 
 void aos_statusbar_app_gone(const char *app_id) { aos_ui_status_icon_set(app_id, NULL, 0); }
+
+static void (*s_provider)(void);
+void aos_ui_status_provider(void (*fn)(void)) { s_provider = fn; }
 
 static lv_obj_t *glyph(lv_obj_t *parent)
 {
@@ -140,6 +147,12 @@ static void set_glyph(lv_obj_t *l, const char *g, lv_opa_t opa)
 
 void aos_statusbar_apps_tick(void)
 {
+    static uint32_t last;
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    if (s_provider && s_bar && now - last >= 1000) {
+        last = now;
+        s_provider();
+    }
     if (!s_app_dirty || !s_bar) return;
     s_app_dirty = false;
     for (int i = 0; i < APP_ICONS; i++) {

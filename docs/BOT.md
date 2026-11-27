@@ -29,6 +29,10 @@ A client with your own account is the Mensajes app (a card app, MTProto).
    Up to eight chats. Anyone else who writes to the bot is told how to
    link, once every ten minutes, and nothing more.
 
+While it is on, a robot in the status bar says how it is: blue online,
+grey connecting or without network, orange with a problem (no token, a
+token Telegram refuses, another error).
+
 ## Commands
 
 Each one can be switched off in the app or the portal. The menu Telegram

@@ -44,7 +44,9 @@ void aos_apps_register_builtin(void)
     aos_app_soon_register();
     aos_ha_widget_register();       /* "widget ha" on the home screen */
     aos_claude_widget_register();   /* "widget claude" */
-    aos_bot_boot();                 /* the Telegram bot's service: waits for its switch, token and network */
+    aos_bot_boot();
+    void aos_sys_status_start(void);
+    aos_sys_status_start();         /* Zigbee's and the bot's glyphs in the status bar */                 /* the Telegram bot's service: waits for its switch, token and network */
 }
 
 /* The services of the built-in apps that must run with the app closed (the

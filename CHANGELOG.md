@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **The status bar shows the Zigbee radio and the bot**, next to the apps'
+  own glyphs (Datalog logging, a printer printing), through the same
+  `aos_ui_status_icon_set`: Zigbee green with the board's network up,
+  orange while it is open for devices to join, purple while emulating a
+  device (paler while it looks for a network), grey starting, red if it
+  could not start, cyan scanning or sniffing; the bot's robot blue online,
+  grey connecting, orange with a problem. Up to six glyphs instead of four.
+- **Infrarrojo finds the remote with several buttons and one kind**: up to
+  four buttons of one remote searched together, televisions, air
+  conditioners, fans or lights, each result tried or added with a tap, on
+  the board and from the portal's page.
 - **The board's Telegram bot** (`docs/BOT.md`): a bot of your own
   (@BotFather) through which the board answers in a chat — its state, a
   screenshot, the Zigbee devices with buttons, the IR codes kept with a

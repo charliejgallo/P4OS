@@ -121,6 +121,11 @@ void        aos_ui_boot_start_run(void);
  * does too. Up to four apps at once: false when the bar is full. From any
  * thread: the bar draws it at its next tick, within 200 ms. */
 bool        aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb);
+/* The system services' glyphs (the Zigbee radio, the Telegram bot): fn is
+ * called from the bar's tick, on LVGL's thread, once a second, and sets
+ * them with aos_ui_status_icon_set under ids of their own ("sys.*"). One
+ * provider; aos_apps registers it (aos_sys_status.c). */
+void        aos_ui_status_provider(void (*fn)(void));
 /* The system's clipboard (aos_textsel.c): plain UTF-8 text, up to 16 KB,
  * shared by every text field (hold one: Cortar, Copiar, Pegar), the apps
  * and the portal (/api/clip). set(NULL or "") empties it. get copies it

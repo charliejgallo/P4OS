@@ -199,6 +199,7 @@ LV_FONT_DECLARE(aos_sym_72);
 #define AOS_SYM_RADAR                        "\xF3\xB0\x90\xB7"
 #define AOS_SYM_IP_NETWORK_OUTLINE           "\xF3\xB0\xB2\x90"
 #define AOS_SYM_LAN_PENDING                  "\xF3\xB0\x8C\x9A"
+#define AOS_SYM_ZIGBEE                       "\xF3\xB0\xB5\x81"
 #define AOS_SYM_ROUTER_WIRELESS              "\xF3\xB0\x91\xA9"
 #define AOS_SYM_CPU_64_BIT                   "\xF3\xB0\xBB\xA0"
 #define AOS_SYM_FILE_OUTLINE                 "\xF3\xB0\x88\xA4"
