@@ -974,7 +974,7 @@ bn_ui_t *bn_ui_new(lv_obj_t *root)
 
     u->ld_quit = false;
     u->ld_done = false;
-    u->ld_running = aos_hal_thread_start("bn_load", loader_main, u, 12288, 3);
+    u->ld_running = aos_hal_thread_start("bn_load", loader_main, u, 16384, 3);
     if (!u->ld_running) aos_hal_log(BN_TAG, "no loader thread");
 
     /* the examples the grid names and the card does not have are made
