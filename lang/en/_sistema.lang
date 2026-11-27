@@ -11186,3 +11186,573 @@ La radio: armando la red Zigbee	The radio: starting the Zigbee network
 La radio, sin usar	The radio, idle
 No se pudo armar la red: ¿el C6 tiene su firmware nuevo? Tienda, Sistema, Firmware de la radio (C6)	Could not start the network: does the C6 have its new firmware? Store, System, The radio's firmware (C6)
 La radio no contesta: el C6 necesita su firmware nuevo (3.0.9-154.15). 1) Tienda, Sistema, Firmware de la radio (C6): bajarlo. 2) Ajustes, Actualización, Instalar en el C6. Son unos 15 s sin Wi-Fi y la placa se reinicia sola.	The radio does not answer: the C6 needs its new firmware (3.0.9-154.15). 1) Store, System, The radio's firmware (C6): get it. 2) Settings, Update, Install on the C6. About 15 s without Wi-Fi, and the board restarts by itself.
+
+#: components/aos_portal/aos_portal_bot.c:177
+Eso no parece un token de bot (número:letras)	That doesn't look like a bot token (number:letters)
+
+#: components/aos_apps/aos_app_bot.c:226
+El token del bot	The bot's token
+
+#: components/aos_apps/aos_app_bot.c:295
+Falta el token	No token yet
+
+#: components/aos_apps/aos_app_bot.c:296
+Esperando la red	Waiting for the network
+
+#: components/aos_apps/aos_app_bot.c:297
+Conectando con Telegram…	Connecting to Telegram…
+
+#: components/aos_apps/aos_app_bot.c:298
+En línea	Online
+
+#: components/aos_apps/aos_bot.c:1219
+Telegram no reconoce el token	Telegram doesn't recognise the token
+
+#: components/aos_apps/aos_app_bot.c:300
+Con problemas, reintentando	Having trouble, retrying
+
+#: components/aos_apps/aos_app_bot.c:325
+Bot de Telegram	Telegram bot
+
+#: components/aos_apps/aos_app_bot.c:334
+%u pedidos recibidos · %u mensajes mandados	%u requests received · %u messages sent
+
+#: components/aos_apps/aos_app_bot.c:339
+TOKEN	TOKEN
+
+#: components/aos_apps/aos_app_bot.c:342
+Falta	Missing
+
+#: components/aos_apps/aos_app_bot.c:343
+Cargar	Load
+
+#: components/aos_apps/aos_app_bot.c:344
+En Telegram, @BotFather y /newbot te dan el token. También se puede pegar desde el portal, en la página Bot. Nunca se vuelve a mostrar.	In Telegram, @BotFather and /newbot give you the token. It can also be pasted from the portal, on the Bot page. It is never shown again.
+
+#: components/aos_apps/aos_app_bot.c:348
+CHATS VINCULADOS	LINKED CHATS
+
+#: components/aos_apps/aos_app_bot.c:355
+Olvidar	Forget
+
+#: components/aos_apps/aos_app_bot.c:360
+Mandale al bot: /vincular %u   (vale %u:%02u más)	Send the bot: /link %u   (valid %u:%02u more)
+
+#: components/aos_apps/aos_app_bot.c:365
+Nadie todavía. Sólo los chats vinculados pueden hablar con la placa.	Nobody yet. Only linked chats can talk to the board.
+
+#: components/aos_apps/aos_app_bot.c:366
+Vincular un chat	Link a chat
+
+#: components/aos_apps/aos_bot.c:830
+/estado: cómo está la placa	/status: how the board is doing
+
+#: components/aos_apps/aos_app_bot.c:374
+/captura: la pantalla	/screenshot: the screen
+
+#: components/aos_apps/aos_app_bot.c:375
+/zigbee, /prender, /apagar	/zigbee, /on, /off
+
+#: components/aos_apps/aos_app_bot.c:376
+/ir: los códigos IR de Zigbee	/ir: the Zigbee IR codes
+
+#: components/aos_apps/aos_app_bot.c:377
+/aviso: un aviso en la pantalla	/notice: a notice on the screen
+
+#: components/aos_apps/aos_app_bot.c:378
+/reglas: verlas y pausarlas	/rules: see and pause them
+
+#: components/aos_apps/aos_app_bot.c:379
+Las apps pueden mandar mensajes	Apps may send messages
+
+#: components/aos_apps/aos_app_bot.c:391
+REGLAS	RULES
+
+#: components/aos_apps/aos_app_bot.c:407
+Una regla manda un mensaje o una captura, prende o apaga algo, cuando pasa algo: una puerta que se abre, una hora, un aviso que llega.	A rule sends a message or a screenshot, or switches something on or off, when something happens: a door opens, an hour comes, a notification arrives.
+
+#: components/aos_apps/aos_app_bot.c:570
+Nueva regla	New rule
+
+#: components/aos_apps/aos_app_bot.c:415
+LO ÚLTIMO	LATEST
+
+#: components/aos_apps/aos_app_bot.c:465
+El valor	The value
+
+#: components/aos_apps/aos_app_bot.c:471
+Sólo los avisos de…	Only notifications from…
+
+#: components/aos_apps/aos_app_bot.c:471
+WhatsApp, Home Assistant… (vacío: todos)	WhatsApp, Home Assistant… (empty: all)
+
+#: components/aos_apps/aos_app_bot.c:662
+El mensaje	The message
+
+#: components/aos_apps/aos_app_bot.c:477
+{dispositivo} {valor} {hora} {placa} {app} {titulo} {texto}	{device} {value} {time} {board} {app} {title} {text}
+
+#: components/aos_apps/aos_app_bot.c:484
+Elegí un dispositivo	Choose a device
+
+#: components/aos_apps/aos_app_bot.c:487
+Elegí al menos un día	Choose at least one day
+
+#: components/aos_apps/aos_app_bot.c:489
+Elegí qué prender o apagar	Choose what to switch
+
+#: components/aos_apps/aos_app_bot.c:492
+Elegí un código IR	Choose an IR code
+
+#: components/aos_portal/aos_portal_bot.c:226
+No pude guardar la regla	Couldn't save the rule
+
+#: components/aos_apps/aos_app_bot.c:570
+La regla	The rule
+
+#: components/aos_apps/aos_app_bot.c:575
+Cuando	When
+
+#: components/aos_apps/aos_app_bot.c:576
+Cambia un dispositivo Zigbee	A Zigbee device changes
+
+#: components/aos_apps/aos_app_bot.c:576
+Es una hora	It is a certain time
+
+#: components/aos_apps/aos_app_bot.c:577
+Arranca la placa	The board starts
+
+#: components/aos_apps/aos_app_bot.c:577
+Llega un aviso	A notification arrives
+
+#: components/aos_apps/aos_app_bot.c:580
+No hay dispositivos Zigbee: se suman en la app Zigbee.	No Zigbee devices: add them in the Zigbee app.
+
+#: components/aos_apps/aos_app_bot.c:586
+Qué mira	What it watches
+
+#: components/aos_apps/aos_app_bot.c:587
+Prendido o apagado	On or off
+
+#: components/aos_apps/aos_app_bot.c:588
+Abierta, movimiento, agua (alarma)	Open, motion, water (alarm)
+
+#: components/aos_apps/aos_app_bot.c:588
+Temperatura (°C)	Temperature (°C)
+
+#: components/aos_apps/aos_app_bot.c:588
+Humedad (%)	Humidity (%)
+
+#: components/aos_apps/aos_app_bot.c:589
+Batería (%)	Battery (%)
+
+#: components/aos_apps/aos_app_bot.c:589
+Nivel (%)	Level (%)
+
+#: components/aos_apps/aos_app_bot.c:589
+Un evento: un botón, un control	An event: a button, a remote
+
+#: components/aos_apps/aos_app_bot.c:595
+cuando cambia	when it changes
+
+#: components/aos_apps/aos_app_bot.c:594
+cuando pasa a…	when it becomes…
+
+#: components/aos_apps/aos_app_bot.c:595
+cuando pasa de…	when it goes above…
+
+#: components/aos_apps/aos_app_bot.c:596
+cuando baja de…	when it goes below…
+
+#: components/aos_apps/aos_app_bot.c:596
+cuando llega a…	when it reaches…
+
+#: components/aos_apps/aos_app_bot.c:602
+alarma (abierta…)	alarm (open…)
+
+#: components/aos_apps/aos_bot.c:629
+no hay nadie	nobody there
+
+#: components/aos_apps/aos_app_bot.c:603
+normal (cerrada…)	normal (closed…)
+
+#: components/aos_apps/aos_bot.c:740
+do	Su
+
+#: components/aos_apps/aos_bot.c:740
+lu	Mo
+
+#: components/aos_apps/aos_bot.c:740
+ma	Tu
+
+#: components/aos_apps/aos_bot.c:740
+mi	We
+
+#: components/aos_apps/aos_bot.c:740
+ju	Th
+
+#: components/aos_apps/aos_bot.c:740
+vi	Fr
+
+#: components/aos_apps/aos_bot.c:740
+sá	Sa
+
+#: components/aos_apps/aos_app_bot.c:633
+De qué app (vacío: todas)	From which app (empty: all)
+
+#: components/aos_apps/aos_app_bot.c:634
+Todas	All
+
+#: components/aos_apps/aos_app_bot.c:638
+Hacer	Do
+
+#: components/aos_apps/aos_app_bot.c:639
+Mandar un mensaje	Send a message
+
+#: components/aos_apps/aos_app_bot.c:639
+Mandar una captura	Send a screenshot
+
+#: components/aos_apps/aos_app_bot.c:640
+Prender un dispositivo	Switch a device on
+
+#: components/aos_apps/aos_app_bot.c:640
+Apagar un dispositivo	Switch a device off
+
+#: components/aos_apps/aos_app_bot.c:640
+Cambiar un dispositivo	Toggle a device
+
+#: components/aos_apps/aos_app_bot.c:640
+Mandar un código IR	Send an IR code
+
+#: components/aos_apps/aos_app_bot.c:643
+No hay dispositivos que se prendan y apaguen.	No devices that switch on and off.
+
+#: components/aos_apps/aos_app_bot.c:650
+No hay códigos IR guardados (app Zigbee, emisor IR).	No IR codes kept (Zigbee app, IR blaster).
+
+#: components/aos_apps/aos_app_bot.c:662
+Con este texto	With this text
+
+#: components/aos_apps/aos_app_bot.c:663
+El de siempre (tocá para escribir otro)	The usual one (tap to write another)
+
+#: components/aos_apps/aos_app_bot.c:665
+Como mucho, una vez cada	At most once every
+
+#: components/aos_apps/aos_app_bot.c:669
+30 segundos	30 seconds
+
+#: components/aos_apps/aos_app_bot.c:669
+15 minutos	15 minutes
+
+#: components/aos_apps/aos_app_bot.c:669
+1 hora	1 hour
+
+#: components/aos_apps/aos_bot.c:1306
+No hay memoria	Out of memory
+
+#: components/aos_apps/aos_bot.c:344
+No pude conectar con %.60s	Couldn't connect to %.60s
+
+#: components/aos_apps/aos_bot.c:397
+Se cortó la conexión	The connection dropped
+
+#: components/aos_apps/aos_bot.c:420
+Telegram no contestó	Telegram didn't answer
+
+#: components/aos_apps/aos_bot.c:469
+La respuesta llegó cortada	The answer came cut short
+
+#: components/aos_apps/aos_bot.c:509
+Telegram contestó algo que no entiendo	Telegram answered something I don't understand
+
+#: components/aos_apps/aos_bot.c:532
+La cola de salida está llena: se perdió un mensaje	The outbox is full: a message was lost
+
+#: components/aos_apps/aos_bot.c:625
+hay movimiento	motion
+
+#: components/aos_apps/aos_bot.c:626
+hay agua	water
+
+#: components/aos_apps/aos_bot.c:651
+batería 	battery 
+
+#: components/aos_apps/aos_bot.c:654
+(sin noticias)	(no news)
+
+#: components/aos_apps/aos_bot.c:677
+Hora: %s · encendida hace %ud %02uh %02um\n	Time: %s · up %ud %02uh %02um\n
+
+#: components/aos_apps/aos_bot.c:680
+Red: %s, %d dBm\n	Network: %s, %d dBm\n
+
+#: components/aos_apps/aos_bot.c:680
+cable	cable
+
+#: components/aos_apps/aos_bot.c:682
+Memoria libre: %u KB interna, %u KB PSRAM\n	Free memory: %u KB internal, %u KB PSRAM\n
+
+#: components/aos_apps/aos_bot.c:684
+En pantalla: %s\n	On screen: %s\n
+
+#: components/aos_apps/aos_bot.c:684
+el inicio	the home screen
+
+#: components/aos_apps/aos_bot.c:686
+Zigbee: %d dispositivos\n	Zigbee: %d devices\n
+
+#: components/aos_apps/aos_bot.c:688
+Batería: %d %%\n	Battery: %d %%\n
+
+#: components/aos_apps/aos_bot.c:699
+alarma (abierta, movimiento, agua)	alarm (open, motion, water)
+
+#: components/aos_apps/aos_bot.c:705
+un evento (botón, control)	an event (button, remote)
+
+#: components/aos_apps/aos_bot.c:728
+Cuando cambia %s de %s	When %s of %s changes
+
+#: components/aos_apps/aos_bot.c:730
+Cuando %s de %s pasa de %g	When %s of %s goes above %g
+
+#: components/aos_apps/aos_bot.c:732
+Cuando %s de %s baja de %g	When %s of %s goes below %g
+
+#: components/aos_apps/aos_bot.c:734
+Cuando %s de %s es %s	When %s of %s is %s
+
+#: components/aos_apps/aos_bot.c:737
+Cuando %s de %s es %g	When %s of %s is %g
+
+#: components/aos_apps/aos_bot.c:742
+todos los días	every day
+
+#: components/aos_apps/aos_bot.c:748
+A las %02d:%02d, %s	At %02d:%02d, %s
+
+#: components/aos_apps/aos_bot.c:751
+Cuando arranca la placa	When the board starts
+
+#: components/aos_apps/aos_bot.c:753
+Cuando llega un aviso de \"%s\"	When a notification from \"%s\" arrives
+
+#: components/aos_apps/aos_bot.c:754
+Cuando llega un aviso	When a notification arrives
+
+#: components/aos_apps/aos_bot.c:757
+mandar un mensaje	send a message
+
+#: components/aos_apps/aos_bot.c:758
+mandar una captura	send a screenshot
+
+#: components/aos_apps/aos_bot.c:761
+prender %s	switch %s on
+
+#: components/aos_apps/aos_bot.c:762
+apagar %s	switch %s off
+
+#: components/aos_apps/aos_bot.c:762
+cambiar %s	toggle %s
+
+#: components/aos_apps/aos_bot.c:764
+mandar el código IR \"%s\"	send the IR code \"%s\"
+
+#: components/aos_apps/aos_bot.c:828
+Soy %s. Esto sé hacer:\n	I'm %s. This is what I can do:\n
+
+#: components/aos_apps/aos_bot.c:831
+/captura: lo que muestra la pantalla	/screenshot: what the screen shows
+
+#: components/aos_apps/aos_bot.c:832
+/zigbee: los dispositivos, con botones	/zigbee: the devices, with buttons
+
+#: components/aos_apps/aos_bot.c:833
+/prender <nombre>, /apagar <nombre>	/on <name>, /off <name>
+
+#: components/aos_apps/aos_bot.c:834
+/ir: los códigos IR guardados	/ir: the IR codes kept
+
+#: components/aos_apps/aos_bot.c:835
+/aviso <texto>: un aviso en la pantalla	/notice <text>: a notice on the screen
+
+#: components/aos_apps/aos_bot.c:836
+/reglas: las reglas, para prenderlas y apagarlas	/rules: the rules, to switch them on and off
+
+#: components/aos_apps/aos_bot.c:846
+No hay dispositivos Zigbee (o la red Zigbee no está andando).	No Zigbee devices (or the Zigbee network isn't running).
+
+#: components/aos_apps/aos_bot.c:847
+Dispositivos Zigbee:	Zigbee devices:
+
+#: components/aos_apps/aos_bot.c:888
+¿Qué prendo? /prender <nombre>	Switch what on? /on <name>
+
+#: components/aos_apps/aos_bot.c:888
+¿Qué apago? /apagar <nombre>	Switch what off? /off <name>
+
+#: components/aos_apps/aos_bot.c:891
+No encuentro \"%s\" entre los que se prenden y apagan.	I can't find \"%s\" among the ones that switch on and off.
+
+#: components/aos_apps/aos_bot.c:895
+Prendo %s.	Switching %s on.
+
+#: components/aos_apps/aos_bot.c:895
+Apago %s.	Switching %s off.
+
+#: components/aos_apps/aos_bot.c:895
+No pude mandarle la orden a %s.	Couldn't send the order to %s.
+
+#: components/aos_apps/aos_bot.c:911
+Mando \"%s\".	Sending \"%s\".
+
+#: components/aos_apps/aos_bot.c:911
+No pude mandar \"%s\".	Couldn't send \"%s\".
+
+#: components/aos_apps/aos_bot.c:916
+No hay un código IR que se llame \"%s\".	There is no IR code called \"%s\".
+
+#: components/aos_apps/aos_bot.c:920
+No hay códigos IR guardados. Se aprenden en la app Zigbee, con un emisor IR.	No IR codes kept. They are learned in the Zigbee app, with an IR blaster.
+
+#: components/aos_apps/aos_bot.c:930
+Los códigos IR guardados:	The IR codes kept:
+
+#: components/aos_apps/aos_bot.c:940
+No hay reglas. Se arman en la app Bot de la placa o en su página del portal.	No rules. They are made in the board's Bot app or on its portal page.
+
+#: components/aos_apps/aos_bot.c:941
+Las reglas:	The rules:
+
+#: components/aos_apps/aos_bot.c:949
+Pausar %d	Pause %d
+
+#: components/aos_apps/aos_bot.c:949
+Activar %d	Resume %d
+
+#: components/aos_apps/aos_bot.c:961
+¿Qué aviso? /aviso <texto>	What notice? /notice <text>
+
+#: components/aos_apps/aos_bot.c:971
+Listo, está en la pantalla.	Done, it's on the screen.
+
+#: components/aos_apps/aos_bot.c:994
+Ya hay ocho chats vinculados: olvidá alguno en la app Bot.	Eight chats are linked already: forget one in the Bot app.
+
+#: components/aos_apps/aos_bot.c:995
+Ese código no sirve. Abrí la app Bot en la placa, tocá Vincular un chat y mandame el número que muestra.	That code won't do. Open the Bot app on the board, tap Link a chat and send me the number it shows.
+
+#: components/aos_apps/aos_bot.c:996
+Chat vinculado: %s	Chat linked: %s
+
+#: components/aos_apps/aos_bot.c:997
+Vinculado. Hola, %s.	Linked. Hi, %s.
+
+#: components/aos_apps/aos_bot.c:1015
+Este chat no está vinculado con la placa. En la placa: app Bot, Vincular un chat; después mandame /vincular y el número que muestra.	This chat isn't linked to the board. On the board: Bot app, Link a chat; then send me /link and the number it shows.
+
+#: components/aos_apps/aos_bot.c:1028
+Este chat ya está vinculado.	This chat is linked already.
+
+#: components/aos_apps/aos_bot.c:1033
+%s pidió /%s	%s asked /%s
+
+#: components/aos_apps/aos_bot.c:1049
+No conozco ese comando (o está apagado en la app Bot). /ayuda dice cuáles hay.	I don't know that command (or it is off in the Bot app). /help lists them.
+
+#: components/aos_apps/aos_bot.c:1063
+Este chat no está vinculado	This chat isn't linked
+
+#: components/aos_apps/aos_bot.c:1076
+Prendido	On
+
+#: components/aos_apps/aos_bot.c:1076
+No pude mandar la orden	Couldn't send the order
+
+#: components/aos_apps/aos_bot.c:1077
+%s tocó %s	%s tapped %s
+
+#: components/aos_apps/aos_bot.c:1077
+prender	on
+
+#: components/aos_apps/aos_bot.c:1083
+Mando \"%s\"	Sending \"%s\"
+
+#: components/aos_apps/aos_bot.c:1083
+No pude mandarlo	Couldn't send it
+
+#: components/aos_apps/aos_bot.c:1099
+Regla %d activada	Rule %d resumed
+
+#: components/aos_apps/aos_bot.c:1099
+Regla %d en pausa	Rule %d paused
+
+#: components/aos_portal/aos_portal_bot.c:243
+Esa regla ya no está	That rule is gone
+
+#: components/aos_apps/aos_bot.c:1102
+Eso ya no está	That is gone
+
+#: components/aos_apps/aos_bot.c:1136
+Hablo con comandos: /ayuda dice cuáles.	I speak in commands: /help lists them.
+
+#: components/aos_apps/aos_bot.c:1228
+No pude hablar con Telegram	Couldn't talk to Telegram
+
+#: components/aos_apps/aos_bot.c:1206
+En línea como @%s	Online as @%s
+
+#: components/aos_apps/aos_bot.c:1222
+Otro programa usa este bot (un webhook u otro getUpdates)	Another program uses this bot (a webhook or another getUpdates)
+
+#: components/aos_apps/aos_bot.c:1332
+Qué sé hacer	What I can do
+
+#: components/aos_apps/aos_bot.c:1333
+Cómo está la placa	How the board is doing
+
+#: components/aos_apps/aos_bot.c:1334
+Lo que muestra la pantalla	What the screen shows
+
+#: components/aos_apps/aos_bot.c:1335
+Los dispositivos Zigbee	The Zigbee devices
+
+#: components/aos_apps/aos_bot.c:1336
+Los códigos IR guardados	The IR codes kept
+
+#: components/aos_apps/aos_bot.c:1337
+Un aviso en la pantalla	A notice on the screen
+
+#: components/aos_apps/aos_bot.c:1338
+Las reglas	The rules
+
+#: components/aos_apps/aos_bot.c:1383
+No pude sacar la captura (hace falta la tarjeta).	Couldn't take the screenshot (it needs the card).
+
+#: components/aos_apps/aos_bot.c:1409
+Telegram no aceptó un mensaje: %.50s	Telegram refused a message: %.50s
+
+#: components/aos_apps/aos_bot.c:1490
+✅ {placa} arrancó	✅ {board} started
+
+#: components/aos_apps/aos_bot.c:1497
+Regla %d: %.70s	Rule %d: %.70s
+
+#: components/aos_apps/aos_bot.c:1638
+No pude mandar: %.60s	Couldn't send: %.60s
+
+#: components/aos_apps/aos_bot.c:1700
+Bot prendido	Bot on
+
+#: components/aos_apps/aos_bot.c:1700
+Bot apagado	Bot off
+
+#: components/aos_apps/aos_bot.c:1731
+Token nuevo guardado	New token saved
+
+#: components/aos_apps/aos_bot.c:1731
+Token borrado	Token erased
+
+#: components/aos_apps/aos_app_bot.c:736  (nombre de app)
+Bot	Bot

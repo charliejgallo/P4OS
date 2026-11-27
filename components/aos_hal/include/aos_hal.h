@@ -1338,6 +1338,11 @@ enum {
     AOS_BLE_EV_INDICATE,
     AOS_BLE_EV_WRITE,               /* a write with response came back */
     AOS_BLE_EV_SUBSCRIBE,           /* the CCCD write came back */
+    AOS_BLE_EV_PASSKEY,             /* pairing: the device shows a PIN, answer with
+                                       aos_hal_ble_gatt_passkey (since 0.35) */
+    AOS_BLE_EV_SECURITY,            /* pairing or encryption ended: status 0 the link is
+                                       encrypted (data[0] 1 if authenticated, data[1] 1 if
+                                       bonded), otherwise NimBLE's code (since 0.35) */
 };
 
 typedef struct {
@@ -1352,8 +1357,8 @@ typedef struct {
 } aos_ble_gatt_ev_t;
 
 /* Connects (stopping the scan meanwhile, which comes back by itself),
- * exchanges the MTU and discovers everything. Pairing is not offered: the
- * bonds' store is the phone's. */
+ * exchanges the MTU and discovers everything. Pairing, when the device
+ * wants it, is asked apart: aos_hal_ble_gatt_pair below. */
 bool aos_hal_ble_gatt_connect(const uint8_t addr[6], uint8_t addr_type);
 void aos_hal_ble_gatt_disconnect(void);
 /* reason: why it FAILED or why the link went (NimBLE's codes; 0x208 the
@@ -1371,6 +1376,22 @@ bool aos_hal_ble_gatt_write(uint16_t handle, const void *data, size_t len, bool 
 bool aos_hal_ble_gatt_subscribe(uint16_t value_handle, int mode);
 /* Answers, notifications and errors, oldest first, off a ring of 64. */
 int  aos_hal_ble_gatt_events(aos_ble_gatt_ev_t *out, int max);
+
+/* Pairing with the device the client is connected to (since 0.35), for the
+ * ones that keep their characteristics behind encryption: a Meshtastic node,
+ * a lock, a watch. Asked once READY. A device bonded before only encrypts
+ * again (no PIN); a new one pairs: if it shows a PIN, AOS_BLE_EV_PASSKEY
+ * arrives and the app asks the user for it; at the end, AOS_BLE_EV_SECURITY.
+ * The keys are kept (bonded) unless forgotten. A device that lost its keys
+ * (reflashed) is paired again once by itself. */
+bool aos_hal_ble_gatt_pair(void);
+/* The PIN the device shows (0..999999), after AOS_BLE_EV_PASSKEY. */
+bool aos_hal_ble_gatt_passkey(uint32_t passkey);
+/* The link is encrypted now. */
+bool aos_hal_ble_gatt_secure(void);
+/* Drops the keys kept for that device (the next pairing asks for a PIN
+ * again). The phone's and the computer's are not touched. */
+bool aos_hal_ble_gatt_forget(const uint8_t addr[6], uint8_t addr_type);
 
 /* --------------------------------------------------------------------------
  * Crypto: the pieces a pairing or key-exchange protocol is made of

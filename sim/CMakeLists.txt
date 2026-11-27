@@ -192,6 +192,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_access.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_claude.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_mqtt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_bot.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_sysmon.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_system.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_macropad.c

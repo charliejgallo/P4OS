@@ -96,6 +96,9 @@ void aos_ble_scan_init(void);       /* after nimble_port_init */
 void aos_ble_scan_deinit(void);     /* before nimble_port_deinit */
 void aos_ble_scan_synced(void);
 void aos_ble_scan_reset(void);
+/* a bond made by the apps' GATT client, not the phone's or the computer's */
+bool aos_ble_scan_is_device_bond(uint8_t type, const uint8_t val[6]);  /* NimBLE's order */
+void aos_ble_scan_bonds_cleared(void);  /* every bond erased at once */
 
 
 #ifdef __cplusplus

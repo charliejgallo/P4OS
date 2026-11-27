@@ -872,6 +872,7 @@ static int value_of(const gattr_t *a, uint8_t *v)
 }
 
 static bool gatt_ready(void) { return s_gstate == AOS_BLE_GATT_READY; }
+static bool s_secure_sim, s_pin_wanted;     /* pairing, below */
 
 bool aos_hal_ble_gatt_connect(const uint8_t addr[6], uint8_t addr_type)
 {
@@ -885,10 +886,61 @@ bool aos_hal_ble_gatt_connect(const uint8_t addr[6], uint8_t addr_type)
     memset(s_sub, 0, sizeof s_sub);
     s_ev_r = s_ev_w;
     s_nus_pending = false;
+    s_secure_sim = s_pin_wanted = false;
     return true;
 }
 
 void aos_hal_ble_gatt_disconnect(void) { s_gstate = AOS_BLE_GATT_IDLE; s_gdev = NULL; }
+
+/* Pairing, as a node with a screen would: a new one shows a PIN (here
+ * always 123456, said in the log), a bonded one only encrypts again. The
+ * bonds last while the simulator runs. */
+#define SIM_PIN 123456
+static bool s_bond[64];
+
+static int dev_index(void) { return s_gdev ? (int)(s_gdev - DEV) : -1; }
+
+bool aos_hal_ble_gatt_pair(void)
+{
+    if (s_gstate != AOS_BLE_GATT_READY) return false;
+    int i = dev_index();
+    if (s_secure_sim || (i >= 0 && s_bond[i])) {
+        s_secure_sim = true;
+        uint8_t info[2] = { 1, 1 };
+        ev_put(AOS_BLE_EV_SECURITY, 0, 0, info, 2);
+        return true;
+    }
+    uint8_t info[1] = { 0 };
+    s_pin_wanted = true;
+    printf("[ble] sim: the device shows the PIN %06d\n", SIM_PIN);
+    ev_put(AOS_BLE_EV_PASSKEY, 0, 0, info, 1);
+    return true;
+}
+
+bool aos_hal_ble_gatt_passkey(uint32_t passkey)
+{
+    if (s_gstate != AOS_BLE_GATT_READY || !s_pin_wanted) return false;
+    s_pin_wanted = false;
+    if (passkey != SIM_PIN) {
+        ev_put(AOS_BLE_EV_SECURITY, 0, 0x501, NULL, 0);    /* NimBLE: passkey entry failed */
+        return true;
+    }
+    int i = dev_index();
+    if (i >= 0 && i < 64) s_bond[i] = true;
+    s_secure_sim = true;
+    uint8_t info[2] = { 1, 1 };
+    ev_put(AOS_BLE_EV_SECURITY, 0, 0, info, 2);
+    return true;
+}
+
+bool aos_hal_ble_gatt_secure(void) { return s_gstate == AOS_BLE_GATT_READY && s_secure_sim; }
+
+bool aos_hal_ble_gatt_forget(const uint8_t addr[6], uint8_t addr_type)
+{
+    (void)addr_type;
+    for (int i = 0; i < NDEV && i < 64; i++) if (!memcmp(DEV[i].addr, addr, 6)) s_bond[i] = false;
+    return true;
+}
 
 static void gatt_run(void)
 {

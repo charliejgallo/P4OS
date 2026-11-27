@@ -1293,10 +1293,9 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             s_pair_wanted = true;
             ESP_LOGI(TAG, "pairing, code %06u", (unsigned)s_pair_code);
         } else {
-            /* With io_cap DISPLAY_YESNO nothing else should arrive. If it
-             * does, the phone does not support secure connections and
-             * negotiated legacy pairing: better to cut than to accept
-             * blindly. */
+            /* With secure connections the phone and the computer always
+             * get numeric comparison. Anything else means legacy pairing:
+             * better to cut than to accept blindly. */
             ESP_LOGW(TAG, "the phone asked for method %d, we do not do it",
                      event->passkey.params.action);
             ble_gap_terminate(event->passkey.conn_handle,
@@ -1442,7 +1441,12 @@ bool aos_ble_start(void)
     /* Numeric comparison: there is a screen to show the number and touch to
      * say yes, which is the most secure combination this board allows and also
      * the only one where the user has to type nothing. */
-    ble_hs_cfg.sm_io_cap = BLE_HS_IO_DISPLAY_YESNO;
+    /* A keyboard and a screen: with the phone and the computer (secure
+     * connections) it is numeric comparison, as with DISPLAY_YESNO; it also
+     * lets the apps' GATT client type the PIN a device shows (a Meshtastic
+     * node, aos_ble_scan.c), which with DISPLAY_YESNO fell to Just Works and
+     * an unauthenticated link the device refuses. */
+    ble_hs_cfg.sm_io_cap = BLE_HS_IO_KEYBOARD_DISPLAY;
     ble_hs_cfg.sm_sc     = 1;       /* secure connections (LE Secure) */
     ble_hs_cfg.sm_mitm   = 1;       /* man-in-the-middle protection */
     ble_hs_cfg.sm_bonding = 1;      /* store the keys */
@@ -1674,9 +1678,15 @@ bool aos_ble_bonded(void)
         aos_hal_pref_get_i32("bt_bond", &v);
         return v != 0;
     }
-    int count = 0;
-    if (ble_store_util_count(BLE_STORE_OBJ_TYPE_PEER_SEC, &count) != 0) {
+    /* the phone's and the computer's: the devices an app bonded through
+     * the GATT client (aos_ble_scan.c) are not counted */
+    ble_addr_t peers[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int n = 0, count = 0;
+    if (ble_store_util_bonded_peers(peers, &n, MYNEWT_VAL(BLE_STORE_MAX_BONDS)) != 0) {
         return false;
+    }
+    for (int i = 0; i < n; i++) {
+        if (!aos_ble_scan_is_device_bond(peers[i].type, peers[i].val)) count++;
     }
     aos_hal_pref_set_i32("bt_bond", count > 0 ? 1 : 0);
     return count > 0;
@@ -1691,7 +1701,18 @@ void aos_ble_forget(void)
     if (s_conn != SIN_CONN) {
         ble_gap_terminate(s_conn, BLE_ERR_REM_USER_CONN_TERM);
     }
-    ble_store_clear();
+    /* the phone's and the computer's keys; the ones an app made with a
+     * device through the GATT client stay (aos_ble_scan.c) */
+    ble_addr_t peers[MYNEWT_VAL(BLE_STORE_MAX_BONDS)];
+    int n = 0;
+    if (ble_store_util_bonded_peers(peers, &n, MYNEWT_VAL(BLE_STORE_MAX_BONDS)) == 0) {
+        for (int i = 0; i < n; i++) {
+            if (!aos_ble_scan_is_device_bond(peers[i].type, peers[i].val)) ble_store_util_delete_peer(&peers[i]);
+        }
+    } else {
+        ble_store_clear();
+        aos_ble_scan_bonds_cleared();
+    }
     limpiar_conexion();
     advertise();
     ESP_LOGI(TAG, "keys erased");

@@ -1,3 +1,4 @@
+#include "aos_bot.h"
 #include "aos_apps.h"
 #include "aos_ui.h"
 #include "aos_backup.h"
@@ -25,6 +26,7 @@ void aos_apps_register_builtin(void)
         aos_app_bench_get,
         aos_app_files_get,
         aos_app_mqtt_get,
+        aos_app_bot_get,
         aos_app_net_get,
         aos_app_sysmon_get,
         aos_app_claude_get,
@@ -42,6 +44,7 @@ void aos_apps_register_builtin(void)
     aos_app_soon_register();
     aos_ha_widget_register();       /* "widget ha" on the home screen */
     aos_claude_widget_register();   /* "widget claude" */
+    aos_bot_boot();                 /* the Telegram bot's service: waits for its switch, token and network */
 }
 
 /* The services of the built-in apps that must run with the app closed (the

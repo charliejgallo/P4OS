@@ -9,6 +9,10 @@
  * its "a third connection is closed" never sees ours. That needs a third
  * place: CONFIG_BT_NIMBLE_MAX_CONNECTIONS is 3 since this file.
  *
+ * Pairing (aos_hal_ble_gatt_pair) uses the same store of bonds as the
+ * phone; the devices bonded here are listed apart (cbond_*), so Settings
+ * still speaks only of the phone.
+ *
  * Two sides:
  *   - the caller (an app, from LVGL's thread) never talks to NimBLE: it
  *     queues a command and posts an event to NimBLE's queue, because some of
@@ -29,6 +33,7 @@
 #include "nimble/nimble_port.h"
 #include "host/ble_hs.h"
 
+#include <stdio.h>
 #include <string.h>
 
 static const char *TAG = "ble_scan";
@@ -53,11 +58,15 @@ static uint32_t s_ev_w, s_ev_r;
 static aos_ble_attr_t *s_attrs;         /* ATTR_MAX, PSRAM: the table handed out */
 static int s_nattrs;
 
-enum { CMD_SCAN, CMD_CONNECT, CMD_DISCONNECT, CMD_READ, CMD_WRITE, CMD_WRITE_NR, CMD_SUB };
+/* the ones from CMD_READ on are GATT procedures and wait for each other
+ * (run); a PIN or a forgotten bond never waits */
+enum { CMD_SCAN, CMD_CONNECT, CMD_DISCONNECT, CMD_PASSKEY, CMD_FORGET,
+       CMD_READ, CMD_WRITE, CMD_WRITE_NR, CMD_SUB, CMD_PAIR };
 typedef struct {
     uint8_t op;
-    uint8_t arg;                        /* scan: active; connect: address type; sub: mode */
+    uint8_t arg;                        /* scan: active; connect, forget: address type; sub: mode */
     uint16_t handle;
+    uint32_t passkey;
     uint16_t len;
     uint8_t addr[6];
     uint8_t data[512];                  /* a write's */
@@ -73,6 +82,7 @@ static volatile int s_reason;
 static volatile uint16_t s_mtu;
 static volatile int8_t s_rssi;
 static volatile bool s_rssi_ok;
+static volatile bool s_secure;          /* our link is encrypted */
 
 /* ---- the host task's own ---- */
 
@@ -97,6 +107,8 @@ static bool s_scan_restart;             /* new parameters: cancel and start agai
 static uint16_t s_rd_len, s_rd_handle;
 static uint8_t s_sub_mode;
 static uint16_t s_sub_handle;
+static uint8_t s_pk_action;             /* the PIN being asked: BLE_SM_IOACT_* */
+static bool s_pair_retried;             /* a device that lost its keys: paired again once */
 
 static void kick(void);
 static int gap_cb(struct ble_gap_event *event, void *arg);
@@ -499,7 +511,121 @@ static void gone(void)
     s_busy = false;
     s_connecting = false;
     s_rssi_ok = false;
+    s_secure = false;
+    s_pk_action = BLE_SM_IOACT_NONE;
+    s_pair_retried = false;
     if (s_ready) ble_npl_callout_stop(&s_rssi_co);
+}
+
+/* ---- the devices bonded through this client ----
+ *
+ * NimBLE keeps every bond in one store: the phone's, the computer's and the
+ * ones made here. Settings' "forget" and aos_ble_bonded() are about the
+ * phone, so the ones made here are listed apart, in the pref "blec_bonds"
+ * ("t:aabbccddeeff;" per device, the identity address as on the air,
+ * most significant byte first), and left out of that count. */
+
+#define CBOND_MAX 8
+
+static int cbond_list(ble_addr_t *out, int max)
+{
+    char buf[CBOND_MAX * 16 + 1] = "";
+    aos_hal_pref_get_str("blec_bonds", buf, sizeof buf);
+    int n = 0;
+    for (const char *p = buf; *p && n < max;) {
+        unsigned t, b[6];
+        if (sscanf(p, "%u:%2x%2x%2x%2x%2x%2x", &t, &b[0], &b[1], &b[2], &b[3], &b[4], &b[5]) == 7) {
+            out[n].type = (uint8_t)t;
+            for (int i = 0; i < 6; i++) out[n].val[i] = (uint8_t)b[5 - i];
+            n++;
+        }
+        const char *semi = strchr(p, ';');
+        if (!semi) break;
+        p = semi + 1;
+    }
+    return n;
+}
+
+static void cbond_save(const ble_addr_t *a, int n)
+{
+    char buf[CBOND_MAX * 16 + 1];
+    size_t o = 0;
+    buf[0] = 0;
+    for (int i = 0; i < n && i < CBOND_MAX; i++)
+        o += snprintf(buf + o, sizeof buf - o, "%u:%02x%02x%02x%02x%02x%02x;", a[i].type,
+                      a[i].val[5], a[i].val[4], a[i].val[3], a[i].val[2], a[i].val[1], a[i].val[0]);
+    aos_hal_pref_set_str("blec_bonds", buf);
+}
+
+static void cbond_add(const ble_addr_t *id)
+{
+    ble_addr_t l[CBOND_MAX];
+    int n = cbond_list(l, CBOND_MAX);
+    for (int i = 0; i < n; i++)
+        if (ble_addr_cmp(&l[i], id) == 0) return;
+    if (n == CBOND_MAX) {
+        memmove(l, l + 1, sizeof l[0] * (CBOND_MAX - 1));
+        n--;
+    }
+    l[n++] = *id;
+    cbond_save(l, n);
+}
+
+static void cbond_del(const ble_addr_t *id)
+{
+    ble_addr_t l[CBOND_MAX];
+    int n = cbond_list(l, CBOND_MAX), m = 0;
+    for (int i = 0; i < n; i++)
+        if (ble_addr_cmp(&l[i], id) != 0) l[m++] = l[i];
+    if (m != n) cbond_save(l, m);
+}
+
+static bool cbond_has(const ble_addr_t *id)
+{
+    ble_addr_t l[CBOND_MAX];
+    int n = cbond_list(l, CBOND_MAX);
+    for (int i = 0; i < n; i++)
+        if (ble_addr_cmp(&l[i], id) == 0) return true;
+    return false;
+}
+
+bool aos_ble_scan_is_device_bond(uint8_t type, const uint8_t val[6])
+{
+    ble_addr_t a = { .type = type };
+    memcpy(a.val, val, 6);
+    return cbond_has(&a);
+}
+
+void aos_ble_scan_bonds_cleared(void)
+{
+    aos_hal_pref_set_str("blec_bonds", "");
+}
+
+static void security_done(int status)
+{
+    struct ble_gap_conn_desc d;
+    uint8_t info[2] = { 0, 0 };
+    if (status == 0 && ble_gap_conn_find(s_conn, &d) == 0) {
+        info[0] = d.sec_state.authenticated;
+        info[1] = d.sec_state.bonded;
+        if (d.sec_state.bonded) cbond_add(&d.peer_id_addr);
+        ESP_LOGI(TAG, "link encrypted (authenticated=%d, bonded=%d)", info[0], info[1]);
+    } else if (status) {
+        ESP_LOGW(TAG, "security failed (%d)", status);
+    }
+    s_secure = status == 0;
+    s_pk_action = BLE_SM_IOACT_NONE;
+    ev_push(AOS_BLE_EV_SECURITY, 0, status, info, sizeof info);
+}
+
+/* The keys of the device on our link, thrown away: it lost its own, or
+ * pairs anew. */
+static void drop_peer_keys(void)
+{
+    struct ble_gap_conn_desc d;
+    if (ble_gap_conn_find(s_conn, &d) != 0) return;
+    ble_store_util_delete_peer(&d.peer_id_addr);
+    cbond_del(&d.peer_id_addr);
 }
 
 static int gap_cb(struct ble_gap_event *event, void *arg)
@@ -555,6 +681,61 @@ static int gap_cb(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_MTU:
         s_mtu = event->mtu.value;
         return 0;
+    case BLE_GAP_EVENT_ENC_CHANGE: {
+        if (event->enc_change.conn_handle != s_conn) return 0;
+        int st = event->enc_change.status;
+        struct ble_gap_conn_desc d;
+        /* a procedure that lost the race to the other side's: the link is
+         * encrypted all the same */
+        if (st && ble_gap_conn_find(s_conn, &d) == 0 && d.sec_state.encrypted) st = 0;
+        if (st == BLE_HS_ERR_HCI_BASE + BLE_ERR_PINKEY_MISSING && !s_pair_retried) {
+            /* our keys, not the device's any more (it was reflashed or
+             * forgot us): once, paired from scratch */
+            ESP_LOGI(TAG, "the device lost its keys: pairing again");
+            s_pair_retried = true;
+            drop_peer_keys();
+            int rc = ble_gap_security_initiate(s_conn);
+            if (rc == 0) return 0;
+            st = rc;
+        }
+        security_done(st);
+        return 0;
+    }
+    case BLE_GAP_EVENT_PASSKEY_ACTION: {
+        if (event->passkey.conn_handle != s_conn) return 0;
+        uint8_t act = event->passkey.params.action;
+        uint8_t info[5] = { 0 };
+        if (act == BLE_SM_IOACT_INPUT) {
+            /* the device shows a PIN: the user types it (CMD_PASSKEY) */
+            info[0] = 0;
+        } else if (act == BLE_SM_IOACT_DISP) {
+            /* the other way round: we choose it, the user types it there */
+            uint32_t pk;
+            aos_hal_random(&pk, sizeof pk);
+            pk %= 1000000;
+            struct ble_sm_io io = { .action = BLE_SM_IOACT_DISP, .passkey = pk };
+            ble_sm_inject_io(s_conn, &io);
+            info[0] = 1;
+            memcpy(info + 1, &pk, 4);
+        } else if (act == BLE_SM_IOACT_NUMCMP) {
+            /* both show a number: the user says whether they match */
+            uint32_t v = event->passkey.params.numcmp;
+            info[0] = 2;
+            memcpy(info + 1, &v, 4);
+        } else {
+            ESP_LOGW(TAG, "pairing method %u, not done", act);
+            ble_gap_terminate(s_conn, BLE_ERR_AUTH_FAIL);
+            return 0;
+        }
+        s_pk_action = act;
+        ESP_LOGI(TAG, "pairing asks for a PIN (method %u)", act);
+        ev_push(AOS_BLE_EV_PASSKEY, 0, 0, info, info[0] ? 5 : 1);
+        return 0;
+    }
+    case BLE_GAP_EVENT_REPEAT_PAIRING:
+        /* the device pairs anew while we keep its old keys: the old ones go */
+        if (event->repeat_pairing.conn_handle == s_conn) drop_peer_keys();
+        return BLE_GAP_REPEAT_PAIRING_RETRY;
     case BLE_GAP_EVENT_L2CAP_UPDATE_REQ: {
         /* the peripheral asking for slower parameters: accepted as asked
            (self_params already holds a copy), only logged */
@@ -646,6 +827,38 @@ static void run(struct ble_npl_event *ev)
             gone();
             s_state = AOS_BLE_GATT_IDLE;
             break;
+        case CMD_PASSKEY: {
+            if (s_conn == NO_CONN || s_pk_action == BLE_SM_IOACT_NONE) break;
+            struct ble_sm_io io = { .action = s_pk_action };
+            if (s_pk_action == BLE_SM_IOACT_INPUT) io.passkey = c.passkey % 1000000;
+            else if (s_pk_action == BLE_SM_IOACT_NUMCMP) io.numcmp_accept = c.passkey ? 1 : 0;
+            else break;                 /* DISP was answered when it was asked */
+            int rc = ble_sm_inject_io(s_conn, &io);
+            if (rc) ESP_LOGW(TAG, "ble_sm_inject_io: %d", rc);
+            break;
+        }
+        case CMD_FORGET: {
+            ble_addr_t a = { .type = c.arg ? BLE_ADDR_RANDOM : BLE_ADDR_PUBLIC };
+            for (int i = 0; i < 6; i++) a.val[i] = c.addr[5 - i];
+            /* only one made here: the phone's and the computer's stay */
+            if (cbond_has(&a)) {
+                ble_store_util_delete_peer(&a);
+                cbond_del(&a);
+                ESP_LOGI(TAG, "a device's keys forgotten");
+            }
+            break;
+        }
+        case CMD_PAIR: {
+            if (s_conn == NO_CONN) { ev_push(AOS_BLE_EV_SECURITY, 0, BLE_HS_ENOTCONN, NULL, 0); break; }
+            struct ble_gap_conn_desc d;
+            if (ble_gap_conn_find(s_conn, &d) == 0 && d.sec_state.encrypted) { security_done(0); break; }
+            s_pair_retried = false;
+            /* bonded: only encrypts again; otherwise pairs */
+            int rc = ble_gap_security_initiate(s_conn);
+            if (rc == BLE_HS_EALREADY) break;   /* the device asked first: ENC_CHANGE will come */
+            if (rc) security_done(rc);
+            break;
+        }
         case CMD_READ:
             if (s_conn == NO_CONN) { ev_push(AOS_BLE_EV_READ, c.handle, BLE_HS_ENOTCONN, NULL, 0); break; }
             s_rd_len = 0;
@@ -855,6 +1068,33 @@ bool aos_hal_ble_gatt_subscribe(uint16_t value_handle, int mode)
 {
     if (s_state != AOS_BLE_GATT_READY || mode < 0 || mode > 2) return false;
     cmd_t c = { .op = CMD_SUB, .handle = value_handle, .arg = (uint8_t)mode };
+    return cmd_push(&c);
+}
+
+bool aos_hal_ble_gatt_pair(void)
+{
+    if (s_state != AOS_BLE_GATT_READY) return false;
+    cmd_t c = { .op = CMD_PAIR };
+    return cmd_push(&c);
+}
+
+bool aos_hal_ble_gatt_passkey(uint32_t passkey)
+{
+    if (s_state != AOS_BLE_GATT_READY) return false;
+    cmd_t c = { .op = CMD_PASSKEY, .passkey = passkey };
+    return cmd_push(&c);
+}
+
+bool aos_hal_ble_gatt_secure(void)
+{
+    return s_state == AOS_BLE_GATT_READY && s_secure;
+}
+
+bool aos_hal_ble_gatt_forget(const uint8_t addr[6], uint8_t addr_type)
+{
+    if (!aos_ble_running() || !addr) return false;
+    cmd_t c = { .op = CMD_FORGET, .arg = addr_type };
+    memcpy(c.addr, addr, 6);
     return cmd_push(&c);
 }
 
