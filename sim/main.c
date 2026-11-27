@@ -363,6 +363,7 @@ static void script_step(void)
     else if (sscanf(c, "open %199s", a) == 1) aos_ui_open(a);
     else if (!strncmp(c, "rotate", 6)) { aos_ui_request_landscape(-1); s_script_wait_until = lv_tick_get() + 300; }
     else if (sscanf(c, "shot %199s", a) == 1) shot_request(a);
+    else if (sscanf(c, "badge %199s %d", a, &x) == 2) aos_ui_set_badge(a, x);
     else if (!strcmp(c, "pad off")) { s_pad_scripted = false; aos_hal_sim_pad(false, 0, 0, 0, -1); }
     else if (sscanf(c, "pad %x %d %d %d", (unsigned *)&x, &y, &x2, &ms) >= 3) {
         int hat = -1;

@@ -163,7 +163,9 @@ static lv_obj_t *badge_create(lv_obj_t *parent, int count, int32_t icon_x2, int3
     lv_label_set_text_fmt(l, count > 99 ? "99+" : "%d", count);
     lv_obj_center(l);
     lv_obj_update_layout(b);
-    lv_obj_set_pos(b, icon_x2 - lv_obj_get_width(b) + 12, icon_y1 - 12);
+    /* the cell clips what sticks out of it, so the badge never starts above
+     * its top: a home icon sits 6 px down, and its badge with it */
+    lv_obj_set_pos(b, icon_x2 - lv_obj_get_width(b) + 12, LV_MAX(0, icon_y1 - 12));
     lv_obj_set_flag(b, LV_OBJ_FLAG_HIDDEN, count <= 0);
     return b;
 }
