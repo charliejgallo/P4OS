@@ -57,9 +57,9 @@ static void name_default(mr_game_t *g, int i)
     const char *n = NULL;
     char buf[MR_NAME];
     if (g->type == MR_T_PANO || g->type == MR_T_POROTOS) {
-        if (g->np == 2) n = i == 0 ? _("Nosotros") : _("Ellos");
+        if (g->np == 2 && i < 2) n = i == 0 ? _("Nosotros") : _("Ellos");
     } else if (g->type == MR_T_ESTADIO) {
-        n = i == 0 ? _("Local") : _("Visitante");
+        if (i < 2) n = i == 0 ? _("Local") : _("Visitante");
     }
     if (!n) {
         snprintf(buf, sizeof buf, g->type == MR_T_CUENTA ? _("Contador %d") : _("Jugador %d"), i + 1);

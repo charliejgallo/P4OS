@@ -535,6 +535,7 @@ static void show_list(void)
             if (g->hist[k].kind != MR_H_RESET) nh++;
         if (g->winner >= 0 && g->winner < g->np)
             snprintf(sub, sizeof sub, _("%s · ganó %.20s"), mr_type_name(g->type), g->p[g->winner].name);
+        else if (nh == 1) snprintf(sub, sizeof sub, _("%s · 1 jugada"), mr_type_name(g->type));
         else snprintf(sub, sizeof sub, _("%s · %d jugadas"), mr_type_name(g->type), nh);
         lv_obj_t *s2 = mr_label(card, aos_font_caption, C_DIM, sub);
         lv_label_set_long_mode(s2, LV_LABEL_LONG_MODE_DOTS);
@@ -1046,6 +1047,8 @@ static lv_obj_t *sheet_open(int w, int h, const char *title)
     lv_obj_center(card);
     lv_obj_set_style_shadow_width(card, 40, 0);
     lv_obj_set_style_shadow_opa(card, 160, 0);
+    /* the callers measure it right away */
+    lv_obj_update_layout(card);
     if (title) {
         lv_obj_t *t = mr_label(card, aos_font_title, 0xFFFFFF, title);
         lv_obj_align(t, LV_ALIGN_TOP_LEFT, 28, 22);
@@ -1115,8 +1118,7 @@ static void show_history(void)
         lv_obj_t *l = mr_label(c, aos_font_body, C_DIM, _("Todavía no se anotó nada"));
         (void)l;
     }
-    lv_obj_t *u = mr_pill(card, LV_SYMBOL_LOOP "  ", 260, 70, C_CARD2, on_hist_undo, NULL);
-    lv_label_set_text_fmt(lv_obj_get_child(u, 0), "%s", _("Deshacer"));
+    lv_obj_t *u = mr_pill(card, _("Deshacer"), 260, 70, C_CARD2, on_hist_undo, NULL);
     lv_obj_align(u, LV_ALIGN_BOTTOM_LEFT, 20, -20);
     lv_obj_t *ok = mr_pill(card, _("Cerrar"), 200, 70, C_ACC, on_close, NULL);
     lv_obj_align(ok, LV_ALIGN_BOTTOM_RIGHT, -20, -20);
@@ -1228,6 +1230,8 @@ static void keypad_open(const char *title, int value, int who, mr_num_cb_t cb)
     lv_obj_t *ok = mr_pill(card, cb ? _("Listo") : _("Anotar"), w - 40, kh, C_ACC, pad_key, (void *)(intptr_t)12);
     lv_obj_set_style_radius(ok, 18, 0);
     lv_obj_set_pos(ok, 20, y + 4 * (kh + 12));
+    if (!a->land) lv_obj_set_height(card, y + 5 * (kh + 12) + 14);
+    lv_obj_align(card, LV_ALIGN_CENTER, 0, 0);
     pad_show();
 }
 
@@ -1242,6 +1246,11 @@ void mr_ui_keypad(int who)
     if (!g) return;
     if (who < 0 || who >= g->np) who = 0;
     keypad_open(_("Anotar puntos"), 0, who, NULL);
+    /* counting down (darts): what is entered is taken off */
+    if (g->type == MR_T_TIZA && g->opt[MR_TIZA_MODE] == MR_TIZA_TOTALS && g->opt[MR_TIZA_SUB]) {
+        P.neg = true;
+        pad_show();
+    }
 }
 
 /* --- menu --- */
@@ -1368,7 +1377,7 @@ void mr_ui_winner(int who)
     size_t k = 0;
     line[0] = 0;
     for (int i = 0; i < g->np && k < sizeof line - 30; i++)
-        k += (size_t)snprintf(line + k, sizeof line - k, "%s%.12s %d", i ? "   " : "", g->p[i].name, g->p[i].wins);
+        k += (size_t)snprintf(line + k, sizeof line - k, "%s%.12s: %d", i ? "   " : "", g->p[i].name, g->p[i].wins);
     lv_obj_t *s = mr_label(card, aos_font_small, C_DIM, "");
     lv_label_set_text_fmt(s, "%s  %s", _("Partidas ganadas:"), line);
     lv_label_set_long_mode(s, LV_LABEL_LONG_MODE_WRAP);
@@ -1402,6 +1411,27 @@ void mr_ui_winner(int who)
 
 /* --- the bar --- */
 
+/* the undo arrow: the symbol fonts have none, so it is drawn */
+static mr_img_t undo_icon;
+
+static void undo_icon_make(void)
+{
+    if (undo_icon.px || !mr_img_new(&undo_icon, 40, 40)) return;
+    float cx = 21, cy = 22, r = 11;
+    float px = 0, py = 0;
+    for (int i = 0; i <= 24; i++) {
+        float a = (-200.0f + 230.0f * i / 24.0f) * 3.14159265f / 180.0f;
+        float x = cx + cosf(a) * r, y = cy + sinf(a) * r;
+        if (i) mr_img_capsule(&undo_icon, px, py, x, y, 2.0f, 0xFFFFFF, 1.0f);
+        px = x;
+        py = y;
+    }
+    /* the head, at the left end, pointing down */
+    float hx = cx - r * cosf(20.0f * 3.14159265f / 180.0f), hy = cy + r * sinf(20.0f * 3.14159265f / 180.0f);
+    mr_img_capsule(&undo_icon, hx, hy + 1, hx - 7, hy - 6, 2.0f, 0xFFFFFF, 1.0f);
+    mr_img_capsule(&undo_icon, hx, hy + 1, hx + 8, hy - 4, 2.0f, 0xFFFFFF, 1.0f);
+}
+
 void mr_ui_bar_refresh(void)
 {
     mr_app_t *a = mr_A;
@@ -1433,7 +1463,10 @@ static void bar_make(void)
     lv_obj_align(m, LV_ALIGN_RIGHT_MID, -14, 0);
     lv_obj_t *h = mr_pill(b, LV_SYMBOL_LIST, 72, 60, 0x33363B, on_hist, NULL);
     lv_obj_align(h, LV_ALIGN_RIGHT_MID, -14 - 84, 0);
-    a->bar_undo = mr_pill(b, LV_SYMBOL_LOOP, 72, 60, 0x33363B, on_undo, NULL);
+    undo_icon_make();
+    a->bar_undo = mr_pill(b, NULL, 72, 60, 0x33363B, on_undo, NULL);
+    lv_obj_t *ui = mr_img_obj(a->bar_undo, &undo_icon);
+    lv_obj_center(ui);
     lv_obj_align(a->bar_undo, LV_ALIGN_RIGHT_MID, -14 - 168, 0);
     mr_ui_bar_refresh();
 }
@@ -1537,12 +1570,55 @@ static void *marcador_create(aos_app_t *self, lv_obj_t *root)
     aos_hal_pref_get_i32("mr_open", &open);
     a->screen = MR_SCR_LIST;
 #ifdef AOS_SIM_BUILTIN
-    /* development: MR_OPEN=<type> opens a demo game of that kind */
+    /* development (the simulator only; getenv() is NULL on the board):
+     *   MR_DEMO=<kind>       a new game of that kind (mr_type_t)
+     *   MR_NP=3              with that many players
+     *   MR_SCORES=18,12      their scores
+     *   MR_AUX=1:0,0:1       games:sets of each
+     *   MR_OPT=0=2,1=10      options (index=value)
+     *   MR_TARGET=30         the target
+     *   MR_CLOCK=1421000     the stadium clock, ms into the period (MR_RUN=1 runs it) */
     const char *env = getenv("MR_DEMO");
     if (env && env[0]) {
-        mr_game_t *g = mr_game_new(atoi(env));
+        int type = atoi(env);
+        mr_game_t *g = mr_game_new(type);
         if (g) {
-            mr_game_defaults(g, atoi(env), getenv("MR_NP") ? atoi(getenv("MR_NP")) : 2);
+            mr_game_defaults(g, type, getenv("MR_NP") ? atoi(getenv("MR_NP")) : 2);
+            const char *e;
+            if ((e = getenv("MR_TARGET"))) g->target = atoi(e);
+            if ((e = getenv("MR_OPT"))) {
+                while (*e) {
+                    int k = atoi(e);
+                    const char *q = strchr(e, '=');
+                    if (!q) break;
+                    if (k >= 0 && k < 8) g->opt[k] = atoi(q + 1);
+                    const char *c = strchr(q, ',');
+                    if (!c) break;
+                    e = c + 1;
+                }
+            }
+            if ((e = getenv("MR_SCORES"))) {
+                for (int i = 0; i < g->np && *e; i++) {
+                    g->p[i].score = atoi(e);
+                    const char *c = strchr(e, ',');
+                    if (!c) break;
+                    e = c + 1;
+                }
+            }
+            if ((e = getenv("MR_AUX"))) {
+                for (int i = 0; i < g->np && *e; i++) {
+                    g->p[i].aux[0] = (int16_t)atoi(e);
+                    const char *q = strchr(e, ':');
+                    if (q) g->p[i].aux[1] = (int16_t)atoi(q + 1);
+                    const char *c = strchr(e, ',');
+                    if (!c) break;
+                    e = c + 1;
+                }
+            }
+            if ((e = getenv("MR_CLOCK"))) g->clock_ms = atoi(e);
+            if ((e = getenv("MR_PERIOD"))) g->period = (uint8_t)atoi(e);
+            if ((e = getenv("MR_RUN"))) g->running = atoi(e) != 0;
+            g->announced = true;    /* a demo does not open on the winner */
             g->id = mr_new_id();
             open_game(g);
             return a;
@@ -1632,6 +1708,7 @@ static void marcador_destroy(aos_app_t *self, void *inst)
     if (a->root) lv_obj_clean(a->root);
     mr_free(a->scene.st);
     thumbs_free();
+    mr_img_free(&undo_icon);
     mr_game_free(g);
     mr_game_free(a->draft);
     mr_snd_close();
@@ -1641,8 +1718,9 @@ static void marcador_destroy(aos_app_t *self, void *inst)
     mr_free(a);
 }
 
-/* The icon: a scoreboard's two numbers over the lamps of a matchbox
- * square: a dark board with two amber digits and five matches. */
+/* The icon: a little scoreboard showing 2:1 over a square of matches
+ * still being laid (four sticks and the fifth across). The blob has to fit
+ * in AOS_ICON_OPS_MAX (256 bytes). */
 static const uint8_t MARCADOR_ICON[] = {
     AIC_HEADER,
     AIC_RECT(AIC_CENTER, 0, -10, 70, 44, 8, AIC_C_LIT(0x15171A), 255),
@@ -1650,12 +1728,15 @@ static const uint8_t MARCADOR_ICON[] = {
     AIC_INTO,
     AIC_RECT(AIC_CENTER, -16, 0, 22, 30, 4, AIC_C_LIT(0x2A1C05), 255),
     AIC_RECT(AIC_CENTER, 16, 0, 22, 30, 4, AIC_C_LIT(0x2A1C05), 255),
-    AIC_RECT(AIC_CENTER, -16, -8, 12, 3, 1, AIC_C_LIT(0xFFB534), 255),
-    AIC_RECT(AIC_CENTER, -16, 8, 12, 3, 1, AIC_C_LIT(0xFFB534), 255),
-    AIC_RECT(AIC_CENTER, -11, 0, 3, 18, 1, AIC_C_LIT(0xFFB534), 255),
-    AIC_RECT(AIC_CENTER, 16, 0, 3, 24, 1, AIC_C_LIT(0xFFB534), 255),
-    AIC_RECT(AIC_CENTER, 0, -5, 4, 4, AIC_CIRCLE, AIC_C_LIT(0xFFB534), 255),
-    AIC_RECT(AIC_CENTER, 0, 5, 4, 4, AIC_CIRCLE, AIC_C_LIT(0xFFB534), 255),
+    /* a seven-segment 2 ... */
+    AIC_RECT(AIC_CENTER, -16, -10, 11, 3, 1, AIC_C_LIT(0xFFB534), 255),
+    AIC_RECT(AIC_CENTER, -11, -5, 3, 10, 1, AIC_C_LIT(0xFFB534), 255),
+    AIC_RECT(AIC_CENTER, -16, 0, 11, 3, 1, AIC_C_LIT(0xFFB534), 255),
+    AIC_RECT(AIC_CENTER, -21, 5, 3, 10, 1, AIC_C_LIT(0xFFB534), 255),
+    AIC_RECT(AIC_CENTER, -16, 10, 11, 3, 1, AIC_C_LIT(0xFFB534), 255),
+    /* ... and a 1 */
+    AIC_RECT(AIC_CENTER, 18, 0, 3, 23, 1, AIC_C_LIT(0xFFB534), 255),
+    AIC_RECT(AIC_CENTER, 15, -9, 6, 3, 1, AIC_C_LIT(0xFFB534), 255),
     AIC_OUT,
     AIC_RECT(AIC_CENTER, -24, 26, 4, 20, 2, AIC_C_LIT(0xF0D7A0), 255),
     AIC_RECT(AIC_CENTER, -12, 26, 4, 20, 2, AIC_C_LIT(0xF0D7A0), 255),

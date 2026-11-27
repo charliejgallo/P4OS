@@ -388,7 +388,7 @@ static void names_draw(mr_scene_t *s)
         lv_canvas_init_layer(cv, &layer);
         lv_draw_label_dsc_t d;
         lv_draw_label_dsc_init(&d);
-        d.font = aos_font_title;
+        d.font = T->c[p].w < 200 ? aos_font_small : T->c[p].w < 260 ? aos_font_body : aos_font_title;
         d.color = lv_color_hex(0xFFFFFF);
         d.text = s->g->p[p].name;
         d.align = LV_TEXT_ALIGN_CENTER;
@@ -507,8 +507,9 @@ static void build(mr_scene_t *s)
         if (T->totals) continue;
         int cx = T->c[p].x + T->c[p].w / 2;
         int y = ledge_y - 78;
-        mr_rbtn(s, cx - 104, y, 96, 62, LV_SYMBOL_MINUS, 0x9024322A, 0xEEF0E8, tz_btn, -(p + 1));
-        mr_rbtn(s, cx + 8, y, 96, 62, LV_SYMBOL_PLUS, 0x9024322A, 0xEEF0E8, tz_btn, p + 1);
+        int bw = mr_minf(96, (T->c[p].w - 30) / 2);
+        mr_rbtn(s, cx - bw - 6, y, bw, 62, LV_SYMBOL_MINUS, 0x9024322A, 0xEEF0E8, tz_btn, -(p + 1));
+        mr_rbtn(s, cx + 6, y, bw, 62, LV_SYMBOL_PLUS, 0x9024322A, 0xEEF0E8, tz_btn, p + 1);
     }
     for (int i = 0; i < MR_FINGERS; i++) T->f[i].p = -1;
 }
@@ -765,6 +766,7 @@ static void tick(mr_scene_t *s)
                 /* the last total of that column goes, if it is the last thing written */
                 mr_game_t *g = s->g;
                 if (g->nhist && g->hist[g->nhist - 1].who == p) mr_undo(g);
+                else mr_toast(_("Se borra sólo lo último que se escribió"));
             } else {
                 mr_add(s->g, p, -1);
             }

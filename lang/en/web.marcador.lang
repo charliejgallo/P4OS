@@ -1,0 +1,94 @@
+# amoledos-lang 1   es -> en
+# web.marcador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/marcador/web/marcador.js:20
+Paño y fósforos	Felt and matches
+
+#: apps/marcador/web/marcador.js:20
+Porotos	Beans
+
+#: apps/marcador/web/marcador.js:20
+Cuentaganado	Tally counter
+
+#: apps/marcador/web/marcador.js:20
+Tablero de estadio	Stadium board
+
+#: apps/marcador/web/marcador.js:21
+Cartel de mesa	Flip score card
+
+#: apps/marcador/web/marcador.js:21
+Ábaco	Abacus
+
+#: apps/marcador/web/marcador.js:21
+Pizarrón	Chalkboard
+
+#: apps/marcador/web/marcador.js:80
+#: apps/marcador/web/marcador.js:188
+Marcador	Scorekeeper
+
+#: apps/marcador/web/marcador.js:93
+sets · games	sets · games
+
+#: apps/marcador/web/marcador.js:94
+games, y %s en el actual	games, and %s in the current one
+
+#: apps/marcador/web/marcador.js:98
+Partidas ganadas: %d	Games won: %d
+
+#: apps/marcador/web/marcador.js:103
+Se reinició la cuenta	The score was reset
+
+#: apps/marcador/web/marcador.js:116
+reinicio	reset
+
+#: apps/marcador/web/marcador.js:124
+¿Borrar la partida "%s"? No se puede deshacer.	Delete the game "%s"? This cannot be undone.
+
+#: apps/marcador/web/marcador.js:125
+Partida borrada	Game deleted
+
+#: apps/marcador/web/marcador.js:133
+Tiempo de juego %s	Time played %s
+
+#: apps/marcador/web/marcador.js:133
+a %d	to %d
+
+#: apps/marcador/web/marcador.js:136
+Bajar el historial (CSV)	Download the history (CSV)
+
+#: apps/marcador/web/marcador.js:137
+Abierta en la placa	Opened on the board
+
+#: apps/marcador/web/marcador.js:138
+Abrir Marcador en la placa	Open Scorekeeper on the board
+
+#: apps/marcador/web/marcador.js:139
+Borrar	Delete
+
+#: apps/marcador/web/marcador.js:141
+Historial	History
+
+#: apps/marcador/web/marcador.js:144
+Tiempo	Time
+
+#: apps/marcador/web/marcador.js:144
+Jugador	Player
+
+#: apps/marcador/web/marcador.js:145
+Cambio	Change
+
+#: apps/marcador/web/marcador.js:145
+Queda	Then
+
+#: apps/marcador/web/marcador.js:147
+Todavía no se anotó nada	Nothing scored yet
+
+#: apps/marcador/web/marcador.js:168
+Todavía no hay partidas guardadas. Se empiezan en la placa, con Marcador.	No saved games yet. They are started on the board, in Scorekeeper.
+
+#: apps/marcador/web/marcador.js:189
+Las partidas que lleva la placa: los puntajes y el historial de cada una.	The games the board is keeping: the scores and the history of each.

@@ -305,7 +305,7 @@ static void build(mr_scene_t *s)
     static const float ANG2[2] = { 90, 270 }, ANG3[3] = { 90, 210, 330 }, ANG4[4] = { 90, 180, 270, 0 };
     const float *ang = P->np == 2 ? ANG2 : P->np == 3 ? ANG3 : ANG4;
     float ex = W * 0.5f, ey = H * 0.5f;
-    float lim = P->np == 2 ? (s->land ? ex * 0.45f : ey * 0.42f) : mr_minf(ex, ey) * 0.50f;
+    float lim = P->np == 2 ? (s->land ? ex * 0.45f : ey * 0.42f) : mr_minf(ex, ey) * 0.36f;
     if (mr > lim) mr = lim;
     for (int p = 0; p < P->np; p++) {
         float a = ang[p] * 3.14159f / 180.0f;
@@ -323,11 +323,30 @@ static void build(mr_scene_t *s)
         P->m[1].x = W - 34 - mr - 10;
         P->m[0].y = P->m[1].y = cy + 10;
     }
+    if (P->np >= 3) {
+        /* three or four: the mats in the corners (the third alone at the bottom), clockwise */
+        float lim2 = mr_minf(ex * 0.44f, ey * 0.40f);
+        mr = sqrtf((float)target * 2300.0f / 3.14159f);
+        if (mr > lim2) mr = lim2;
+        if (mr < 90) mr = 90;
+        static const float SX4[4] = { -1, -1, 1, 1 }, SY4[4] = { 1, -1, -1, 1 };
+        static const float SX3[3] = { 0, -1, 1 }, SY3[3] = { 1, -1, -1 };
+        for (int p = 0; p < P->np; p++) {
+            float sx = P->np == 4 ? SX4[p] : SX3[p], sy = P->np == 4 ? SY4[p] : SY3[p];
+            P->m[p].x = cx + sx * (ex - mr - 30);
+            P->m[p].y = cy + sy * (ey - mr - 56);
+            P->m[p].r = mr;
+        }
+    }
     P->pcx = cx;
     P->pcy = cy;
     P->pr = sqrtf((float)total * 640.0f / 3.14159f);
     float pmax = P->np == 2 ? (s->land ? (P->m[1].x - P->m[0].x) * 0.5f - mr - 20 : (P->m[0].y - P->m[1].y) * 0.5f - mr - 20)
-                            : mr_minf(ex, ey) * 0.34f;
+                            : 1e9f;
+    for (int p = 0; p < P->np && P->np >= 3; p++) {
+        float d = sqrtf((P->m[p].x - cx) * (P->m[p].x - cx) + (P->m[p].y - cy) * (P->m[p].y - cy)) - P->m[p].r - 24;
+        if (d < pmax) pmax = d;
+    }
     if (P->pr > pmax) P->pr = pmax;
     if (P->pr < 50) P->pr = 50;
 
@@ -370,11 +389,14 @@ static void build(mr_scene_t *s)
         lv_obj_set_style_transform_pivot_x(P->m[p].name, lw / 2, 0);
         lv_obj_set_style_transform_pivot_y(P->m[p].name, lh / 2, 0);
         lv_obj_set_style_transform_rotation(P->m[p].name, rot, 0);
-        if (ly < s->top + 30 && rot == 1800) ly = s->top + 30;
+        /* keep it on the table, turned as it is */
+        float hw = (rot == 900 || rot == 2700) ? lh * 0.5f : lw * 0.5f, hh = (rot == 900 || rot == 2700) ? lw * 0.5f : lh * 0.5f;
+        lx = mr_clampf(lx, hw + 6, s->w - hw - 6);
+        ly = mr_clampf(ly, s->top + hh + 6, s->h - hh - 6);
         lv_obj_set_pos(P->m[p].name, (int)(lx - lw * 0.5f), (int)(ly - lh * 0.5f));
     }
-    /* the buttons, by each mat, on the side away from the heap */
-    for (int p = 0; p < P->np; p++) {
+    /* the buttons, by each mat (two players: with more, the mats are tapped and held) */
+    for (int p = 0; p < P->np && P->np == 2; p++) {
         float a = atan2f(P->m[p].y - cy, P->m[p].x - cx) + 1.5708f;
         float bx = P->m[p].x + cosf(a) * (P->m[p].r + 52), by = P->m[p].y + sinf(a) * (P->m[p].r + 52);
         if (P->np == 2 && s->land) {

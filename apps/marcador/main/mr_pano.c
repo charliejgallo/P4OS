@@ -58,6 +58,8 @@ typedef struct {
     float     L, T;         /* match length and thickness                  */
     float     side;         /* the square                                  */
     float     boxx, boxy;   /* the drawer's mouth, where matches come from */
+    int       head, foot;   /* a column's name on top, its buttons at the bottom */
+    bool      sbs;          /* malas and buenas side by side (else one over the other) */
     int       np;
     struct {
         int       x, y, w, h;       /* the player's part of the felt       */
@@ -271,6 +273,22 @@ static void grid_fit(float w, float h, int n, float gap, int *cols, int *rows, f
     *side = best;
 }
 
+/* the size of a square for a column of w x h, and which way the halves go */
+static float best_side(float w, float h, int nsq, bool split, bool *sbs)
+{
+    int c, r;
+    float a = 0, b = 0;
+    if (!split) {
+        grid_fit(w, h, nsq, 30, &c, &r, &a);
+        *sbs = false;
+        return a;
+    }
+    grid_fit(w * 0.5f, h - 34, (nsq + 1) / 2, 30, &c, &r, &a);
+    grid_fit(w, h * 0.5f - 34, (nsq + 1) / 2, 30, &c, &r, &b);
+    *sbs = a > b;
+    return a > b ? a : b;
+}
+
 /* where every match of player p goes */
 static void place(mr_scene_t *s, int p, float side_cap)
 {
@@ -280,10 +298,10 @@ static void place(mr_scene_t *s, int p, float side_cap)
     int nsq = (target + 4) / 5;
     if (nsq > MAXM / 5) nsq = MAXM / 5;
     bool split = g->opt[MR_PANO_SPLIT] && nsq >= 2;
-    int x = P->c[p].x, y = P->c[p].y + 112, w = P->c[p].w, h = P->c[p].h - 112 - 76;
+    int x = P->c[p].x, y = P->c[p].y + P->head, w = P->c[p].w, h = P->c[p].h - P->head - P->foot;
     P->c[p].nz = split ? 2 : 1;
     int per[2] = { split ? (nsq + 1) / 2 : nsq, split ? nsq / 2 : 0 };
-    bool side_by_side = split && w > h * 0.9f;
+    bool side_by_side = split && P->sbs;
     float lab = split ? 34.0f : 0.0f;
     for (int z = 0; z < P->c[p].nz; z++) {
         zone_t *Z = &P->c[p].z[z];
@@ -340,9 +358,10 @@ static void sprites_make(pano_t *P)
     match_draw(&P->fly, L, T, 0, 0x777u, false);
     mr_img_new(&P->flysh, fs, (int)(T * 4 + 20));
     match_shadow_draw(&P->flysh, L, T);
-    int bw = (int)(L * 1.12f * 1.42f + 30), bh = (int)(L * 0.62f + 34);
+    float BL = L < 120 ? 120 : L;      /* the box keeps its size when the squares are small */
+    int bw = (int)(BL * 1.12f * 1.42f + 30), bh = (int)(BL * 0.62f + 34);
     mr_img_new(&P->box, bw, bh);
-    box_draw(&P->box, L);
+    box_draw(&P->box, BL);
 }
 
 static void obj_center(lv_obj_t *o, const mr_img_t *im, float x, float y)
@@ -401,18 +420,12 @@ static void build(mr_scene_t *s)
     int target = g->target > 0 ? g->target : 30;
     int nsq = (target + 4) / 5;
     if (nsq > MAXM / 5) nsq = MAXM / 5;
+    bool compact = (!s->land && P->np == 4) || cw < 300;
+    P->head = compact ? 76 : 112;
+    P->foot = compact ? 62 : 76;
     for (int p = 0; p < P->np; p++) {
-        int cols2, rows2;
-        float sd;
         bool split = g->opt[MR_PANO_SPLIT] && nsq >= 2;
-        float w = P->c[p].w, h = P->c[p].h - 112 - 76 - (split ? 68 : 0);
-        if (split && w > h * 0.9f) {
-            grid_fit(w * 0.5f, h, (nsq + 1) / 2, 30, &cols2, &rows2, &sd);
-        } else if (split) {
-            grid_fit(w, h * 0.5f, (nsq + 1) / 2, 30, &cols2, &rows2, &sd);
-        } else {
-            grid_fit(w, h, nsq, 30, &cols2, &rows2, &sd);
-        }
+        float sd = best_side(P->c[p].w, P->c[p].h - P->head - P->foot, nsq, split, &P->sbs);
         if (sd < side) side = sd;
     }
     if (side > 170) side = 170;
@@ -449,7 +462,7 @@ static void build(mr_scene_t *s)
         byc = s->h - P->box.h * 0.5f - 10;
     }
     obj_center(bo, &P->box, bxc, byc);
-    P->boxx = bxc + P->L * 0.45f;
+    P->boxx = bxc + (P->L < 120 ? 120 : P->L) * 0.45f;
     P->boxy = byc;
 
     for (int p = 0; p < P->np; p++) {
@@ -462,16 +475,16 @@ static void build(mr_scene_t *s)
         lv_obj_set_style_bg_opa(P->c[p].dot, 255, 0);
         lv_obj_set_style_border_color(P->c[p].dot, lv_color_hex(0xF3EBD5), 0);
         lv_obj_set_style_border_width(P->c[p].dot, 2, 0);
-        P->c[p].name = mr_label(s->obj, aos_font_title, 0xF3EBD5, g->p[p].name);
+        P->c[p].name = mr_label(s->obj, compact ? aos_font_body : aos_font_title, 0xF3EBD5, g->p[p].name);
         lv_label_set_long_mode(P->c[p].name, LV_LABEL_LONG_MODE_DOTS);
-        lv_obj_set_size(P->c[p].name, P->c[p].w - 80, lv_font_get_line_height(aos_font_title));
+        lv_obj_set_size(P->c[p].name, P->c[p].w - 70, lv_font_get_line_height(compact ? aos_font_body : aos_font_title));
         lv_obj_set_style_text_align(P->c[p].name, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_pos(P->c[p].name, P->c[p].x + 50, P->c[p].y + 14);
-        lv_obj_set_pos(P->c[p].dot, P->c[p].x + 34, P->c[p].y + 26);
-        P->c[p].count = mr_label(s->obj, aos_font_body, 0xCFE6C8, "");
+        lv_obj_set_pos(P->c[p].name, P->c[p].x + 52, P->c[p].y + (compact ? 6 : 14));
+        lv_obj_set_pos(P->c[p].dot, P->c[p].x + 22, P->c[p].y + (compact ? 12 : 26));
+        P->c[p].count = mr_label(s->obj, compact ? aos_font_small : aos_font_body, 0xCFE6C8, "");
         lv_obj_set_width(P->c[p].count, P->c[p].w);
         lv_obj_set_style_text_align(P->c[p].count, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_pos(P->c[p].count, P->c[p].x, P->c[p].y + 66);
+        lv_obj_set_pos(P->c[p].count, P->c[p].x, P->c[p].y + (compact ? 40 : 66));
         if (g->opt[MR_PANO_SPLIT]) {
             for (int z = 0; z < 2; z++) {
                 P->c[p].lab[z] = mr_label(s->obj, aos_font_caption, 0xBFDDB8, z ? _("BUENAS") : _("MALAS"));
@@ -487,11 +500,10 @@ static void build(mr_scene_t *s)
             lv_obj_add_flag(P->c[p].m[k], LV_OBJ_FLAG_HIDDEN);
         }
         /* the little buttons at the bottom of the column */
-        int by = P->c[p].y + P->c[p].h - 70;
-        int bxm = P->c[p].x + P->c[p].w / 2;
-        if (!s->land && P->np <= 3 && p < P->np && rows == 1) by = P->c[p].y + P->c[p].h - 70;
-        mr_rbtn(s, bxm - 116, by, 104, 60, LV_SYMBOL_MINUS, 0x0E3A20, 0xF3EBD5, mr_pano_btn, -(p + 1));
-        mr_rbtn(s, bxm + 12, by, 104, 60, LV_SYMBOL_PLUS, 0x0E3A20, 0xF3EBD5, mr_pano_btn, p + 1);
+        int bh = compact ? 50 : 60, by = P->c[p].y + P->c[p].h - bh - 10;
+        int bxm = P->c[p].x + P->c[p].w / 2, bw = P->c[p].w / 2 - 22 < 104 ? P->c[p].w / 2 - 22 : 104;
+        mr_rbtn(s, bxm - bw - 8, by, bw, bh, LV_SYMBOL_MINUS, 0x0E3A20, 0xF3EBD5, mr_pano_btn, -(p + 1));
+        mr_rbtn(s, bxm + 8, by, bw, bh, LV_SYMBOL_PLUS, 0x0E3A20, 0xF3EBD5, mr_pano_btn, p + 1);
     }
     for (int i = 0; i < FLIGHTS; i++) {
         P->fl[i].sh = mr_img_obj(s->obj, &P->flysh);

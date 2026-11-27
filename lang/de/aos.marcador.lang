@@ -1,0 +1,341 @@
+# amoledos-lang 1   es -> de
+# aos.marcador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/marcador/main/marcador.c:49
+Paño y fósforos	Filz und Streichhölzer
+
+#: apps/marcador/main/marcador.c:49
+#: apps/marcador/main/marcador.c:914
+Porotos	Bohnen
+
+#: apps/marcador/main/marcador.c:49
+Cuentaganado	Handzähler
+
+#: apps/marcador/main/marcador.c:50
+Tablero de estadio	Stadiontafel
+
+#: apps/marcador/main/marcador.c:50
+Cartel de mesa	Klapp-Anzeigetafel
+
+#: apps/marcador/main/marcador.c:50
+Ábaco	Abakus
+
+#: apps/marcador/main/marcador.c:51
+Pizarrón	Kreidetafel
+
+#: apps/marcador/main/marcador.c:53
+Truco y juegos de mesa: cuadrados de cinco fósforos, malas y buenas	Truco und Tischspiele: Quadrate aus fünf Streichhölzern, erste und zweite Hälfte
+
+#: apps/marcador/main/marcador.c:54
+Un montón en la mesa y cada uno arrastra los suyos	Ein Haufen auf dem Tisch, jeder zieht sich seine heran
+
+#: apps/marcador/main/marcador.c:55
+El contador de mano: lo apretás y suma	Der Handzähler: drücken, und er zählt
+
+#: apps/marcador/main/marcador.c:56
+Lámparas, reloj de juego, tiempos y bocina	Lampen, Spieluhr, Spielabschnitte und Hupe
+
+#: apps/marcador/main/marcador.c:57
+Los números que se dan vuelta, para ping-pong y pádel	Zahlen zum Umklappen, für Tischtennis und Padel
+
+#: apps/marcador/main/marcador.c:58
+Cuentas de madera que se corren de a una	Holzperlen, eine nach der anderen geschoben
+
+#: apps/marcador/main/marcador.c:59
+Palitos o cuentas con tiza; el borrador deshace	Striche oder Summen mit Kreide; der Schwamm macht rückgängig
+
+#: apps/marcador/main/marcador.c:419
+No se pudo abrir la partida	Die Partie ließ sich nicht öffnen
+
+#: apps/marcador/main/marcador.c:432
+Tocá otra vez para borrarla	Zum Löschen noch einmal tippen
+
+#: apps/marcador/main/marcador.c:474
+Marcador	Punktezähler
+
+#: apps/marcador/main/marcador.c:477
+Nueva	Neu
+
+#: apps/marcador/main/marcador.c:499
+Todavía no hay partidas	Noch keine Partien
+
+#: apps/marcador/main/marcador.c:501
+Tocá Nueva y elegí con qué llevar la cuenta	Tippe auf Neu und wähle, womit gezählt wird
+
+#: apps/marcador/main/marcador.c:537
+%s · ganó %.20s	%s · %.20s hat gewonnen
+
+#: apps/marcador/main/marcador.c:538
+%s · 1 jugada	%s · 1 Zug
+
+#: apps/marcador/main/marcador.c:539
+%s · %d jugadas	%s · %d Züge
+
+#: apps/marcador/main/marcador.c:581
+¿Con qué llevan la cuenta?	Womit wird gezählt?
+
+#: apps/marcador/main/marcador.c:745
+Hasta cuántos	Bis wie viele
+
+#: apps/marcador/main/marcador.c:746
+Desde cuánto	Ab wie viel
+
+#: apps/marcador/main/marcador.c:867
+#: apps/marcador/main/marcador.c:1302
+Jugadores y reglas	Spieler und Regeln
+
+#: apps/marcador/main/marcador.c:875
+Nombre de la partida	Name der Partie
+
+#: apps/marcador/main/marcador.c:881
+Contadores: %d	Zähler: %d
+
+#: apps/marcador/main/marcador.c:881
+Jugadores: %d	Spieler: %d
+
+#: apps/marcador/main/marcador.c:897
+Sin meta	Ohne Ziel
+
+#: apps/marcador/main/marcador.c:897
+Otro	Andere
+
+#: apps/marcador/main/marcador.c:902
+#: apps/marcador/main/marcador.c:911
+Se juega a	Gespielt bis
+
+#: apps/marcador/main/marcador.c:904
+Malas y buenas	Zwei Hälften (malas, buenas)
+
+#: apps/marcador/main/marcador.c:904
+De corrido	Durchgehend
+
+#: apps/marcador/main/marcador.c:905
+Cómo se cuenta	Wie gezählt wird
+
+#: apps/marcador/main/marcador.c:913
+Blancos	Weiß
+
+#: apps/marcador/main/marcador.c:913
+Pintos	Wachtelbohnen
+
+#: apps/marcador/main/marcador.c:913
+Negros	Schwarz
+
+#: apps/marcador/main/marcador.c:913
+Mezclados	Gemischt
+
+#: apps/marcador/main/marcador.c:920
+#: apps/marcador/main/marcador.c:950
+#: apps/marcador/main/marcador.c:957
+#: apps/marcador/main/marcador.c:976
+Meta	Ziel
+
+#: apps/marcador/main/marcador.c:925
+Fútbol	Fußball
+
+#: apps/marcador/main/marcador.c:925
+Básquet	Basketball
+
+#: apps/marcador/main/marcador.c:925
+Handball	Handball
+
+#: apps/marcador/main/marcador.c:925
+Hockey	Hockey
+
+#: apps/marcador/main/marcador.c:925
+Otro deporte	Andere Sportart
+
+#: apps/marcador/main/marcador.c:926
+Deporte	Sportart
+
+#: apps/marcador/main/marcador.c:929
+Minutos por tiempo	Minuten pro Abschnitt
+
+#: apps/marcador/main/marcador.c:932
+Tiempos	Abschnitte
+
+#: apps/marcador/main/marcador.c:934
+Reloj para adelante	Uhr zählt vorwärts
+
+#: apps/marcador/main/marcador.c:934
+Cuenta regresiva	Countdown
+
+#: apps/marcador/main/marcador.c:935
+Reloj	Uhr
+
+#: apps/marcador/main/marcador.c:940
+Ping-pong	Tischtennis
+
+#: apps/marcador/main/marcador.c:940
+Pádel y tenis	Padel und Tennis
+
+#: apps/marcador/main/marcador.c:940
+Libre	Frei
+
+#: apps/marcador/main/marcador.c:941
+Reglas	Regeln
+
+#: apps/marcador/main/marcador.c:945
+Al mejor de (sets)	Best of (Sätze)
+
+#: apps/marcador/main/marcador.c:945
+Al mejor de (games)	Best of (Spiele)
+
+#: apps/marcador/main/marcador.c:962
+Palitos	Striche
+
+#: apps/marcador/main/marcador.c:962
+Cuentas	Laufende Summen
+
+#: apps/marcador/main/marcador.c:963
+Qué se escribe	Was geschrieben wird
+
+#: apps/marcador/main/marcador.c:966
+Sumando	Addieren
+
+#: apps/marcador/main/marcador.c:966
+Restando	Herunterzählen
+
+#: apps/marcador/main/marcador.c:967
+Cada anotación	Jeder Eintrag
+
+#: apps/marcador/main/marcador.c:972
+Desde	Ab
+
+#: apps/marcador/main/marcador.c:987
+#: apps/marcador/main/marcador.c:1230
+Listo	Fertig
+
+#: apps/marcador/main/marcador.c:987
+Empezar	Starten
+
+#: apps/marcador/main/marcador.c:1006
+No hay nada para deshacer	Nichts rückgängig zu machen
+
+#: apps/marcador/main/marcador.c:1065
+Se reinició la cuenta	Der Stand wurde zurückgesetzt
+
+#: apps/marcador/main/marcador.c:1075
+Punto para	Punkt für
+
+#: apps/marcador/main/marcador.c:1095
+Historial	Verlauf
+
+#: apps/marcador/main/marcador.c:1118
+Todavía no se anotó nada	Noch nichts notiert
+
+#: apps/marcador/main/marcador.c:1121
+Deshacer	Rückgängig
+
+#: apps/marcador/main/marcador.c:1123
+Cerrar	Schließen
+
+#: apps/marcador/main/marcador.c:1230
+Anotar	Eintragen
+
+#: apps/marcador/main/marcador.c:1248
+Anotar puntos	Punkte eintragen
+
+#: apps/marcador/main/marcador.c:1269
+Cuenta en cero. Deshacer la vuelve atrás	Stand auf null. Rückgängig holt ihn zurück
+
+#: apps/marcador/main/marcador.c:1290
+Sonido prendido	Ton an
+
+#: apps/marcador/main/marcador.c:1290
+Sonido apagado	Ton aus
+
+#: apps/marcador/main/marcador.c:1302
+Anotar puntos...	Punkte eintragen...
+
+#: apps/marcador/main/marcador.c:1302
+Poner la cuenta en cero	Stand auf null setzen
+
+#: apps/marcador/main/marcador.c:1303
+Apagar el sonido	Ton ausschalten
+
+#: apps/marcador/main/marcador.c:1303
+Prender el sonido	Ton einschalten
+
+#: apps/marcador/main/marcador.c:1371
+¡Ganó %s!	%s gewinnt!
+
+#: apps/marcador/main/marcador.c:1382
+Partidas ganadas:	Gewonnene Partien:
+
+#: apps/marcador/main/marcador.c:1388
+Seguir	Weiterspielen
+
+#: apps/marcador/main/marcador.c:1390
+Revancha	Revanche
+
+#: apps/marcador/main/mr_cartel.c:354
+#: apps/marcador/main/mr_cartel.c:354
+Games	Spiele
+
+#: apps/marcador/main/mr_cartel.c:354
+Sets	Sätze
+
+#: apps/marcador/main/mr_cartel.c:473
+Sólo se puede deshacer el último punto	Nur der letzte Punkt lässt sich zurücknehmen
+
+#: apps/marcador/main/mr_cartel.c:500
+El partido terminó: poné la cuenta en cero desde el menú	Das Match ist vorbei: Stand im Menü auf null setzen
+
+#: apps/marcador/main/mr_estadio.c:489
+TIEMPO	ABSCHNITT
+
+#: apps/marcador/main/mr_estadio.c:513
+T+	A+
+
+#: apps/marcador/main/mr_estadio.c:534
+Tiempo +	Abschnitt +
+
+#: apps/marcador/main/mr_estadio.c:688
+El reloj vuelve al principio del tiempo	Die Uhr springt an den Anfang des Abschnitts
+
+#: apps/marcador/main/mr_estadio.c:701
+Terminó el tiempo: pasá al siguiente	Abschnitt vorbei: weiter zum nächsten
+
+#: apps/marcador/main/mr_estadio.c:724
+Ya es el último tiempo	Das ist schon der letzte Abschnitt
+
+#: apps/marcador/main/mr_model.c:60
+Nosotros	Wir
+
+#: apps/marcador/main/mr_model.c:60
+Ellos	Die anderen
+
+#: apps/marcador/main/mr_model.c:62
+Local	Heim
+
+#: apps/marcador/main/mr_model.c:62
+Visitante	Gast
+
+#: apps/marcador/main/mr_model.c:65
+Contador %d	Zähler %d
+
+#: apps/marcador/main/mr_model.c:65
+Jugador %d	Spieler %d
+
+#: apps/marcador/main/mr_model.c:226
+Se pasa: no cuenta	Überworfen: zählt nicht
+
+#: apps/marcador/main/mr_pano.c:361
+malas	erste Hälfte
+
+#: apps/marcador/main/mr_pano.c:362
+buenas	zweite Hälfte
+
+#: apps/marcador/main/mr_pano.c:477
+BUENAS	ZWEITE HÄLFTE
+
+#: apps/marcador/main/mr_pano.c:477
+MALAS	ERSTE HÄLFTE
+
+#: apps/marcador/main/mr_tiza.c:768
+Se borra sólo lo último que se escribió	Nur das zuletzt Geschriebene lässt sich wegwischen

@@ -208,9 +208,19 @@ static void build(mr_scene_t *s)
     if (g->target > 999) nr = 4;
     int top = s->top + 30;
     float W = s->w - 40, H = s->h - top - 40;
-    /* the frames side by side (standing rods) or one over the other (lying) */
-    float slot_along = A->vert ? H - 90 : W - 150;                 /* along the rods */
-    float slot_cross = A->vert ? (W - (A->n - 1) * 24) / A->n - 20 : (H - (A->n - 1) * 24) / A->n - 40;
+    /* the frames in a grid: side by side (standing rods) or one over the other
+     * (lying), two by two from three players on */
+    int cols, rows;
+    if (A->n <= 2) {
+        cols = A->vert ? A->n : 1;
+        rows = A->vert ? 1 : A->n;
+    } else {
+        cols = 2;
+        rows = 2;
+    }
+    float slot_w = W / cols, slot_h = (H - (rows - 1) * 24) / rows;
+    float slot_along = A->vert ? slot_h - 100 : slot_w - 170;
+    float slot_cross = A->vert ? slot_w - 30 : slot_h - 40;
     float pitch = (slot_cross - 40) / (nr + 0.4f);
     float bw = mr_minf((slot_along - 40) / 13.2f, pitch * 0.74f);
     if (bw > 80) bw = 80;
@@ -222,22 +232,22 @@ static void build(mr_scene_t *s)
     float cross = pitch * nr + 2 * t + 16;
     for (int p = 0; p < A->n; p++) {
         frm_t *F = &A->f[p];
+        int ci = p % cols, ri = p / cols;
+        float sx = 20 + ci * slot_w, sy = top + ri * (slot_h + 24);
         F->nr = nr;
         if (A->vert) {
             F->w = (int)cross;
             F->h = (int)(along + 2 * t);
-            float slot = W / A->n;
-            F->x = (int)(20 + slot * p + (slot - F->w) * 0.5f);
-            F->y = (int)(top + (H - 90 - F->h) * 0.5f);
+            F->x = (int)(sx + (slot_w - F->w) * 0.5f);
+            F->y = (int)(sy + (slot_h - 90 - F->h) * 0.5f);
             F->u0 = F->y + F->h - t - 4;
             F->L = (float)(F->h - 2 * t - 8);
             for (int r = 0; r < nr; r++) F->r[r].c = (int)(F->x + t + 8 + pitch * (r + 0.5f));
         } else {
             F->w = (int)(along + 2 * t);
             F->h = (int)cross;
-            F->x = (int)((s->w - F->w) / 2) + 20;
-            float slot = (H - (A->n - 1) * 24) / A->n;
-            F->y = (int)(top + p * (slot + 24) + (slot - F->h) * 0.5f);
+            F->x = (int)(sx + (slot_w - F->w) * 0.5f) + 20;
+            F->y = (int)(sy + (slot_h - F->h) * 0.5f);
             F->u0 = F->x + t + 4;
             F->L = (float)(F->w - 2 * t - 8);
             for (int r = 0; r < nr; r++) F->r[r].c = (int)(F->y + t + 8 + pitch * (r + 0.5f));
@@ -289,14 +299,15 @@ static void build(mr_scene_t *s)
         lv_obj_set_size(pl, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
         lv_obj_t *nl = mr_label(pl, aos_font_small, 0x3A2A08, g->p[p].name);
         lv_label_set_long_mode(nl, LV_LABEL_LONG_MODE_DOTS);
-        lv_obj_set_style_max_width(nl, F->w - 30, 0);
+        lv_obj_update_layout(nl);
+        if (lv_obj_get_width(nl) > F->w - 40) lv_obj_set_size(nl, F->w - 40, lv_font_get_line_height(aos_font_small));
         lv_obj_update_layout(pl);
         lv_obj_set_pos(pl, F->x + F->w / 2 - lv_obj_get_width(pl) / 2, F->y - lv_obj_get_height(pl) / 2 + t / 2);
         F->score = mr_label(s->obj, aos_font_large, 0x3A2412, "0");
         lv_obj_set_style_border_side(F->score, LV_BORDER_SIDE_BOTTOM, 0);
         lv_obj_set_style_border_color(F->score, lv_color_hex(g->p[p].color), 0);
         lv_obj_set_style_border_width(F->score, 5, 0);
-        if (A->vert) {
+        if (A->vert || A->n > 2) {
             lv_obj_set_width(F->score, F->w);
             lv_obj_set_style_text_align(F->score, LV_TEXT_ALIGN_CENTER, 0);
             lv_obj_set_pos(F->score, F->x, F->y + F->h + 36);
