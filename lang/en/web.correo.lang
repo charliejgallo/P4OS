@@ -1,0 +1,137 @@
+# amoledos-lang 1   es -> en
+# web.correo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/correo/web/correo.js:110
+La placa no contestó	The board did not answer
+
+#: apps/correo/web/correo.js:159
+#: apps/correo/web/correo.js:168
+Correo	Mail
+
+#: apps/correo/web/correo.js:184
+Todas las entradas	All inboxes
+
+#: apps/correo/web/correo.js:194
+Escribir	Write
+
+#: apps/correo/web/correo.js:199
+Buscar	Search
+
+#: apps/correo/web/correo.js:206
+#: apps/correo/web/correo.js:274
+(sin asunto)	(no subject)
+
+#: apps/correo/web/correo.js:207
+No hay mensajes	No messages
+
+#: apps/correo/web/correo.js:208
+Buzones	Mailboxes
+
+#: apps/correo/web/correo.js:212
+Abriendo...	Opening...
+
+#: apps/correo/web/correo.js:222
+No se pudo abrir el mensaje	Could not open the message
+
+#: apps/correo/web/correo.js:231
+No se pudo	It could not be done
+
+#: apps/correo/web/correo.js:240
+Listo	Done
+
+#: apps/correo/web/correo.js:255
+Imagen	Picture
+
+#: apps/correo/web/correo.js:261
+Las imágenes de internet no se bajan.	Pictures from the internet are not downloaded.
+
+#: apps/correo/web/correo.js:266
+Lista	List
+
+#: apps/correo/web/correo.js:267
+Responder	Reply
+
+#: apps/correo/web/correo.js:268
+A todos	Reply all
+
+#: apps/correo/web/correo.js:269
+Reenviar	Forward
+
+#: apps/correo/web/correo.js:270
+Archivar	Archive
+
+#: apps/correo/web/correo.js:272
+No leído	Unread
+
+#: apps/correo/web/correo.js:273
+Borrar	Delete
+
+#: apps/correo/web/correo.js:276
+Para:	To:
+
+#: apps/correo/web/correo.js:276
+Cc:	Cc: 
+
+#: apps/correo/web/correo.js:291
+Mensaje reenviado	Forwarded message
+
+#: apps/correo/web/correo.js:291
+#: apps/correo/web/correo.js:346
+De	From
+
+#: apps/correo/web/correo.js:291
+Fecha	Date
+
+#: apps/correo/web/correo.js:291
+#: apps/correo/web/correo.js:347
+Asunto	Subject
+
+#: apps/correo/web/correo.js:299
+escribió	wrote
+
+#: apps/correo/web/correo.js:313
+Falta a quién mandarlo	Who to send it to is missing
+
+#: apps/correo/web/correo.js:317
+Enviando...	Sending...
+
+#: apps/correo/web/correo.js:335
+#: apps/correo/web/correo.js:339
+No se pudo enviar	Could not send
+
+#: apps/correo/web/correo.js:336
+Enviado	Sent
+
+#: apps/correo/web/correo.js:344
+Cancelar	Cancel
+
+#: apps/correo/web/correo.js:345
+Enviar	Send
+
+#: apps/correo/web/correo.js:346
+Para	To
+
+#: apps/correo/web/correo.js:346
+Cc	Cc 
+
+#: apps/correo/web/correo.js:347
+Cco	Bcc
+
+#: apps/correo/web/correo.js:347
+Mensaje	Message
+
+#: apps/correo/web/correo.js:348
+Adjuntos	Attachments
+
+#: apps/correo/web/correo.js:362
+No hay cuentas: agregalas en la placa, en Correo, Ajustes.	No accounts: add them on the board, in Mail, Settings.
+
+#: apps/correo/web/correo.js:370
+Correo no está abierto en la placa.	Mail is not open on the board.
+
+#: apps/correo/web/correo.js:371
+Abrir en la placa	Open on the board
