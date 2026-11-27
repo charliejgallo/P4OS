@@ -1,0 +1,97 @@
+# CIELO - the figures of the 88 constellations, drawn for this app from the
+# stars of the Yale Bright Star Catalogue (not copied from any planetarium's
+# line set). Public domain, like the catalogue.
+#
+# One constellation per line: its IAU abbreviation, then chains separated by
+# ";". A chain "Alp-Gam-Del" joins alpha to gamma and gamma to delta. A star
+# is named as the catalogue does: a Bayer letter (Alp, Bet... with a digit
+# for alpha-1, alpha-2), a Flamsteed number (41), "HR1234", or either of the
+# first two with ".Xxx" for a star of another constellation (Alp.And).
+And  Alp-Del-Bet-Gam1; Bet-Mu-Nu
+Ant  Eps-Alp-Iot
+Aps  Alp-Del1-Bet-Gam
+Aqr  Eps-Bet-Alp-Gam-Zet-Eta; Alp-The-Lam-Del
+Aql  Gam-Alp-Bet; Alp-Del-Lam; Del-Zet; Del-Eta-The
+Ara  The-Alp-Bet-Gam-Del-Eta-Zet-Bet
+Ari  41-Alp-Bet-Gam2
+Aur  Alp-Bet-The-Bet.Tau-Iot-Alp; Alp-Eps-Zet-Eta-Alp
+Boo  Alp-Eps-Del-Bet-Gam-Rho-Alp; Alp-Eta; Alp-Zet
+Cae  Del-Alp-Bet-Gam1
+Cam  7-Bet-Alp-Gam
+Cnc  Alp-Del-Bet; Del-Gam-Iot
+CVn  Alp2-Bet
+CMa  Zet-Bet-Alp-Omi2-Del-Eta; Del-Eps; Alp-Iot-Gam
+CMi  Alp-Bet
+Cap  Alp2-Bet-Psi-Ome-Zet-Del-Gam-Iot-The-Bet
+Car  Alp-Eps; Eps-Iot-The; The-Ome-Bet
+Cas  Eps-Del-Gam-Alp-Bet
+Cen  Alp1-Bet-Eps-Gam-Del; Eps-Zet-Mu-Nu-The; Zet-Eta-Kap; Gam-Sig-Del; Nu-Iot
+Cep  Alp-Bet-Gam-Iot-Zet-Alp; Zet-Del; Alp-Eta
+Cet  Alp-Gam-Del-Omi-Zet-Tau-Bet-Iot-Eta-The-Zet; Alp-Lam-Mu-Xi2-Nu-Gam
+Cha  Alp-Gam-Bet-Eps-Alp
+Cir  Bet-Alp-Gam
+Col  Eps-Alp-Bet-Eta; Bet-Gam-Del
+Com  Alp-Bet-Gam
+CrA  Eps-Gam-Alp-Bet-Del-Zet
+CrB  Iot-Eps-Del-Gam-Alp-Bet-The
+Crv  Alp-Eps-Gam-Del-Bet-Eps
+Crt  Alp-Bet-Gam-Del-Alp; Gam-Zet-Eta; Del-Eps-The
+Cru  Alp1-Gam; Bet-Del
+Cyg  Alp-Gam-Eta-Bet1; Del-Gam-Eps-Zet
+Del  Eps-Bet-Del-Gam2-Alp-Bet
+Dor  Gam-Alp-Zet-Bet-Del
+Dra  Bet-Gam-Xi-Nu2-Bet; Xi-Del-Eps; Del-Zet-Eta-The-Iot-Alp-Kap-Lam
+Equ  Alp-Bet-Del-Gam-Alp
+Eri  Bet-Mu-Nu-Omi1-Gam-Pi-Del-Eps-Eta-Tau1-Tau3-Tau4-Tau6-Tau9-The-Iot-Kap-Phi-Chi-Alp
+For  Alp-Bet-Nu
+Gem  Alp-Tau-Eps-Mu-Eta; Bet-Ups-Iot-Tau; Ups-Del-Zet-Gam; Del-Lam-Xi
+Gru  Gam-Lam-Mu1-Del1-Bet-Eps-Zet; Alp-Bet-Iot
+Her  Eps-Zet-Eta-Pi-Eps; Zet-Bet-Gam; Eps-Del-Lam-Mu-Xi; Pi-Rho-The-Iot; Eta-Sig-Tau-Phi-Chi; Del-Alp1
+Hor  Alp-Iot-Eta-Zet-Mu-Bet
+Hya  Del-Sig-Eta-Rho-Eps-Del; Eps-Zet-The-Iot-Alp-Ups1-Lam-Mu-Nu-Xi-Gam-Pi
+Hyi  Alp-Bet-Gam-Alp
+Ind  Bet-Eta-Alp-The-Del
+Lac  Bet-Alp-5-4-2-6-11
+Leo  Alp-Eta-Gam1-Zet-Mu-Eps; Alp-The-Bet-Del-Gam1; Del-The
+LMi  21-Bet-46
+Lep  Eps-Bet-Alp-Zet-Eta; Bet-Gam-Del; Alp-Mu-Kap
+Lib  Sig-Alp2-Bet-Gam-Alp2
+Lup  Alp-Bet-Del-Gam-Eta; Alp-Zet; Gam-Eps-Kap1
+Lyn  Alp-38-31-21-15-2
+Lyr  Alp-Zet1-Bet-Gam-Del2-Zet1; Alp-Eps1
+Men  Alp-Gam-Eta-Bet
+Mic  Alp-Gam-Eps
+Mon  Alp-Zet-Del-Bet-Gam; Del-13-Eps
+Mus  Alp-Bet-Del-Gam-Alp-Eps-Lam
+Nor  Gam2-Eta-Del-Eps-Gam2
+Oct  Nu-Bet-Del-Nu
+Oph  Alp-Kap-Del-Eps-Zet-Eta-Bet-Alp; Bet-Gam; Eta-Xi-The
+Ori  Alp-Zet-Eps-Del-Gam-Lam-Alp; Zet-Kap; Del-Eta-Bet; Alp-Mu-Xi-Chi1; Gam-Pi3-Pi4-Pi5; Pi3-Pi2-Pi1
+Pav  Alp-Bet-Del-Eta; Bet-Gam; Bet-Eps-Zet
+Peg  Alp-Bet-Alp.And-Gam-Alp; Alp-Zet-The-Eps; Bet-Eta; Bet-Mu-Lam-Iot-Kap
+Per  Eta-Gam-Alp-Del-Eps-Xi-Zet; Alp-Kap-Bet-Rho; Del-Nu-Lam
+Phe  Eps-Alp-Bet-Gam-Del; Bet-Zet
+Pic  Alp-Gam-Bet
+PsA  Alp-Del-Gam-Bet-Mu-Eps-Alp
+Psc  Gam-Kap-Lam-Iot-The-Gam; Iot-Ome-Del-Eps-Zet-Mu-Nu-Alp-Omi-Eta
+Pup  Rho-Zet-Pi-Nu-Tau; Pi-Sig; Rho-Xi
+Pyx  Bet-Alp-Gam
+Ret  Alp-Bet-Del-Eps-Alp
+Sge  Alp-Del-Gam; Bet-Del
+Sgr  Gam2-Del-Eps-Gam2; Del-Lam-Phi-Del; Phi-Sig-Tau-Zet-Phi; Zet-Eps; Lam-Mu
+Sco  Nu-Bet1-Del-Pi-Rho; Del-Sig-Alp-Tau-Eps-Mu1-Zet2-Eta-The-Iot1-Kap-Lam-Ups
+Scl  Alp-Del-Gam-Bet
+Sct  Alp-Bet-Del-Gam-Alp
+Ser  Gam-Bet-Kap-Gam; Bet-Del-Alp-Eps-Mu; Nu-Xi-Eta-The1
+Sex  Gam-Alp-Bet
+Tau  Zet-Alp-The2-Gam-Del1-Eps-Bet; Gam-Lam-Omi
+Tel  Zet-Alp-Eps
+Tri  Alp-Bet-Gam-Alp
+TrA  Alp-Bet-Gam-Alp
+Tuc  Alp-Gam-Bet1; Gam-Eps-Zet-Bet1
+UMa  Eta-Zet-Eps-Del-Alp-Bet-Gam-Del; Gam-Chi-Psi-Mu-Lam; Chi-Nu-Xi; Alp-23-Omi-Ups-Bet; Ups-The-Kap-Iot
+UMi  Alp-Del-Eps-Zet-Bet-Gam-Eta-Zet
+Vel  Gam2-Del-Kap-Phi-Mu-Psi-Lam-Gam2
+Vir  Nu-Bet-Eta-Gam-Del-Eps; Gam-The-Alp; Del-Zet-Alp; Zet-Tau-Iot
+Vol  Alp-Bet-Eps-Del; Eps-Zet-Gam2
+Vul  1-Alp-13

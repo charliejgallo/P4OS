@@ -1,0 +1,23 @@
+{
+ "cat": "utiles",
+ "about": {
+  "es": "El cielo de esta noche desde donde está la placa: estrellas, constelaciones, planetas, la Luna y las pasadas de la Estación Espacial.",
+  "en": "Tonight's sky from where the board is: stars, constellations, planets, the Moon and the passes of the Space Station."
+ },
+ "desc": {
+  "es": "Cielo muestra el cielo de tu lugar como se ve ahora y lo sigue mientras gira la Tierra: unas nueve mil estrellas con su color, las figuras y los nombres de las 88 constelaciones, la Vía Láctea, los planetas, el Sol, la Luna con su fase y los objetos de Messier. Se ve como un domo entero o mirando hacia el horizonte; se arrastra con un dedo y se acerca con dos.\n\nTocar algo abre su ficha: nombre, magnitud, distancia, altura y acimut, y a qué hora sale, culmina y se pone. Abajo se viaja en el tiempo: una hora o un día por vez, más rápido hacia adelante o hacia atrás, u otra fecha. El modo nocturno pone todo en rojo para no perder la vista en la oscuridad.\n\nLa Estación Espacial, la china, el Hubble y otros satélites que elijas tienen sus próximas pasadas, cuáles se van a ver y su traza en el cielo, con un aviso unos minutos antes. Sus órbitas se bajan de un servicio gratuito una vez por día. La página Cielo del portal muestra el cielo de ahora, la tabla de pasadas y busca el lugar por su nombre.",
+  "en": "Sky shows the sky over your place as it looks now and follows it as the Earth turns: some nine thousand stars in their colours, the figures and names of the 88 constellations, the Milky Way, the planets, the Sun, the Moon with its phase and the Messier objects. See it as a whole dome or looking towards the horizon; drag it with one finger and zoom with two.\n\nTap something to open its card: name, magnitude, distance, altitude and azimuth, and when it rises, culminates and sets. At the bottom you travel in time: an hour or a day at a time, faster forwards or backwards, or another date. Night mode turns everything red to keep your eyes used to the dark.\n\nThe Space Station, China's station, Hubble and other satellites you choose have their coming passes, which ones will be visible and their track across the sky, with an alert a few minutes before. Their orbits come from a free service once a day. The Sky page in the portal shows the sky of now and the table of passes, and finds the place by its name."
+ },
+ "shots": [
+  "app-cielo.png",
+  "app-cielo-ficha.png",
+  "app-cielo-pasada.png",
+  "land-cielo.png"
+ ],
+ "packs": [
+  {
+   "file": "cielo_p4.pak",
+   "need": true
+  }
+ ]
+}
