@@ -59,6 +59,19 @@ void tqm_menu_tick(app_t *a, float dt)
     (void)dt;
 }
 
+static void to_menu(lv_event_t *e)
+{
+    tqa_screen((app_t *)lv_event_get_user_data(e), SC_MENU);
+}
+
+/* Back to the title, at a card's top left (the system's back and the
+ * joystick's B do the same) */
+static void back_button(app_t *a, lv_obj_t *card_)
+{
+    lv_obj_t *b = tqa_button(card_, LV_SYMBOL_LEFT, 0x2A3A4C, 72, 56, to_menu, a);
+    lv_obj_align(b, LV_ALIGN_TOP_LEFT, 18, 12);
+}
+
 static lv_obj_t *card(app_t *a, int w, int h)
 {
     lv_obj_t *p = tqa_panel(a->ui, 0, 0, w, h, 36);
@@ -185,8 +198,9 @@ void tqm_build_story(app_t *a)
     bool land = a->W > a->H;
     int w = land ? 760 : a->W - 40, h = land ? a->H - 40 : a->H - 100;
     lv_obj_t *p = card(a, w, h);
+    back_button(a, p);
     lv_obj_t *t = tqa_label(p, _("Historia"), aos_font_title, 0xFFE9A8);
-    lv_obj_align(t, LV_ALIGN_TOP_LEFT, 30, 22);
+    lv_obj_align(t, LV_ALIGN_TOP_LEFT, 106, 22);
     a->coins_lbl = tqa_label(p, "", aos_font_caption, 0xFFD23C);
     coins_text(a, a->coins_lbl);
     lv_obj_align(a->coins_lbl, LV_ALIGN_TOP_RIGHT, -30, 34);
@@ -390,8 +404,9 @@ void tqm_build_free(app_t *a)
     int h = 130 + F_ROWS * rh + 120;
     if (h > a->H - 30) h = a->H - 30;
     lv_obj_t *p = card(a, w, h);
+    back_button(a, p);
     lv_obj_t *t = tqa_label(p, _("Batalla libre"), aos_font_title, 0xFFE9A8);
-    lv_obj_align(t, LV_ALIGN_TOP_LEFT, 30, 18);
+    lv_obj_align(t, LV_ALIGN_TOP_LEFT, 106, 18);
     static const char *const NAME[F_ROWS] = { N_("Modo"), N_("Lugar"), N_("Tamaño"), N_("Rivales"), N_("Dificultad"),
                                               N_("Clima"), N_("Objetos"), N_("Jugadores"), N_("Tanque del 2") };
     for (int r = 0; r < F_ROWS; r++) {
