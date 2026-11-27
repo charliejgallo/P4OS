@@ -1,0 +1,73 @@
+# amoledos-lang 1   es -> fr
+# web.mensajes.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mensajes/web/mensajes.js:66
+#: apps/mensajes/web/mensajes.js:106
+Mensajes	Messages
+
+#: apps/mensajes/web/mensajes.js:74
+Buscando la app en la placa…	Recherche de l'app sur la carte…
+
+#: apps/mensajes/web/mensajes.js:81
+Escribí un mensaje	Écris un message
+
+#: apps/mensajes/web/mensajes.js:88
+Enviar	Envoyer
+
+#: apps/mensajes/web/mensajes.js:97
+Las claves de la app	Les clés de l'app
+
+#: apps/mensajes/web/mensajes.js:98
+Para entrar con tu cuenta, Mensajes necesita un api_id y un api_hash tuyos. Se sacan gratis en my.telegram.org, en «API development tools». Se guardan en la placa, no en la tarjeta.	Pour te connecter à ton compte, Messages a besoin de ton api_id et de ton api_hash. Ils sont gratuits sur my.telegram.org, dans « API development tools ». Ils sont gardés sur la carte, pas sur la carte SD.
+
+#: apps/mensajes/web/mensajes.js:102
+El api_id es un número y el api_hash tiene 32 letras y números (0-9, a-f).	L'api_id est un nombre et l'api_hash a 32 lettres et chiffres (0-9, a-f).
+
+#: apps/mensajes/web/mensajes.js:103
+Guardadas: seguí en la placa con tu número	Enregistrées : continue sur la carte avec ton numéro
+
+#: apps/mensajes/web/mensajes.js:104
+Guardar	Enregistrer
+
+#: apps/mensajes/web/mensajes.js:120
+Todavía no hay chats	Pas encore de chats
+
+#: apps/mensajes/web/mensajes.js:125
+Elegí un chat	Choisis un chat
+
+#: apps/mensajes/web/mensajes.js:127
+Cargando…	Chargement…
+
+#: apps/mensajes/web/mensajes.js:135
+Reenviado de %s	Transféré de %s
+
+#: apps/mensajes/web/mensajes.js:140
+editado	modifié
+
+#: apps/mensajes/web/mensajes.js:150
+Mensajes no está abierta en la placa.	Messages n'est pas ouverte sur la carte.
+
+#: apps/mensajes/web/mensajes.js:151
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/mensajes/web/mensajes.js:151
+Abrir Mensajes en la placa	Ouvrir Messages sur la carte
+
+#: apps/mensajes/web/mensajes.js:158
+conectando…	connexion…
+
+#: apps/mensajes/web/mensajes.js:159
+Conectada como %s	Connectée : %s
+
+#: apps/mensajes/web/mensajes.js:159
+%s sin leer	%s non lus
+
+#: apps/mensajes/web/mensajes.js:160
+Faltan las claves de la app.	Il manque les clés de l'app.
+
+#: apps/mensajes/web/mensajes.js:161
+No hay sesión: entrá desde la placa con tu número y el código.	Pas de session : connecte-toi sur la carte (numéro et code).

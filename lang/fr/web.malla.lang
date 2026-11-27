@@ -1,0 +1,168 @@
+# amoledos-lang 1   es -> fr
+# web.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/web/malla.js:44
+no hay ruta	sans route
+
+#: apps/malla/web/malla.js:44
+lo rechazaron	refusé
+
+#: apps/malla/web/malla.js:44
+no hubo respuesta	pas de réponse
+
+#: apps/malla/web/malla.js:44
+sin radio	sans radio
+
+#: apps/malla/web/malla.js:45
+nadie lo confirmó	personne ne l'a confirmé
+
+#: apps/malla/web/malla.js:45
+canal desconocido	canal inconnu
+
+#: apps/malla/web/malla.js:45
+demasiado largo	trop long
+
+#: apps/malla/web/malla.js:45
+sin respuesta	sans réponse
+
+#: apps/malla/web/malla.js:46
+límite de uso del canal	limite d'usage du canal
+
+#: apps/malla/web/malla.js:46
+#: apps/malla/web/malla.js:46
+falta su clave pública	sa clé publique manque
+
+#: apps/malla/web/malla.js:47
+demasiados seguidos	trop d'envois d'affilée
+
+#: apps/malla/web/malla.js:61
+nunca	jamais
+
+#: apps/malla/web/malla.js:61
+recién	à l'instant
+
+#: apps/malla/web/malla.js:61
+hace %d min	il y a %d min
+
+#: apps/malla/web/malla.js:62
+hace %d h	il y a %d h
+
+#: apps/malla/web/malla.js:62
+hace %d d	il y a %d j
+
+#: apps/malla/web/malla.js:81
+#: apps/malla/web/malla.js:102
+Malla	Maillage
+
+#: apps/malla/web/malla.js:91
+Mensaje	Message
+
+#: apps/malla/web/malla.js:93
+Enviar	Envoyer
+
+#: apps/malla/web/malla.js:98
+Tomar canales de una URL	Prendre des canaux d'une URL
+
+#: apps/malla/web/malla.js:99
+Reemplaza los canales del nodo (y su radio, si la URL la trae). El nodo se reinicia.	Remplace les canaux du noeud (et sa radio, si l'URL l'inclut). Le noeud redémarre.
+
+#: apps/malla/web/malla.js:100
+Aplicar	Appliquer
+
+#: apps/malla/web/malla.js:113
+Es demasiado largo para la malla	Trop long pour le maillage
+
+#: apps/malla/web/malla.js:120
+No es una URL de canales de Meshtastic	Pas une URL de canaux Meshtastic
+
+#: apps/malla/web/malla.js:121
+¿Reemplazar los canales del nodo? Se reinicia.	Remplacer les canaux du noeud ? Il redémarre.
+
+#: apps/malla/web/malla.js:122
+Mandado al nodo	Envoyé au noeud
+
+#: apps/malla/web/malla.js:152
+#: apps/malla/web/malla.js:176
+Vos	Toi
+
+#: apps/malla/web/malla.js:152
+Sin mensajes todavía	Pas encore de messages
+
+#: apps/malla/web/malla.js:161
+en cola	en attente
+
+#: apps/malla/web/malla.js:161
+enviado	envoyé
+
+#: apps/malla/web/malla.js:162
+repetido	relayé
+
+#: apps/malla/web/malla.js:162
+recibido	reçu
+
+#: apps/malla/web/malla.js:163
+error	erreur
+
+#: apps/malla/web/malla.js:170
+Canal %d	Canal %d
+
+#: apps/malla/web/malla.js:182
+Escribí el primer mensaje directo.	Écris le premier message direct.
+
+#: apps/malla/web/malla.js:182
+Todavía no hay mensajes en este canal.	Pas encore de messages sur ce canal.
+
+#: apps/malla/web/malla.js:190
+%d nodos	%d noeuds
+
+#: apps/malla/web/malla.js:192
+Nodo	Noeud
+
+#: apps/malla/web/malla.js:192
+Visto	Vu
+
+#: apps/malla/web/malla.js:192
+Saltos	Sauts
+
+#: apps/malla/web/malla.js:192
+Batería	Batterie
+
+#: apps/malla/web/malla.js:193
+Distancia	Distance
+
+#: apps/malla/web/malla.js:196
+este	local
+
+#: apps/malla/web/malla.js:197
+directo	direct
+
+#: apps/malla/web/malla.js:198
+enchufado	branché
+
+#: apps/malla/web/malla.js:205
+Malla no está abierta en la placa.	Maillage n'est pas ouvert sur la carte.
+
+#: apps/malla/web/malla.js:206
+Abrir Malla en la placa	Ouvrir Maillage sur la carte
+
+#: apps/malla/web/malla.js:209
+Conectado	Connecté
+
+#: apps/malla/web/malla.js:209
+Cargando la base de nodos	Chargement des noeuds
+
+#: apps/malla/web/malla.js:209
+Conectando	Connexion
+
+#: apps/malla/web/malla.js:210
+Reintentando	Nouvel essai
+
+#: apps/malla/web/malla.js:210
+Sin conexión	Déconnecté
+
+#: apps/malla/web/malla.js:213
+Sin nodo	Aucun noeud

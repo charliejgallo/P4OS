@@ -1,0 +1,627 @@
+# amoledos-lang 1   es -> fr
+# aos.correo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:214
+Mensaje reenviado	Message transféré
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:214
+#: apps/correo/main/cr_ui_compose.c:578
+De	De
+
+#: apps/correo/main/cr_mime.c:682
+#: apps/correo/main/cr_ui_compose.c:215
+#: apps/correo/main/cr_ui_compose.c:596
+Asunto	Objet
+
+#: apps/correo/main/cr_mime.c:683
+#: apps/correo/main/cr_ui_compose.c:215
+Fecha	Date
+
+#: apps/correo/main/cr_mime.c:753
+El mensaje es muy grande: se bajó sólo el principio.	Le message est très gros : seul le début a été téléchargé.
+
+#: apps/correo/main/cr_store.c:39
+Gmail no deja entrar con tu contraseña de siempre: pide una contraseña de aplicación. Activá la verificación en dos pasos en tu cuenta de Google, buscá \"Contraseñas de aplicaciones\" en Seguridad, creá una para Correo y escribila acá (son 16 letras; los espacios no importan).	Gmail ne te laisse pas entrer avec ton mot de passe habituel : il demande un mot de passe d'application. Active la validation en deux étapes dans ton compte Google, cherche \"Mots de passe des applications\" dans Sécurité, crées-en un pour Mail et écris-le ici (16 lettres ; les espaces ne comptent pas).
+
+#: apps/correo/main/cr_store.c:44
+Outlook pide una contraseña de aplicación: con la verificación en dos pasos activada, creala en account.microsoft.com, en Seguridad. Microsoft está pasando sus cuentas a OAuth2, que Correo todavía no tiene: si la contraseña de aplicación no anda, la cuenta no se puede usar por ahora. Para mandar usa el puerto 587 con STARTTLS.	Outlook demande un mot de passe d'application : avec la validation en deux étapes activée, crée-le sur account.microsoft.com, dans Sécurité. Microsoft passe ses comptes à OAuth2, que Mail n'a pas encore : si le mot de passe d'application ne marche pas, le compte est inutilisable pour l'instant. Pour l'envoi, utilise le port 587 avec STARTTLS.
+
+#: apps/correo/main/cr_store.c:50
+iCloud pide una contraseña de app: entrá a account.apple.com, Inicio de sesión y seguridad, Contraseñas de apps, y creá una para Correo. El usuario del correo entrante es lo que va antes de la @. Para mandar usa el puerto 587 con STARTTLS.	iCloud demande un mot de passe pour app : va sur account.apple.com, Connexion et sécurité, Mots de passe pour app, et crées-en un pour Mail. L'utilisateur du courrier entrant est ce qui précède le @. Pour l'envoi, utilise le port 587 avec STARTTLS.
+
+#: apps/correo/main/cr_store.c:55
+Fastmail pide una contraseña de app: Configuración, Privacidad y seguridad, Contraseñas de apps; elegí acceso por IMAP y SMTP.	Fastmail demande un mot de passe d'app : Paramètres, Confidentialité et sécurité, Mots de passe d'app ; choisis l'accès IMAP et SMTP.
+
+#: apps/correo/main/cr_store.c:59
+Yahoo pide una contraseña de aplicación: Información de la cuenta, Seguridad de la cuenta, Generar contraseña de aplicación.	Yahoo demande un mot de passe d'application : Infos du compte, Sécurité du compte, Générer un mot de passe d'application.
+
+#: apps/correo/main/cr_store.c:61
+Otro	Autre
+
+#: apps/correo/main/cr_store.c:62
+Con un servidor propio o de tu proveedor, los datos te los da quien te da el correo. Correo prueba imap.<dominio> y smtp.<dominio> con SSL/TLS; si no son esos, cambialos abajo.	Avec ton propre serveur ou celui de ton fournisseur, les infos te sont données par qui te fournit le mail. Mail essaie imap.<domaine> et smtp.<domaine> avec SSL/TLS ; si ce ne sont pas les bons, change-les plus bas.
+
+#: apps/correo/main/cr_ui.c:425
+#: apps/correo/main/cr_ui_acct.c:493
+#: apps/correo/main/cr_ui_compose.c:569
+#: apps/correo/main/cr_ui_compose.c:720
+Cancelar	Annuler
+
+#: apps/correo/main/cr_ui.c:447
+La placa no abre enlaces: escanealo con el teléfono para abrirlo ahí.	La carte n'ouvre pas les liens : scanne-le avec ton téléphone pour l'ouvrir dessus.
+
+#: apps/correo/main/cr_ui.c:449
+#: apps/correo/main/cr_ui_msg.c:766
+Cerrar	Fermer
+
+#: apps/correo/main/cr_ui.c:457
+No se pudo llegar al servidor	Serveur injoignable
+
+#: apps/correo/main/cr_ui.c:458
+La conexión segura falló (certificado o cifrado)	La connexion sécurisée a échoué (certificat ou chiffrement)
+
+#: apps/correo/main/cr_ui.c:459
+La placa todavía no tiene hora: sin hora no se puede verificar el certificado	La carte n'a pas encore l'heure : sans elle, impossible de vérifier le certificat
+
+#: apps/correo/main/cr_ui.c:460
+El servidor no aceptó el usuario o la contraseña	Le serveur a refusé l'utilisateur ou le mot de passe
+
+#: apps/correo/main/cr_ui.c:461
+El servidor contestó algo inesperado	Réponse inattendue du serveur
+
+#: apps/correo/main/cr_ui.c:463
+Este firmware todavía no cifra con STARTTLS (puertos 143 y 587). Usá SSL/TLS (993 y 465) si el servidor lo tiene, o esperá la próxima versión.	Ce firmware ne chiffre pas encore avec STARTTLS (ports 143 et 587). Utilise SSL/TLS (993 et 465) si le serveur le propose, ou attends la prochaine version.
+
+#: apps/correo/main/cr_ui.c:465
+#: apps/correo/main/cr_ui.c:473
+#: apps/correo/main/cr_ui_acct.c:291
+Falta la contraseña	Mot de passe manquant
+
+#: apps/correo/main/cr_ui.c:474
+Conectando...	Connexion...
+
+#: apps/correo/main/cr_ui.c:475
+Al día	À jour
+
+#: apps/correo/main/cr_ui.c:476
+Al día, esperando correo	À jour, en attente de mail
+
+#: apps/correo/main/cr_ui.c:479
+Sin conexión	Non connecté
+
+#: apps/correo/main/cr_ui.c:479
+Sin red	Hors ligne
+
+#: apps/correo/main/cr_ui.c:498
+Entrada	Réception
+
+#: apps/correo/main/cr_ui.c:499
+Enviados	Envoyés
+
+#: apps/correo/main/cr_ui.c:500
+Borradores	Brouillons
+
+#: apps/correo/main/cr_ui.c:501
+Archivo	Archives
+
+#: apps/correo/main/cr_ui.c:502
+Papelera	Corbeille
+
+#: apps/correo/main/cr_ui.c:503
+No deseado	Spam
+
+#: apps/correo/main/cr_ui.c:504
+Todos los mensajes	Tous les messages
+
+#: apps/correo/main/cr_ui.c:505
+Destacados	Favoris
+
+#: apps/correo/main/cr_ui.c:669
+La cuenta no tiene carpeta de archivo	Le compte n'a pas de dossier d'archives
+
+#: apps/correo/main/cr_ui.c:673
+Archivado	Archivé
+
+#: apps/correo/main/cr_ui.c:689
+Borrado	Supprimé
+
+#: apps/correo/main/cr_ui.c:702
+Movido	Déplacé
+
+#: apps/correo/main/cr_ui.c:723
+Mover a	Déplacer vers
+
+#: apps/correo/main/cr_ui.c:741
+#: apps/correo/main/cr_ui.c:841
+#: apps/correo/main/cr_ui_acct.c:510
+Correo	Mail
+
+#: apps/correo/main/cr_ui.c:743
+Tu correo en la placa: varias cuentas, la bandeja de todas juntas, conversaciones y avisos cuando llega algo. Funciona con Gmail, Outlook, iCloud, Fastmail o cualquier servidor IMAP y SMTP.	Tes mails sur la carte : plusieurs comptes, toutes les réceptions réunies, conversations et une alerte à chaque arrivée. Marche avec Gmail, Outlook, iCloud, Fastmail ou tout serveur IMAP et SMTP.
+
+#: apps/correo/main/cr_ui.c:748
+#: apps/correo/main/cr_ui_acct.c:160
+Agregar una cuenta	Ajouter un compte
+
+#: apps/correo/main/cr_ui.c:789
+Probando de nuevo...	Nouvel essai...
+
+#: apps/correo/main/cr_ui.c:853
+#: apps/correo/main/cr_ui.c:1315
+Todas las entradas	Toutes les boîtes
+
+#: apps/correo/main/cr_ui.c:878
+Todavía sin carpetas: conectando...	Pas encore de dossiers : connexion...
+
+#: apps/correo/main/cr_ui.c:942
+#: apps/correo/main/cr_ui_msg.c:805
+Para:	À :
+
+#: apps/correo/main/cr_ui.c:944
+#: apps/correo/main/cr_ui_msg.c:823
+(sin asunto)	(sans objet)
+
+#: apps/correo/main/cr_ui.c:1101
+#: apps/correo/main/cr_ui_msg.c:717
+Marcar como no leído	Marquer comme non lu
+
+#: apps/correo/main/cr_ui.c:1101
+Marcar como leído	Marquer comme lu
+
+#: apps/correo/main/cr_ui.c:1102
+#: apps/correo/main/cr_ui_msg.c:718
+Quitar la estrella	Retirer des favoris
+
+#: apps/correo/main/cr_ui.c:1102
+#: apps/correo/main/cr_ui_msg.c:718
+Destacar	Favori
+
+#: apps/correo/main/cr_ui.c:1103
+#: apps/correo/main/cr_ui_msg.c:859
+Archivar	Archiver
+
+#: apps/correo/main/cr_ui.c:1104
+#: apps/correo/main/cr_ui_msg.c:719
+Mover a...	Déplacer vers...
+
+#: apps/correo/main/cr_ui.c:1106
+#: apps/correo/main/cr_ui_msg.c:860
+Borrar	Effacer
+
+#: apps/correo/main/cr_ui.c:1209
+#: apps/correo/main/cr_ui.c:1228
+Trayendo...	Chargement...
+
+#: apps/correo/main/cr_ui.c:1223
+Nada que coincida	Aucun résultat
+
+#: apps/correo/main/cr_ui.c:1223
+No hay mensajes	Aucun message
+
+#: apps/correo/main/cr_ui.c:1228
+Traer más viejos	Plus anciens
+
+#: apps/correo/main/cr_ui.c:1267
+Actualizando...	Mise à jour...
+
+#: apps/correo/main/cr_ui.c:1287
+Para buscar en el servidor, abrí una carpeta de una cuenta	Pour chercher sur le serveur, ouvre un dossier d'un compte
+
+#: apps/correo/main/cr_ui.c:1299
+Buscando en el servidor...	Recherche sur le serveur...
+
+#: apps/correo/main/cr_ui.c:1332
+#: apps/correo/main/cr_ui_msg.c:764
+Lista	Liste
+
+#: apps/correo/main/cr_ui.c:1332
+#: apps/correo/main/cr_ui_acct.c:133
+#: apps/correo/main/cr_ui_msg.c:765
+Buzones	Boîtes
+
+#: apps/correo/main/cr_ui.c:1357
+Buscar	Chercher
+
+#: apps/correo/main/cr_ui.c:1371
+%d en el servidor	%d sur le serveur
+
+#: apps/correo/main/cr_ui.c:1482
+No se pudo buscar	Recherche impossible
+
+#: apps/correo/main/cr_ui.c:1502
+No se pudo	Impossible
+
+#: apps/correo/main/cr_ui.c:1644
+%d correos nuevos	%d nouveaux mails
+
+#: apps/correo/main/cr_ui_acct.c:111
+Lo más que guarda en la tarjeta	Maximum gardé sur la carte SD
+
+#: apps/correo/main/cr_ui_acct.c:119
+Caché vaciada	Cache vidé
+
+#: apps/correo/main/cr_ui_acct.c:126
+Se borran los mensajes guardados en la tarjeta (no los del servidor): se vuelven a bajar al abrirlos.	Les messages gardés sur la carte SD sont effacés (pas ceux du serveur) : ils sont retéléchargés à l'ouverture.
+
+#: apps/correo/main/cr_ui_acct.c:127
+#: apps/correo/main/cr_ui_acct.c:184
+Vaciar	Vider
+
+#: apps/correo/main/cr_ui_acct.c:133
+Ajustes	Réglages
+
+#: apps/correo/main/cr_ui_acct.c:137
+Cuentas	Comptes
+
+#: apps/correo/main/cr_ui_acct.c:162
+Opciones	Options
+
+#: apps/correo/main/cr_ui_acct.c:165
+Agrupar por conversación	Grouper par conversation
+
+#: apps/correo/main/cr_ui_acct.c:166
+Avisar del correo nuevo con la app en segundo plano	Prévenir des nouveaux mails avec l'app en arrière-plan
+
+#: apps/correo/main/cr_ui_acct.c:167
+Correo se queda conectado esperando (IDLE) y avisa apenas llega algo.	Mail reste connecté en attente (IDLE) et prévient dès que quelque chose arrive.
+
+#: apps/correo/main/cr_ui_acct.c:169
+Abrir Correo al prender la placa	Ouvrir Mail au démarrage de la carte
+
+#: apps/correo/main/cr_ui_acct.c:171
+En la tarjeta	Sur la carte SD
+
+#: apps/correo/main/cr_ui_acct.c:178
+Mensajes guardados: %s de %s	Messages gardés : %s sur %s
+
+#: apps/correo/main/cr_ui_acct.c:183
+Cambiar el tope	Changer la limite
+
+#: apps/correo/main/cr_ui_acct.c:185
+Los adjuntos que guardás van a la carpeta Correo de la tarjeta.	Pièces jointes enregistrées : dossier Correo de la carte SD.
+
+#: apps/correo/main/cr_ui_acct.c:283
+La dirección de correo no está bien escrita	L'adresse e-mail est mal écrite
+
+#: apps/correo/main/cr_ui_acct.c:287
+Faltan los servidores	Serveurs manquants
+
+#: apps/correo/main/cr_ui_acct.c:380
+Las dos conexiones andan: cuenta guardada	Les deux connexions OK : compte enregistré
+
+#: apps/correo/main/cr_ui_acct.c:422
+Se borra la cuenta de la placa, con lo que guardó en la tarjeta. En el servidor no se toca nada.	Le compte est effacé de la carte, avec ce qu'il gardait sur la carte SD. Rien n'est touché sur le serveur.
+
+#: apps/correo/main/cr_ui_acct.c:423
+#: apps/correo/main/cr_ui_acct.c:563
+Borrar la cuenta	Effacer le compte
+
+#: apps/correo/main/cr_ui_acct.c:442
+Servidor	Serveur
+
+#: apps/correo/main/cr_ui_acct.c:450
+Puerto	Port
+
+#: apps/correo/main/cr_ui_acct.c:454
+Seguridad	Sécurité
+
+#: apps/correo/main/cr_ui_acct.c:465
+Usuario	Login
+
+#: apps/correo/main/cr_ui_acct.c:469
+Sin cifrar, la contraseña viaja a la vista: sólo para un servidor de tu red.	Sans chiffrement, le mot de passe circule en clair : seulement pour un serveur de ton réseau.
+
+#: apps/correo/main/cr_ui_acct.c:493
+Cuenta nueva	Nouveau compte
+
+#: apps/correo/main/cr_ui_acct.c:501
+Proveedor	Service
+
+#: apps/correo/main/cr_ui_acct.c:509
+Tu nombre (el que ven los demás)	Ton nom (vu par les autres)
+
+#: apps/correo/main/cr_ui_acct.c:513
+Contraseña de aplicación	Mot de passe d'app
+
+#: apps/correo/main/cr_ui_acct.c:513
+Contraseña	Mot de passe
+
+#: apps/correo/main/cr_ui_acct.c:515
+(la que está guardada)	(celui enregistré)
+
+#: apps/correo/main/cr_ui_acct.c:525
+Probando la conexión...	Test de la connexion...
+
+#: apps/correo/main/cr_ui_acct.c:528
+Guardar igual	Garder quand même
+
+#: apps/correo/main/cr_ui_acct.c:531
+Probando...	Test...
+
+#: apps/correo/main/cr_ui_acct.c:531
+Probar y guardar	Tester et enregistrer
+
+#: apps/correo/main/cr_ui_acct.c:533
+Servidores	Serveurs
+
+#: apps/correo/main/cr_ui_acct.c:535
+Entrante (IMAP)	Entrant (IMAP)
+
+#: apps/correo/main/cr_ui_acct.c:537
+Saliente (SMTP)	Sortant (SMTP)
+
+#: apps/correo/main/cr_ui_acct.c:539
+En la placa	Sur la carte
+
+#: apps/correo/main/cr_ui_acct.c:541
+Nombre de la cuenta	Nom du compte
+
+#: apps/correo/main/cr_ui_acct.c:541
+Personal, Trabajo...	Perso, Travail...
+
+#: apps/correo/main/cr_ui_acct.c:542
+Color	Couleur
+
+#: apps/correo/main/cr_ui_acct.c:558
+Firma	Signature
+
+#: apps/correo/main/cr_ui_acct.c:558
+Se agrega al final de lo que escribís	Ajoutée à la fin de ce que tu écris
+
+#: apps/correo/main/cr_ui_acct.c:560
+Guardar lo enviado en la carpeta Enviados	Garder les envois dans le dossier Envoyés
+
+#: apps/correo/main/cr_ui_acct.c:561
+Gmail lo guarda solo: con Gmail, apagado.	Gmail le fait déjà : avec Gmail, désactivé.
+
+#: apps/correo/main/cr_ui_compose.c:93
+Primero agregá una cuenta	Ajoute d'abord un compte
+
+#: apps/correo/main/cr_ui_compose.c:220
+escribió	a écrit
+
+#: apps/correo/main/cr_ui_compose.c:324
+Hay una dirección que no está bien escrita	Une adresse est mal écrite
+
+#: apps/correo/main/cr_ui_compose.c:328
+Falta a quién mandarlo	Destinataire manquant
+
+#: apps/correo/main/cr_ui_compose.c:345
+#: apps/correo/main/cr_ui_compose.c:412
+#: apps/correo/main/cr_ui_compose.c:572
+Enviando...	Envoi...
+
+#: apps/correo/main/cr_ui_compose.c:366
+Borrador guardado	Brouillon enregistré
+
+#: apps/correo/main/cr_ui_compose.c:369
+No se pudo guardar el borrador	Impossible d'enregistrer le brouillon
+
+#: apps/correo/main/cr_ui_compose.c:377
+#: apps/correo/main/cr_ui_compose.c:391
+No se pudo enviar	Impossible d'envoyer
+
+#: apps/correo/main/cr_ui_compose.c:384
+Enviado	Envoyé
+
+#: apps/correo/main/cr_ui_compose.c:420
+Guardar como borrador	Garder en brouillon
+
+#: apps/correo/main/cr_ui_compose.c:422
+Descartar	Jeter
+
+#: apps/correo/main/cr_ui_compose.c:424
+¿Qué hacemos con lo que escribiste?	Que faire de ce que tu as écrit ?
+
+#: apps/correo/main/cr_ui_compose.c:537
+No entran más adjuntos	Trop de pièces jointes
+
+#: apps/correo/main/cr_ui_compose.c:544
+Es demasiado para un correo (20 MB en total)	Trop pour un seul mail (20 MB au total)
+
+#: apps/correo/main/cr_ui_compose.c:569
+Respuesta	Réponse
+
+#: apps/correo/main/cr_ui_compose.c:570
+#: apps/correo/main/cr_ui_msg.c:858
+Reenviar	Transférer
+
+#: apps/correo/main/cr_ui_compose.c:570
+Mensaje nuevo	Nouveau message
+
+#: apps/correo/main/cr_ui_compose.c:572
+Enviar	Envoyer
+
+#: apps/correo/main/cr_ui_compose.c:584
+Para	À
+
+#: apps/correo/main/cr_ui_compose.c:584
+nombre o dirección	nom ou adresse
+
+#: apps/correo/main/cr_ui_compose.c:587
+Cc	Cc
+
+#: apps/correo/main/cr_ui_compose.c:589
+Cco (no lo ven los demás)	Cci (invisible pour les autres)
+
+#: apps/correo/main/cr_ui_compose.c:593
+Cc y Cco	Cc et Cci
+
+#: apps/correo/main/cr_ui_compose.c:611
+Adjuntar	Joindre
+
+#: apps/correo/main/cr_ui_compose.c:612
+Escribí acá	Écris ici
+
+#: apps/correo/main/cr_ui_compose.c:642
+#: apps/correo/main/cr_ui_msg.c:484
+#: apps/correo/main/cr_ui_msg.c:701
+No hay tarjeta	Pas de carte SD
+
+#: apps/correo/main/cr_ui_compose.c:720
+La tarjeta	La carte SD
+
+#: apps/correo/main/cr_ui_compose.c:736
+Subir	Remonter
+
+#: apps/correo/main/cr_ui_compose.c:739
+La carpeta está vacía	Le dossier est vide
+
+#: apps/correo/main/cr_ui_msg.c:138
+#: apps/correo/main/cr_ui_msg.c:666
+Enlace	Lien
+
+#: apps/correo/main/cr_ui_msg.c:278
+No se pudo mostrar la imagen	Impossible d'afficher l'image
+
+#: apps/correo/main/cr_ui_msg.c:278
+#: apps/correo/main/cr_ui_msg.c:542
+Cargando la imagen...	Chargement de l'image...
+
+#: apps/correo/main/cr_ui_msg.c:413
+Ver el resto del mensaje	Voir le reste du message
+
+#: apps/correo/main/cr_ui_msg.c:470
+Guardado en	Enregistré dans
+
+#: apps/correo/main/cr_ui_msg.c:473
+Oficina no está instalada	App Bureau non installée
+
+#: apps/correo/main/cr_ui_msg.c:501
+Bajando el adjunto...	Téléchargement...
+
+#: apps/correo/main/cr_ui_msg.c:509
+#: apps/correo/main/cr_ui_msg.c:705
+No se pudo guardar en la tarjeta	Impossible d'enregistrer sur la carte SD
+
+#: apps/correo/main/cr_ui_msg.c:520
+No se pudo bajar el adjunto	Pièce jointe non téléchargée
+
+#: apps/correo/main/cr_ui_msg.c:569
+Ver	Voir
+
+#: apps/correo/main/cr_ui_msg.c:570
+Abrir con Oficina	Ouvrir avec Bureau
+
+#: apps/correo/main/cr_ui_msg.c:571
+Guardar en la tarjeta	Enregistrer sur carte SD
+
+#: apps/correo/main/cr_ui_msg.c:593
+Adjuntos	Pièces jointes
+
+#: apps/correo/main/cr_ui_msg.c:614
+ - se baja al guardarlo	 - téléchargée si enregistrée
+
+#: apps/correo/main/cr_ui_msg.c:692
+Enlaces del mensaje	Liens du message
+
+#: apps/correo/main/cr_ui_msg.c:693
+El mensaje no tiene enlaces	Le message n'a pas de liens
+
+#: apps/correo/main/cr_ui_msg.c:720
+Ver los enlaces	Voir les liens
+
+#: apps/correo/main/cr_ui_msg.c:721
+Guardar el mensaje en la tarjeta	Enregistrer le message (carte SD)
+
+#: apps/correo/main/cr_ui_msg.c:775
+No se pudo abrir el mensaje	Impossible d'ouvrir le message
+
+#: apps/correo/main/cr_ui_msg.c:777
+Probar de nuevo	Réessayer
+
+#: apps/correo/main/cr_ui_msg.c:779
+Abriendo...	Ouverture...
+
+#: apps/correo/main/cr_ui_msg.c:805
+Cc:	Cc :
+
+#: apps/correo/main/cr_ui_msg.c:833
+Seguir escribiendo	Continuer à écrire
+
+#: apps/correo/main/cr_ui_msg.c:838
+Las imágenes de internet no se bajan: avisan a quien las manda que abriste el correo.	Les images d'internet ne sont pas téléchargées : elles signalent à l'expéditeur que tu as ouvert le mail.
+
+#: apps/correo/main/cr_ui_msg.c:844
+El mensaje pesa %s: se bajó el principio, y los adjuntos se bajan al guardarlos.	Le message pèse %s : le début a été téléchargé, et les pièces jointes le sont à l'enregistrement.
+
+#: apps/correo/main/cr_ui_msg.c:847
+El mensaje es muy largo: se muestra el principio.	Le message est très long : seul le début est affiché.
+
+#: apps/correo/main/cr_ui_msg.c:856
+Responder	Répondre
+
+#: apps/correo/main/cr_ui_msg.c:857
+A todos	À tous
+
+#: apps/correo/main/cr_ui_msg.c:861
+Más	Plus
+
+#: apps/correo/main/cr_util.c:782
+ene	jan
+
+#: apps/correo/main/cr_util.c:782
+feb	fév
+
+#: apps/correo/main/cr_util.c:782
+mar	mar
+
+#: apps/correo/main/cr_util.c:782
+abr	avr
+
+#: apps/correo/main/cr_util.c:782
+may	mai
+
+#: apps/correo/main/cr_util.c:782
+jun	jun
+
+#: apps/correo/main/cr_util.c:783
+jul	jul
+
+#: apps/correo/main/cr_util.c:783
+ago	aoû
+
+#: apps/correo/main/cr_util.c:783
+sep	sep
+
+#: apps/correo/main/cr_util.c:783
+oct	oct
+
+#: apps/correo/main/cr_util.c:783
+nov	nov
+
+#: apps/correo/main/cr_util.c:783
+dic	déc
+
+#: apps/correo/main/cr_util.c:784
+dom	dim
+
+#: apps/correo/main/cr_util.c:784
+lun	lun
+
+#: apps/correo/main/cr_util.c:784
+mar (día)	mar
+
+#: apps/correo/main/cr_util.c:784
+mié	mer
+
+#: apps/correo/main/cr_util.c:785
+jue	jeu
+
+#: apps/correo/main/cr_util.c:785
+vie	ven
+
+#: apps/correo/main/cr_util.c:785
+sáb	sam
+
+#: apps/correo/main/cr_util.c:812
+ayer	hier
+
+#: apps/correo/main/cr_ui_acct.c
+Dirección de correo	Adresse e-mail

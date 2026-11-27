@@ -142,6 +142,10 @@ Bus).
 | Video | Video | Vidéo |
 | Visor 3D | 3D Viewer | Visionneuse 3D |
 | Vuelos | Flights | Vols |
+| Cielo | Sky | Ciel |
+| Correo | Mail | Mail |
+| Malla | Mesh | Maillage |
+| Mensajes | Messages | Messages |
 
 Metegol se traduce porque el inglés también lo traduce (Table Football):
 la regla es la del inglés.
