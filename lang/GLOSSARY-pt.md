@@ -117,7 +117,7 @@ Bus).
 | Atasco | Traffic Jam | Trânsito |
 | Bastión | Bastion | Bastião |
 | Bolsa | Stocks | Bolsa |
-| Botonera | (Soundboard) | Painel de sons |
+| Botonera | Soundboard | Painel de sons |
 | Burbujas | Bubbles | Bolhas |
 | Buscaminas | Minesweeper | Campo minado |
 | Cámaras | Cameras | Câmeras |
@@ -134,6 +134,7 @@ Bus).
 | Impresoras 3D | 3D Printers | Impressoras 3D |
 | Lógica | Logic | Lógica |
 | Luces | Lights | Luzes |
+| Marcador | (Scorekeeper) | Placar |
 | Juegos de mesa | Board games | Jogos de mesa |
 | Metegol | Table Football | Pebolim |
 | Oficina | Office | Escritório |

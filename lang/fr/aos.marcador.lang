@@ -1,0 +1,341 @@
+# amoledos-lang 1   es -> fr
+# aos.marcador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/marcador/main/marcador.c:49
+Paño y fósforos	Tapis et allumettes
+
+#: apps/marcador/main/marcador.c:49
+#: apps/marcador/main/marcador.c:914
+Porotos	Haricots
+
+#: apps/marcador/main/marcador.c:49
+Cuentaganado	Compteur
+
+#: apps/marcador/main/marcador.c:50
+Tablero de estadio	Tableau de stade
+
+#: apps/marcador/main/marcador.c:50
+Cartel de mesa	Tableau à rabats
+
+#: apps/marcador/main/marcador.c:50
+Ábaco	Boulier
+
+#: apps/marcador/main/marcador.c:51
+Pizarrón	Ardoise
+
+#: apps/marcador/main/marcador.c:53
+Truco y juegos de mesa: cuadrados de cinco fósforos, malas y buenas	Truco et jeux de société : carrés de cinq allumettes, 1re et 2e moitié
+
+#: apps/marcador/main/marcador.c:54
+Un montón en la mesa y cada uno arrastra los suyos	Un tas sur la table, et chacun tire les siens
+
+#: apps/marcador/main/marcador.c:55
+El contador de mano: lo apretás y suma	Le compteur manuel : appuie, il compte
+
+#: apps/marcador/main/marcador.c:56
+Lámparas, reloj de juego, tiempos y bocina	Lampes, chrono de jeu, périodes et sirène
+
+#: apps/marcador/main/marcador.c:57
+Los números que se dan vuelta, para ping-pong y pádel	Des chiffres qui basculent, pour ping-pong et padel
+
+#: apps/marcador/main/marcador.c:58
+Cuentas de madera que se corren de a una	Des boules en bois glissées une à une
+
+#: apps/marcador/main/marcador.c:59
+Palitos o cuentas con tiza; el borrador deshace	Bâtons ou totaux à la craie ; la brosse annule
+
+#: apps/marcador/main/marcador.c:419
+No se pudo abrir la partida	Impossible d'ouvrir la partie
+
+#: apps/marcador/main/marcador.c:432
+Tocá otra vez para borrarla	Retouche pour la supprimer
+
+#: apps/marcador/main/marcador.c:474
+Marcador	Marqueur
+
+#: apps/marcador/main/marcador.c:477
+Nueva	Créer
+
+#: apps/marcador/main/marcador.c:499
+Todavía no hay partidas	Pas encore de parties
+
+#: apps/marcador/main/marcador.c:501
+Tocá Nueva y elegí con qué llevar la cuenta	Touche Créer et choisis avec quoi compter
+
+#: apps/marcador/main/marcador.c:537
+%s · ganó %.20s	%s · %.20s a gagné
+
+#: apps/marcador/main/marcador.c:538
+%s · 1 jugada	%s · 1 coup
+
+#: apps/marcador/main/marcador.c:539
+%s · %d jugadas	%s · %d coups
+
+#: apps/marcador/main/marcador.c:581
+¿Con qué llevan la cuenta?	Avec quoi tenir le score ?
+
+#: apps/marcador/main/marcador.c:745
+Hasta cuántos	Points visés
+
+#: apps/marcador/main/marcador.c:746
+Desde cuánto	À partir de
+
+#: apps/marcador/main/marcador.c:867
+#: apps/marcador/main/marcador.c:1302
+Jugadores y reglas	Joueurs et règles
+
+#: apps/marcador/main/marcador.c:875
+Nombre de la partida	Nom de la partie
+
+#: apps/marcador/main/marcador.c:881
+Contadores: %d	Compteurs : %d
+
+#: apps/marcador/main/marcador.c:881
+Jugadores: %d	Joueurs : %d
+
+#: apps/marcador/main/marcador.c:897
+Sin meta	Sans but
+
+#: apps/marcador/main/marcador.c:897
+Otro	Autre
+
+#: apps/marcador/main/marcador.c:902
+#: apps/marcador/main/marcador.c:911
+Se juega a	Se joue en
+
+#: apps/marcador/main/marcador.c:904
+Malas y buenas	Deux moitiés (malas, buenas)
+
+#: apps/marcador/main/marcador.c:904
+De corrido	En continu
+
+#: apps/marcador/main/marcador.c:905
+Cómo se cuenta	Façon de compter
+
+#: apps/marcador/main/marcador.c:913
+Blancos	Blancs
+
+#: apps/marcador/main/marcador.c:913
+Pintos	Tachetés
+
+#: apps/marcador/main/marcador.c:913
+Negros	Noirs
+
+#: apps/marcador/main/marcador.c:913
+Mezclados	Mélangés
+
+#: apps/marcador/main/marcador.c:920
+#: apps/marcador/main/marcador.c:950
+#: apps/marcador/main/marcador.c:957
+#: apps/marcador/main/marcador.c:976
+Meta	But
+
+#: apps/marcador/main/marcador.c:925
+Fútbol	Foot
+
+#: apps/marcador/main/marcador.c:925
+Básquet	Basket
+
+#: apps/marcador/main/marcador.c:925
+Handball	Handball
+
+#: apps/marcador/main/marcador.c:925
+Hockey	Hockey
+
+#: apps/marcador/main/marcador.c:925
+Otro deporte	Autre sport
+
+#: apps/marcador/main/marcador.c:926
+Deporte	Sport
+
+#: apps/marcador/main/marcador.c:929
+Minutos por tiempo	Minutes par période
+
+#: apps/marcador/main/marcador.c:932
+Tiempos	Périodes
+
+#: apps/marcador/main/marcador.c:934
+Reloj para adelante	Chrono croissant
+
+#: apps/marcador/main/marcador.c:934
+Cuenta regresiva	Compte à rebours
+
+#: apps/marcador/main/marcador.c:935
+Reloj	Chrono
+
+#: apps/marcador/main/marcador.c:940
+Ping-pong	Ping-pong
+
+#: apps/marcador/main/marcador.c:940
+Pádel y tenis	Padel et tennis
+
+#: apps/marcador/main/marcador.c:940
+Libre	Libre
+
+#: apps/marcador/main/marcador.c:941
+Reglas	Règles
+
+#: apps/marcador/main/marcador.c:945
+Al mejor de (sets)	Meilleur de (sets)
+
+#: apps/marcador/main/marcador.c:945
+Al mejor de (games)	Meilleur de (jeux)
+
+#: apps/marcador/main/marcador.c:962
+Palitos	Bâtons
+
+#: apps/marcador/main/marcador.c:962
+Cuentas	Totaux
+
+#: apps/marcador/main/marcador.c:963
+Qué se escribe	Ce qu'on écrit
+
+#: apps/marcador/main/marcador.c:966
+Sumando	Addition
+
+#: apps/marcador/main/marcador.c:966
+Restando	Soustraction
+
+#: apps/marcador/main/marcador.c:967
+Cada anotación	Chaque entrée
+
+#: apps/marcador/main/marcador.c:972
+Desde	Début
+
+#: apps/marcador/main/marcador.c:987
+#: apps/marcador/main/marcador.c:1230
+Listo	OK
+
+#: apps/marcador/main/marcador.c:987
+Empezar	Démarrer
+
+#: apps/marcador/main/marcador.c:1006
+No hay nada para deshacer	Rien à annuler
+
+#: apps/marcador/main/marcador.c:1065
+Se reinició la cuenta	Score remis à zéro
+
+#: apps/marcador/main/marcador.c:1075
+Punto para	Point pour
+
+#: apps/marcador/main/marcador.c:1095
+Historial	Historique
+
+#: apps/marcador/main/marcador.c:1118
+Todavía no se anotó nada	Encore aucun point
+
+#: apps/marcador/main/marcador.c:1121
+Deshacer	Annuler
+
+#: apps/marcador/main/marcador.c:1123
+Cerrar	Fermer
+
+#: apps/marcador/main/marcador.c:1230
+Anotar	Marquer
+
+#: apps/marcador/main/marcador.c:1248
+Anotar puntos	Marquer des points
+
+#: apps/marcador/main/marcador.c:1269
+Cuenta en cero. Deshacer la vuelve atrás	Score à zéro. Annuler le rétablit
+
+#: apps/marcador/main/marcador.c:1290
+Sonido prendido	Son activé
+
+#: apps/marcador/main/marcador.c:1290
+Sonido apagado	Son coupé
+
+#: apps/marcador/main/marcador.c:1302
+Anotar puntos...	Marquer des points...
+
+#: apps/marcador/main/marcador.c:1302
+Poner la cuenta en cero	Remettre le score à zéro
+
+#: apps/marcador/main/marcador.c:1303
+Apagar el sonido	Couper le son
+
+#: apps/marcador/main/marcador.c:1303
+Prender el sonido	Activer le son
+
+#: apps/marcador/main/marcador.c:1371
+¡Ganó %s!	%s a gagné !
+
+#: apps/marcador/main/marcador.c:1382
+Partidas ganadas:	Parties gagnées :
+
+#: apps/marcador/main/marcador.c:1388
+Seguir	Continuer
+
+#: apps/marcador/main/marcador.c:1390
+Revancha	Revanche
+
+#: apps/marcador/main/mr_cartel.c:354
+#: apps/marcador/main/mr_cartel.c:354
+Games	Jeux
+
+#: apps/marcador/main/mr_cartel.c:354
+Sets	Sets
+
+#: apps/marcador/main/mr_cartel.c:473
+Sólo se puede deshacer el último punto	Seul le dernier point peut être annulé
+
+#: apps/marcador/main/mr_cartel.c:500
+El partido terminó: poné la cuenta en cero desde el menú	Match terminé : remets le score à zéro depuis le menu
+
+#: apps/marcador/main/mr_estadio.c:489
+TIEMPO	PÉRIODE
+
+#: apps/marcador/main/mr_estadio.c:513
+T+	P+
+
+#: apps/marcador/main/mr_estadio.c:534
+Tiempo +	Période +
+
+#: apps/marcador/main/mr_estadio.c:688
+El reloj vuelve al principio del tiempo	Le chrono revient au début de la période
+
+#: apps/marcador/main/mr_estadio.c:701
+Terminó el tiempo: pasá al siguiente	Période finie : passe à la suivante
+
+#: apps/marcador/main/mr_estadio.c:724
+Ya es el último tiempo	C'est déjà la dernière période
+
+#: apps/marcador/main/mr_model.c:60
+Nosotros	Nous
+
+#: apps/marcador/main/mr_model.c:60
+Ellos	Eux
+
+#: apps/marcador/main/mr_model.c:62
+Local	Locaux
+
+#: apps/marcador/main/mr_model.c:62
+Visitante	Visiteurs
+
+#: apps/marcador/main/mr_model.c:65
+Contador %d	Compteur %d
+
+#: apps/marcador/main/mr_model.c:65
+Jugador %d	Joueur %d
+
+#: apps/marcador/main/mr_model.c:226
+Se pasa: no cuenta	Dépassé : ne compte pas
+
+#: apps/marcador/main/mr_pano.c:361
+malas	1re moitié
+
+#: apps/marcador/main/mr_pano.c:362
+buenas	2e moitié
+
+#: apps/marcador/main/mr_pano.c:477
+BUENAS	2E MOITIÉ
+
+#: apps/marcador/main/mr_pano.c:477
+MALAS	1RE MOITIÉ
+
+#: apps/marcador/main/mr_tiza.c:768
+Se borra sólo lo último que se escribió	Seul le dernier écrit peut être effacé
