@@ -1,0 +1,72 @@
+# The functions Mensajes calls. tl_subset.py keeps these and every
+# constructor their arguments and answers can carry.
+# MTProto itself
+req_pq_multi
+req_DH_params
+set_client_DH_params
+ping_delay_disconnect
+ping
+get_future_salts
+destroy_session
+msgs_ack
+msg_resend_req
+msgs_state_req
+msgs_state_info
+msgs_all_info
+msg_detailed_info
+msg_new_detailed_info
+bad_msg_notification
+bad_server_salt
+new_session_created
+rpc_error
+rpc_answer_unknown
+rpc_drop_answer
+p_q_inner_data_dc
+server_DH_inner_data
+client_DH_inner_data
+# wrapping
+invokeWithLayer
+initConnection
+invokeWithoutUpdates
+# signing in
+help.getConfig
+help.getNearestDc
+auth.sendCode
+auth.resendCode
+auth.signIn
+auth.checkPassword
+auth.logOut
+auth.exportAuthorization
+auth.importAuthorization
+auth.exportLoginToken
+auth.importLoginToken
+account.getPassword
+users.getUsers
+# chats and messages
+messages.getDialogs
+messages.getPinnedDialogs
+messages.getHistory
+messages.getMessages
+channels.getMessages
+messages.sendMessage
+messages.sendMedia
+messages.editMessage
+messages.deleteMessages
+channels.deleteMessages
+messages.forwardMessages
+messages.sendReaction
+messages.readHistory
+channels.readHistory
+messages.search
+messages.searchGlobal
+contacts.search
+messages.setTyping
+messages.getAvailableReactions
+# files
+upload.saveFilePart
+upload.saveBigFilePart
+upload.getFile
+# updates
+updates.getState
+updates.getDifference
+updates.getChannelDifference
