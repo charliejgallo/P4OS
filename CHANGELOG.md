@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Marcador** (new, `apps/marcador`): a scorekeeper with seven ways of
+  keeping the score, each drawn and sounding like the real thing: matches
+  on green baize for truco (squares of five, "malas" and "buenas"), beans
+  dragged across a wooden table, a mechanical tally counter with its
+  rolling digits, a stadium scoreboard with lamps and a horn, a
+  table-tennis flip card (padel and tennis too), an abacus and a
+  chalkboard; players, undo, the game's history and a portal page. All of
+  it drawn and synthesised by the app: no packs.
+- **Botonera** (new, `apps/botonera`): a soundboard of big buttons for the
+  card's WAV and MP3, several at once, looping or not, each with its own
+  volume; pages, editing, recording a new sound with the microphone, and a
+  portal page to upload sounds and play them from the phone.
 - **Visión** (new, `apps/vision`): a USB webcam that sees, on the board
   itself with Espressif's esp-dl: faces, people, the 80 kinds of thing of
   COCO, hands and their gesture, and QR and EAN/UPC codes. Boxes with their
@@ -89,8 +101,10 @@
   longer lose their top: they started 6 px above the icon's cell, which
   clips them.
 - **Both icon packs (3D toy and Line) have the new apps** (Grabador,
-  Malla, Mensajes, Correo, Cielo, Bot), now 110 apps each.
+  Malla, Mensajes, Correo, Cielo, Bot, Marcador, Botonera), now 112 apps
+  each.
 - Tortuga repaints where the turtle was (bits of it stayed on the board).
+- Tanques: a back button to the title on the story and the free battle.
 - Cielo no longer hangs the board while it works out the passes.
 
 ## 0.34.2 — 2026-11-26

@@ -12892,6 +12892,12 @@ Grabador	Sorveglianza
 #: apps/vision  (nombre de app)
 Visión	Visione
 
+#: apps/marcador  (nombre de app)
+Marcador	Segnapunti
+
+#: apps/botonera  (nombre de app)
+Botonera	Pulsantiera
+
 #: apps/hockey  (nombre de app)
 Hockey de mesa	Air hockey
 

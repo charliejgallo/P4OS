@@ -11811,6 +11811,12 @@ Grabador	Surveillance
 #: apps/vision  (nombre de app)
 Visión	Vision
 
+#: apps/marcador  (nombre de app)
+Marcador	Scorekeeper
+
+#: apps/botonera  (nombre de app)
+Botonera	Soundboard
+
 #: components/aos_ui/aos_library.c, aos_lock.c, aos_app_settings.c, aos_sys_status.c, aos_portal.c (0.35.0)
 Juegos	Games
 Sonido e imagen	Sound and picture

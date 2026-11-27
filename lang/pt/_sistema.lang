@@ -12892,6 +12892,12 @@ Grabador	Vigilância
 #: apps/vision  (nombre de app)
 Visión	Visão
 
+#: apps/marcador  (nombre de app)
+Marcador	Placar
+
+#: apps/botonera  (nombre de app)
+Botonera	Painel de sons
+
 #: apps/hockey  (nombre de app)
 Hockey de mesa	Air hockey
 
