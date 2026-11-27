@@ -109,8 +109,34 @@ bytes as they came, and the meaning is the app's.
   subscriptions (the CCCD written for the app) are queued and run one at a
   time; their answers, the notifications and the indications come back
   through `_gatt_events`. The RSSI of the link is measured once a second.
-  **No pairing:** the store of bonds holds the phone's and the computer's
-  keys, and a sensor's would push them out.
+  Pairing is asked apart (below).
+- **Pairing with a device** (since 0.35, 2026-11-27, for Meshtastic
+  nodes): `aos_hal_ble_gatt_pair()` once READY. A device bonded before only
+  encrypts again; a new one pairs, and when it shows a PIN the app gets
+  `AOS_BLE_EV_PASSKEY` (`data[0]` 0: type the PIN the device shows; 1: the
+  board chose one, in `data[1..4]`, to type on the device; 2: compare the
+  number in `data[1..4]`) and answers with `aos_hal_ble_gatt_passkey()` (the
+  PIN, or 1/0 for the comparison). `AOS_BLE_EV_SECURITY` closes it: status
+  0 and `data[0]`/`data[1]` authenticated/bonded, or NimBLE's code. A
+  device that lost its keys (reflashed: "PIN or key missing") is paired
+  again once by itself; `aos_hal_ble_gatt_forget()` drops a device's keys.
+  - **The PIN needs a keyboard:** the board's I/O capability went from
+    DISPLAY_YESNO to KEYBOARD_DISPLAY. With a node that only displays,
+    DISPLAY_YESNO meant Just Works, an unauthenticated link, and Meshtastic
+    keeps its characteristics behind MITM. With the phone and the computer
+    (secure connections) it is still numeric comparison; legacy pairing is
+    still cut.
+  - **One store, two lists:** NimBLE keeps every bond together, so the
+    devices bonded through the client are listed apart (pref `blec_bonds`,
+    their identity addresses). Settings' "is there a pairing" and "forget"
+    are about the phone and the computer only: forgetting them leaves the
+    devices' keys.
+  - **Six bonds** (`CONFIG_BT_NIMBLE_MAX_BONDS`, it was 3): with three, a
+    fourth bond pushed out the oldest, which could be the phone's. NimBLE's
+    store keeps them in its own static arrays in internal RAM, ~170 bytes
+    each (~0.5 KB more); not ours to move to PSRAM.
+  - The simulator's devices pair too: a new one "shows" the PIN 123456 in
+    the log, a bonded one only encrypts; the bonds last while it runs.
 - **At 15-30 ms** (2026-10-10): the connection asks for an interval of
   12-24 × 1.25 ms, latency 0 and a 2 s supervision timeout, not NimBLE's
   default 30-50 ms. At the default a stock Xiaomi thermometer let the

@@ -435,16 +435,16 @@ __attribute__((weak)) bool aos_hal_spk_open(uint32_t sample_rate)
 __attribute__((weak)) int aos_hal_spk_write(const int16_t *pcm, int n)
 { int v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) int aos_hal_spk_queued(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_spk_open_low(uint32_t sample_rate)
-{ return aos_hal_spk_open(sample_rate); }
+{ bool v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) int aos_hal_spk_latency_ms(void)
-{ return 0; }
+{ int v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) int aos_hal_spk_dry(void)
-{ return 0; }
-
-__attribute__((weak)) int aos_hal_spk_queued(void)
 { int v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) bool aos_hal_spk_is_open(void)
@@ -662,6 +662,18 @@ __attribute__((weak)) bool aos_hal_ble_gatt_subscribe(uint16_t value_handle, int
 
 __attribute__((weak)) int aos_hal_ble_gatt_events(aos_ble_gatt_ev_t *out, int max)
 { int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_pair(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_passkey(uint32_t passkey)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_secure(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_forget(const uint8_t addr[6], uint8_t addr_type)
+{ bool v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) void aos_hal_random(void *buf, size_t len)
 { }

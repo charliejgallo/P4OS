@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh, aos_154
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3713 simbolos.
+ * Total: 3717 simbolos.
  */
 
 #include <stddef.h>
@@ -230,9 +230,13 @@ extern int aos_hal_ble_gatt_attrs;
 extern int aos_hal_ble_gatt_connect;
 extern int aos_hal_ble_gatt_disconnect;
 extern int aos_hal_ble_gatt_events;
+extern int aos_hal_ble_gatt_forget;
 extern int aos_hal_ble_gatt_mtu;
+extern int aos_hal_ble_gatt_pair;
+extern int aos_hal_ble_gatt_passkey;
 extern int aos_hal_ble_gatt_read;
 extern int aos_hal_ble_gatt_rssi;
+extern int aos_hal_ble_gatt_secure;
 extern int aos_hal_ble_gatt_state;
 extern int aos_hal_ble_gatt_subscribe;
 extern int aos_hal_ble_gatt_write;
@@ -3946,9 +3950,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_connect),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_disconnect),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_events),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_forget),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_mtu),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_pair),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_passkey),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_read),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_rssi),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_secure),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_state),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_subscribe),
     ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_write),
