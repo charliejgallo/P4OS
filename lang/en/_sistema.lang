@@ -10875,6 +10875,9 @@ Documento	Document
 Abrir en Oficina	Open in Office
 No se pudo abrir Oficina	Could not open Office
 Oficina lo abre: está en la Tienda	Office opens it: it is in the Store
+Video lo reproduce: está en la Tienda	Video plays it: it is in the Store
+No se pudo abrir Video	Could not open Video
+Reproducir en Video	Play in Video
 
 #: Terminal: speed, frame and the USB lines (2026-11-23)
 Entre 50 y 5000000 baudios	Between 50 and 5000000 baud
@@ -11804,3 +11807,6 @@ Celular	Phone
 
 #: apps/grabador  (nombre de app)
 Grabador	Surveillance
+
+#: apps/vision  (nombre de app)
+Visión	Vision

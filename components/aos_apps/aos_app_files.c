@@ -329,7 +329,7 @@ static void fmt_date(char *out, size_t n, uint32_t t, bool full)
 /* Kinds of file                                                               */
 /* -------------------------------------------------------------------------- */
 
-enum { K_DIR, K_IMAGE, K_AUDIO, K_TEXT, K_CSV, K_CODE, K_FW, K_APP, K_ICON, K_DOC, K_OTHER, K_COUNT };
+enum { K_DIR, K_IMAGE, K_AUDIO, K_TEXT, K_CSV, K_CODE, K_FW, K_APP, K_ICON, K_DOC, K_VIDEO, K_OTHER, K_COUNT };
 
 static const struct { const char *glyph; uint32_t color; const char *name; } KIND[K_COUNT] = {
     [K_DIR]   = { AOS_SYM_FOLDER,                0x60A5FA, N_("Carpeta") },
@@ -342,6 +342,7 @@ static const struct { const char *glyph; uint32_t color; const char *name; } KIN
     [K_APP]   = { AOS_SYM_PACKAGE_VARIANT,       0xFF9F0A, N_("App de P4OS") },
     [K_ICON]  = { AOS_SYM_PALETTE,               0x40C8E0, N_("Ícono de app") },
     [K_DOC]   = { AOS_SYM_FILE_DOCUMENT_OUTLINE, 0x0A84FF, N_("Documento") },
+    [K_VIDEO] = { AOS_SYM_VIDEO,                 0x5E5CE6, N_("Video") },
     [K_OTHER] = { AOS_SYM_FILE_OUTLINE,          0x8E8E93, N_("Archivo") },
 };
 
@@ -350,6 +351,11 @@ static const struct { const char *glyph; uint32_t color; const char *name; } KIN
 #define OFFICE_ID "aos.oficina"
 static bool has_office(void) { return aos_ui_app_find(OFFICE_ID) != NULL; }
 
+/* The Video app (apps/video), when it is on the card: MJPEG .avi and, since
+ * 0.35, H.264 .mp4 (the Grabador's recordings among them). */
+#define VIDEO_ID "aos.video"
+static bool has_video(void) { return aos_ui_app_find(VIDEO_ID) != NULL; }
+
 static int kind_of(const char *name)
 {
     const char *dot = strrchr(name, '.');
@@ -357,6 +363,7 @@ static int kind_of(const char *name)
     static const struct { const char *ext; int kind; } EXT[] = {
         { "jpg", K_IMAGE }, { "jpeg", K_IMAGE }, { "png", K_IMAGE }, { "bmp", K_IMAGE },
         { "mp3", K_AUDIO }, { "wav", K_AUDIO },
+        { "mp4", K_VIDEO }, { "avi", K_VIDEO },
         { "txt", K_TEXT }, { "log", K_TEXT }, { "md", K_TEXT },
         { "csv", K_CSV }, { "tsv", K_CSV },
         { "json", K_CODE }, { "yaml", K_CODE }, { "yml", K_CODE }, { "ini", K_CODE }, { "cfg", K_CODE },
@@ -3264,6 +3271,14 @@ static void open_file(const char *path, int kind)
     }
     if (kind == K_IMAGE) { if (!aos_ui_open_app_with("aos.photos", path)) aos_ui_toast(_("No se pudo abrir Fotos"), 1600); return; }
     if (kind == K_AUDIO) { if (!aos_ui_open_app_with("aos.music", path)) aos_ui_toast(_("No se pudo abrir Música"), 1600); return; }
+    if (kind == K_VIDEO) {
+        /* without Video it is bytes, as before, and a word on where the app is */
+        if (!has_video()) aos_ui_toast(_("Video lo reproduce: está en la Tienda"), 2500);
+        else if (aos_ui_open_app_with(VIDEO_ID, path)) return;
+        else aos_ui_toast(_("No se pudo abrir Video"), 1600);
+        viewer_open(path, K_OTHER);
+        return;
+    }
     if (kind == K_FW && rel && path_under(rel, "firmware")) {
         if (!aos_ui_open_app_with("aos.flasher", path)) aos_ui_toast(_("No se pudo abrir el Programador"), 1600);
         return;
@@ -3643,8 +3658,9 @@ static void ctx_menu(int ei)
     else if (e->kind == K_FW && rel && path_under(rel, "firmware")) open = _("Abrir en el Programador");
     else if (kind_is_text(e->kind)) open = _("Ver");
     else if (e->kind == K_DOC) open = _("Abrir en Oficina");
+    else if (e->kind == K_VIDEO) open = _("Reproducir en Video");
     bool office = !dir && has_office();
-    if (dir || (e->kind != K_OTHER && (e->kind != K_DOC || office)))
+    if (dir || (e->kind != K_OTHER && (e->kind != K_DOC || office) && (e->kind != K_VIDEO || has_video())))
         a[n++] = (act_t){ dir ? AOS_SYM_FOLDER_OPEN : AOS_SYM_CHEVRON_RIGHT, open, AOS_C_TEXT, act_open };
     /* a text, a table or a data file: this app shows it, Office edits it */
     if (office && kind_is_text(e->kind)) a[n++] = (act_t){ AOS_SYM_PENCIL, _("Abrir en Oficina"), AOS_C_TEXT, act_office };

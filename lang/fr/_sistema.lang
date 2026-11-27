@@ -3195,6 +3195,9 @@ No se pudo abrir el Programador	Impossible d'ouvrir le Programmateur
 
 #: components/aos_apps/aos_app_files.c:3273
 Oficina lo abre: está en la Tienda	Bureau l'ouvre : voir la Boutique
+Video lo reproduce: está en la Tienda	Vidéo le lit : voir la Boutique
+No se pudo abrir Video	Impossible d'ouvrir Vidéo
+Reproducir en Video	Lire dans Vidéo
 
 #: components/aos_apps/aos_app_files.c:3275
 #: components/aos_apps/aos_app_files.c:3328
@@ -12885,6 +12888,9 @@ Golf	Golf
 
 #: apps/grabador  (nombre de app)
 Grabador	Surveillance
+
+#: apps/vision  (nombre de app)
+Visión	Vision
 
 #: apps/hockey  (nombre de app)
 Hockey de mesa	Air hockey
