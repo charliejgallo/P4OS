@@ -1,0 +1,18 @@
+{
+ "cat": "medios",
+ "about": {
+  "es": "Una cámara USB que entiende lo que ve: caras, personas, objetos y manos detectados en la placa misma, y códigos QR y de barras leídos al vuelo.",
+  "en": "A USB camera that understands what it sees: faces, people, objects and hands detected on the board itself, and QR and bar codes read on the fly."
+ },
+ "desc": {
+  "es": "Enchufás una webcam USB y la imagen aparece en vivo con un recuadro sobre cada cosa que encuentra, su nombre y la seguridad con que la ve. Los modos son caras, personas, objetos (ochenta clases: autos, perros, tazas, sillas...), manos con su gesto, y códigos. Arriba dice cuántos hay y a cuántos cuadros por segundo va.\n\nTodo se calcula en la placa, sin red: los modelos de visión corren en las instrucciones vectoriales del procesador. Caras y personas vienen con la app; objetos y manos son extras que se bajan aparte.\n\nEn modo códigos lee QR, EAN-13, EAN-8 y UPC-A, y guarda los últimos para copiarlos con un toque. Con Avisar suena y muestra una nota cuando algo aparece; Foto guarda la imagen con los recuadros en Fotos. El umbral ajusta cuánta seguridad hace falta para marcar algo.\n\nSin cámara, usa las fotos o el video .mjpeg que pongas en la carpeta vision de la tarjeta. La página Visión del portal muestra la misma imagen con lo detectado, cambia de modo y saca fotos desde el navegador.",
+  "en": "Plug in a USB webcam and the picture appears live with a box over each thing it finds, its name and how sure it is. The modes are faces, people, objects (eighty classes: cars, dogs, cups, chairs...), hands with their gesture, and codes. The top says how many there are and how many frames a second it runs at.\n\nEverything is worked out on the board, offline: the vision models run on the processor's vector instructions. Faces and people come with the app; objects and hands are extras downloaded separately.\n\nIn codes mode it reads QR, EAN-13, EAN-8 and UPC-A, and keeps the last ones to copy with a tap. With Alert it sounds and shows a note when something appears; Photo saves the picture with its boxes to Photos. The threshold sets how sure it must be to mark something.\n\nWithout a camera it uses the photos or the .mjpeg video you put in the card's vision folder. Vision's page in the portal shows the same picture with what was found, switches modes and takes photos from the browser."
+ },
+ "shots": ["app-vision.png", "app-vision-codes.png", "land-vision.png"],
+ "needs": ["usb-host"],
+ "packs": [
+  {"file": "vision_p4.pak", "need": true},
+  {"file": "vision_coco_p4.pak", "need": false, "name": {"es": "Objetos: 80 clases", "en": "Objects: 80 classes"}},
+  {"file": "vision_manos_p4.pak", "need": false, "name": {"es": "Manos y gestos", "en": "Hands and gestures"}}
+ ]
+}
