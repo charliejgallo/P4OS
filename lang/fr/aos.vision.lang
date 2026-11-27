@@ -1,0 +1,380 @@
+# amoledos-lang 1   es -> fr
+# aos.vision.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vision/main/vi_names.c:14
+#: apps/vision/main/vi_names.c:69
+persona	personne
+
+#: apps/vision/main/vi_names.c:14
+bicicleta	vélo
+
+#: apps/vision/main/vi_names.c:14
+auto	auto
+
+#: apps/vision/main/vi_names.c:14
+moto	moto
+
+#: apps/vision/main/vi_names.c:15
+avión	avion
+
+#: apps/vision/main/vi_names.c:15
+colectivo	bus
+
+#: apps/vision/main/vi_names.c:15
+tren	train
+
+#: apps/vision/main/vi_names.c:15
+camión	camion
+
+#: apps/vision/main/vi_names.c:16
+barco	bateau
+
+#: apps/vision/main/vi_names.c:16
+semáforo	feu rouge
+
+#: apps/vision/main/vi_names.c:16
+hidrante	borne incendie
+
+#: apps/vision/main/vi_names.c:16
+cartel de pare	panneau stop
+
+#: apps/vision/main/vi_names.c:17
+parquímetro	parcmètre
+
+#: apps/vision/main/vi_names.c:17
+banco	banc
+
+#: apps/vision/main/vi_names.c:17
+pájaro	oiseau
+
+#: apps/vision/main/vi_names.c:17
+gato	chat
+
+#: apps/vision/main/vi_names.c:18
+perro	chien
+
+#: apps/vision/main/vi_names.c:18
+caballo	cheval
+
+#: apps/vision/main/vi_names.c:18
+oveja	mouton
+
+#: apps/vision/main/vi_names.c:18
+vaca	vache
+
+#: apps/vision/main/vi_names.c:19
+elefante	éléphant
+
+#: apps/vision/main/vi_names.c:19
+oso	ours
+
+#: apps/vision/main/vi_names.c:19
+cebra	zèbre
+
+#: apps/vision/main/vi_names.c:19
+jirafa	girafe
+
+#: apps/vision/main/vi_names.c:20
+mochila	sac à dos
+
+#: apps/vision/main/vi_names.c:20
+paraguas	parapluie
+
+#: apps/vision/main/vi_names.c:20
+cartera	sac à main
+
+#: apps/vision/main/vi_names.c:20
+corbata	cravate
+
+#: apps/vision/main/vi_names.c:21
+valija	valise
+
+#: apps/vision/main/vi_names.c:21
+frisbee	frisbee
+
+#: apps/vision/main/vi_names.c:21
+esquís	skis
+
+#: apps/vision/main/vi_names.c:21
+tabla de snow	snowboard
+
+#: apps/vision/main/vi_names.c:22
+pelota	ballon
+
+#: apps/vision/main/vi_names.c:22
+barrilete	cerf-volant
+
+#: apps/vision/main/vi_names.c:22
+bate	batte
+
+#: apps/vision/main/vi_names.c:22
+guante de béisbol	gant de baseball
+
+#: apps/vision/main/vi_names.c:23
+patineta	skateboard
+
+#: apps/vision/main/vi_names.c:23
+tabla de surf	planche de surf
+
+#: apps/vision/main/vi_names.c:23
+raqueta	raquette
+
+#: apps/vision/main/vi_names.c:23
+botella	bouteille
+
+#: apps/vision/main/vi_names.c:24
+copa de vino	verre à vin
+
+#: apps/vision/main/vi_names.c:24
+taza	tasse
+
+#: apps/vision/main/vi_names.c:24
+tenedor	fourchette
+
+#: apps/vision/main/vi_names.c:24
+cuchillo	couteau
+
+#: apps/vision/main/vi_names.c:25
+cuchara	cuillère
+
+#: apps/vision/main/vi_names.c:25
+bol	bol
+
+#: apps/vision/main/vi_names.c:25
+banana	banane
+
+#: apps/vision/main/vi_names.c:25
+manzana	pomme
+
+#: apps/vision/main/vi_names.c:26
+sándwich	sandwich
+
+#: apps/vision/main/vi_names.c:26
+naranja	orange
+
+#: apps/vision/main/vi_names.c:26
+brócoli	brocoli
+
+#: apps/vision/main/vi_names.c:26
+zanahoria	carotte
+
+#: apps/vision/main/vi_names.c:27
+pancho	hot-dog
+
+#: apps/vision/main/vi_names.c:27
+pizza	pizza
+
+#: apps/vision/main/vi_names.c:27
+dona	donut
+
+#: apps/vision/main/vi_names.c:27
+torta	gâteau
+
+#: apps/vision/main/vi_names.c:28
+silla	chaise
+
+#: apps/vision/main/vi_names.c:28
+sillón	canapé
+
+#: apps/vision/main/vi_names.c:28
+planta	plante
+
+#: apps/vision/main/vi_names.c:28
+cama	lit
+
+#: apps/vision/main/vi_names.c:29
+mesa	table
+
+#: apps/vision/main/vi_names.c:29
+inodoro	toilettes
+
+#: apps/vision/main/vi_names.c:29
+televisor	télé
+
+#: apps/vision/main/vi_names.c:29
+notebook	PC portable
+
+#: apps/vision/main/vi_names.c:30
+mouse	souris
+
+#: apps/vision/main/vi_names.c:30
+control remoto	télécommande
+
+#: apps/vision/main/vi_names.c:30
+teclado	clavier
+
+#: apps/vision/main/vi_names.c:30
+celular	mobile
+
+#: apps/vision/main/vi_names.c:31
+microondas	micro-ondes
+
+#: apps/vision/main/vi_names.c:31
+horno	four
+
+#: apps/vision/main/vi_names.c:31
+tostadora	grille-pain
+
+#: apps/vision/main/vi_names.c:31
+pileta de cocina	évier
+
+#: apps/vision/main/vi_names.c:32
+heladera	frigo
+
+#: apps/vision/main/vi_names.c:32
+libro	livre
+
+#: apps/vision/main/vi_names.c:32
+reloj	horloge
+
+#: apps/vision/main/vi_names.c:32
+florero	vase
+
+#: apps/vision/main/vi_names.c:33
+tijera	ciseaux
+
+#: apps/vision/main/vi_names.c:33
+osito de peluche	nounours
+
+#: apps/vision/main/vi_names.c:33
+secador de pelo	sèche-cheveux
+
+#: apps/vision/main/vi_names.c:33
+cepillo de dientes	brosse à dents
+
+#: apps/vision/main/vi_names.c:37
+uno	un
+
+#: apps/vision/main/vi_names.c:37
+dos	deux
+
+#: apps/vision/main/vi_names.c:37
+tres	trois
+
+#: apps/vision/main/vi_names.c:37
+cuatro	quatre
+
+#: apps/vision/main/vi_names.c:37
+cinco	cinq
+
+#: apps/vision/main/vi_names.c:37
+pulgar arriba	pouce levé
+
+#: apps/vision/main/vi_names.c:38
+ok	ok
+
+#: apps/vision/main/vi_names.c:38
+#: apps/vision/main/vi_names.c:71
+mano	main
+
+#: apps/vision/main/vi_names.c:38
+llamame	appelle-moi
+
+#: apps/vision/main/vi_names.c:38
+pulgar abajo	pouce baissé
+
+#: apps/vision/main/vi_names.c:38
+sin mano	sans main
+
+#: apps/vision/main/vi_names.c:56
+Caras	Visages
+
+#: apps/vision/main/vi_names.c:57
+Personas	Personnes
+
+#: apps/vision/main/vi_names.c:58
+Objetos	Objets
+
+#: apps/vision/main/vi_names.c:59
+Manos	Mains
+
+#: apps/vision/main/vi_names.c:60
+Códigos	Codes
+
+#: apps/vision/main/vi_names.c:68
+cara	visage
+
+#: apps/vision/main/vi_names.c:68
+caras	visages
+
+#: apps/vision/main/vi_names.c:69
+personas	personnes
+
+#: apps/vision/main/vi_names.c:70
+objeto	objet
+
+#: apps/vision/main/vi_names.c:70
+objetos	objets
+
+#: apps/vision/main/vi_names.c:71
+manos	mains
+
+#: apps/vision/main/vi_names.c:72
+código	code
+
+#: apps/vision/main/vi_names.c:72
+códigos	codes
+
+#: apps/vision/main/vision.c:228
+Copiado	Copié
+
+#: apps/vision/main/vision.c:279
+Enchufá una cámara USB	Branche une caméra USB
+
+#: apps/vision/main/vision.c:280
+O poné fotos .jpg o un video .mjpeg en la carpeta vision de la tarjeta.	Ou mets des photos .jpg ou une vidéo .mjpeg dans le dossier vision de la carte SD.
+
+#: apps/vision/main/vision.c:283
+Esperando la imagen de la cámara	En attente de l'image caméra
+
+#: apps/vision/main/vision.c:286
+Cargando el modelo	Chargement du modèle
+
+#: apps/vision/main/vision.c:289
+Falta el paquete de este modo	Il manque le pack de ce mode
+
+#: apps/vision/main/vision.c:291
+#: apps/vision/main/vision.c:295
+Instalá la app de nuevo desde la Tienda.	Réinstalle l'app depuis la Boutique.
+
+#: apps/vision/main/vision.c:292
+Es un extra: bajalo desde la página de Visión en la Tienda.	C'est un extra : télécharge-le sur la page de Vision de la Boutique.
+
+#: apps/vision/main/vision.c:295
+Falta el motor de visión	Moteur de vision absent
+
+#: apps/vision/main/vision.c:298
+El modelo no cargó	Échec du chargement du modèle
+
+#: apps/vision/main/vision.c:318
+Fotos de prueba	Photos de test
+
+#: apps/vision/main/vision.c:341
+#: apps/vision/main/vision.c:343
+Apareció	Apparu
+
+#: apps/vision/main/vision.c:413
+Foto guardada en Fotos	Photo ajoutée à Photos
+
+#: apps/vision/main/vision.c:413
+No se pudo guardar la foto	Impossible d'enregistrer la photo
+
+#: apps/vision/main/vision.c:675
+Umbral	Seuil
+
+#: apps/vision/main/vision.c:695
+Foto	Photo
+
+#: apps/vision/main/vision.c:696
+Avisar	Alerte
+
+#: apps/vision/main/vision.c:699
+Prueba	Test
+
+#: apps/vision/main/vision.c:731
+#: apps/vision/main/vision.c:770
+Sin memoria para la cámara	Pas de mémoire pour la caméra
