@@ -1,0 +1,658 @@
+# amoledos-lang 1   es -> en
+# aos.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/main/malla.c:91
+en	in
+
+#: apps/malla/main/malla.c:171
+No hay memoria para la malla	Not enough memory for the mesh
+
+#: apps/malla/main/msh_emoji.c:153
+Sin el paquete de emojis en la tarjeta se mandan igual, pero no se ven.	Without the emoji pack on the card they are still sent, but not shown.
+
+#: apps/malla/main/msh_emoji.c:176
+#: apps/malla/main/msh_ui_chats.c:349
+No se pudo encolar el mensaje	Could not queue the message
+
+#: apps/malla/main/msh_emoji.c:183
+Reaccionar	React
+
+#: apps/malla/main/msh_link_ble.c:130
+#: apps/malla/main/msh_link_ble.c:148
+Emparejando…	Pairing…
+
+#: apps/malla/main/msh_link_ble.c:132
+No se pudo pedir el emparejamiento	Could not ask for pairing
+
+#: apps/malla/main/msh_link_ble.c:141
+Se cortó mientras emparejaba	Dropped while pairing
+
+#: apps/malla/main/msh_link_ble.c:156
+El nodo pide el PIN	The node asks for the PIN
+
+#: apps/malla/main/msh_link_ble.c:161
+El emparejamiento falló (¿PIN equivocado?)	Pairing failed (wrong PIN?)
+
+#: apps/malla/main/msh_link_ble.c:166
+El emparejamiento no terminó a tiempo	Pairing did not finish in time
+
+#: apps/malla/main/msh_link_ble.c:174
+El Bluetooth está apagado	Bluetooth is off
+
+#: apps/malla/main/msh_link_ble.c:179
+#: apps/malla/main/msh_link_stream.c:170
+#: apps/malla/main/msh_link_stream.c:227
+#: apps/malla/main/msh_sess.c:261
+Sin memoria	Out of memory
+
+#: apps/malla/main/msh_link_ble.c:183
+Conectando por Bluetooth…	Connecting over Bluetooth…
+
+#: apps/malla/main/msh_link_ble.c:185
+El Bluetooth no aceptó la conexión	Bluetooth refused the connection
+
+#: apps/malla/main/msh_link_ble.c:192
+El nodo no aceptó la conexión	The node did not accept the connection
+
+#: apps/malla/main/msh_link_ble.c:207
+No es un nodo Meshtastic	Not a Meshtastic node
+
+#: apps/malla/main/msh_link_ble.c:228
+Se cortó el Bluetooth	Bluetooth dropped
+
+#: apps/malla/main/msh_link_ble.c:244
+El nodo pide emparejar con PIN	The node wants pairing with a PIN
+
+#: apps/malla/main/msh_link_stream.c:173
+No se pudo abrir el puerto	Could not open the port
+
+#: apps/malla/main/msh_link_stream.c:191
+Se desconectó el puerto	The port was disconnected
+
+#: apps/malla/main/msh_link_stream.c:230
+No se encontró la dirección	Address not found
+
+#: apps/malla/main/msh_link_stream.c:231
+No quedan conexiones libres	No free connections left
+
+#: apps/malla/main/msh_link_stream.c:232
+El nodo no contesta	The node does not answer
+
+#: apps/malla/main/msh_link_stream.c:251
+El nodo cerró la conexión	The node closed the connection
+
+#: apps/malla/main/msh_model.c:161
+Todos	Everyone
+
+#: apps/malla/main/msh_model.c:199
+Sin región	No region
+
+#: apps/malla/main/msh_model.c:215
+bien	ok
+
+#: apps/malla/main/msh_model.c:216
+no hay ruta	no route
+
+#: apps/malla/main/msh_model.c:217
+lo rechazaron	rejected
+
+#: apps/malla/main/msh_model.c:218
+no hubo respuesta	no answer
+
+#: apps/malla/main/msh_model.c:219
+sin radio	no radio
+
+#: apps/malla/main/msh_model.c:220
+nadie lo confirmó	nobody confirmed it
+
+#: apps/malla/main/msh_model.c:221
+canal desconocido	unknown channel
+
+#: apps/malla/main/msh_model.c:222
+demasiado largo	too long
+
+#: apps/malla/main/msh_model.c:223
+sin respuesta	no response
+
+#: apps/malla/main/msh_model.c:224
+límite de uso del canal	channel duty limit
+
+#: apps/malla/main/msh_model.c:227
+falta su clave pública	its public key is missing
+
+#: apps/malla/main/msh_model.c:228
+demasiados seguidos	too many in a row
+
+#: apps/malla/main/msh_model.c:229
+no autorizado	not authorized
+
+#: apps/malla/main/msh_model.c:230
+error	failed
+
+#: apps/malla/main/msh_model.c:239
+Primario	Primary
+
+#: apps/malla/main/msh_model.c:240
+#: apps/malla/main/msh_ui_cfg.c:491
+Canal %d	Channel %d
+
+#: apps/malla/main/msh_portal.c:167
+Canales cambiados desde el portal: el nodo se reinicia	Channels changed from the portal: the node restarts
+
+#: apps/malla/main/msh_sess.c:213
+#: apps/malla/main/msh_sess.c:228
+No se pudo escribir al nodo	Could not write to the node
+
+#: apps/malla/main/msh_sess.c:309
+No se pudo empezar la conexión	Could not start the connection
+
+#: apps/malla/main/msh_ui_cfg.c:113
+Cancelar	Cancel
+
+#: apps/malla/main/msh_ui_cfg.c:141
+Falta la dirección del nodo	The node's address is missing
+
+#: apps/malla/main/msh_ui_cfg.c:184
+Buscando nodos Meshtastic cerca…	Looking for Meshtastic nodes nearby…
+
+#: apps/malla/main/msh_ui_cfg.c:254
+Conectar con el nodo	Connect to the node
+
+#: apps/malla/main/msh_ui_cfg.c:263
+Ahora	Now
+
+#: apps/malla/main/msh_ui_cfg.c:265
+Desconectar y olvidar	Disconnect and forget
+
+#: apps/malla/main/msh_ui_cfg.c:271
+Por USB o serie	Over USB or serial
+
+#: apps/malla/main/msh_ui_cfg.c:274
+%d puerto USB enchufado. El nodo va a 115200 salvo que lo hayas cambiado.	%d USB port plugged in. The node talks at 115200 unless you changed it.
+
+#: apps/malla/main/msh_ui_cfg.c:275
+Enchufá el nodo al USB de la placa, o a un UART del conector.	Plug the node into the board's USB, or into a UART of the header.
+
+#: apps/malla/main/msh_ui_cfg.c:296
+Por Wi-Fi (TCP)	Over Wi-Fi (TCP)
+
+#: apps/malla/main/msh_ui_cfg.c:297
+Un nodo con Wi-Fi atiende a los clientes en el puerto 4403.	A node with Wi-Fi serves clients on port 4403.
+
+#: apps/malla/main/msh_ui_cfg.c:308
+#: apps/malla/main/msh_ui_cfg.c:656
+#: apps/malla/main/msh_ui_chats.c:184
+#: apps/malla/main/msh_ui_main.c:267
+Conectar	Connect
+
+#: apps/malla/main/msh_ui_cfg.c:315
+Por Bluetooth	Over Bluetooth
+
+#: apps/malla/main/msh_ui_cfg.c:317
+El Bluetooth de la placa está apagado.	The board's Bluetooth is off.
+
+#: apps/malla/main/msh_ui_cfg.c:318
+Prender el Bluetooth	Turn Bluetooth on
+
+#: apps/malla/main/msh_ui_cfg.c:321
+Este firmware todavía no empareja con PIN: sólo anda con un nodo en modo sin PIN.	This firmware cannot pair with a PIN yet: only a node in no-PIN mode works.
+
+#: apps/malla/main/msh_ui_cfg.c:346
+El PIN tiene seis cifras	The PIN has six digits
+
+#: apps/malla/main/msh_ui_cfg.c:360
+#: apps/malla/main/msh_ui_cfg.c:366
+Emparejar	Pair
+
+#: apps/malla/main/msh_ui_cfg.c:361
+Escribí el PIN de seis cifras que muestra el nodo. Uno sin pantalla suele usar 123456.	Type the six-digit PIN the node shows. One without a screen usually uses 123456.
+
+#: apps/malla/main/msh_ui_cfg.c:380
+Hacen falta los dos nombres	Both names are needed
+
+#: apps/malla/main/msh_ui_cfg.c:383
+Nombre cambiado	Name changed
+
+#: apps/malla/main/msh_ui_cfg.c:384
+#: apps/malla/main/msh_ui_cfg.c:424
+#: apps/malla/main/msh_ui_cfg.c:467
+#: apps/malla/main/msh_ui_cfg.c:571
+No se pudo mandar al nodo	Could not send it to the node
+
+#: apps/malla/main/msh_ui_cfg.c:391
+Nombre del nodo	Node name
+
+#: apps/malla/main/msh_ui_cfg.c:400
+Nombre largo (hasta 24 letras)	Long name (up to 24 letters)
+
+#: apps/malla/main/msh_ui_cfg.c:401
+Nombre largo	Long name
+
+#: apps/malla/main/msh_ui_cfg.c:402
+Nombre corto (hasta 4)	Short name (up to 4)
+
+#: apps/malla/main/msh_ui_cfg.c:404
+#: apps/malla/main/msh_ui_cfg.c:504
+Guardar	Save
+
+#: apps/malla/main/msh_ui_cfg.c:423
+Radio cambiada: el nodo se reinicia	Radio changed: the node restarts
+
+#: apps/malla/main/msh_ui_cfg.c:430
+#: apps/malla/main/msh_ui_cfg.c:511
+#: apps/malla/main/msh_ui_cfg.c:518
+#: apps/malla/main/msh_ui_cfg.c:596
+El nodo no está conectado	The node is not connected
+
+#: apps/malla/main/msh_ui_cfg.c:439
+Cambiar la radio	Change the radio
+
+#: apps/malla/main/msh_ui_cfg.c:440
+El nodo se reinicia para tomar la región y el preset nuevos. Todos los nodos de una malla tienen que usar el mismo preset.	The node restarts to take the new region and preset. Every node of a mesh must use the same preset.
+
+#: apps/malla/main/msh_ui_cfg.c:441
+#: apps/malla/main/msh_ui_cfg.c:656
+Cambiar	Change
+
+#: apps/malla/main/msh_ui_cfg.c:451
+sin cifrar	unencrypted
+
+#: apps/malla/main/msh_ui_cfg.c:452
+clave predeterminada	default key
+
+#: apps/malla/main/msh_ui_cfg.c:466
+Canal guardado	Channel saved
+
+#: apps/malla/main/msh_ui_cfg.c:477
+Canal borrado	Channel deleted
+
+#: apps/malla/main/msh_ui_cfg.c:484
+Borrar el canal	Delete the channel
+
+#: apps/malla/main/msh_ui_cfg.c:484
+Los mensajes de este canal dejan de llegar a este nodo.	This channel's messages stop reaching this node.
+
+#: apps/malla/main/msh_ui_cfg.c:484
+#: apps/malla/main/msh_ui_cfg.c:505
+Borrar	Delete
+
+#: apps/malla/main/msh_ui_cfg.c:499
+primario	primary
+
+#: apps/malla/main/msh_ui_cfg.c:499
+secundario	secondary
+
+#: apps/malla/main/msh_ui_cfg.c:501
+Nombre (hasta 11 letras; vacío en el primario es el del preset)	Name (up to 11 letters; empty on the primary means the preset's)
+
+#: apps/malla/main/msh_ui_cfg.c:502
+#: apps/malla/main/msh_ui_cfg.c:682
+Nombre	Name
+
+#: apps/malla/main/msh_ui_cfg.c:525
+El nodo ya tiene los ocho canales	The node already has all eight channels
+
+#: apps/malla/main/msh_ui_cfg.c:545
+Todavía no se conocen los canales del nodo	The node's channels are not known yet
+
+#: apps/malla/main/msh_ui_cfg.c:548
+Compartir los canales	Share the channels
+
+#: apps/malla/main/msh_ui_cfg.c:549
+Escaneálo con la app de Meshtastic del teléfono para sumarse a estos canales.	Scan it with the phone's Meshtastic app to join these channels.
+
+#: apps/malla/main/msh_ui_cfg.c:562
+Listo	Done
+
+#: apps/malla/main/msh_ui_cfg.c:570
+Canales cambiados: el nodo se reinicia	Channels changed: the node restarts
+
+#: apps/malla/main/msh_ui_cfg.c:580
+No es una URL de canales de Meshtastic	Not a Meshtastic channel URL
+
+#: apps/malla/main/msh_ui_cfg.c:588
+Reemplaza los canales del nodo por estos %d: %s. Si trae la radio, también. El nodo se reinicia.	Replaces the node's channels with these %d: %s. The radio too, if it brings it. The node restarts.
+
+#: apps/malla/main/msh_ui_cfg.c:590
+Tomar estos canales	Take these channels
+
+#: apps/malla/main/msh_ui_cfg.c:590
+Reemplazar	Replace
+
+#: apps/malla/main/msh_ui_cfg.c:597
+Tomar canales de una URL	Take channels from a URL
+
+#: apps/malla/main/msh_ui_cfg.c:598
+Pegá una URL https://meshtastic.org/e/#... (también se puede desde la página del portal).	Paste a https://meshtastic.org/e/#... URL (the portal's page can do it too).
+
+#: apps/malla/main/msh_ui_cfg.c:601
+Revisar	Check
+
+#: apps/malla/main/msh_ui_cfg.c:642
+Conexión	Connection
+
+#: apps/malla/main/msh_ui_cfg.c:644
+Ningún nodo elegido.	No node chosen.
+
+#: apps/malla/main/msh_ui_cfg.c:647
+Por	Via
+
+#: apps/malla/main/msh_ui_cfg.c:648
+#: apps/malla/main/msh_ui_nodes.c:114
+conectado	connected
+
+#: apps/malla/main/msh_ui_cfg.c:648
+recibiendo la base de nodos	receiving the node database
+
+#: apps/malla/main/msh_ui_cfg.c:649
+conectando	connecting
+
+#: apps/malla/main/msh_ui_cfg.c:649
+reintentando	retrying
+
+#: apps/malla/main/msh_ui_cfg.c:649
+parado	stopped
+
+#: apps/malla/main/msh_ui_cfg.c:650
+Estado	State
+
+#: apps/malla/main/msh_ui_cfg.c:651
+Último error	Last error
+
+#: apps/malla/main/msh_ui_cfg.c:653
+Paquetes (in / out)	Packets (in / out)
+
+#: apps/malla/main/msh_ui_cfg.c:657
+Reintentar ya	Retry now
+
+#: apps/malla/main/msh_ui_cfg.c:677
+Este nodo	This node
+
+#: apps/malla/main/msh_ui_cfg.c:686
+Firmware	Firmware
+
+#: apps/malla/main/msh_ui_cfg.c:688
+Equipo	Hardware
+
+#: apps/malla/main/msh_ui_cfg.c:689
+Rol	Role
+
+#: apps/malla/main/msh_ui_cfg.c:691
+Nodos conocidos	Known nodes
+
+#: apps/malla/main/msh_ui_cfg.c:694
+PIN fijo %06lu	Fixed PIN %06lu
+
+#: apps/malla/main/msh_ui_cfg.c:696
+sin PIN	no PIN
+
+#: apps/malla/main/msh_ui_cfg.c:696
+PIN al azar en su pantalla	random PIN on its screen
+
+#: apps/malla/main/msh_ui_cfg.c:697
+apagado	off
+
+#: apps/malla/main/msh_ui_cfg.c:699
+Cambiar el nombre	Change the name
+
+#: apps/malla/main/msh_ui_cfg.c:704
+Radio LoRa	LoRa radio
+
+#: apps/malla/main/msh_ui_cfg.c:715
+Región	Region
+
+#: apps/malla/main/msh_ui_cfg.c:717
+Preset	Preset
+
+#: apps/malla/main/msh_ui_cfg.c:719
+Saltos como máximo	Max hops
+
+#: apps/malla/main/msh_ui_cfg.c:722
+El nodo usa una radio a medida, sin preset: guardar la pasa a un preset.	The node uses custom radio settings, no preset: saving moves it to a preset.
+
+#: apps/malla/main/msh_ui_cfg.c:724
+Guardar la radio	Save the radio
+
+#: apps/malla/main/msh_ui_cfg.c:729
+Canales	Channels
+
+#: apps/malla/main/msh_ui_cfg.c:746
+Agregar canal	Add channel
+
+#: apps/malla/main/msh_ui_cfg.c:747
+Compartir (QR)	Share (QR)
+
+#: apps/malla/main/msh_ui_cfg.c:748
+Tomar una URL	Take a URL
+
+#: apps/malla/main/msh_ui_chats.c:89
+#: apps/malla/main/msh_ui_chats.c:230
+Vos	You
+
+#: apps/malla/main/msh_ui_chats.c:97
+Sin mensajes todavía	No messages yet
+
+#: apps/malla/main/msh_ui_chats.c:174
+#: apps/malla/main/msh_ui_nodes.c:441
+Mensajes directos	Direct messages
+
+#: apps/malla/main/msh_ui_chats.c:180
+Conectá un nodo Meshtastic por USB, Wi-Fi o Bluetooth para chatear con la malla.	Connect a Meshtastic node over USB, Wi-Fi or Bluetooth to chat with the mesh.
+
+#: apps/malla/main/msh_ui_chats.c:206
+en cola	queued
+
+#: apps/malla/main/msh_ui_chats.c:207
+enviado	sent
+
+#: apps/malla/main/msh_ui_chats.c:210
+repetido	relayed
+
+#: apps/malla/main/msh_ui_chats.c:210
+recibido	delivered
+
+#: apps/malla/main/msh_ui_chats.c:293
+1 salto	1 hop
+
+#: apps/malla/main/msh_ui_chats.c:294
+%d saltos	%d hops
+
+#: apps/malla/main/msh_ui_chats.c:319
+Escribí el primer mensaje directo.	Write the first direct message.
+
+#: apps/malla/main/msh_ui_chats.c:320
+Todavía no hay mensajes en este canal.	No messages on this channel yet.
+
+#: apps/malla/main/msh_ui_chats.c:345
+Es demasiado largo para la malla	Too long for the mesh
+
+#: apps/malla/main/msh_ui_chats.c:411
+cifrado de punta a punta	end-to-end encrypted
+
+#: apps/malla/main/msh_ui_chats.c:411
+con la clave del canal	with the channel's key
+
+#: apps/malla/main/msh_ui_chats.c:440
+#: apps/malla/main/msh_ui_nodes.c:363
+Mensaje	Message
+
+#: apps/malla/main/msh_ui_main.c:24
+Chats	Chats
+
+#: apps/malla/main/msh_ui_main.c:24
+Nodos	Nodes
+
+#: apps/malla/main/msh_ui_main.c:24
+Mapa	Map
+
+#: apps/malla/main/msh_ui_main.c:24
+#: apps/malla/main/msh_ui_main.c:232
+Nodo	Node
+
+#: apps/malla/main/msh_ui_main.c:117
+nunca	never
+
+#: apps/malla/main/msh_ui_main.c:118
+recién	just now
+
+#: apps/malla/main/msh_ui_main.c:119
+hace %d min	%d min ago
+
+#: apps/malla/main/msh_ui_main.c:120
+hace %d h	%d h ago
+
+#: apps/malla/main/msh_ui_main.c:121
+hace %d d	%d d ago
+
+#: apps/malla/main/msh_ui_main.c:252
+Conectado	Connected
+
+#: apps/malla/main/msh_ui_main.c:256
+Cargando %d nodos	Loading %d nodes
+
+#: apps/malla/main/msh_ui_main.c:260
+Conectando…	Connecting…
+
+#: apps/malla/main/msh_ui_main.c:264
+Reintentando	Retrying
+
+#: apps/malla/main/msh_ui_main.c:267
+Sin conexión	Not connected
+
+#: apps/malla/main/msh_ui_map.c:178
+Ningún nodo mandó su posición todavía.	No node has sent its position yet.
+
+#: apps/malla/main/msh_ui_nodes.c:56
+#: apps/malla/main/msh_ui_nodes.c:392
+enchufado	plugged in
+
+#: apps/malla/main/msh_ui_nodes.c:64
+%s1 salto	%s1 hop
+
+#: apps/malla/main/msh_ui_nodes.c:64
+%s%d saltos	%s%d hops
+
+#: apps/malla/main/msh_ui_nodes.c:65
+#: apps/malla/main/msh_ui_nodes.c:388
+directo	direct
+
+#: apps/malla/main/msh_ui_nodes.c:96
+#: apps/malla/main/msh_ui_nodes.c:208
+este	this one
+
+#: apps/malla/main/msh_ui_nodes.c:127
+%d nodo	%d node
+
+#: apps/malla/main/msh_ui_nodes.c:127
+%d nodos	%d nodes
+
+#: apps/malla/main/msh_ui_nodes.c:132
+Los nodos aparecen acá cuando el tuyo manda su lista.	Nodes show up here once yours sends its list.
+
+#: apps/malla/main/msh_ui_nodes.c:150
+Buscando la ruta…	Looking for the route…
+
+#: apps/malla/main/msh_ui_nodes.c:158
+Pedido: la telemetría llega cuando conteste	Asked: the telemetry comes when it answers
+
+#: apps/malla/main/msh_ui_nodes.c:165
+Pedido: la posición llega cuando conteste	Asked: the position comes when it answers
+
+#: apps/malla/main/msh_ui_nodes.c:239
+#: apps/malla/main/msh_ui_nodes.c:364
+Traceroute	Traceroute
+
+#: apps/malla/main/msh_ui_nodes.c:242
+Esperando la respuesta…	Waiting for the answer…
+
+#: apps/malla/main/msh_ui_nodes.c:246
+No hubo respuesta	No answer
+
+#: apps/malla/main/msh_ui_nodes.c:250
+Ida	Out
+
+#: apps/malla/main/msh_ui_nodes.c:253
+Vuelta	Back
+
+#: apps/malla/main/msh_ui_nodes.c:319
+mín.	min.
+
+#: apps/malla/main/msh_ui_nodes.c:319
+máx.	max.
+
+#: apps/malla/main/msh_ui_nodes.c:319
+lecturas	readings
+
+#: apps/malla/main/msh_ui_nodes.c:330
+Este nodo ya no está en la lista.	This node is no longer in the list.
+
+#: apps/malla/main/msh_ui_nodes.c:355
+sin datos todavía	no data yet
+
+#: apps/malla/main/msh_ui_nodes.c:366
+#: apps/malla/main/msh_ui_nodes.c:446
+Telemetría	Telemetry
+
+#: apps/malla/main/msh_ui_nodes.c:367
+#: apps/malla/main/msh_ui_nodes.c:430
+Posición	Position
+
+#: apps/malla/main/msh_ui_nodes.c:368
+En el mapa	On the map
+
+#: apps/malla/main/msh_ui_nodes.c:369
+Quitar favorito	Unfavourite
+
+#: apps/malla/main/msh_ui_nodes.c:369
+Favorito	Favourite
+
+#: apps/malla/main/msh_ui_nodes.c:376
+Visto	Heard
+
+#: apps/malla/main/msh_ui_nodes.c:382
+Señal	Signal
+
+#: apps/malla/main/msh_ui_nodes.c:386
+#: apps/malla/main/msh_ui_nodes.c:388
+Saltos	Hops
+
+#: apps/malla/main/msh_ui_nodes.c:399
+#: apps/malla/main/msh_ui_nodes.c:447
+Batería	Battery
+
+#: apps/malla/main/msh_ui_nodes.c:404
+aire	air
+
+#: apps/malla/main/msh_ui_nodes.c:405
+Uso del canal	Channel use
+
+#: apps/malla/main/msh_ui_nodes.c:411
+Encendido	Up for
+
+#: apps/malla/main/msh_ui_nodes.c:423
+Ambiente	Environment
+
+#: apps/malla/main/msh_ui_nodes.c:438
+Distancia	Distance
+
+#: apps/malla/main/msh_ui_nodes.c:441
+cifrados con su clave pública	encrypted with its public key
+
+#: apps/malla/main/msh_ui_nodes.c:448
+Tensión	Voltage
+
+#: apps/malla/main/msh_ui_nodes.c:449
+Uso del canal (verde) y aire (naranja)	Channel use (green) and air (orange)
+
+#: apps/malla/main/msh_ui_nodes.c:450
+Temperatura	Temperature
+
+#: apps/malla/main/msh_ui_nodes.c:451
+Humedad	Humidity
+
+#: apps/malla/main/msh_ui_nodes.c:452
+Presión	Pressure

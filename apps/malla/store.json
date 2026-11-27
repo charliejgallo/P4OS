@@ -1,0 +1,18 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Chateá por una malla LoRa a través de tu nodo: canales y mensajes directos con su confirmación, los nodos, un mapa, telemetría y traceroute. Por USB, Wi-Fi o Bluetooth.",
+  "en": "Chat over a LoRa mesh through your node: channels and direct messages with their delivery, the nodes, a map, telemetry and traceroute. Over USB, Wi-Fi or Bluetooth."
+ },
+ "desc": {
+  "es": "Es un cliente para los nodos compatibles con Meshtastic (firmware 2.x): la placa habla con tu nodo como lo hace la app del teléfono. Se conecta enchufándolo al USB de la placa o a un UART del header, por Wi-Fi al puerto 4403 de un nodo con red, o por Bluetooth, con el PIN que muestra el nodo. Recuerda la conexión y vuelve sola si el nodo se reinicia o se corta.\n\nLos chats van por canal y por mensaje directo, con emojis y reacciones, y cada mensaje tuyo dice si quedó en cola, salió, lo confirmó el otro nodo o falló y por qué. Con la app en segundo plano y conectada, los mensajes nuevos llegan como notificaciones.\n\nLa lista de nodos muestra nombre, equipo, batería, señal, saltos, hace cuánto se lo oyó y a qué distancia está. Cada nodo tiene su ficha con la telemetría en gráficos, traceroute de ida y vuelta, y pedidos de posición y telemetría. El mapa los ubica con anillos de distancia alrededor del tuyo.\n\nDel nodo se cambia lo básico: el nombre, la región, el preset y los saltos, los canales, y se comparten por QR o se toman de una URL. La página del portal deja chatear desde el celular. Esta app es GPL-3.0.",
+  "en": "A client for nodes compatible with Meshtastic (firmware 2.x): the board talks to your node the way the phone app does. It connects with the node plugged into the board's USB or a header UART, over Wi-Fi to port 4403 of a node on the network, or over Bluetooth with the PIN the node shows. It remembers the connection and comes back by itself when the node restarts or drops.\n\nChats go by channel and by direct message, with emoji and reactions, and each of your messages tells whether it is queued, went out, was confirmed by the other node or failed and why. With the app in the background and connected, new messages arrive as notifications.\n\nThe node list shows name, hardware, battery, signal, hops, when it was last heard and how far away it is. Each node has its own page with telemetry charts, traceroute both ways, and requests for its position and telemetry. The map places them with distance rings around yours.\n\nThe basics of the node can be changed: its name, the region, preset and hops, the channels, shared as a QR or taken from a URL. The portal page lets you chat from your phone. This app is GPL-3.0."
+ },
+ "license": "GPL-3.0",
+ "shots": [
+  "app-malla.png",
+  "app-malla-nodos.png",
+  "app-malla-mapa.png",
+  "app-malla-nodo.png"
+ ]
+}

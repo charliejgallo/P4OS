@@ -1,0 +1,658 @@
+# amoledos-lang 1   es -> de
+# aos.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/main/malla.c:91
+en	in
+
+#: apps/malla/main/malla.c:171
+No hay memoria para la malla	Nicht genug Speicher für das Mesh
+
+#: apps/malla/main/msh_emoji.c:153
+Sin el paquete de emojis en la tarjeta se mandan igual, pero no se ven.	Ohne das Emoji-Paket auf der Karte werden sie trotzdem gesendet, aber nicht angezeigt.
+
+#: apps/malla/main/msh_emoji.c:176
+#: apps/malla/main/msh_ui_chats.c:349
+No se pudo encolar el mensaje	Die Nachricht konnte nicht eingereiht werden
+
+#: apps/malla/main/msh_emoji.c:183
+Reaccionar	Reagieren
+
+#: apps/malla/main/msh_link_ble.c:130
+#: apps/malla/main/msh_link_ble.c:148
+Emparejando…	Kopplung…
+
+#: apps/malla/main/msh_link_ble.c:132
+No se pudo pedir el emparejamiento	Kopplung konnte nicht angefordert werden
+
+#: apps/malla/main/msh_link_ble.c:141
+Se cortó mientras emparejaba	Während der Kopplung getrennt
+
+#: apps/malla/main/msh_link_ble.c:156
+El nodo pide el PIN	Der Knoten verlangt die PIN
+
+#: apps/malla/main/msh_link_ble.c:161
+El emparejamiento falló (¿PIN equivocado?)	Kopplung fehlgeschlagen (falsche PIN?)
+
+#: apps/malla/main/msh_link_ble.c:166
+El emparejamiento no terminó a tiempo	Die Kopplung wurde nicht rechtzeitig fertig
+
+#: apps/malla/main/msh_link_ble.c:174
+El Bluetooth está apagado	Bluetooth ist aus
+
+#: apps/malla/main/msh_link_ble.c:179
+#: apps/malla/main/msh_link_stream.c:170
+#: apps/malla/main/msh_link_stream.c:227
+#: apps/malla/main/msh_sess.c:261
+Sin memoria	Kein Speicher
+
+#: apps/malla/main/msh_link_ble.c:183
+Conectando por Bluetooth…	Verbinde über Bluetooth…
+
+#: apps/malla/main/msh_link_ble.c:185
+El Bluetooth no aceptó la conexión	Bluetooth hat die Verbindung abgelehnt
+
+#: apps/malla/main/msh_link_ble.c:192
+El nodo no aceptó la conexión	Der Knoten hat die Verbindung nicht angenommen
+
+#: apps/malla/main/msh_link_ble.c:207
+No es un nodo Meshtastic	Kein Meshtastic-Knoten
+
+#: apps/malla/main/msh_link_ble.c:228
+Se cortó el Bluetooth	Bluetooth getrennt
+
+#: apps/malla/main/msh_link_ble.c:244
+El nodo pide emparejar con PIN	Der Knoten verlangt eine Kopplung mit PIN
+
+#: apps/malla/main/msh_link_stream.c:173
+No se pudo abrir el puerto	Der Port konnte nicht geöffnet werden
+
+#: apps/malla/main/msh_link_stream.c:191
+Se desconectó el puerto	Der Port wurde getrennt
+
+#: apps/malla/main/msh_link_stream.c:230
+No se encontró la dirección	Adresse nicht gefunden
+
+#: apps/malla/main/msh_link_stream.c:231
+No quedan conexiones libres	Keine freien Verbindungen mehr
+
+#: apps/malla/main/msh_link_stream.c:232
+El nodo no contesta	Der Knoten antwortet nicht
+
+#: apps/malla/main/msh_link_stream.c:251
+El nodo cerró la conexión	Der Knoten hat die Verbindung geschlossen
+
+#: apps/malla/main/msh_model.c:161
+Todos	Alle
+
+#: apps/malla/main/msh_model.c:199
+Sin región	Keine Region
+
+#: apps/malla/main/msh_model.c:215
+bien	ok
+
+#: apps/malla/main/msh_model.c:216
+no hay ruta	keine Route
+
+#: apps/malla/main/msh_model.c:217
+lo rechazaron	abgelehnt
+
+#: apps/malla/main/msh_model.c:218
+no hubo respuesta	keine Antwort
+
+#: apps/malla/main/msh_model.c:219
+sin radio	kein Funk
+
+#: apps/malla/main/msh_model.c:220
+nadie lo confirmó	niemand hat es bestätigt
+
+#: apps/malla/main/msh_model.c:221
+canal desconocido	unbekannter Kanal
+
+#: apps/malla/main/msh_model.c:222
+demasiado largo	zu lang
+
+#: apps/malla/main/msh_model.c:223
+sin respuesta	ohne Antwort
+
+#: apps/malla/main/msh_model.c:224
+límite de uso del canal	Kanal-Nutzungsgrenze
+
+#: apps/malla/main/msh_model.c:227
+falta su clave pública	sein öffentlicher Schlüssel fehlt
+
+#: apps/malla/main/msh_model.c:228
+demasiados seguidos	zu viele hintereinander
+
+#: apps/malla/main/msh_model.c:229
+no autorizado	nicht berechtigt
+
+#: apps/malla/main/msh_model.c:230
+error	Fehler
+
+#: apps/malla/main/msh_model.c:239
+Primario	Primär
+
+#: apps/malla/main/msh_model.c:240
+#: apps/malla/main/msh_ui_cfg.c:491
+Canal %d	Kanal %d
+
+#: apps/malla/main/msh_portal.c:167
+Canales cambiados desde el portal: el nodo se reinicia	Kanäle über das Portal geändert: der Knoten startet neu
+
+#: apps/malla/main/msh_sess.c:213
+#: apps/malla/main/msh_sess.c:228
+No se pudo escribir al nodo	Konnte nicht an den Knoten schreiben
+
+#: apps/malla/main/msh_sess.c:309
+No se pudo empezar la conexión	Die Verbindung konnte nicht gestartet werden
+
+#: apps/malla/main/msh_ui_cfg.c:113
+Cancelar	Abbrechen
+
+#: apps/malla/main/msh_ui_cfg.c:141
+Falta la dirección del nodo	Die Adresse des Knotens fehlt
+
+#: apps/malla/main/msh_ui_cfg.c:184
+Buscando nodos Meshtastic cerca…	Suche Meshtastic-Knoten in der Nähe…
+
+#: apps/malla/main/msh_ui_cfg.c:254
+Conectar con el nodo	Mit dem Knoten verbinden
+
+#: apps/malla/main/msh_ui_cfg.c:263
+Ahora	Jetzt
+
+#: apps/malla/main/msh_ui_cfg.c:265
+Desconectar y olvidar	Trennen und vergessen
+
+#: apps/malla/main/msh_ui_cfg.c:271
+Por USB o serie	Über USB oder seriell
+
+#: apps/malla/main/msh_ui_cfg.c:274
+%d puerto USB enchufado. El nodo va a 115200 salvo que lo hayas cambiado.	%d USB-Port eingesteckt. Der Knoten spricht 115200, außer du hast es geändert.
+
+#: apps/malla/main/msh_ui_cfg.c:275
+Enchufá el nodo al USB de la placa, o a un UART del conector.	Steck den Knoten an den USB der Platine oder an einen UART des Steckers.
+
+#: apps/malla/main/msh_ui_cfg.c:296
+Por Wi-Fi (TCP)	Über WLAN (TCP)
+
+#: apps/malla/main/msh_ui_cfg.c:297
+Un nodo con Wi-Fi atiende a los clientes en el puerto 4403.	Ein Knoten mit WLAN bedient Clients auf Port 4403.
+
+#: apps/malla/main/msh_ui_cfg.c:308
+#: apps/malla/main/msh_ui_cfg.c:656
+#: apps/malla/main/msh_ui_chats.c:184
+#: apps/malla/main/msh_ui_main.c:267
+Conectar	Verbinden
+
+#: apps/malla/main/msh_ui_cfg.c:315
+Por Bluetooth	Über Bluetooth
+
+#: apps/malla/main/msh_ui_cfg.c:317
+El Bluetooth de la placa está apagado.	Das Bluetooth der Platine ist aus.
+
+#: apps/malla/main/msh_ui_cfg.c:318
+Prender el Bluetooth	Bluetooth einschalten
+
+#: apps/malla/main/msh_ui_cfg.c:321
+Este firmware todavía no empareja con PIN: sólo anda con un nodo en modo sin PIN.	Diese Firmware kann noch nicht mit PIN koppeln: nur ein Knoten ohne PIN funktioniert.
+
+#: apps/malla/main/msh_ui_cfg.c:346
+El PIN tiene seis cifras	Die PIN hat sechs Ziffern
+
+#: apps/malla/main/msh_ui_cfg.c:360
+#: apps/malla/main/msh_ui_cfg.c:366
+Emparejar	Koppeln
+
+#: apps/malla/main/msh_ui_cfg.c:361
+Escribí el PIN de seis cifras que muestra el nodo. Uno sin pantalla suele usar 123456.	Gib die sechsstellige PIN ein, die der Knoten zeigt. Einer ohne Display nutzt meist 123456.
+
+#: apps/malla/main/msh_ui_cfg.c:380
+Hacen falta los dos nombres	Beide Namen sind nötig
+
+#: apps/malla/main/msh_ui_cfg.c:383
+Nombre cambiado	Name geändert
+
+#: apps/malla/main/msh_ui_cfg.c:384
+#: apps/malla/main/msh_ui_cfg.c:424
+#: apps/malla/main/msh_ui_cfg.c:467
+#: apps/malla/main/msh_ui_cfg.c:571
+No se pudo mandar al nodo	Konnte nicht an den Knoten gesendet werden
+
+#: apps/malla/main/msh_ui_cfg.c:391
+Nombre del nodo	Name des Knotens
+
+#: apps/malla/main/msh_ui_cfg.c:400
+Nombre largo (hasta 24 letras)	Langer Name (bis 24 Zeichen)
+
+#: apps/malla/main/msh_ui_cfg.c:401
+Nombre largo	Langer Name
+
+#: apps/malla/main/msh_ui_cfg.c:402
+Nombre corto (hasta 4)	Kurzname (bis 4)
+
+#: apps/malla/main/msh_ui_cfg.c:404
+#: apps/malla/main/msh_ui_cfg.c:504
+Guardar	Speichern
+
+#: apps/malla/main/msh_ui_cfg.c:423
+Radio cambiada: el nodo se reinicia	Funk geändert: der Knoten startet neu
+
+#: apps/malla/main/msh_ui_cfg.c:430
+#: apps/malla/main/msh_ui_cfg.c:511
+#: apps/malla/main/msh_ui_cfg.c:518
+#: apps/malla/main/msh_ui_cfg.c:596
+El nodo no está conectado	Der Knoten ist nicht verbunden
+
+#: apps/malla/main/msh_ui_cfg.c:439
+Cambiar la radio	Funk ändern
+
+#: apps/malla/main/msh_ui_cfg.c:440
+El nodo se reinicia para tomar la región y el preset nuevos. Todos los nodos de una malla tienen que usar el mismo preset.	Der Knoten startet neu, um Region und Preset zu übernehmen. Alle Knoten eines Mesh brauchen dasselbe Preset.
+
+#: apps/malla/main/msh_ui_cfg.c:441
+#: apps/malla/main/msh_ui_cfg.c:656
+Cambiar	Ändern
+
+#: apps/malla/main/msh_ui_cfg.c:451
+sin cifrar	unverschlüsselt
+
+#: apps/malla/main/msh_ui_cfg.c:452
+clave predeterminada	Standardschlüssel
+
+#: apps/malla/main/msh_ui_cfg.c:466
+Canal guardado	Kanal gespeichert
+
+#: apps/malla/main/msh_ui_cfg.c:477
+Canal borrado	Kanal gelöscht
+
+#: apps/malla/main/msh_ui_cfg.c:484
+Borrar el canal	Kanal löschen
+
+#: apps/malla/main/msh_ui_cfg.c:484
+Los mensajes de este canal dejan de llegar a este nodo.	Die Nachrichten dieses Kanals erreichen diesen Knoten nicht mehr.
+
+#: apps/malla/main/msh_ui_cfg.c:484
+#: apps/malla/main/msh_ui_cfg.c:505
+Borrar	Löschen
+
+#: apps/malla/main/msh_ui_cfg.c:499
+primario	primär
+
+#: apps/malla/main/msh_ui_cfg.c:499
+secundario	sekundär
+
+#: apps/malla/main/msh_ui_cfg.c:501
+Nombre (hasta 11 letras; vacío en el primario es el del preset)	Name (bis 11 Zeichen; leer beim primären heißt der des Presets)
+
+#: apps/malla/main/msh_ui_cfg.c:502
+#: apps/malla/main/msh_ui_cfg.c:682
+Nombre	Name
+
+#: apps/malla/main/msh_ui_cfg.c:525
+El nodo ya tiene los ocho canales	Der Knoten hat schon alle acht Kanäle
+
+#: apps/malla/main/msh_ui_cfg.c:545
+Todavía no se conocen los canales del nodo	Die Kanäle des Knotens sind noch nicht bekannt
+
+#: apps/malla/main/msh_ui_cfg.c:548
+Compartir los canales	Kanäle teilen
+
+#: apps/malla/main/msh_ui_cfg.c:549
+Escaneálo con la app de Meshtastic del teléfono para sumarse a estos canales.	Scanne ihn mit der Meshtastic-App des Telefons, um diesen Kanälen beizutreten.
+
+#: apps/malla/main/msh_ui_cfg.c:562
+Listo	Fertig
+
+#: apps/malla/main/msh_ui_cfg.c:570
+Canales cambiados: el nodo se reinicia	Kanäle geändert: der Knoten startet neu
+
+#: apps/malla/main/msh_ui_cfg.c:580
+No es una URL de canales de Meshtastic	Keine Meshtastic-Kanal-URL
+
+#: apps/malla/main/msh_ui_cfg.c:588
+Reemplaza los canales del nodo por estos %d: %s. Si trae la radio, también. El nodo se reinicia.	Ersetzt die Kanäle des Knotens durch diese %d: %s. Den Funk auch, falls enthalten. Der Knoten startet neu.
+
+#: apps/malla/main/msh_ui_cfg.c:590
+Tomar estos canales	Diese Kanäle übernehmen
+
+#: apps/malla/main/msh_ui_cfg.c:590
+Reemplazar	Ersetzen
+
+#: apps/malla/main/msh_ui_cfg.c:597
+Tomar canales de una URL	Kanäle aus einer URL übernehmen
+
+#: apps/malla/main/msh_ui_cfg.c:598
+Pegá una URL https://meshtastic.org/e/#... (también se puede desde la página del portal).	Füge eine https://meshtastic.org/e/#...-URL ein (geht auch über die Portalseite).
+
+#: apps/malla/main/msh_ui_cfg.c:601
+Revisar	Prüfen
+
+#: apps/malla/main/msh_ui_cfg.c:642
+Conexión	Verbindung
+
+#: apps/malla/main/msh_ui_cfg.c:644
+Ningún nodo elegido.	Kein Knoten gewählt.
+
+#: apps/malla/main/msh_ui_cfg.c:647
+Por	Über
+
+#: apps/malla/main/msh_ui_cfg.c:648
+#: apps/malla/main/msh_ui_nodes.c:114
+conectado	verbunden
+
+#: apps/malla/main/msh_ui_cfg.c:648
+recibiendo la base de nodos	empfange die Knotendatenbank
+
+#: apps/malla/main/msh_ui_cfg.c:649
+conectando	verbinde
+
+#: apps/malla/main/msh_ui_cfg.c:649
+reintentando	neuer Versuch
+
+#: apps/malla/main/msh_ui_cfg.c:649
+parado	angehalten
+
+#: apps/malla/main/msh_ui_cfg.c:650
+Estado	Zustand
+
+#: apps/malla/main/msh_ui_cfg.c:651
+Último error	Letzter Fehler
+
+#: apps/malla/main/msh_ui_cfg.c:653
+Paquetes (in / out)	Pakete (ein / aus)
+
+#: apps/malla/main/msh_ui_cfg.c:657
+Reintentar ya	Jetzt erneut versuchen
+
+#: apps/malla/main/msh_ui_cfg.c:677
+Este nodo	Dieser Knoten
+
+#: apps/malla/main/msh_ui_cfg.c:686
+Firmware	Firmware
+
+#: apps/malla/main/msh_ui_cfg.c:688
+Equipo	Hardware
+
+#: apps/malla/main/msh_ui_cfg.c:689
+Rol	Rolle
+
+#: apps/malla/main/msh_ui_cfg.c:691
+Nodos conocidos	Bekannte Knoten
+
+#: apps/malla/main/msh_ui_cfg.c:694
+PIN fijo %06lu	Feste PIN %06lu
+
+#: apps/malla/main/msh_ui_cfg.c:696
+sin PIN	ohne PIN
+
+#: apps/malla/main/msh_ui_cfg.c:696
+PIN al azar en su pantalla	Zufalls-PIN auf seinem Display
+
+#: apps/malla/main/msh_ui_cfg.c:697
+apagado	aus
+
+#: apps/malla/main/msh_ui_cfg.c:699
+Cambiar el nombre	Namen ändern
+
+#: apps/malla/main/msh_ui_cfg.c:704
+Radio LoRa	LoRa-Funk
+
+#: apps/malla/main/msh_ui_cfg.c:715
+Región	Region
+
+#: apps/malla/main/msh_ui_cfg.c:717
+Preset	Preset
+
+#: apps/malla/main/msh_ui_cfg.c:719
+Saltos como máximo	Maximale Sprünge
+
+#: apps/malla/main/msh_ui_cfg.c:722
+El nodo usa una radio a medida, sin preset: guardar la pasa a un preset.	Der Knoten nutzt eigene Funkeinstellungen ohne Preset: Speichern stellt auf ein Preset um.
+
+#: apps/malla/main/msh_ui_cfg.c:724
+Guardar la radio	Funk speichern
+
+#: apps/malla/main/msh_ui_cfg.c:729
+Canales	Kanäle
+
+#: apps/malla/main/msh_ui_cfg.c:746
+Agregar canal	Kanal hinzufügen
+
+#: apps/malla/main/msh_ui_cfg.c:747
+Compartir (QR)	Teilen (QR)
+
+#: apps/malla/main/msh_ui_cfg.c:748
+Tomar una URL	URL übernehmen
+
+#: apps/malla/main/msh_ui_chats.c:89
+#: apps/malla/main/msh_ui_chats.c:230
+Vos	Du
+
+#: apps/malla/main/msh_ui_chats.c:97
+Sin mensajes todavía	Noch keine Nachrichten
+
+#: apps/malla/main/msh_ui_chats.c:174
+#: apps/malla/main/msh_ui_nodes.c:441
+Mensajes directos	Direktnachrichten
+
+#: apps/malla/main/msh_ui_chats.c:180
+Conectá un nodo Meshtastic por USB, Wi-Fi o Bluetooth para chatear con la malla.	Verbinde einen Meshtastic-Knoten über USB, WLAN oder Bluetooth, um mit dem Mesh zu chatten.
+
+#: apps/malla/main/msh_ui_chats.c:206
+en cola	in der Warteschlange
+
+#: apps/malla/main/msh_ui_chats.c:207
+enviado	gesendet
+
+#: apps/malla/main/msh_ui_chats.c:210
+repetido	weitergeleitet
+
+#: apps/malla/main/msh_ui_chats.c:210
+recibido	zugestellt
+
+#: apps/malla/main/msh_ui_chats.c:293
+1 salto	1 Sprung
+
+#: apps/malla/main/msh_ui_chats.c:294
+%d saltos	%d Sprünge
+
+#: apps/malla/main/msh_ui_chats.c:319
+Escribí el primer mensaje directo.	Schreib die erste Direktnachricht.
+
+#: apps/malla/main/msh_ui_chats.c:320
+Todavía no hay mensajes en este canal.	Noch keine Nachrichten in diesem Kanal.
+
+#: apps/malla/main/msh_ui_chats.c:345
+Es demasiado largo para la malla	Zu lang für das Mesh
+
+#: apps/malla/main/msh_ui_chats.c:411
+cifrado de punta a punta	Ende-zu-Ende verschlüsselt
+
+#: apps/malla/main/msh_ui_chats.c:411
+con la clave del canal	mit dem Kanalschlüssel
+
+#: apps/malla/main/msh_ui_chats.c:440
+#: apps/malla/main/msh_ui_nodes.c:363
+Mensaje	Nachricht
+
+#: apps/malla/main/msh_ui_main.c:24
+Chats	Chats
+
+#: apps/malla/main/msh_ui_main.c:24
+Nodos	Knoten
+
+#: apps/malla/main/msh_ui_main.c:24
+Mapa	Karte
+
+#: apps/malla/main/msh_ui_main.c:24
+#: apps/malla/main/msh_ui_main.c:232
+Nodo	Knoten
+
+#: apps/malla/main/msh_ui_main.c:117
+nunca	nie
+
+#: apps/malla/main/msh_ui_main.c:118
+recién	gerade eben
+
+#: apps/malla/main/msh_ui_main.c:119
+hace %d min	vor %d Min.
+
+#: apps/malla/main/msh_ui_main.c:120
+hace %d h	vor %d Std.
+
+#: apps/malla/main/msh_ui_main.c:121
+hace %d d	vor %d T.
+
+#: apps/malla/main/msh_ui_main.c:252
+Conectado	Verbunden
+
+#: apps/malla/main/msh_ui_main.c:256
+Cargando %d nodos	Lade %d Knoten
+
+#: apps/malla/main/msh_ui_main.c:260
+Conectando…	Verbinde…
+
+#: apps/malla/main/msh_ui_main.c:264
+Reintentando	Neuer Versuch
+
+#: apps/malla/main/msh_ui_main.c:267
+Sin conexión	Nicht verbunden
+
+#: apps/malla/main/msh_ui_map.c:178
+Ningún nodo mandó su posición todavía.	Noch kein Knoten hat seine Position gesendet.
+
+#: apps/malla/main/msh_ui_nodes.c:56
+#: apps/malla/main/msh_ui_nodes.c:392
+enchufado	am Netz
+
+#: apps/malla/main/msh_ui_nodes.c:64
+%s1 salto	%s1 Sprung
+
+#: apps/malla/main/msh_ui_nodes.c:64
+%s%d saltos	%s%d Sprünge
+
+#: apps/malla/main/msh_ui_nodes.c:65
+#: apps/malla/main/msh_ui_nodes.c:388
+directo	direkt
+
+#: apps/malla/main/msh_ui_nodes.c:96
+#: apps/malla/main/msh_ui_nodes.c:208
+este	dieser
+
+#: apps/malla/main/msh_ui_nodes.c:127
+%d nodo	%d Knoten
+
+#: apps/malla/main/msh_ui_nodes.c:127
+%d nodos	%d Knoten
+
+#: apps/malla/main/msh_ui_nodes.c:132
+Los nodos aparecen acá cuando el tuyo manda su lista.	Die Knoten erscheinen hier, sobald deiner seine Liste schickt.
+
+#: apps/malla/main/msh_ui_nodes.c:150
+Buscando la ruta…	Suche die Route…
+
+#: apps/malla/main/msh_ui_nodes.c:158
+Pedido: la telemetría llega cuando conteste	Angefragt: die Telemetrie kommt mit der Antwort
+
+#: apps/malla/main/msh_ui_nodes.c:165
+Pedido: la posición llega cuando conteste	Angefragt: die Position kommt mit der Antwort
+
+#: apps/malla/main/msh_ui_nodes.c:239
+#: apps/malla/main/msh_ui_nodes.c:364
+Traceroute	Traceroute
+
+#: apps/malla/main/msh_ui_nodes.c:242
+Esperando la respuesta…	Warte auf die Antwort…
+
+#: apps/malla/main/msh_ui_nodes.c:246
+No hubo respuesta	Keine Antwort
+
+#: apps/malla/main/msh_ui_nodes.c:250
+Ida	Hin
+
+#: apps/malla/main/msh_ui_nodes.c:253
+Vuelta	Zurück
+
+#: apps/malla/main/msh_ui_nodes.c:319
+mín.	min.
+
+#: apps/malla/main/msh_ui_nodes.c:319
+máx.	max.
+
+#: apps/malla/main/msh_ui_nodes.c:319
+lecturas	Messwerte
+
+#: apps/malla/main/msh_ui_nodes.c:330
+Este nodo ya no está en la lista.	Dieser Knoten ist nicht mehr in der Liste.
+
+#: apps/malla/main/msh_ui_nodes.c:355
+sin datos todavía	noch keine Daten
+
+#: apps/malla/main/msh_ui_nodes.c:366
+#: apps/malla/main/msh_ui_nodes.c:446
+Telemetría	Telemetrie
+
+#: apps/malla/main/msh_ui_nodes.c:367
+#: apps/malla/main/msh_ui_nodes.c:430
+Posición	Position
+
+#: apps/malla/main/msh_ui_nodes.c:368
+En el mapa	Auf der Karte
+
+#: apps/malla/main/msh_ui_nodes.c:369
+Quitar favorito	Kein Favorit mehr
+
+#: apps/malla/main/msh_ui_nodes.c:369
+Favorito	Favorit
+
+#: apps/malla/main/msh_ui_nodes.c:376
+Visto	Gehört
+
+#: apps/malla/main/msh_ui_nodes.c:382
+Señal	Signal
+
+#: apps/malla/main/msh_ui_nodes.c:386
+#: apps/malla/main/msh_ui_nodes.c:388
+Saltos	Sprünge
+
+#: apps/malla/main/msh_ui_nodes.c:399
+#: apps/malla/main/msh_ui_nodes.c:447
+Batería	Akku
+
+#: apps/malla/main/msh_ui_nodes.c:404
+aire	Luft
+
+#: apps/malla/main/msh_ui_nodes.c:405
+Uso del canal	Kanalnutzung
+
+#: apps/malla/main/msh_ui_nodes.c:411
+Encendido	Läuft seit
+
+#: apps/malla/main/msh_ui_nodes.c:423
+Ambiente	Umgebung
+
+#: apps/malla/main/msh_ui_nodes.c:438
+Distancia	Entfernung
+
+#: apps/malla/main/msh_ui_nodes.c:441
+cifrados con su clave pública	mit seinem öffentlichen Schlüssel verschlüsselt
+
+#: apps/malla/main/msh_ui_nodes.c:448
+Tensión	Spannung
+
+#: apps/malla/main/msh_ui_nodes.c:449
+Uso del canal (verde) y aire (naranja)	Kanalnutzung (grün) und Luft (orange)
+
+#: apps/malla/main/msh_ui_nodes.c:450
+Temperatura	Temperatur
+
+#: apps/malla/main/msh_ui_nodes.c:451
+Humedad	Feuchte
+
+#: apps/malla/main/msh_ui_nodes.c:452
+Presión	Luftdruck

@@ -1,0 +1,168 @@
+# amoledos-lang 1   es -> en
+# web.malla.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/malla/web/malla.js:44
+no hay ruta	no route
+
+#: apps/malla/web/malla.js:44
+lo rechazaron	rejected
+
+#: apps/malla/web/malla.js:44
+no hubo respuesta	no answer
+
+#: apps/malla/web/malla.js:44
+sin radio	no radio
+
+#: apps/malla/web/malla.js:45
+nadie lo confirmó	nobody confirmed it
+
+#: apps/malla/web/malla.js:45
+canal desconocido	unknown channel
+
+#: apps/malla/web/malla.js:45
+demasiado largo	too long
+
+#: apps/malla/web/malla.js:45
+sin respuesta	no response
+
+#: apps/malla/web/malla.js:46
+límite de uso del canal	channel duty limit
+
+#: apps/malla/web/malla.js:46
+#: apps/malla/web/malla.js:46
+falta su clave pública	its public key is missing
+
+#: apps/malla/web/malla.js:47
+demasiados seguidos	too many in a row
+
+#: apps/malla/web/malla.js:56
+nunca	never
+
+#: apps/malla/web/malla.js:56
+recién	just now
+
+#: apps/malla/web/malla.js:56
+hace %d min	%d min ago
+
+#: apps/malla/web/malla.js:57
+hace %d h	%d h ago
+
+#: apps/malla/web/malla.js:57
+hace %d d	%d d ago
+
+#: apps/malla/web/malla.js:76
+#: apps/malla/web/malla.js:97
+Malla	Mesh
+
+#: apps/malla/web/malla.js:86
+Mensaje	Message
+
+#: apps/malla/web/malla.js:88
+Enviar	Send
+
+#: apps/malla/web/malla.js:93
+Tomar canales de una URL	Take channels from a URL
+
+#: apps/malla/web/malla.js:94
+Reemplaza los canales del nodo (y su radio, si la URL la trae). El nodo se reinicia.	Replaces the node's channels (and its radio, if the URL brings it). The node restarts.
+
+#: apps/malla/web/malla.js:95
+Aplicar	Apply
+
+#: apps/malla/web/malla.js:108
+Es demasiado largo para la malla	Too long for the mesh
+
+#: apps/malla/web/malla.js:115
+No es una URL de canales de Meshtastic	Not a Meshtastic channel URL
+
+#: apps/malla/web/malla.js:116
+¿Reemplazar los canales del nodo? Se reinicia.	Replace the node's channels? It restarts.
+
+#: apps/malla/web/malla.js:117
+Mandado al nodo	Sent to the node
+
+#: apps/malla/web/malla.js:147
+#: apps/malla/web/malla.js:171
+Vos	You
+
+#: apps/malla/web/malla.js:147
+Sin mensajes todavía	No messages yet
+
+#: apps/malla/web/malla.js:156
+en cola	queued
+
+#: apps/malla/web/malla.js:156
+enviado	sent
+
+#: apps/malla/web/malla.js:157
+repetido	relayed
+
+#: apps/malla/web/malla.js:157
+recibido	delivered
+
+#: apps/malla/web/malla.js:158
+error	failed
+
+#: apps/malla/web/malla.js:165
+Canal %d	Channel %d
+
+#: apps/malla/web/malla.js:177
+Escribí el primer mensaje directo.	Write the first direct message.
+
+#: apps/malla/web/malla.js:177
+Todavía no hay mensajes en este canal.	No messages on this channel yet.
+
+#: apps/malla/web/malla.js:185
+%d nodos	%d nodes
+
+#: apps/malla/web/malla.js:187
+Nodo	Node
+
+#: apps/malla/web/malla.js:187
+Visto	Heard
+
+#: apps/malla/web/malla.js:187
+Saltos	Hops
+
+#: apps/malla/web/malla.js:187
+Batería	Battery
+
+#: apps/malla/web/malla.js:188
+Distancia	Distance
+
+#: apps/malla/web/malla.js:191
+este	this one
+
+#: apps/malla/web/malla.js:192
+directo	direct
+
+#: apps/malla/web/malla.js:193
+enchufado	plugged in
+
+#: apps/malla/web/malla.js:200
+Malla no está abierta en la placa.	Mesh is not open on the board.
+
+#: apps/malla/web/malla.js:201
+Abrir Malla en la placa	Open Mesh on the board
+
+#: apps/malla/web/malla.js:204
+Conectado	Connected
+
+#: apps/malla/web/malla.js:204
+Cargando la base de nodos	Loading the node database
+
+#: apps/malla/web/malla.js:204
+Conectando	Connecting
+
+#: apps/malla/web/malla.js:205
+Reintentando	Retrying
+
+#: apps/malla/web/malla.js:205
+Sin conexión	Not connected
+
+#: apps/malla/web/malla.js:208
+Sin nodo	No node
