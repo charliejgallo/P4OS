@@ -2178,7 +2178,7 @@ static void thread_main(void *arg)
     if (logged && mj_mtp_has_key(A.mtp, A.home) && mj_pref_get_str("msj_self", self, sizeof self)) {
         mj_store_lock();
         mj_S.self.type = MJ_PEER_USER;
-        mj_S.self.id = strtoll(self, NULL, 10);
+        mj_S.self.id = mj_atoll(self);
         mj_store_unlock();
         A.logged = true;
         set_auth(MJ_AUTH_READY, "");

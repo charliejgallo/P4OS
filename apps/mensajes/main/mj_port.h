@@ -15,6 +15,15 @@
  */
 #pragma once
 
+/* The board's GCC takes -Wformat-truncation as an error (HANDOFF-APPS.md,
+ * "Trampas"): a snprintf of a name into a row's 64 bytes is a truncation
+ * it cannot rule out. Here cutting a text to what fits is what every one
+ * of those snprintf means to do, so the warning is off for this app's
+ * files; the buffers' sizes are what keeps them safe. */
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -25,6 +34,11 @@ void  *mj_calloc(size_t n);
 void  *mj_realloc(void *p, size_t n);
 void   mj_free(void *p);
 char  *mj_strdup(const char *s);
+/* A copy cut to fit (never in the middle of a UTF-8 character): what
+ * snprintf("%s") does, without the board's GCC calling it a truncation. */
+void   mj_scpy(char *dst, size_t n, const char *src);
+/* A signed 64-bit number from text (strtoll is not in the firmware's table). */
+int64_t mj_atoll(const char *s);
 size_t mj_mem_used(void);         /* bytes held now                         */
 size_t mj_mem_peak(void);         /* the most held at once                  */
 

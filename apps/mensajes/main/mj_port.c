@@ -118,6 +118,29 @@ void mj_port_init(void)
 #endif
 }
 
+void mj_scpy(char *d, size_t n, const char *s)
+{
+    if (!n) return;
+    size_t l = s ? strlen(s) : 0;
+    if (l >= n) {
+        l = n - 1;
+        while (l > 0 && ((unsigned char)s[l] & 0xC0) == 0x80) l--;
+    }
+    if (l) memcpy(d, s, l);
+    d[l] = 0;
+}
+
+int64_t mj_atoll(const char *s)
+{
+    while (s && (*s == ' ' || *s == '\t')) s++;
+    if (!s) return 0;
+    bool neg = *s == '-';
+    if (*s == '-' || *s == '+') s++;
+    uint64_t v = 0;
+    while (*s >= '0' && *s <= '9') v = v * 10 + (uint64_t)(*s++ - '0');
+    return neg ? -(int64_t)v : (int64_t)v;
+}
+
 size_t mj_mem_used(void) { return s_used; }
 size_t mj_mem_peak(void) { return s_peak; }
 

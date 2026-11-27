@@ -119,7 +119,7 @@ static void print_chat(void)
 
 static mj_pkey_t key_of(const char *t, const char *id)
 {
-    mj_pkey_t k = {*t == 'u' ? MJ_PEER_USER : *t == 'c' ? MJ_PEER_CHAT : MJ_PEER_CHANNEL, strtoll(id, NULL, 10)};
+    mj_pkey_t k = {*t == 'u' ? MJ_PEER_USER : *t == 'c' ? MJ_PEER_CHAT : MJ_PEER_CHANNEL, mj_atoll(id)};
     return k;
 }
 

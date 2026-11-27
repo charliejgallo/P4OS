@@ -6,7 +6,7 @@ MTProto 2.0 for real, with an account and its chats made up.
     tools/fake_telegram.py [--port 9443] [--bind 127.0.0.1] [--lang es|en]
                            [--client-config <data>/mensajes/servidor.txt]
                            [--password pescado | --no-password]
-                           [--chatter 20] [--control 9450] [--quiet]
+                           [--chatter 20] [--control 9450] [--state <file>] [--quiet]
 
 Three data centres, DC n on port+n-1. The account lives on DC 1 and some of
 its photos on DC 3, so a client that starts on DC 2 (as Mensajes does) meets
@@ -156,19 +156,39 @@ SOLID_JPEG = bytes.fromhex(
     'd2d3d4d5d6d7d8d9dae1e2e3e4e5e6e7e8e9eaf1f2f3f4f5f6f7f8f9faffda0008010100003f00fbfcffd9')
 
 
-def avatar(initials, rgb):
+def avatar(kind, rgb, hair=(60, 40, 30), skin=(240, 200, 170)):
+    """A made-up profile picture: a person (head, hair, shoulders) on a
+    coloured background, or for a group one of a few simple drawings."""
+    import math
+
     def d(img, g):
         w, h = img.size
-        g.rectangle([0, 0, w, h], fill=rgb)
         for i in range(h):
             k = i / h
-            g.line([0, i, w, i], fill=tuple(int(c * (1 - 0.35 * k)) for c in rgb))
-        try:
-            from PIL import ImageFont
-            f = ImageFont.load_default(size=64)
-        except Exception:  # noqa: BLE001
-            f = None
-        g.text((w / 2, h / 2), initials, fill=(255, 255, 255), anchor='mm', font=f)
+            g.line([0, i, w, i], fill=tuple(int(c * (1 - 0.4 * k) + 40 * k) for c in rgb))
+        if kind == 'person':
+            g.ellipse([w * 0.18, h * 0.66, w * 0.82, h * 1.3], fill=tuple(max(0, c - 70) for c in rgb))
+            g.ellipse([w * 0.3, h * 0.2, w * 0.7, h * 0.62], fill=skin)
+            g.chord([w * 0.27, h * 0.14, w * 0.73, h * 0.5], 180, 360, fill=hair)
+            g.ellipse([w * 0.4, h * 0.38, w * 0.45, h * 0.43], fill=(40, 40, 40))
+            g.ellipse([w * 0.55, h * 0.38, w * 0.6, h * 0.43], fill=(40, 40, 40))
+            g.arc([w * 0.42, h * 0.42, w * 0.58, h * 0.54], 20, 160, fill=(150, 60, 60), width=3)
+        elif kind == 'house':
+            g.polygon([(w * 0.2, h * 0.5), (w * 0.5, h * 0.22), (w * 0.8, h * 0.5)], fill=(250, 240, 230))
+            g.rectangle([w * 0.28, h * 0.5, w * 0.72, h * 0.8], fill=(250, 240, 230))
+            g.rectangle([w * 0.45, h * 0.6, w * 0.56, h * 0.8], fill=tuple(max(0, c - 60) for c in rgb))
+        elif kind == 'ball':
+            g.ellipse([w * 0.22, h * 0.22, w * 0.78, h * 0.78], fill=(250, 250, 250))
+            g.regular_polygon((w * 0.5, h * 0.5, w * 0.11), 5, fill=(30, 30, 30))
+            for a in range(5):
+                x = w * 0.5 + math.cos(a * 1.2566 - 1.57) * w * 0.22
+                y = h * 0.5 + math.sin(a * 1.2566 - 1.57) * h * 0.22
+                g.ellipse([x - w * 0.05, y - h * 0.05, x + w * 0.05, y + h * 0.05], fill=(30, 30, 30))
+        elif kind == 'board':
+            g.rectangle([w * 0.22, h * 0.3, w * 0.78, h * 0.7], fill=(20, 110, 60))
+            g.rectangle([w * 0.38, h * 0.4, w * 0.62, h * 0.6], fill=(30, 30, 30))
+            for i in range(6):
+                g.rectangle([w * (0.26 + i * 0.085), h * 0.32, w * (0.29 + i * 0.085), h * 0.36], fill=(220, 190, 90))
     return jpeg(160, 160, d)
 
 
@@ -293,7 +313,7 @@ class Store:
         self.make()
 
     # -- making things
-    def user(self, uid, first, last='', photo=None, rgb=(90, 120, 200), bot=False, online=False):
+    def user(self, uid, first, last='', photo=None, rgb=(90, 120, 200), bot=False, online=False, hair=(60, 40, 30)):
         u = {'_': 'user', 'id': uid, 'access_hash': self.access + uid, 'first_name': first}
         if last:
             u['last_name'] = last
@@ -301,9 +321,9 @@ class Store:
             u['bot'] = True
             u['bot_info_version'] = 1
         if photo:
-            pid = 7000000 + uid
+            pid = 7100000 + uid
             u['photo'] = {'_': 'userProfilePhoto', 'photo_id': pid, 'dc_id': 1}
-            self.files[('avatar', pid)] = avatar(photo, rgb)
+            self.files[('avatar', pid)] = avatar('person', rgb, hair)
         u['status'] = ({'_': 'userStatusOnline', 'expires': self.now + 300} if online
                        else {'_': 'userStatusOffline', 'was_online': self.now - 3600})
         self.users[uid] = u
@@ -395,27 +415,27 @@ class Store:
 
     def make(self):
         U = self.user
-        U(self.self_id, T('self_first'), T('self_last'), 'LP', (120, 90, 200), online=True)
+        U(self.self_id, T('self_first'), T('self_last'), True, (120, 90, 200), online=True, hair=(150, 80, 40))
         self.users[self.self_id]['self'] = True
         self.users[self.self_id]['phone'] = ARGS.phone.lstrip('+')
-        U(2001, 'Martín', 'Gómez', 'MG', (60, 140, 210), online=True)
-        U(2002, 'Rosa', 'Abuela' if ARGS.lang == 'es' else 'Grandma', 'RA', (220, 110, 120))
-        U(2003, 'Caro', '', 'C', (70, 170, 120))
+        U(2001, 'Martín', 'Gómez', True, (60, 140, 210), online=True, hair=(40, 30, 20))
+        U(2002, 'Rosa', 'Abuela' if ARGS.lang == 'es' else 'Grandma', True, (220, 110, 120), hair=(210, 210, 215))
+        U(2003, 'Caro', '', True, (70, 170, 120), hair=(170, 60, 30))
         U(2004, 'Diego', 'Fernández', None)
-        U(2005, 'Paula', 'Ríos', 'PR', (230, 160, 60))
+        U(2005, 'Paula', 'Ríos', True, (230, 160, 60), hair=(30, 20, 20))
         U(2006, 'Tomás', '', None)
         self.chats[3001] = {'_': 'chat', 'id': 3001, 'title': T('family'), 'participants_count': 5,
                             'date': self.now - 900000, 'version': 1,
-                            'photo': {'_': 'chatPhoto', 'photo_id': 7300001, 'dc_id': 1}}
-        self.files[('avatar', 7300001)] = avatar('F', (200, 90, 160))
+                            'photo': {'_': 'chatPhoto', 'photo_id': 7310001, 'dc_id': 1}}
+        self.files[('avatar', 7310001)] = avatar('house', (200, 90, 160))
         self.channels[4001] = {'_': 'channel', 'id': 4001, 'access_hash': self.access + 4001, 'title': T('football'),
                                'megagroup': True, 'date': self.now - 500000,
-                               'photo': {'_': 'chatPhoto', 'photo_id': 7400001, 'dc_id': 1}}
-        self.files[('avatar', 7400001)] = avatar('⚽' if False else 'FJ', (40, 150, 90))
+                               'photo': {'_': 'chatPhoto', 'photo_id': 7410001, 'dc_id': 1}}
+        self.files[('avatar', 7410001)] = avatar('ball', (40, 150, 90))
         self.channels[4002] = {'_': 'channel', 'id': 4002, 'access_hash': self.access + 4002, 'title': T('news'),
                                'broadcast': True, 'date': self.now - 400000, 'username': 'p4os_news',
-                               'photo': {'_': 'chatPhoto', 'photo_id': 7400002, 'dc_id': 1}}
-        self.files[('avatar', 7400002)] = avatar('P4', (30, 40, 60))
+                               'photo': {'_': 'chatPhoto', 'photo_id': 7410002, 'dc_id': 1}}
+        self.files[('avatar', 7410002)] = avatar('board', (30, 60, 110))
 
         H = 3600
         a = self.add
@@ -579,6 +599,35 @@ class Key:
 
 KEYS = {}
 EXPORTED = {}
+
+
+def keys_save():
+    """The auth keys and who signed in with each, so a restart of the fake
+    does not send the app back to signing in (--state)."""
+    if not ARGS.state:
+        return
+    with LOCK:
+        data = [{'key': k.key.hex(), 'dc': k.dc, 'user': k.user, 'salt': k.salt} for k in KEYS.values()]
+    tmp = ARGS.state + '.tmp'
+    with open(tmp, 'w') as f:
+        json.dump(data, f)
+    os.replace(tmp, ARGS.state)
+
+
+def keys_load():
+    if not ARGS.state:
+        return
+    try:
+        with open(ARGS.state) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return
+    for d in data:
+        k = Key(bytes.fromhex(d['key']), d['dc'])
+        k.user = d.get('user')
+        k.salt = d.get('salt', k.salt)
+        KEYS[k.id] = k
+    log(f'{len(data)} auth keys from {ARGS.state}')
 CONNS = set()
 PENDING_CODE = {}
 
@@ -728,6 +777,7 @@ class Conn(socketserver.BaseRequestHandler):
             k.salt = struct.unpack('<q', salt)[0]
             with LOCK:
                 KEYS[k.id] = k
+            keys_save()
             self.send_plain({'_': 'dh_gen_ok', 'nonce': hs['nonce'], 'server_nonce': hs['server_nonce'],
                              'new_nonce_hash1': R.new_nonce_hash(hs['new_nonce'], ak, 1)})
             log(f'dc{self.dc}: an auth key made ({k.id.hex()})')
@@ -872,6 +922,7 @@ class Conn(socketserver.BaseRequestHandler):
 
     def authorization(self):
         self.key.user = STORE.self_id
+        keys_save()
         return {'_': 'auth.authorization', 'user': STORE.users[STORE.self_id]}
 
     def f_auth_signIn(self, q):
@@ -911,6 +962,7 @@ class Conn(socketserver.BaseRequestHandler):
 
     def f_auth_logOut(self, q):
         self.key.user = None
+        keys_save()
         return {'_': 'auth.loggedOut'}
 
     def f_auth_exportAuthorization(self, q):
@@ -924,6 +976,7 @@ class Conn(socketserver.BaseRequestHandler):
         if not e or e[0] != q['bytes'] or e[1] != self.dc:
             raise RpcError(400, 'AUTH_BYTES_INVALID')
         self.key.user = e[2]
+        keys_save()
         log(f'dc{self.dc}: signed in by importAuthorization')
         return {'_': 'auth.authorization', 'user': STORE.users[e[2]]}
 
@@ -1300,6 +1353,7 @@ def control():
                     with LOCK:
                         for k in KEYS.values():
                             k.user = None
+                    keys_save()
                     f.write('ok\n')
                 elif w[0] == 'list':
                     for u in STORE.users.values():
@@ -1342,6 +1396,7 @@ def main():
     ap.add_argument('--control', type=int, default=0)
     ap.add_argument('--key', default=os.path.expanduser('~/.cache/p4os_fake_telegram.json'))
     ap.add_argument('--client-config', default='')
+    ap.add_argument('--state', default='', help='a file to keep the auth keys and sign-ins across restarts')
     ap.add_argument('--quiet', action='store_true')
     ARGS = ap.parse_args()
     if ARGS.no_password:
@@ -1353,6 +1408,7 @@ def main():
     if ARGS.password:
         SRP_V = R.srp_verifier(ARGS.password, SRP_SALT1, SRP_SALT2, 3, R.DH_PRIME)
     STORE = Store()
+    keys_load()
     if ARGS.client_config:
         os.makedirs(os.path.dirname(os.path.abspath(ARGS.client_config)), exist_ok=True)
         with open(ARGS.client_config, 'w') as f:
