@@ -1426,6 +1426,16 @@ proyecto).
   0.34.1, que no es la publicada en `v0.33.0`, y se dejó como estaba. La
   Tienda los ofrece como actualización con el catálogo de la próxima.
 
+- **Para la 0.35.0 (2026-11-27), los packs nuevos:** `cielo_p4.pak`,
+  `vision_p4.pak`, `vision_coco_p4.pak`, `vision_manos_p4.pak`, y
+  `juguete.pak` y `linea.pak` con 112 apps, subidos a `v0.34.2` (la última
+  publicada; las copias de antes de los dos de íconos, que nadie nombraba,
+  reemplazadas) y comparados por SHA-256 con los de la Mac; anotados con
+  `gen_store.py packs --tag v0.34.2` y en `CARRIED_PACKS` los cuatro
+  nuevos. **Otra vez quiso mover `c6.bin`** (a la imagen que el CI
+  recompiló en la 0.34.2): se dejó en `v0.33.0`. Los de Cielo y Visión
+  son los mismos bytes que corre la placa del usuario.
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:

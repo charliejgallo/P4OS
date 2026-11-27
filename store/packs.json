@@ -69,6 +69,11 @@
   "size": 1495424,
   "sha256": "0053f99eff9893c882ee82f01361f5c22ed169b1760ad8f7bb3d559728150215"
  },
+ "cielo_p4.pak": {
+  "tag": "v0.34.2",
+  "size": 341677,
+  "sha256": "ce74c0dd0a9a395cfede1a9cc4edd27f02399b9dd814b15c52d249c2ab56fc71"
+ },
  "emoji.pak": {
   "tag": "v0.28.0",
   "size": 16203453,
@@ -100,14 +105,14 @@
   "sha256": "1da5fb3b4f682c4bab066033afe6770ad6573d4f88f9a35603004bc5e22a669c"
  },
  "juguete.pak": {
-  "tag": "v0.34.1",
-  "size": 4323776,
-  "sha256": "f4c0c9f9c477a5fc8062fd40c28e3f6e0293ec8faa16c3f7de432906b74148e6"
+  "tag": "v0.34.2",
+  "size": 4639012,
+  "sha256": "0cfd82e6810a6065544332e96dc371ac5d810660fc94ae7850461da147a427a5"
  },
  "linea.pak": {
-  "tag": "v0.34.1",
-  "size": 3232869,
-  "sha256": "0999c760b5d84ce3bebc5309586f697443f84b93d173bd6a53986dd2a0bc9983"
+  "tag": "v0.34.2",
+  "size": 3479768,
+  "sha256": "ef1b3462f576fdf226d74c8b0b0985ff4c638c1be8d4c05ce21bbfe5b5d46b87"
  },
  "mesa_marmol_p4.pak": {
   "tag": "v0.30.0",
@@ -448,6 +453,21 @@
   "tag": "v0.28.0",
   "size": 9723991,
   "sha256": "1d00b52352b5e0bf1b20d71e34fb7fdc7b97cf82c720159f327d4c41d1233f99"
+ },
+ "vision_coco_p4.pak": {
+  "tag": "v0.34.2",
+  "size": 2989584,
+  "sha256": "3123f9b76b71c59653a16231460603bff333f814838b78fd61a8521dcb159db6"
+ },
+ "vision_manos_p4.pak": {
+  "tag": "v0.34.2",
+  "size": 1512400,
+  "sha256": "842413526caacd2bfe0758720724cdf65024b4d0033eac34fe7ee10391557341"
+ },
+ "vision_p4.pak": {
+  "tag": "v0.34.2",
+  "size": 626768,
+  "sha256": "60ed3eac7c4e72284007d21f33f32c10c5e47ba8fd7c2fcc08305bd6bd476762"
  },
  "vuelos_p4.pak": {
   "tag": "v0.30.0",
