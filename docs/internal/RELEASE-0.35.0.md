@@ -55,6 +55,11 @@ A bot of your own (@BotFather) through which the board answers in a chat: its st
 2. `main` y su CI; revisar su catálogo (las apps nuevas, Cielo y Visión con
    sus packs, las partes del sistema).
 3. Tag `v0.35.0` y su CI (borrador).
-4. Cada archivo que nombra el catálogo buscado en su release, con su tamaño,
-   y los nuevos por SHA-256; las dos imágenes dicen `v0.35.0`.
-5. Estas notas en el borrador; publicar, cuando lo diga el usuario.
+4. Hecho el 2026-11-27: el CI del tag pasó (borrador con 124 archivos); los
+   194 paquetes y packs que nombra el catálogo, cada uno en su release
+   (25 en `v0.35.0`, 6 en `v0.34.2`, 1 en `v0.34.1`, 4 en `v0.32.1`, 74 en
+   `v0.33.0`, 41 en `v0.31.0`, 15 en `v0.30.0`, 13 en `v0.29.0`, 15 en
+   `v0.28.0`), con su tamaño y su SHA-256, sin un error; las 306 capturas
+   están; las dos imágenes dicen `v0.35.0`. El catálogo: 85 apps (8 nuevas
+   en "Nuevas") y 11 partes del sistema.
+5. Estas notas en el borrador (hecho); publicar, cuando lo diga el usuario.
