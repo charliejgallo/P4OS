@@ -121,6 +121,11 @@ int main(int argc, char **argv)
             printf("held %d\n", held);
             continue;
         }
+        else if (!strcmp(a, "shot")) {          /* a page's picture asked for once, and the page left */
+            printf("shot %d\n", aos_store_shot(v ? v : "", NULL, 0));
+            aos_hal_sleep_ms(1500);            /* it ends; nobody asks for it again */
+            continue;
+        }
         else if (!strcmp(a, "fresh")) {         /* the apps the store shows as new, one line */
             aos_store_app_t app;
             printf("fresh ");

@@ -576,6 +576,15 @@ took = time.time() - t0
 fake_set("kbps=0")
 check("every download taken: the install waits, and goes through", "held 2" in o and len(jobs) == 2 and jobs[1][0]
       and apps["dados"][0] == "installed" and took > 3, "%.1f s\n%s" % (took, o))
+# a page's pictures asked for once and the page left before they ended:
+# their slots were kept for good, and every install after failed with
+# "could not start the download (-2)" (the board, 2026-11-27, 0.35.0)
+for k in (1, 2):
+    open("rel/pic%d.jpg" % k, "wb").write(os.urandom(30000))
+os.mkdir("s1")
+jobs, apps, o = fw("s1", "refresh", "shot=v9.0.0/pic1.jpg", "shot=v9.0.0/pic2.jpg", "install=dados", "list")
+check("pictures nobody asks for again give their slots back", o.count("shot 0") == 2 and len(jobs) == 2
+      and jobs[1][0] and apps["dados"][0] == "installed", o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

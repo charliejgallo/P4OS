@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **The Store kept its downloads taken after an app's page**: leaving a
+  page while its pictures came held both download slots for good, and
+  every install or replacement after it failed with "could not start the
+  download (-2)", and another page's pictures never came. The pictures'
+  slots that ended are now given back at once, and an install takes the
+  slot of one still coming. A test in `tests/store_fw_host` for it, and the
+  service builds there again (it had come to need LVGL's headers).
+
 ## 0.35.0 — 2026-11-27
 
 Eight new apps, a Telegram bot of the board's own, the phone as a gamepad,

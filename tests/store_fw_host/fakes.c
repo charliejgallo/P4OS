@@ -105,3 +105,6 @@ bool aos_hal_pref_set_i32(const char *key, int32_t value)
  * counted here, made in tests/backup_host. */
 int g_backups_before_fw;
 void aos_backup_before_firmware(void) { g_backups_before_fw++; }
+
+/* the shell: an icon pack installed asks the home screen to redraw */
+void aos_ui_request_icons(void) {}

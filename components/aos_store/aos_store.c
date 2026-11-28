@@ -29,8 +29,11 @@
 #include "aos_fetch.h"
 #include "aos_backup.h"
 #include "aos_hal.h"
-#include "aos_ui.h"
 #include "cJSON.h"
+
+/* the one thing of the shell this service calls (aos_ui.h): declared here so
+ * the service builds without LVGL (tests/store_fw_host) */
+void aos_ui_request_icons(void);
 
 #include <ctype.h>
 #include <dirent.h>
@@ -805,6 +808,8 @@ static bool url_allowed(const char *url, err_t *e)
 
 /* ---- downloads ------------------------------------------------------------- */
 
+static void shots_reap(bool busy_too);
+
 /* 'cap' is for a file whose size nobody published - a catalogue: it stops
  * the download as soon as the server announces more than that, or sends it,
  * so a source cannot fill the card with one. 0 is no limit: a package and a
@@ -819,6 +824,12 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
      * second tap (2026-11-22, with Office too). So wait for one to end. */
     int id;
     for (int tries = 0; ; tries++) {
+        /* the pictures' slots that ended go back first; after two seconds a
+         * picture still coming gives its slot up too: a package or the
+         * catalogue comes before a page's pictures, which ask again */
+        lock();
+        shots_reap(tries >= 10);
+        unlock();
         id = aos_fetch_start(url, full(f, rel), sha, size);
         if (id != -2 || tries >= 100 || s_cancel) break;
         aos_hal_sleep_ms(200);
@@ -872,6 +883,30 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
 AOS_BSS_PSRAM static struct { char name[72]; int id; } s_shot[SHOTS_LIVE];
 AOS_BSS_PSRAM static char s_shot_bad[SHOTS_BAD][72];
 
+/* The pictures' downloads whose page stopped asking: a slot was given back
+ * only when the page asked for the same picture again, so leaving a page
+ * while its pictures came kept the download slots (both of them, SLOTS in
+ * aos_fetch.c) taken for good, and every package after it failed with "could
+ * not start the download (-2)" (on the board, 2026-11-27, replacing the apps
+ * copied by hand after Cielo's page). One that ended is let go here: done,
+ * its file is on the card and found by name; failed, it is not tried again.
+ * busy_too also stops the ones still coming. With the lock held. */
+static void shots_reap(bool busy_too)
+{
+    for (int i = 0; i < SHOTS_LIVE; i++) {
+        if (!s_shot[i].id) continue;
+        aos_fetch_info_t in;
+        bool known = aos_fetch_info(s_shot[i].id, &in);
+        bool busy = known && in.state == AOS_FETCH_BUSY;
+        if (busy && !busy_too) continue;
+        bool done = known && in.state == AOS_FETCH_DONE && in.got <= SHOT_MAX;
+        aos_fetch_release(s_shot[i].id);
+        if (!done && !busy && s_shot_nbad < SHOTS_BAD)
+            memcpy(s_shot_bad[s_shot_nbad++], s_shot[i].name, sizeof s_shot_bad[0]);   /* both 72 */
+        s_shot[i].id = 0;
+    }
+}
+
 int aos_store_shot(const char *url, char *path, size_t path_len)
 {
     aos_store_init();
@@ -885,6 +920,7 @@ int aos_store_shot(const char *url, char *path, size_t path_len)
     full(f, rel);
     int result = 0;
     lock();
+    shots_reap(false);          /* another page's that ended, so this one has a slot */
     int slot = -1, free_slot = -1;
     for (int i = 0; i < SHOTS_LIVE; i++) {
         if (s_shot[i].id && !strcmp(s_shot[i].name, name)) slot = i;
