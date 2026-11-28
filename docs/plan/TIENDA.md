@@ -1447,6 +1447,13 @@ proyecto).
   `docs/internal/RELEASE-0.35.0.md`. Publicada, `releases/latest` sirve
   su catálogo (85 apps, 8 en "Nuevas").
 
+- **La 0.35.1 salió el 2026-11-27** (tag `v0.35.1` en `5c679576`), un
+  arreglo: las capturas de la página de una app dejaban tomados los dos
+  lugares de descarga y todo lo que se bajaba después fallaba con "-2"
+  (`tests/store_fw_host` tiene el caso). Sin packs nuevos; los 194 archivos
+  del catálogo y las 306 capturas, sin un error
+  (`docs/internal/RELEASE-0.35.1.md`).
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:

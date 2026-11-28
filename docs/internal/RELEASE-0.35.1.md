@@ -1,6 +1,6 @@
 # Notas de la release 0.35.1
 
-Las notas de la release `v0.35.1`, del 2026-11-27. El texto de abajo, en
+Las notas de la release `v0.35.1`, publicada el 2026-11-27 (tag en `5c679576`). El texto de abajo, en
 inglés como las demás, es el que va a GitHub.
 
 ---
@@ -24,3 +24,12 @@ Leaving Malla's and Grabador's pages with their pictures still coming, then "Rep
 As in 0.35.0. The packs stay where 0.35.0's catalogue names them; the Translator's language packs in [v0.31.0](https://github.com/charliejgallo/P4OS/releases/tag/v0.31.0).
 
 ---
+
+## Cómo se hizo
+
+Sin packs nuevos. `main` y el tag a la vez (sólo cambiaba el servicio de la
+Tienda y sus tests); CI del tag: borrador con 70 archivos. Los 194 archivos
+que nombra el catálogo en su release con su tamaño y su SHA-256 (los dos
+firmwares en `v0.35.1`, el resto como en la 0.35.0) y las 306 capturas, sin
+un error; las dos imágenes dicen `v0.35.1`; "Nuevas" sigue en `v0.35.0`.
+Publicada con el OK del usuario; `releases/latest` sirve su catálogo.
