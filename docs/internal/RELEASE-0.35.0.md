@@ -31,7 +31,7 @@ P4OS 0.35.0 for the [Waveshare ESP32-P4-WIFI6-Touch-LCD-5](https://www.waveshare
 
 ## The board's Telegram bot
 
-A bot of your own (@BotFather) through which the board answers in a chat: its state, a screenshot, the Zigbee devices with buttons, the IR codes. And **rules**: send a message or a screenshot, switch a device or send an IR code when a door opens, at an hour, at boot or when a notification arrives. Only chats linked with a code the board shows can use it. Set up in the Bot app or the portal's Bot page. [docs/BOT.md](https://github.com/charliejgallo/P4OS/blob/v0.35.0/docs/BOT.md).
+A bot of your own (made with Telegram's BotFather) through which the board answers in a chat: its state, a screenshot, the Zigbee devices with buttons, the IR codes. And **rules**: send a message or a screenshot, switch a device or send an IR code when a door opens, at an hour, at boot or when a notification arrives. Only chats linked with a code the board shows can use it. Set up in the Bot app or the portal's Bot page. [docs/BOT.md](https://github.com/charliejgallo/P4OS/blob/v0.35.0/docs/BOT.md).
 
 ## The system
 

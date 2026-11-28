@@ -12,12 +12,12 @@ app on the board (`aos_app_bot.c`) and the portal's **Bot** page
 (`aos_portal_bot.c`, `#bot` in `web/app.js`).
 
 It is not a Telegram client: the bot is a bot account of your own, made with
-@BotFather, and the board speaks the Bot API (HTTPS and JSON) as that bot.
+`@BotFather`, and the board speaks the Bot API (HTTPS and JSON) as that bot.
 A client with your own account is the Mensajes app (a card app, MTProto).
 
 ## Setting it up
 
-1. In Telegram, **@BotFather**, `/newbot`: a name and a username ending in
+1. In Telegram, **`@BotFather`**, `/newbot`: a name and a username ending in
    `bot`. It gives a token, `123456789:AA...`.
 2. The token goes into the board: the Bot app (Token, Load) or, easier to
    paste, the portal's Bot page. It is kept in the pref `sec_bot_token`

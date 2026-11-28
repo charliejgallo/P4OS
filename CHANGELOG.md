@@ -68,9 +68,9 @@ the App Library and widgets on the lock screen.
   four buttons of one remote searched together, televisions, air
   conditioners, fans or lights, each result tried or added with a tap, on
   the board and from the portal's page.
-- **The board's Telegram bot** (`docs/BOT.md`): a bot of your own
-  (@BotFather) through which the board answers in a chat — its state, a
-  screenshot, the Zigbee devices with buttons, the IR codes kept with a
+- **The board's Telegram bot** (`docs/BOT.md`): a bot of your own (made
+  with Telegram's BotFather) through which the board answers in a chat —
+  its state, a screenshot, the Zigbee devices with buttons, the IR codes kept with a
   Zigbee blaster, a notice on its screen — and rules that send a message or
   a screenshot, or switch a Zigbee device or send an IR code, when a device
   changes, at an hour, when the board starts or when a notification
