@@ -5,6 +5,16 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
+## Después de la 0.35.0 (2026-11-27)
+
+- [x] La Tienda con las descargas trabadas por las capturas (arreglo
+      `bf4d1118`, instalado por OTA): entrando a las páginas de Malla y de
+      Grabador y saliendo con las capturas todavía bajando, "Reemplazar" las
+      copiadas a mano reemplazó las 12 (Planeo, Tanques, Vitral, DJ y las 8
+      nuevas) sin un "-2", y los idiomas fr, it y pt se instalaron desde la
+      Tienda. Sin reinicios. Quedan copiadas a mano `blittest` y `pato`, que
+      no son del catálogo.
+
 ## El bot de Telegram y el emparejamiento BLE (2026-11-27, sin publicar)
 
 - [x] El bot contra Telegram de verdad (2026-11-27, @P4os_bot del usuario):
