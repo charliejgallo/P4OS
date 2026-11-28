@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.35.1 — 2026-11-27
+
+The Store no longer runs out of downloads after an app's page.
 
 - **The Store kept its downloads taken after an app's page**: leaving a
   page while its pictures came held both download slots for good, and
