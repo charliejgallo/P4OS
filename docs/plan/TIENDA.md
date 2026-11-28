@@ -1436,6 +1436,17 @@ proyecto).
   recompiló en la 0.34.2): se dejó en `v0.33.0`. Los de Cielo y Visión
   son los mismos bytes que corre la placa del usuario.
 
+- **La 0.35.0 salió el 2026-11-27** (tag `v0.35.0` en `aea80651`): ocho
+  apps nuevas (Grabador, Visión, Malla, Mensajes, Correo, Cielo, Marcador,
+  Botonera), el bot de Telegram, el celular como joystick, la Biblioteca
+  de apps y los widgets del bloqueo. El CI de `main` había quedado rojo
+  por la ficha de Video (1265 caracteres en castellano, 1200 como mucho):
+  arreglado antes del tag. Borrador con 124 archivos; los 194 paquetes y
+  packs del catálogo en su release con su tamaño y su SHA-256, y las 306
+  capturas, sin un error; las dos imágenes dicen `v0.35.0`; notas en
+  `docs/internal/RELEASE-0.35.0.md`. Publicada, `releases/latest` sirve
+  su catálogo (85 apps, 8 en "Nuevas").
+
 ## Preguntas abiertas
 
 1. **El nombre.** "Tienda" se entiende, pero no se vende nada. Alternativas:

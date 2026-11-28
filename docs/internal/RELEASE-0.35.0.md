@@ -1,6 +1,7 @@
-# Notas de la release 0.35.0 (borrador)
+# Notas de la release 0.35.0
 
-Las notas de la release `v0.35.0`, todavía sin publicar. El texto entre las
+Las notas de la release `v0.35.0`, publicada el 2026-11-27 (tag en
+`aea80651`). El texto entre las
 rayas, en inglés como las demás, es el que va a GitHub. Publicar lo decide
 el usuario.
 
@@ -62,4 +63,5 @@ A bot of your own (@BotFather) through which the board answers in a chat: its st
    `v0.28.0`), con su tamaño y su SHA-256, sin un error; las 306 capturas
    están; las dos imágenes dicen `v0.35.0`. El catálogo: 85 apps (8 nuevas
    en "Nuevas") y 11 partes del sistema.
-5. Estas notas en el borrador (hecho); publicar, cuando lo diga el usuario.
+5. Estas notas en el borrador, y publicada con el OK del usuario el
+   2026-11-27; `releases/latest` sirve el catálogo de `v0.35.0`.
